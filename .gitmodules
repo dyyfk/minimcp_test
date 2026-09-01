@@ -1,0 +1,4 @@
+[submodule "interactive_paper/paper"]
+	path = interactive_paper/paper
+	url = https://github.com/namezhenzhang/interactive_paper.git
+	branch = main
