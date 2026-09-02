@@ -1,0 +1,14 @@
+{
+  "status": "frozen_before_context_generation",
+  "seed": 64,
+  "rows": 120,
+  "counts_by_target_pool": {
+    "p16_boolq": 40,
+    "p16_hellaswag": 40,
+    "p16_qasc": 40
+  },
+  "selection_sha256": "fec072f1e014959401e42254abf35d66537f6fe3bb5db61146e5d68d456e2317",
+  "canonical_content_sha256": "be6120d7db431ec643564bb17d59014b570693d73e8923e64cf9d992033ea0cd",
+  "source_selection_sha256": "39d18e50d08c5f2c85e23a343c43a914f4791574ee91e1a70a3ee8b2d714c40c",
+  "guard": "Pairs frozen before any two-turn model outputs."
+}
