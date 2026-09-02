@@ -230,6 +230,18 @@ pools, and has reliable native gains on both SD-QA (`+.0426`, 95% CI
 two samples for a direct implementation; next test threshold-band adaptive
 second sampling to reduce its average generation count.
 
+The threshold-band adaptive follow-up is rejected. It swept second-sample
+fractions `0/.1/.2/.3/.5/.75/1` and selected the smallest fraction within
+`.001` routing objective of the training-pilot best. The objectives are
+`.1730/.1720/.1730/.1733/.1737/.1737/.1737`, so zero second samples already
+falls within tolerance. This reduces exactly to the one-sample candidate and
+its weak 30%-budget external gain (`+.0022`). A balanced-budget-only selector
+would prefer a small gray band, but introducing a different post-hoc objective
+after opening the external result is not justified. Keep the clear static
+choice: one sample for minimum latency, or two for ranking quality; do not add
+adaptive serving complexity on this evidence. Adaptive receipt SHA256:
+`7ac935c42efa2961d489c55b4685975c9af7c468bc23816f602187e184cfece5`.
+
 An audit correction occurred before the final evaluation: the first selection
 parquet carried expert labels from the ceiling files rather than the exact
 `tier=always` conclive files used by every preceding external comparison. The
