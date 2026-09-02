@@ -1,0 +1,161 @@
+{
+  "status": "one_shot_frozen_source_disjoint_validation",
+  "overall": {
+    "rows": 400,
+    "failure_rate": 0.315,
+    "live_auc": 0.7961128490325571,
+    "candidate_auc": 0.8059031398447456,
+    "auc_delta": 0.009790290812188518,
+    "auc_delta_bootstrap_95ci": [
+      0.009818325992168888,
+      -0.006218744108006124,
+      0.025754314600600275
+    ],
+    "budgets": {
+      "conservative": {
+        "rate": 0.15,
+        "live_precision": 0.6166666666666667,
+        "candidate_precision": 0.6666666666666666,
+        "precision_delta": 0.04999999999999993,
+        "live_recall": 0.29365079365079366,
+        "candidate_recall": 0.31746031746031744,
+        "selection_agreement": 0.945
+      },
+      "balanced": {
+        "rate": 0.3,
+        "live_precision": 0.575,
+        "candidate_precision": 0.5833333333333334,
+        "precision_delta": 0.008333333333333415,
+        "live_recall": 0.5476190476190477,
+        "candidate_recall": 0.5555555555555556,
+        "selection_agreement": 0.925
+      },
+      "aggressive": {
+        "rate": 0.5,
+        "live_precision": 0.51,
+        "candidate_precision": 0.505,
+        "precision_delta": -0.0050000000000000044,
+        "live_recall": 0.8095238095238095,
+        "candidate_recall": 0.8015873015873016,
+        "selection_agreement": 0.92
+      }
+    }
+  },
+  "by_pool": {
+    "p15_sciq": {
+      "rows": 200,
+      "failure_rate": 0.095,
+      "live_auc": 0.7961616749054958,
+      "candidate_auc": 0.7839488223320733,
+      "auc_delta": -0.012212852573422528,
+      "auc_delta_bootstrap_95ci": [
+        -0.013009799185790058,
+        -0.06686691910896336,
+        0.04487179487179471
+      ],
+      "budgets": {
+        "conservative": {
+          "rate": 0.15,
+          "live_precision": 0.3333333333333333,
+          "candidate_precision": 0.26666666666666666,
+          "precision_delta": -0.06666666666666665,
+          "live_recall": 0.5263157894736842,
+          "candidate_recall": 0.42105263157894735,
+          "selection_agreement": 0.95
+        },
+        "balanced": {
+          "rate": 0.3,
+          "live_precision": 0.23333333333333334,
+          "candidate_precision": 0.2,
+          "precision_delta": -0.033333333333333326,
+          "live_recall": 0.7368421052631579,
+          "candidate_recall": 0.631578947368421,
+          "selection_agreement": 0.86
+        },
+        "aggressive": {
+          "rate": 0.5,
+          "live_precision": 0.16,
+          "candidate_precision": 0.17,
+          "precision_delta": 0.010000000000000009,
+          "live_recall": 0.8421052631578947,
+          "candidate_recall": 0.8947368421052632,
+          "selection_agreement": 0.92
+        }
+      }
+    },
+    "p15_winogrande": {
+      "rows": 200,
+      "failure_rate": 0.535,
+      "live_auc": 0.5671791779720631,
+      "candidate_auc": 0.5945131142598734,
+      "auc_delta": 0.027333936287810334,
+      "auc_delta_bootstrap_95ci": [
+        0.027091475437113145,
+        -0.008687218721872133,
+        0.06375023496240609
+      ],
+      "budgets": {
+        "conservative": {
+          "rate": 0.15,
+          "live_precision": 0.6666666666666666,
+          "candidate_precision": 0.7,
+          "precision_delta": 0.033333333333333326,
+          "live_recall": 0.18691588785046728,
+          "candidate_recall": 0.19626168224299065,
+          "selection_agreement": 0.92
+        },
+        "balanced": {
+          "rate": 0.3,
+          "live_precision": 0.6,
+          "candidate_precision": 0.6166666666666667,
+          "precision_delta": 0.01666666666666672,
+          "live_recall": 0.3364485981308411,
+          "candidate_recall": 0.34579439252336447,
+          "selection_agreement": 0.89
+        },
+        "aggressive": {
+          "rate": 0.5,
+          "live_precision": 0.58,
+          "candidate_precision": 0.61,
+          "precision_delta": 0.030000000000000027,
+          "live_recall": 0.5420560747663551,
+          "candidate_recall": 0.5700934579439252,
+          "selection_agreement": 0.86
+        }
+      }
+    }
+  },
+  "decision_rule": {
+    "broad_support": "positive aggregate AUC delta and positive delta in both frozen source pools",
+    "statistical_support": "aggregate bootstrap 95% CI lower bound above zero",
+    "no_retuning": true
+  },
+  "judge_usage": {
+    "model": "gpt-5.4-mini",
+    "service_tier": "default",
+    "prompt_tokens": 122934,
+    "cached_prompt_tokens": 0,
+    "completion_tokens": 31086,
+    "published_standard_rates_usd_per_million": {
+      "input": 0.75,
+      "cached_input": 0.075,
+      "output": 4.5
+    },
+    "cost_usd_at_published_standard_rates": 0.2320875,
+    "pricing_source": "https://developers.openai.com/api/docs/pricing",
+    "pricing_checked_utc": "2026-09-02"
+  },
+  "decision": {
+    "broad_support": false,
+    "statistical_support": false
+  },
+  "provenance": {
+    "selection_sha256": "f84df6c71f02558403114a634a668bc420c6eafb3235addf5929362a84ad7454",
+    "ordered_ids_sha256": "301bdd18e3e03e54a2969f2eaecf3350e4c5102b5fcdc0fd423715cabeb52968",
+    "trace_manifest_sha256": "35d620aabda3343c193188dcd35abb99bf9d4a6ca3275e377b75b6586cd3cc29",
+    "feature_manifest_sha256": "bc1172e778781d4ddabd343368ed1d4a5d9a024b263c3c016224d1d70b63b1c3",
+    "judged_sha256": "83a232608a302d86a02996d5aa6df20b6da3f53b3e2126262188f207407878cb",
+    "live_artifact_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
+    "candidate_artifact_sha256": "c85e0697788b2f8ce819fc963aa68c5a5ef34e0ae59c4f58b7917ccbf848dbb0"
+  }
+}

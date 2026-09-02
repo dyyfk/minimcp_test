@@ -498,8 +498,36 @@ Ordered ID-list SHA256:
 canonical content SHA256:
 `9295e1a47bd493af7f14dfb35d4bf395ab3d58fafd17fd465b58efb3b2f61f9a`.
 The 60,104 rendered characters imply `$0.90156` at the recorded TTS rate.
-The candidate and comparison protocol stay frozen; this set is validation
-only and cannot be used for refitting or candidate selection.
+The candidate and comparison protocol stayed frozen; this set is validation
+only and was not used for refitting or candidate selection. TTS completed
+400/400 with no errors. Official-native inference then completed 400/400 with
+no errors, no no-speak cases, no empty answers, no missing end-of-turn markers,
+and finite 12,288-dimensional features for every row.
+
+The exact repository ref-anchored judge marked 68.5% of answers adequate
+(31.5% failure). On the full prospective set, live-to-candidate native-failure
+AUC changes `.7961 -> .8059`: `+.0098`, bootstrap 95% CI
+`[-.0062,+.0258]`. Exact-budget failure precision changes `+.0500`, `+.0083`,
+and `-.0050` at 15%, 30%, and 50%, respectively; ranking agreement is
+92.0--94.5%.
+
+The source split is not broad enough for activation:
+
+| frozen source | n | failure rate | live AUC | candidate AUC | delta (95% CI) |
+|---|---:|---:|---:|---:|---:|
+| SciQ | 200 | .095 | .7962 | .7839 | -.0122 [-.0669,+.0449] |
+| WinoGrande | 200 | .535 | .5672 | .5945 | +.0273 [-.0087,+.0638] |
+
+Thus P15 is directionally positive in aggregate and at the two lower budgets,
+but it fails both predeclared prospective conditions: the aggregate interval
+includes zero and SciQ regresses. The distilled candidate remains
+shadow-only/activation-prohibited; the live gate remains unchanged. Result
+receipt SHA256:
+`6d642b9eca72bdc54f2dee2187beb1909ad4fbcc895dbe57be59f3f179579794`.
+
+Judging used 122,934 input and 31,086 output tokens with zero errors. At the
+published standard `gpt-5.4-mini` rates checked 2026-09-02, that is `$0.23209`;
+conservative cumulative OpenAI spend is `$28.95545 / $500`.
 
 ## P1 execution result: aligned labels do not improve the gate
 

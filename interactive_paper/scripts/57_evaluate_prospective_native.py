@@ -17,6 +17,9 @@ BLOCK = 4096
 RATES = {"conservative": .15, "balanced": .30, "aggressive": .50}
 LIVE_SHA256 = "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372"
 CANDIDATE_SHA256 = "c85e0697788b2f8ce819fc963aa68c5a5ef34e0ae59c4f58b7917ccbf848dbb0"
+JUDGE_INPUT_USD_PER_M = .75
+JUDGE_CACHED_INPUT_USD_PER_M = .075
+JUDGE_OUTPUT_USD_PER_M = 4.50
 
 
 def load_support():
@@ -104,8 +107,8 @@ def main():
         raise RuntimeError(f"artifact mismatch: live={live_sha}, candidate={candidate_sha}")
 
     selection = pd.read_parquet(args.selection)[["id", "pool"]]
-    judged = (pd.read_parquet(args.judged)
-              .drop_duplicates("id", keep="last")[["id", "adequate"]])
+    judged_full = pd.read_parquet(args.judged).drop_duplicates("id", keep="last")
+    judged = judged_full[["id", "adequate"]]
     if judged.adequate.isna().any():
         raise RuntimeError("judge output contains unresolved rows")
     ids, arrays = [], []
@@ -143,6 +146,27 @@ def main():
             "statistical_support": "aggregate bootstrap 95% CI lower bound above zero",
             "no_retuning": True,
         },
+    }
+    prompt_tokens = int(judged_full.prompt_tokens.fillna(0).sum())
+    cached_tokens = int(judged_full.cached_prompt_tokens.fillna(0).sum())
+    completion_tokens = int(judged_full.completion_tokens.fillna(0).sum())
+    uncached_tokens = prompt_tokens - cached_tokens
+    result["judge_usage"] = {
+        "model": "gpt-5.4-mini", "service_tier": "default",
+        "prompt_tokens": prompt_tokens,
+        "cached_prompt_tokens": cached_tokens,
+        "completion_tokens": completion_tokens,
+        "published_standard_rates_usd_per_million": {
+            "input": JUDGE_INPUT_USD_PER_M,
+            "cached_input": JUDGE_CACHED_INPUT_USD_PER_M,
+            "output": JUDGE_OUTPUT_USD_PER_M,
+        },
+        "cost_usd_at_published_standard_rates": float(
+            uncached_tokens * JUDGE_INPUT_USD_PER_M / 1_000_000
+            + cached_tokens * JUDGE_CACHED_INPUT_USD_PER_M / 1_000_000
+            + completion_tokens * JUDGE_OUTPUT_USD_PER_M / 1_000_000),
+        "pricing_source": "https://developers.openai.com/api/docs/pricing",
+        "pricing_checked_utc": "2026-09-02",
     }
     for pool in sorted(rows.pool.unique()):
         mask = rows.pool.to_numpy() == pool
