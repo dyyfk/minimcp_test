@@ -143,6 +143,48 @@ Receipt SHA256:
 Stop low-rank linear compression: its grouped training advantage is another
 non-transferable regularization artifact.
 
+### P4: semantic-uncertainty supervision helps, but not enough to deploy
+
+A fixed 1,000-row subset of the staged paired set was sampled proportionally
+within the original source-family, language, and native-failure strata (seed
+43). For each row, three stochastic official-config native-duplex answers were
+generated locally on B300 and paired with the cached deterministic answer.
+Generation completed 1,000/1,000 with zero errors. A local multilingual
+sentence encoder supplied connected-component entropy at three fixed cosine
+thresholds plus continuous answer-dissimilarity targets; no OpenAI judge was
+used. TTS cost was $1.896735 and local generation cost no OpenAI tokens.
+
+Direct answer disagreement is informative on the fixed training pilot: mean
+pairwise dissimilarity has native-failure AUC `.7263` and expert-benefit AUC
+`.6519`. The strongest direct variant, deterministic-to-stochastic answer
+dissimilarity, reaches `.7274/.6531`. This validates semantic instability as
+a distinct uncertainty signal, but direct use requires three extra native
+generations per request.
+
+For a cheap single-pass surrogate, source-family-grouped outer folds predicted
+the semantic targets from the P3a `eot_mean8 + user_mean` features with a
+multi-output ridge sweep. The frozen winner predicts stochastic-sample
+pairwise dissimilarity (`alpha=1000`) and blends it at weight `.25` with the
+P3a failure score. It records native OOF AUC `.8066`, benefit OOF AUC `.6900`,
+and routing objective `+.1743`, versus `.7981/.6839/+.1690` for the fold-matched
+base on the same pilot rows.
+
+On the five untouched external pools, the surrogate changes mean native AUC
+from `.7429` to `.7528` (`+.0099`), benefit AUC from `.6767` to `.6826`
+(`+.0058`), and cascade accuracy by `-.0004/+.0083/+.0033` at 15/30/50%.
+Speech WebQ supplies the only reliable native-ranking gain: `.772 -> .803`,
+paired-bootstrap delta `+.0314`, 95% CI `[+.0077,+.0561]`. Reasoning-zh loses
+benefit AUC (`.599 -> .574`), and the mean 30% cascade gain remains below the
+predeclared two-point replacement threshold. Do not deploy the surrogate yet.
+
+Selection parquet SHA256: `c4a3581df4f8718886de0d404a80ed086881e8e9b2131c6e47e03e6ca11e8041`;
+generated sample-stream SHA256: `2ec928629319326ea461749622908349743f36a668c3f7f0c5add7c5dc2cd320`;
+semantic-label SHA256: `5adb9bc937cd7b9417be2b4bf59bc63b4a6088bfc3ea38535fbd92bee59422c6`;
+result receipt SHA256: `4909e209dfb947a28b9ca4ff36db5867fee85d0b7ae62a1c2b1fcde9b3ba3f53`.
+The next frozen test evaluates the direct multi-sample signal on the exact
+1,138-row external intersection; that separates target quality from surrogate
+fit quality.
+
 ## P1 execution result: aligned labels do not improve the gate
 
 The bundle from
