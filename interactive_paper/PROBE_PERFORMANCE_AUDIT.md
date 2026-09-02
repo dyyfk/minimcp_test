@@ -900,3 +900,32 @@ zero-API-cost rejection, not evidence that training loss cannot be reduced;
 it shows that added parameters do not transfer across source families at the
 available sample size. Receipt SHA256:
 `5a645a229889076017ec786bbbb9fd24aaa1e385d8bc6636c3571c63dc07e6a1`.
+
+P25-A tested whether more structured information already present in the same
+duplex forward could overcome the L22-summary ceiling. Read-only hooks captured
+layers 14/18/22/26/30 at target speak onset: rolling EOT last/mean states,
+current-turn token means, per-audio-chunk last-state means and first-to-last
+deltas, plus onset wait and chunk count. The hooks add no model forward and
+cannot affect routing. Candidate recipes and regularization were selected only
+by five-fold target-pool-grouped OOF on P21, then applied unchanged to P22/P23.
+
+Replay QC compared the score-defining L22 vector with the original capture
+before labels or validation metrics were read. P21 was equivalent for 960/960
+rows and P23 for 120/120 within float16 serialization tolerance. P22 retained
+110/120 rows; ten rows with genuinely divergent pre-answer state were excluded
+(mean absolute error above `.001` or maximum error above `.05`). Exact cached
+answer parity then held for every included row. This fail-closed amendment was
+recorded before either validation metric was computed.
+
+The selected 23-dimensional scalar-geometry head uses the live score, onset
+wait, chunk count, and per-layer turn/chunk/delta norms and cosine geometry.
+It does not improve the selection set: P21 macro pool AUC delta is `-.01425`
+and pooled delta is `-.00411`. It also regresses on P22 (macro `-.04664`,
+pooled `-.02218`) and P23 pooled (`-.02469`); P23 macro is only `+.00572` and
+contains an English seating-swap regression of `-.25`. P25-A therefore fails
+the frozen selection and validation gates without opening a new prospective
+set. Reject same-forward structured summaries, keep the live gate unchanged,
+and proceed to P25-B data expansion. Result SHA256:
+`4075b312e0b30fa18dec6aa0a374948ce4644b745e70b0ab627fe77983908d26`.
+No API spend was added; conservative cumulative spend remains
+`$34.052445 / $500`.
