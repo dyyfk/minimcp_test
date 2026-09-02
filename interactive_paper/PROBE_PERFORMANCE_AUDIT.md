@@ -35,7 +35,9 @@ do transfer: the frozen P3a + two-sample semantic entropy + RTJ fusion improves
 five-pool mean native AUC by `.0334`. It remains shadow-only. A fixed latency
 benchmark shows the two semantic generations cost median `7.21s` and p90
 `25.52s` before RTJ, making the current formulation too slow for synchronous
-activation despite its offline ranking gain.
+activation despite its offline ranking gain. Distilling that teacher back into
+the P3a hidden features recovers a `+.0213` mean external native-AUC gain with
+no extra serving pass; this is now the preferred shadow candidate.
 
 ## P2 execution result: direct expert-gain routing does not transfer
 
@@ -371,7 +373,7 @@ Latency receipt: `figures/shadow_latency_benchmark.json`, SHA256
 semantic stream SHA256
 `3eece7d4811a73e1152acf11e105f83cc59e8f4d68c5c3eb03d5a4224528d78c`.
 
-### P9: single-pass distillation recovers only a small fraction of P7
+### P9: single-pass distillation clears the mean-AUC gate
 
 To remove the synchronous multi-generation cost, I distilled the frozen
 answer-conditioned teacher—equal-weight standardized two-sample semantic
@@ -383,17 +385,29 @@ pools were evaluated only after this grid froze its winner.
 The direct teacher is strong on the pilot (`.7882` native AUC, `.6803` benefit
 AUC), and the hidden-state ridge predicts it with OOF Spearman `.6503`.
 Selection chooses P3a's `eot_mean8 + user_mean` blocks, ridge `alpha=100`,
-blended `.25` with the P3a score. It does not preserve the teacher's external
-advantage: five-pool mean native AUC improves only `+.0097`, benefit AUC
-`+.0057`, and cascade accuracy `-.0008/+.0013/+.0064` at 15/30/50%. No
-pool-level native interval excludes zero. The transfer pattern also changes:
-Reasoning-zh and TriviaQA gain, while the direct fusion's reliable SD-QA/WebQ
-gains disappear.
+blended `.25` with the P3a score. Against the frozen live 8bq artifact, the
+single-pass candidate improves five-pool mean native AUC by `+.0213`, benefit
+AUC by `+.0151`, and cascade accuracy by `+.0088/+.0080/+.0072` at
+15/30/50%. Native AUC improves on all five pools: SD-QA `+.0347`, Llama
+`+.0091`, Reasoning-zh `+.0283`, TriviaQA `+.0136`, and WebQ `+.0209`.
+SD-QA's interval excludes zero (`[+.0013,+.0683]`).
 
-Decision: do not deploy this distilled head. It is essentially another modest
-single-pass regularizer, comparable to P4, rather than a faithful substitute
-for answer-conditioned inference. Result receipt SHA256:
-`c023704d7421d8fec48d4dab466d2d867aa524ce48025d08a9ab3503baf1c3f1`.
+The first P9 receipt mistakenly compared the candidate against the committed
+legacy-label/global-threshold artifact (SHA256 `b0bf2eaa...`) rather than the
+live 8bq artifact (SHA256 `0e6494c2...`), understating the gain. The script now
+fails closed unless the latter exact SHA is supplied. Candidate scores and the
+training-only winner did not change; only the baseline comparison was
+corrected.
+
+This is the best latency/quality Pareto point so far: the answer-conditioned
+teacher is needed only offline, and its two linear components fold into one
+8,192-dimensional coefficient vector with no extra serving pass. Keep it
+shadow-only until online score calibration and routing lift are observed; do
+not overwrite the live gate yet. Corrected result SHA256:
+`d9833b641691059d2a515788080e2b37c7349f05fa73ac070bb2bf493e4278f0`.
+The exported artifact is `data/gate_shadow_distilled_semantic_rtj.json`,
+SHA256 `c85e0697788b2f8ce819fc963aa68c5a5ef34e0ae59c4f58b7917ccbf848dbb0`;
+its algebraic fold differs from the two-component scorer by at most `1.8e-6`.
 
 ## P1 execution result: aligned labels do not improve the gate
 

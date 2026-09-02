@@ -30,6 +30,7 @@ BLOCKS = {
 ALPHAS = (100., 1000., 10000.)
 BLENDS = (0., .1, .25, .5, .75)
 RATES = {"conservative": .15, "balanced": .30, "aggressive": .50}
+LIVE_ALIGNED_SHA256 = "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372"
 
 
 def load_module(filename, name):
@@ -90,11 +91,17 @@ def main():
     parser.add_argument("--data-dir", type=Path, required=True)
     parser.add_argument("--aligned-artifact", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--artifact", type=Path)
     parser.add_argument("--jobs", type=int, default=5)
     args = parser.parse_args()
 
     p3a = load_module("35_feature_conditioning.py", "feature_conditioning")
     ptrue_mod = load_module("45_text_ptrue_fusion.py", "text_ptrue")
+    aligned_sha256 = p3a.sha256(args.aligned_artifact)
+    if aligned_sha256 != LIVE_ALIGNED_SHA256:
+        raise RuntimeError(
+            "aligned artifact is not the frozen live 8bq baseline: "
+            f"{aligned_sha256}")
     target = json.loads(args.semantic_result.read_text())["winner"]["target"]
     frozen = json.loads(args.fusion_result.read_text())["winner"]
     train = (pd.read_parquet(args.train_selection)
@@ -222,6 +229,76 @@ def main():
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(result, indent=2) + "\n")
     print("wrote", args.output, flush=True)
+    if args.artifact:
+        blend = winner["blend"]
+        base_center_value, base_scale_value = base_deploy_center
+        teacher_center = winner["prediction_center"]
+        teacher_scale = winner["prediction_scale"]
+        weight = ((1 - blend) * base_model.coef_[0] / base_scale_value +
+                  blend * teacher_model.coef_ / teacher_scale)
+        bias = float(
+            (1 - blend) * (base_model.intercept_[0] - base_center_value) /
+            base_scale_value + blend *
+            (teacher_model.intercept_ - teacher_center) / teacher_scale)
+        folded = x[pilot_index][:, BLOCK:] @ weight + bias
+        unfurled = ((1 - blend) * zapply(
+            base_model.decision_function(x[pilot_index][:, BLOCK:]),
+            *base_deploy_center) + blend * zapply(
+                teacher_model.predict(x[pilot_index][:, BLOCK:]),
+                teacher_center, teacher_scale))
+        fold_max_abs_diff = float(np.max(np.abs(folded - unfurled)))
+        if fold_max_abs_diff > 1e-5:
+            raise RuntimeError(
+                f"algebraic coefficient fold mismatch: {fold_max_abs_diff}")
+        validation_rows = list(pools.values())
+        artifact = {
+            "status": "shadow_only", "activation_prohibited": True,
+            "live_gate_unchanged": True,
+            "reason": "external AUC gate passed; online routing lift and score calibration are not yet validated",
+            "feature_recipe": {
+                "blocks": ["eot_mean8", "user_mean"],
+                "dimension": 2 * BLOCK,
+                "base_training_rows": len(y),
+                "distillation_rows": len(train),
+                "base_C": 3e-4,
+                "teacher": result["teacher_definition"],
+                "teacher_ridge_alpha": winner["alpha"],
+                "teacher_blend": blend,
+            },
+            "w": weight.tolist(), "b": bias,
+            "threshold_policy": {
+                "kind": "rolling exact-quantile by language bucket",
+                "rates": [.15, .30, .50],
+                "note": "do not reuse live gate thresholds on the distilled score",
+            },
+            "validation": {
+                "mean_external_native_auc_delta": float(np.mean([
+                    row["native_auc_candidate"] - row["native_auc_aligned"]
+                    for row in validation_rows])),
+                "mean_external_benefit_auc_delta": float(np.mean([
+                    row["benefit_auc_candidate"] - row["benefit_auc_aligned"]
+                    for row in validation_rows])),
+                "mean_external_cascade_delta": {
+                    tier: float(np.mean([
+                        row["budgets"][tier]["candidate_accuracy"] -
+                        row["budgets"][tier]["aligned_accuracy"]
+                        for row in validation_rows])) for tier in RATES},
+                "result_sha256": p3a.sha256(args.output),
+                "coefficient_fold_max_abs_diff": fold_max_abs_diff,
+            },
+            "provenance": {
+                "aligned_artifact_sha256": aligned_sha256,
+                "semantic_result_sha256": p3a.sha256(args.semantic_result),
+                "fusion_result_sha256": p3a.sha256(args.fusion_result),
+            },
+            "shadow_logging_required": [
+                "language", "live_score", "distilled_score", "latency_ms",
+                "realized_escalation", "local_outcome", "expert_outcome"],
+        }
+        args.artifact.parent.mkdir(parents=True, exist_ok=True)
+        args.artifact.write_text(json.dumps(artifact, indent=2) + "\n")
+        print("wrote", args.artifact, "sha256", p3a.sha256(args.artifact),
+              flush=True)
 
 
 if __name__ == "__main__":
