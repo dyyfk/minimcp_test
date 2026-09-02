@@ -24,6 +24,8 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--concurrency", type=int, default=8)
     parser.add_argument("--batch-size", type=int, default=40)
+    parser.add_argument("--allow-missing-traces", action="store_true",
+                        help="judge available traces now and resume later")
     args = parser.parse_args()
     sys.path.insert(0, str(args.source_dir.resolve()))
     import escalate
@@ -47,6 +49,8 @@ def main():
             continue
         trace = traces.get(row_id)
         if trace is None:
+            if args.allow_missing_traces:
+                continue
             raise RuntimeError(f"missing native trace for {row_id}")
         todo.append({
             "id": row_id, "pool": metadata[row_id]["pool"],
