@@ -1,4 +1,4 @@
-"""Judge P19 target answers after their frozen completed carrier turns."""
+"""Judge target answers after their frozen completed carrier turns."""
 from __future__ import annotations
 
 import argparse
@@ -46,8 +46,11 @@ def main():
         if row_id in have:
             continue
         trace = traces.get(row_id)
-        if trace is None or trace.get("error"):
+        if trace is None:
             raise RuntimeError(f"missing or failed trace for {row_id}")
+        error = trace.get("error")
+        if error and error != "RuntimeError: target never reached speak onset":
+            raise RuntimeError(f"failed trace for {row_id}: {error}")
         row = metadata[row_id]
         todo.append({
             "id": row_id,
@@ -58,6 +61,7 @@ def main():
             "answer": trace.get("target_answer") or "",
             "no_speak": not bool(trace.get("target_answer")),
             "eot_seen": bool(trace.get("target_eot_seen")),
+            "native_no_speak": bool(error),
         })
     print(f"{len(traces)} traces; {len(have)} judged; {len(todo)} pending",
           flush=True)

@@ -111,8 +111,12 @@ def main():
             .merge(carrier_index.rename(columns={"row": "carrier_row"}),
                    on="id", validate="one_to_one")
             .sort_values("id"))
-    if len(rows) != len(pairs) or rows.adequate.isna().any():
+    if rows.adequate.isna().any():
         raise RuntimeError("incomplete pair/judge/feature join")
+    scored_ids = set(rows.id)
+    unscored_ids = sorted(set(pairs.id.astype(str)) - scored_ids)
+    if len(rows) + len(unscored_ids) != len(pairs):
+        raise RuntimeError("inconsistent scored/unscored partition")
     target = target_values[rows.target_row.to_numpy()]
     carrier = carrier_values[rows.carrier_row.to_numpy()]
     live = artifact_score(args.live_artifact, target)
@@ -124,9 +128,12 @@ def main():
     y = 1 - rows.adequate.astype(int).to_numpy()
     pools = rows.target_pool.to_numpy()
     by_pool = {}
+    shadow_by_pool = {}
     for pool in sorted(set(pools)):
         mask = pools == pool
         by_pool[pool] = metrics(y[mask], live[mask], candidate[mask])
+        shadow_by_pool[pool] = metrics(y[mask], live[mask],
+                                       shadow_target[mask])
 
     rng = np.random.default_rng(68)
     bootstrap = []
@@ -145,9 +152,18 @@ def main():
     interval = [float(np.mean(bootstrap)),
                 float(np.percentile(bootstrap, 2.5)),
                 float(np.percentile(bootstrap, 97.5))]
+    usage_columns = ["prompt_tokens", "completion_tokens",
+                     "cached_prompt_tokens"]
+    usage = judged[usage_columns].fillna(0).sum().astype(int)
+    judge_cost = float(
+        (usage.prompt_tokens - usage.cached_prompt_tokens) * .75 / 1e6
+        + usage.cached_prompt_tokens * .075 / 1e6
+        + usage.completion_tokens * 4.5 / 1e6)
     output = {
         "status": "context_delta_evaluation",
-        "rows": len(rows),
+        "selected_rows": len(pairs),
+        "scored_rows": len(rows),
+        "unscored_no_onset_ids": unscored_ids,
         "candidate": {
             "formula": "current_p16_score - beta * prior_p16_score",
             "beta": args.beta,
@@ -155,7 +171,9 @@ def main():
             "first_turn_behavior": "unchanged",
         },
         "pooled": metrics(y, live, candidate),
+        "p16_target_only_pooled": metrics(y, live, shadow_target),
         "by_target_pool": by_pool,
+        "p16_target_only_by_target_pool": shadow_by_pool,
         "macro_auc_delta": {
             "point": float(np.mean(deltas)),
             "source_stratified_bootstrap_95ci": interval,
@@ -165,6 +183,11 @@ def main():
             "statistical_support": bool(interval[1] > 0),
             "clears_point_threshold": bool(np.mean(deltas) >= .015),
             "activation_recommended": False,
+        },
+        "judge_usage": {
+            **usage.to_dict(),
+            "cost_usd_at_published_standard_rates": judge_cost,
+            "pricing_checked_utc": "2026-09-02",
         },
         "provenance": {
             "pairs_sha256": sha256(args.pairs),

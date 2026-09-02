@@ -801,3 +801,22 @@ The repeat-then-judge fusion can remain an English-only, default-off experiment:
 its current result adds about .026 internally but is negative on zh and was
 evaluated through the same legacy-target path. Re-evaluate it only after P1,
 because otherwise it optimizes a measurement that is not the deployed target.
+
+## Controlled multi-turn follow-up
+
+P19 replayed 120 P16 targets after completed cross-source carrier turns. The
+standalone-to-context score correlation was only `.473` for live and `.494`
+for P16. P16's contextual macro AUC delta versus live was effectively zero
+(`-.00019`, source-stratified 95% CI `[-.05894,+.06123]`) and failed source
+breadth. This establishes that standalone ranking cannot be assumed to
+transfer into an accumulated dialogue state.
+
+P20 then tested a zero-forward context correction frozen on P19:
+`current_P16 - 0.5 * prior_P16`. On an independent 120-session P17 replay,
+119 targets produced scoreable onset features and one produced no onset. The
+correction's macro AUC delta was only `+.00311` (95% CI
+`[-.05081,+.05902]`), with SNLI `-.02344`, SST-2 `+.02165`, and WiC
+`+.01111`; pooled AUC fell `.63246→.60965`. The prior-score subtraction is
+therefore rejected. It adds no forward pass, but its apparent P19 gain did not
+transfer. Keep P16 shadow-only and require organic first-turn/follow-up logs
+before any activation decision.
