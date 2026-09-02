@@ -1,4 +1,4 @@
-"""Evaluate live and frozen P16 scores on dependent multi-turn fixtures."""
+"""Evaluate live and a frozen inactive candidate on dependent conversations."""
 from __future__ import annotations
 
 import argparse
@@ -86,6 +86,9 @@ def main() -> None:
     parser.add_argument("--trace-dir", type=Path, required=True)
     parser.add_argument("--live-artifact", type=Path, required=True)
     parser.add_argument("--candidate-artifact", type=Path, required=True)
+    parser.add_argument("--candidate-name", default="p16")
+    parser.add_argument("--require-pooled-nonnegative", action="store_true")
+    parser.add_argument("--require-language-positive", action="store_true")
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
 
@@ -158,15 +161,21 @@ def main() -> None:
         + usage.cached_prompt_tokens * .075 / 1e6
         + usage.completion_tokens * 4.5 / 1e6)
     deltas = [group_metrics[pool]["auc_delta"] for pool in valid_pools]
+    pooled_metrics = metrics(y, live, candidate)
+    pooled_delta = pooled_metrics["auc_delta"]
+    language_deltas = [value["auc_delta"] for value in language_metrics.values()]
     decision_pass = bool(
         point is not None and point >= .015 and interval is not None and
-        interval[1] > 0 and deltas and min(deltas) >= -.01)
+        interval[1] > 0 and deltas and min(deltas) >= -.01 and
+        (not args.require_pooled_nonnegative or pooled_delta >= 0) and
+        (not args.require_language_positive or all(
+            value is not None and value > 0 for value in language_deltas)))
     output = {
-        "status": "dependent_multiturn_p16_evaluation",
+        "status": f"dependent_multiturn_{args.candidate_name}_evaluation",
         "selected_rows": len(pairs),
         "scored_rows": len(rows),
         "unscored_ids": unscored,
-        "pooled": metrics(y, live, candidate),
+        "pooled": pooled_metrics,
         "by_pool": group_metrics,
         "by_language": language_metrics,
         "macro_pool_auc_delta": {
@@ -176,8 +185,13 @@ def main() -> None:
         },
         "decision": {
             "clears_preregistered_offline_gate": decision_pass,
-            "requirements": ("macro delta >= .015, bootstrap lower bound > 0, "
-                             "and no pool delta below -.01"),
+            "requirements": {
+                "macro_pool_auc_delta_min": .015,
+                "bootstrap_lower_bound_positive": True,
+                "minimum_pool_auc_delta": -.01,
+                "pooled_auc_delta_nonnegative": args.require_pooled_nonnegative,
+                "both_language_auc_deltas_positive": args.require_language_positive,
+            },
             "activation_recommended": False,
             "reason": ("Template-generated dependent conversations remain "
                        "controlled evidence; organic shadow traffic is required."),
@@ -202,6 +216,7 @@ def main() -> None:
                                for path in feature_paths},
             "trace_shards": {path.name: sha256(path) for path in trace_paths},
             "live_artifact_sha256": sha256(args.live_artifact),
+            "candidate_name": args.candidate_name,
             "candidate_artifact_sha256": sha256(args.candidate_artifact),
         },
     }

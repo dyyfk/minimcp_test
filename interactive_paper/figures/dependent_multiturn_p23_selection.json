@@ -1,0 +1,29 @@
+{
+  "status": "frozen_after_p22_candidate_before_all_p23_outputs",
+  "rows": 120,
+  "turn_audio_rows": 240,
+  "counts_by_pool": {
+    "en-arithmetic_ledger": 20,
+    "en-seating_swap": 20,
+    "en-temporal_order": 20,
+    "zh-arithmetic_ledger": 20,
+    "zh-seating_swap": 20,
+    "zh-temporal_order": 20
+  },
+  "counts_by_language": {
+    "en": 60,
+    "zh": 60
+  },
+  "counts_by_family": {
+    "arithmetic_ledger": 40,
+    "seating_swap": 40,
+    "temporal_order": 40
+  },
+  "characters": 19671,
+  "tts_cost_usd_at_15_per_million_characters": 0.295065,
+  "pairs_sha256": "ba027bef1ea9d65d01d9dd6575bec0d8754ae7f8805a640cb55c7b936e060277",
+  "audio_selection_sha256": "5a2e0a0286a210d4e7379e4277d8c80548dfb8546ba105ca796febccbd92f27b",
+  "canonical_content_sha256": "35799e3e28b47625bfc0cd618b5c0abb827e5f14916f5a0763c5d2b345f7c3f5",
+  "acceptance": "macro pool AUC delta >= .015, bootstrap lower bound > 0, pooled AUC nonnegative, both languages positive, and no pool delta below -.01",
+  "guard": "P23 content and gate frozen before TTS/model/judge/scoring."
+}
