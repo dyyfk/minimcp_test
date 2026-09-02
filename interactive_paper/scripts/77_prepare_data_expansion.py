@@ -248,6 +248,8 @@ def multiturn(raw: Path, output: Path, seed: int):
     out["target_id"] = out["id"] + "-target"
     out["carrier_pool"] = out["source_family"]
     out["target_pool"] = out["pool"]
+    out["target_query"] = out["query"]
+    out["target_reference_answer"] = out["reference_answer"]
     out["mode"] = "multiturn"
 
     # Extract the selected real carrier bytes only after stable IDs exist.
@@ -303,7 +305,8 @@ def main():
     multi_out = multi[["id", "pool", "source_family", "language", "query",
                        "reference_answer", "raw_id", "mode", "carrier_id",
                        "target_id", "carrier_pool", "target_pool",
-                       "carrier_query", "carrier_audio_kind"]]
+                       "carrier_query", "carrier_audio_kind", "target_query",
+                       "target_reference_answer"]]
     single_path = args.output_dir / "single.parquet"
     pairs_path = args.output_dir / "pairs.parquet"
     selection_path = args.output_dir / "selection.parquet"
