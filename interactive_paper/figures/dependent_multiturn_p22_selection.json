@@ -1,0 +1,28 @@
+{
+  "status": "frozen_before_tts_native_or_judge_outputs",
+  "rows": 120,
+  "turn_audio_rows": 240,
+  "counts_by_pool": {
+    "en-constraint_choice": 20,
+    "en-linked_lookup": 20,
+    "en-state_update": 20,
+    "zh-constraint_choice": 20,
+    "zh-linked_lookup": 20,
+    "zh-state_update": 20
+  },
+  "counts_by_language": {
+    "en": 60,
+    "zh": 60
+  },
+  "counts_by_family": {
+    "constraint_choice": 40,
+    "linked_lookup": 40,
+    "state_update": 40
+  },
+  "characters": 40138,
+  "tts_cost_usd_at_15_per_million_characters": 0.60207,
+  "pairs_sha256": "ef811bc401ef316839098ffc8a57bcc77af05fb47f13b47c1693210d43cddf60",
+  "audio_selection_sha256": "ebebc32ad9d7acf7b45ffc9291d5b406c37983042d665df827fa17983ab64e48",
+  "canonical_content_sha256": "f759ab2144d890cb8c9fb6dfd7d9f5ec780cda4ccf5aeb1f7c0184dcf174f563",
+  "guard": "Fixtures and scoring criteria frozen before all TTS, native model, judge, and candidate results."
+}
