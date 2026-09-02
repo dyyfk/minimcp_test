@@ -165,6 +165,42 @@ def checkpoint(path: Path, rows: list[dict]):
     pd.DataFrame(rows).to_parquet(path, index=False)
 
 
+async def process_batch(escalate, batch: pd.DataFrame, args):
+    """Keep both clients on one loop and give their async close tasks time."""
+    answers = await escalate.ask_expert_many(
+        list(batch["query"]), concurrency=args.expert_concurrency,
+        effort="low", cache_dir=str(args.cache_dir))
+    # OpenAI's async client schedules transport cleanup after the helper
+    # returns. Yield before the loop is closed to avoid leaking connections.
+    await asyncio.sleep(.1)
+    generated = []
+    for (_, query), answer in zip(batch.iterrows(), answers):
+        generated.append({
+            "id": str(query["id"]),
+            "pool": query.get("pool"),
+            "source": query.get("source"),
+            "training_tag": query["training_tag"],
+            "query": query["query"],
+            "reference_answer": query.get("reference_answer"),
+            "answer": answer.get("answer"),
+            "latency_s": answer.get("latency_s"),
+            "error": answer.get("error"),
+            "prompt_tokens": answer.get("prompt_tokens"),
+            "completion_tokens": answer.get("completion_tokens"),
+            "expert_model": escalate.EXPERT_MODEL,
+            "expert_effort": "low",
+            "judge_model": escalate.JUDGE_MODEL,
+            "judge_effort": escalate.JUDGE_EFFORT,
+            "adequate": None,
+            "judge_reason": None,
+        })
+    judge_input = [row for row in generated if row["answer"]]
+    judged = await escalate.judge_many(
+        judge_input, concurrency=args.judge_concurrency)
+    await asyncio.sleep(.1)
+    return generated, judged
+
+
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--data-dir", type=Path, required=True)
@@ -219,33 +255,7 @@ def main():
     args.cache_dir.mkdir(parents=True, exist_ok=True)
     for start in range(0, len(pending), args.batch_size):
         batch = pending.iloc[start:start + args.batch_size]
-        answers = asyncio.run(escalate.ask_expert_many(
-            list(batch["query"]), concurrency=args.expert_concurrency,
-            effort="low", cache_dir=str(args.cache_dir)))
-        generated = []
-        for (_, query), answer in zip(batch.iterrows(), answers):
-            generated.append({
-                "id": str(query["id"]),
-                "pool": query.get("pool"),
-                "source": query.get("source"),
-                "training_tag": query["training_tag"],
-                "query": query["query"],
-                "reference_answer": query.get("reference_answer"),
-                "answer": answer.get("answer"),
-                "latency_s": answer.get("latency_s"),
-                "error": answer.get("error"),
-                "prompt_tokens": answer.get("prompt_tokens"),
-                "completion_tokens": answer.get("completion_tokens"),
-                "expert_model": escalate.EXPERT_MODEL,
-                "expert_effort": "low",
-                "judge_model": escalate.JUDGE_MODEL,
-                "judge_effort": escalate.JUDGE_EFFORT,
-                "adequate": None,
-                "judge_reason": None,
-            })
-        judge_input = [row for row in generated if row["answer"]]
-        judged = asyncio.run(escalate.judge_many(
-            judge_input, concurrency=args.judge_concurrency))
+        generated, judged = asyncio.run(process_batch(escalate, batch, args))
         judged_by_id = {str(row["id"]): row for row in judged}
         for row in generated:
             verdict = judged_by_id.get(row["id"])
