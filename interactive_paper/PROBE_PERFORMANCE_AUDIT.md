@@ -2,9 +2,9 @@
 
 Scope: deployed official-config native gate at `03bf0e4`, artifact
 `data/gate_native.json` (`train_n=5228`, `C=3e-4`). This audit uses the
-committed code and data artifacts. The large feature shards remain on the
-original `gate-data` Modal volume and were not visible from the available
-`liquid-ai` Modal workspace, so model refits are proposed rather than claimed.
+committed code and data artifacts. The initial static audit did not have the
+large feature shards. P1 was subsequently executed from the published
+official-native bundle; the post-refit results are recorded below.
 
 ## Bottom line
 
@@ -19,6 +19,49 @@ training answers and refit on deployment-aligned labels. After that, optimize
 the routing utility (`expert_ok - local_ok`) rather than only local failure.
 The committed paired outcomes show 5--18.5 points of oracle routing headroom at
 the deployed budgets, depending on pool and tier.
+
+That first step has now been run. It confirms the label mismatch (only 80.8%
+agreement on the 5228 training rows), but a matched native-label refit does not
+improve external ranking or routing. The old labels were wrong as provenance,
+yet correlated enough that relabeling alone does not clear the replacement
+gate. P2, optimizing expert gain, is now the highest-value experiment.
+
+## P1 execution result: aligned labels do not improve the gate
+
+The bundle from
+[`dyyfk/minicpm-o45-native-gate-data`](https://huggingface.co/datasets/dyyfk/minicpm-o45-native-gate-data)
+was downloaded without the duplicate zip and verified against every entry in
+`SHA256SUMS`. The manifest SHA256 is
+`11b73100bac37e7ddd91ab05a9d18b4e3e34798bf043ffd9541b06660a6abf90`;
+it identifies source commit `03bf0e4`, the 12288-dimensional feature recipe,
+and the official serving configuration. All 5228 declared training rows joined
+to a native label (4986 core + 242 fresh train).
+
+The author's supplied native-label artifact reports row-random 5-fold OOF AUC
+`.8477`; an independent rerun reproduced `.847674`. The stricter source-grouped
+5-fold sweep selected the same `C=3e-4` but measured `.8346`, a useful estimate
+of the family-transfer penalty. The independent full-data coefficients and the
+supplied artifact were effectively identical (cosine similarity `>.999999`),
+and produced the same exact-budget cascade decisions.
+
+Official-native evaluation, old deployed gate versus aligned refit:
+
+| pool | n | native AUC old | native AUC aligned | delta (95% bootstrap CI) | cascade delta @15/30/50% |
+|---|---:|---:|---:|---:|---:|
+| internal test | 239 | .878 | .876 | -.002 [-.025, +.021] | +.000 / -.008 / +.008 |
+| Speech TriviaQA | 250 | .800 | .811 | +.011 [-.018, +.042] | -.012 / -.024 / +.016 |
+| Speech WebQ | 241 | .786 | .772 | -.015 [-.049, +.020] | -.021 / -.012 / -.004 |
+| Llama Questions | 245 | .758 | .742 | -.015 [-.052, +.022] | -.016 / +.008 / +.000 |
+| SD-QA | 200 | .763 | .726 | -.037 [-.076, +.000] | -.005 / +.000 / +.000 |
+| Reasoning zh | 202 | .666 | .662 | -.004 [-.057, +.049] | +.015 / -.005 / -.020 |
+
+Across the five external pools, mean native AUC changes from `.755` to `.743`.
+Mean cascade accuracy changes by `-.8`, `-.7`, and `-.2` points at 15%, 30%,
+and 50% budgets. No pool has a statistically reliable AUC improvement. This
+fails the predeclared replacement gate (at least +.015 external AUC or +2
+points at 30% plus broad pool-level support), so the deployed artifact should
+remain unchanged. The native-label artifact is valuable as a provenance- and
+calibration-correct candidate, not as a performance upgrade.
 
 ## Finding 1: training and headline AUC labels are not deployment-aligned
 
