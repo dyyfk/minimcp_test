@@ -34,29 +34,44 @@ async def main_async(args):
     args.audio_dir.mkdir(parents=True, exist_ok=True)
     client = AsyncOpenAI()
     semaphore = asyncio.Semaphore(args.concurrency)
+    rate_lock = asyncio.Lock()
+    next_start = 0.0
     completed = 0
     rendered = 0
     failed = []
 
     async def one(item):
-        nonlocal completed, rendered
+        nonlocal completed, rendered, next_start
         path = args.audio_dir / f"{item['id']}.wav"
         if path.exists() and path.stat().st_size > 44:
             completed += 1
             return
-        try:
-            async with semaphore:
-                response = await client.audio.speech.create(
-                    model="tts-1", voice=args.voice, input=item["text"],
-                    response_format="wav")
-            path.write_bytes(response.content)
-            rendered += 1
-            completed += 1
-            if completed % 100 == 0:
-                print(f"tts {completed}/{len(requests)}", flush=True)
-        except Exception as exc:
-            failed.append({"id": item["id"], "kind": item["kind"],
-                           "error": f"{type(exc).__name__}: {exc}"})
+        last_error = None
+        for attempt in range(args.retries):
+            try:
+                async with semaphore:
+                    async with rate_lock:
+                        loop = asyncio.get_running_loop()
+                        now = loop.time()
+                        if next_start > now:
+                            await asyncio.sleep(next_start - now)
+                            now = loop.time()
+                        next_start = now + 60.0 / args.rpm
+                    response = await client.audio.speech.create(
+                        model="tts-1", voice=args.voice, input=item["text"],
+                        response_format="wav")
+                path.write_bytes(response.content)
+                rendered += 1
+                completed += 1
+                if completed % 100 == 0:
+                    print(f"tts {completed}/{len(requests)}", flush=True)
+                return
+            except Exception as exc:
+                last_error = exc
+                if attempt + 1 < args.retries:
+                    await asyncio.sleep(min(8., .5 * 2 ** attempt))
+        failed.append({"id": item["id"], "kind": item["kind"],
+                       "error": f"{type(last_error).__name__}: {last_error}"})
 
     try:
         await asyncio.gather(*(one(item) for item in requests))
@@ -86,6 +101,8 @@ def main():
     parser.add_argument("--audio-dir", type=Path, required=True)
     parser.add_argument("--concurrency", type=int, default=16)
     parser.add_argument("--voice", default="alloy")
+    parser.add_argument("--rpm", type=float, default=450.)
+    parser.add_argument("--retries", type=int, default=8)
     args = parser.parse_args()
     asyncio.run(main_async(args))
 
