@@ -337,7 +337,7 @@ RTJ+semantic fusion result SHA256:
 `396de32461de11111071008f1729262c6f5b21401d72ecce6a25413d0477ad51`.
 
 The frozen scorer is exported as `data/gate_shadow_semantic_rtj.json`, SHA256
-`55fff3ceab5a294e24b19ee46c527b8f91f6d6b81bcc7dc66e8ce0a63e573b34`.
+`1bba247f7565107e2ffe1f51b3ef445cd8a4287614b77d3619fe859ed16a5542`.
 It contains the fitted 8,192-dimensional P3a coefficients, all three training
 centers/scales and fusion weights, exact semantic/RTJ recipes, validation
 receipts, fixed-set latency evidence, a per-language rolling-quantile

@@ -30,6 +30,9 @@ def main():
     parser.add_argument("--semantic-result", type=Path, required=True)
     parser.add_argument("--rtj-result", type=Path, required=True)
     parser.add_argument("--latency-result", type=Path)
+    parser.add_argument(
+        "--p3a-artifact", type=Path,
+        help="Preserve coefficients from an already-frozen shadow artifact.")
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     p3a = load_p3a()
@@ -44,8 +47,13 @@ def main():
 
     x, y, _ids, groups, blocks = p3a.collect_training(args.data_dir)
     cols = np.arange(BLOCK, 3 * BLOCK)
-    model = LogisticRegression(C=3e-4, max_iter=5000, tol=1e-5)
-    model.fit(x[:, cols], y)
+    if args.p3a_artifact:
+        p3a_coefficients = json.loads(args.p3a_artifact.read_text())["p3a"]
+    else:
+        model = LogisticRegression(C=3e-4, max_iter=5000, tol=1e-5)
+        model.fit(x[:, cols], y)
+        p3a_coefficients = {
+            "w": model.coef_[0].tolist(), "b": float(model.intercept_[0])}
     pools = fusion["pools"]
     external = list(pools.values())
 
@@ -58,8 +66,7 @@ def main():
             "training_rows": len(y), "source_groups": len(set(groups)),
             "training_blocks": blocks, "C": 3e-4,
         },
-        "p3a": {"w": model.coef_[0].tolist(),
-                "b": float(model.intercept_[0])},
+        "p3a": p3a_coefficients,
         "semantic": {
             "extra_native_answers": 2, "temperature": .7, "top_k": 20,
             "metric": semantic["winner"]["target"],
