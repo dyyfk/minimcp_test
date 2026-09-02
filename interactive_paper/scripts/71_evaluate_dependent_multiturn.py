@@ -141,8 +141,15 @@ def main() -> None:
                 if bootstrap else None)
 
     trace_paths = sorted(args.trace_dir.glob("controlled_multiturn.rank*.jsonl"))
-    traces = [json.loads(line) for path in trace_paths
-              for line in path.read_text().splitlines() if line.strip()]
+    # Generation is resumable and appends retries.  Match the judge's contract:
+    # the last record for an ID is authoritative.
+    trace_by_id = {}
+    for path in trace_paths:
+        for line in path.read_text().splitlines():
+            if line.strip():
+                record = json.loads(line)
+                trace_by_id[str(record["id"])] = record
+    traces = list(trace_by_id.values())
     usage_columns = ["prompt_tokens", "completion_tokens",
                      "cached_prompt_tokens"]
     usage = judged[usage_columns].fillna(0).sum().astype(int)

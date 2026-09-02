@@ -836,3 +836,21 @@ pools regress. No independent P22 set was opened because P21 failed its
 training-stage screen. Direct contextual relabeling/refitting with the same
 L22 linear representation is therefore rejected; the remaining gap is not
 fixed by exposing this head to more unrelated prior-turn state.
+
+P22 removed the main limitation of P19--P21: all 120 bilingual targets were
+genuinely dependent on the preceding user turn. The frozen fixtures balance
+English and Chinese across linked lookup, constraint selection, and state
+update tasks. The repository's optional `calibctx` / `exp3zhctx` hooks were
+not used because those rows are absent from both the exported 5,228-row bundle
+and its deployed training recipe.
+
+All 120 sessions reached a carrier EOT and a scoreable target onset; 117/120
+target answers reached EOT. The native model failed 64/120 judged targets,
+providing meaningful separation rather than a ceiling-only memory test. The
+unchanged live gate outperforms P16: pooled AUC `.68583→.61942` (`-.06641`),
+English `.75778→.70333`, and Chinese `.68552→.61652`. Macro pool delta is
+`-.03681` with source-stratified bootstrap 95% CI `[-.08235,+.00366]`; five
+of six pools regress. At exact 15/30/50% budgets, P16 pooled precision changes
+by `-.0556/-.0556/-.0333`. P22 therefore rejects P16 for dependent follow-up
+traffic and strengthens the case for leaving the live gate unchanged. The
+fixture result remains controlled rather than organic evidence.
