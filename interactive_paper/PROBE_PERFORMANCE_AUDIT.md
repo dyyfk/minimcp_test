@@ -1,10 +1,11 @@
 # Probe performance audit (2026-09-02)
 
-Scope: deployed official-config native gate at `03bf0e4`, artifact
-`data/gate_native.json` (`train_n=5228`, `C=3e-4`). This audit uses the
-committed code and data artifacts. The initial static audit did not have the
-large feature shards. P1 was subsequently executed from the published
-official-native bundle; the post-refit results are recorded below.
+Scope: official-config native gate at `03bf0e4`, artifact
+`data/gate_native.json` (`train_n=5228`, `C=3e-4`), plus the author's
+deployment-aligned 8-bit artifact now served by the live demo. This audit uses
+the committed code and published data artifacts. The initial static audit did
+not have the large feature shards. P1 and the staged P2 expert-gain experiment
+were subsequently executed; their results are recorded below.
 
 ## Bottom line
 
@@ -20,11 +21,62 @@ the routing utility (`expert_ok - local_ok`) rather than only local failure.
 The committed paired outcomes show 5--18.5 points of oracle routing headroom at
 the deployed budgets, depending on pool and tier.
 
-That first step has now been run. It confirms the label mismatch (only 80.8%
-agreement on the 5228 training rows), but a matched native-label refit does not
-improve external ranking or routing. The old labels were wrong as provenance,
-yet correlated enough that relabeling alone does not clear the replacement
-gate. P2, optimizing expert gain, is now the highest-value experiment.
+Both recommended target experiments have now been run. P1 confirms the label
+mismatch (only 80.8% agreement on the 5228 training rows), but a matched
+native-label refit does not improve external ranking or routing. P2 labels a
+fixed stratified 1500-row subset with paired expert outcomes, but its direct
+gain router transfers worse than the live aligned failure router. The result
+does not support replacing the live artifact. The next useful experiment needs
+a different representation or a richer routing model, not more labels for the
+same 12288-dimensional linear head.
+
+## P2 execution result: direct expert-gain routing does not transfer
+
+A fixed 1500/5228 subset was sampled by source family, language, and native
+failure with seed 42. The ordered ID-list SHA256 is
+`0e6f5a1a6c4563bb1de1bd5410724f734513097810106613584ae438e064b9fc`.
+The exact repository expert/judge protocol produced 1500 judged outcomes with
+zero API errors: the expert was correct on 82.7% of rows versus 46.1% locally;
+38.3% had positive gain and only 1.7% had harmful gain. The label parquet
+SHA256 is
+`a3ef657fec85867d8841f783c5350493287332f8145e7050d07294c79858facc`;
+the selection-manifest SHA256 is
+`e1674662872ebd66545e9adb5f8171dadcf6164d16e4964c8ebc3b517fa22cc9`.
+
+Source-family-grouped five-fold CV (35 groups, with the same family kept
+together across expansion rounds) selected the positive-benefit logistic head
+at `C=1e-4`, with mean routing objective `+.1671` across exact 15/30/50%
+budgets. On the same training rows, the frozen live aligned failure score is
+better at `+.1816`. An exploratory standardized blend sweep favors zero weight
+on the gain score; increasing its weight monotonically reduces the objective.
+This does not support a small gain reranker on the evidence available here.
+
+Untouched official-native pools, candidate versus the live aligned 8-bit
+failure router:
+
+| pool | n | benefit AUC aligned | benefit AUC gain | cascade delta @15/30/50% |
+|---|---:|---:|---:|---:|
+| internal test | 239 | .712 | .690 | +.000 / +.008 / -.025 |
+| Speech TriviaQA | 250 | .747 | .678 | +.000 / -.028 / -.044 |
+| Speech WebQ | 241 | .604 | .601 | +.008 / +.004 / -.008 |
+| Llama Questions | 245 | .755 | .671 | -.016 / -.037 / -.008 |
+| SD-QA | 200 | .678 | .631 | -.020 / -.025 / +.000 |
+| Reasoning zh | 202 | .599 | .530 | -.010 / -.045 / -.020 |
+
+Across the five external pools, mean benefit AUC falls from `.677` to `.622`.
+Mean cascade accuracy changes by `-.8`, `-2.6`, and `-1.6` points at 15%, 30%,
+and 50%. The gain candidate loses benefit AUC on every external pool and fails
+the replacement gate. Its artifact SHA256 is
+`1f9d710f70e4991787cb852175d695cb8482c2259f444409016e7b47a1be2643`;
+the full result-receipt SHA256 is
+`6c728061f69b1bcba96f028fc4b29854a1a490ad2c0686e82c44c3d20e6d4aaa`.
+
+The expert is almost always correct and is rarely harmful on this staged
+sample, so the positive-gain label is close to native local failure with added
+noise. The observed oracle headroom therefore does not imply that the same
+small-model hidden-state vector can predict expert benefit out of source. Do
+not deploy this candidate or buy the remaining expert labels under the same
+linear-feature hypothesis.
 
 ## P1 execution result: aligned labels do not improve the gate
 

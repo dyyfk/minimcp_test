@@ -127,7 +127,10 @@ def group_for(meta: pd.DataFrame, tag: str, row_id: str) -> str:
     row = meta.loc[row_id]
     for col in ("source", "pool"):
         if col in meta.columns and pd.notna(row.get(col)):
-            return f"{tag}:{row[col]}"
+            # The same source family can recur in several expansion rounds.
+            # Group by the family itself, not tag:family, or CV leaks a family
+            # from (say) expoff into the exp2off validation fold.
+            return str(row[col])
     return f"{tag}:unknown"
 
 
