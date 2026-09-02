@@ -329,6 +329,14 @@ RTJ-only result SHA256:
 RTJ+semantic fusion result SHA256:
 `396de32461de11111071008f1729262c6f5b21401d72ecce6a25413d0477ad51`.
 
+The frozen scorer is exported as `data/gate_shadow_semantic_rtj.json`, SHA256
+`caf3dbd8df49e0e17236584b909af80a4c03fe195dc6683859ef352245fac54c`.
+It contains the fitted 8,192-dimensional P3a coefficients, all three training
+centers/scales and fusion weights, exact semantic/RTJ recipes, validation
+receipts, a per-language rolling-quantile requirement, and required shadow
+logs. The artifact is explicitly marked `shadow_only` with activation
+prohibited; it does not overwrite or alter `gate_native.json`.
+
 ## P1 execution result: aligned labels do not improve the gate
 
 The bundle from
