@@ -27,6 +27,9 @@ with tempfile.TemporaryDirectory() as directory:
             "realized_escalation": index >= 14,
             "local_outcome": int(not failure),
             "expert_outcome": 1,
+            "turn_index": 1 if index < 8 else 2 + (index % 3),
+            "has_context": index >= 8,
+            "prior_escalations": 0 if index < 12 else 1,
         })
     log.write_text("".join(json.dumps(row) + "\n" for row in rows))
     artifact = PAPER / "data" / "gate_shadow_robust_ensemble.json"
@@ -35,5 +38,8 @@ with tempfile.TemporaryDirectory() as directory:
     assert result["native_auc_candidate"] == 1.0
     assert result["budgets"]["balanced"]["candidate_accuracy"] >= 0.9
     assert result["provenance"]["artifact_sha256"]
+    assert result["context_strata"]["first_turn"]["rows"] == 8
+    assert result["context_strata"]["follow_up"]["rows"] == 12
+    assert result["context_strata"]["prior_escalation_rows"] == 8
 
 print("OK (shadow analyzer synthetic smoke)")

@@ -359,6 +359,8 @@ class DuplexVoice:
                 prev_listen = True
                 thinking = _th.Event()           # thinker in flight
                 n_chunk = 0
+                completed_turns = 0               # pre-answer context state
+                prior_escalations = 0             # completed/in-flight fires
 
                 def thinker(snapshot, context):
                     # context: the resolved dialogue so far. The probe
@@ -506,6 +508,9 @@ class DuplexVoice:
                                       "act": (None if act is None
                                               else round(act, 4)),
                                       "is_info": bool(is_info),
+                                      "turn_index": completed_turns + 1,
+                                      "has_context": completed_turns > 0,
+                                      "prior_escalations": prior_escalations,
                                       "probe_on": probe_on})
                                 if fired:
                                     thinking.set()
@@ -526,6 +531,7 @@ class DuplexVoice:
                                 turn_text.append(r["text"])
                             if fired_now:
                                 turn_fired = True
+                                prior_escalations += 1
                                 if self.stall_pcm is not None:
                                     i16s = (np.clip(self.stall_pcm, -1, 1)
                                             * 32767).astype("<i2")
@@ -545,6 +551,7 @@ class DuplexVoice:
                                     top_k=GEN_TOP_K)
                                 _emit_gen(r, mute=True)
                             if r.get("end_of_turn"):
+                                completed_turns += 1
                                 if muted:
                                     emit({"type": "log",
                                           "msg": f"muted {muted - 1} chunks "

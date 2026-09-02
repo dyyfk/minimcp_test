@@ -61,8 +61,16 @@ shadow_refs = [node for node in ast.walk(fired_values[0])
                    (isinstance(node, ast.Attribute) and
                     "shadow" in node.attr))]
 check(not shadow_refs, "shadow state cannot enter the live fired expression")
+context_refs = [node.id for node in ast.walk(fired_values[0])
+                if isinstance(node, ast.Name) and node.id in {
+                    "completed_turns", "prior_escalations"}]
+check(not context_refs,
+      "observational context state cannot enter the live fired expression")
 check('"shadow_v"' in source and '"shadow_score"' in source,
       "shadow values remain observable in websocket events")
+check(all(f'"{field}"' in source for field in (
+    "turn_index", "has_context", "prior_escalations")),
+      "pre-answer context strata remain observable in gate events")
 check("_SHADOW_ARTIFACT" in source and ".add_local_file(" in source,
       "the frozen artifact is packaged into the runtime image")
 check("gate_shadow_robust_ensemble.json" in source,
