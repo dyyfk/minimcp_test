@@ -854,3 +854,27 @@ of six pools regress. At exact 15/30/50% budgets, P16 pooled precision changes
 by `-.0556/-.0556/-.0333`. P22 therefore rejects P16 for dependent follow-up
 traffic and strengthens the case for leaving the live gate unchanged. The
 fixture result remains controlled rather than organic evidence.
+
+P23 tested the strongest remaining zero-forward hypothesis: reduce the two
+accumulated-context feature blocks while preserving the current-user block.
+The coefficient was frozen from P22 before opening a second independent set:
+scale `eot_last` and `eot_mean8` (and the bias) by `.625`, leaving `user_mean`
+unchanged. P22 development diagnostics predicted a macro pool AUC gain of
+`+.02196` while keeping pooled AUC nonnegative versus live. The prospective
+set comprised 120 new bilingual dependent conversations across disjoint
+temporal-order, arithmetic-ledger, and seating-swap families.
+
+All 120 sessions reached carrier EOT, target onset, and target EOT with zero
+inference errors; 66/120 judged targets failed. Prospectively, however, the
+context-block mix is essentially flat: pooled AUC `.61055→.61364` (`+.00309`)
+and macro pool delta `+.00405`, source-stratified 95% CI
+`[-.03188,+.04005]`. English improves `+.02602`, but Chinese regresses
+`-.01004`; arithmetic regresses in both languages (`-.01333` English,
+`-.03125` Chinese). It therefore fails the frozen macro-gain, positive-CI,
+language-breadth, and minimum-pool gates. Reject it, keep the live gate
+unchanged, and stop context-block coefficient tuning. The result receipt
+SHA256 is
+`b1917ab97285333188e11617e7e147927def9c88e7e0eb9eecfe24a5f1e8b36f`.
+P23 TTS cost was `$0.295065`; judge usage was 33,514 input and 10,005 output
+tokens, costing `$0.070158`. Conservative cumulative OpenAI spend is
+`$34.052445 / $500`.
