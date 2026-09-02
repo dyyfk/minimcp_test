@@ -1,0 +1,66 @@
+"""Safety contract for the inactive distilled-gate shadow integration.
+
+Run: python interactive_paper/src/test_distilled_shadow.py
+"""
+from __future__ import annotations
+
+import ast
+import json
+import os
+import sys
+from pathlib import Path
+
+
+HERE = Path(__file__).resolve().parent
+PAPER = HERE.parent
+sys.path.insert(0, os.fspath(HERE))
+from gate import Probe  # noqa: E402
+
+
+artifact = json.loads((
+    PAPER / "data" / "gate_shadow_distilled_semantic_rtj.json").read_text())
+source_path = PAPER / "demo_duplex.py"
+source = source_path.read_text()
+tree = ast.parse(source)
+checks = 0
+
+
+def check(condition, message):
+    global checks
+    checks += 1
+    assert condition, message
+
+
+check(artifact["status"] == "shadow_only", "artifact stays shadow-only")
+check(artifact["activation_prohibited"] is True,
+      "artifact explicitly prohibits activation")
+check(artifact["live_gate_unchanged"] is True,
+      "artifact records that the live gate is unchanged")
+check("thresholds" not in artifact and "eot_thresholds" not in artifact,
+      "artifact carries no activation thresholds")
+check(artifact["feature_recipe"]["blocks"] == ["eot_mean8", "user_mean"],
+      "feature recipe is the frozen two-block recipe")
+check(len(artifact["w"]) == artifact["feature_recipe"]["dimension"] == 8192,
+      "coefficient dimension matches the feature recipe")
+check(0 < Probe(artifact["w"], artifact["b"]).score([0.] * 8192) < 1,
+      "artifact loads in the production pure-Python Probe")
+
+fired_values = []
+for node in ast.walk(tree):
+    if isinstance(node, (ast.Assign, ast.AnnAssign)):
+        targets = node.targets if isinstance(node, ast.Assign) else [node.target]
+        if any(isinstance(target, ast.Name) and target.id == "fired"
+               for target in targets):
+            fired_values.append(node.value)
+check(len(fired_values) == 1, "demo has one auditable live fired assignment")
+shadow_refs = [node for node in ast.walk(fired_values[0])
+               if ((isinstance(node, ast.Name) and "shadow" in node.id) or
+                   (isinstance(node, ast.Attribute) and
+                    "shadow" in node.attr))]
+check(not shadow_refs, "shadow state cannot enter the live fired expression")
+check('"shadow_v"' in source and '"shadow_score"' in source,
+      "shadow values remain observable in websocket events")
+check("_SHADOW_ARTIFACT" in source and ".add_local_file(" in source,
+      "the frozen artifact is packaged into the runtime image")
+
+print(f"OK ({checks} distilled-shadow safety checks)")

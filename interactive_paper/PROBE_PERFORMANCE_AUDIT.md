@@ -443,6 +443,16 @@ expression, so it cannot change escalation behavior. The live artifact,
 threshold selection, dialogue-act guard, and expert path are unchanged. This
 is code-level plumbing only; it has not been deployed.
 
+### P12: executable shadow-safety contract
+
+`src/test_distilled_shadow.py` makes the P11 safety boundary executable. It
+checks the artifact's shadow/activation flags, lack of deployable thresholds,
+frozen 8,192-dimensional feature recipe, and compatibility with the production
+pure-Python `Probe`. It also parses `demo_duplex.py` and fails if any shadow
+name or attribute enters the sole live `fired` assignment, while requiring the
+observational websocket fields to remain present. The original 28 gate tests
+and all 11 distilled-shadow checks pass.
+
 ## P1 execution result: aligned labels do not improve the gate
 
 The bundle from
