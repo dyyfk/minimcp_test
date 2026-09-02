@@ -1,0 +1,72 @@
+{
+  "status": "frozen_after_alpha2_before_tts_native_or_judge",
+  "seed": 49,
+  "n": 450,
+  "counts_by_pool": {
+    "p17_snli": 150,
+    "p17_sst2": 150,
+    "p17_wic": 150
+  },
+  "characters": 82778,
+  "tts_cost_usd_at_15_per_million_characters": 1.24167,
+  "ordered_id_sha256": "3126ffbad5b50bdb17fc1e7165de2963c4e7a28b3e964355d905be63edb76d8f",
+  "canonical_content_sha256": "683d5c0726bcce14122e0dcb500326d7108531110edd5e04031d2e652faf0d12",
+  "selection_sha256": "fe0b9de698be07a639d94a0171da2607e7fbacbb582de5bc7175a47eecd086f8",
+  "raw_sources": {
+    "snli": {
+      "revision": "cdb5c3d5eed6ead6e5a341c8e56e669bb666725b",
+      "sha256": "00f5ed8deaed007fef3022f0215b287efbab815b1bb31ac3f3ff4f4129d41ffe"
+    },
+    "sst2": {
+      "revision": "bcdcba79d07bc864c1c254ccfcedcce55bcc9a8c",
+      "sha256": "a1371f3b3a7b0bcefa8388799a9359dc3ce76c349cc0079507a7991364fd2a9b"
+    },
+    "wic": {
+      "revision": "3de24cf8022e94f4ee4b9d55a6f539891524d646",
+      "sha256": "22cc5df62bf76c8ed47ea0c92b4bb1bce698984ac1c10493250365d3419ac6da"
+    }
+  },
+  "diagnostics": {
+    "p17_snli": {
+      "source_rows": 9842,
+      "eligible": 9702,
+      "existing_overlap": 0,
+      "within_source_duplicates": 2,
+      "over_character_limit": 139,
+      "excluded_union": 140,
+      "chosen": 150,
+      "chosen_label_counts": {
+        "0": 50,
+        "1": 50,
+        "2": 50
+      }
+    },
+    "p17_sst2": {
+      "source_rows": 872,
+      "eligible": 870,
+      "existing_overlap": 0,
+      "within_source_duplicates": 0,
+      "over_character_limit": 2,
+      "excluded_union": 2,
+      "chosen": 150,
+      "chosen_label_counts": {
+        "0": 75,
+        "1": 75
+      }
+    },
+    "p17_wic": {
+      "source_rows": 638,
+      "eligible": 637,
+      "existing_overlap": 0,
+      "within_source_duplicates": 0,
+      "over_character_limit": 1,
+      "excluded_union": 1,
+      "chosen": 150,
+      "chosen_label_counts": {
+        "0": 75,
+        "1": 75
+      }
+    }
+  },
+  "guard": "P17 was frozen after alpha-2 and cannot be used for its fitting or selection."
+}
