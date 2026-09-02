@@ -453,6 +453,17 @@ name or attribute enters the sole live `fired` assignment, while requiring the
 observational websocket fields to remain present. The original 28 gate tests
 and all 11 distilled-shadow checks pass.
 
+### P13: fail-closed shadow acceptance receipt
+
+`scripts/52_analyze_distilled_shadow.py` consumes only new shadow JSONL and
+the frozen artifact. It requires unique IDs and complete language, live score,
+distilled score, latency, realized action, local outcome, and expert outcome
+fields; it rejects unsafe artifacts, incomplete rows, duplicates, non-binary
+outcomes, and undersized samples. The receipt reports native/benefit AUC,
+per-language exact-budget cascade accuracy and harmful escalation, observed
+policy accuracy, latency, score drift, and hashes of both inputs. It has no
+activation path. A synthetic end-to-end smoke passes.
+
 ## P1 execution result: aligned labels do not improve the gate
 
 The bundle from
