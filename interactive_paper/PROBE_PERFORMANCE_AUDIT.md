@@ -371,6 +371,30 @@ Latency receipt: `figures/shadow_latency_benchmark.json`, SHA256
 semantic stream SHA256
 `3eece7d4811a73e1152acf11e105f83cc59e8f4d68c5c3eb03d5a4224528d78c`.
 
+### P9: single-pass distillation recovers only a small fraction of P7
+
+To remove the synchronous multi-generation cost, I distilled the frozen
+answer-conditioned teacher—equal-weight standardized two-sample semantic
+entropy and RTJ uncertainty—into the existing hidden features. Selection used
+only the fixed 1,000-row pilot, five source-family folds, three input block
+sets, ridge `alpha={100,1000,10000}`, and fixed blend weights. The external
+pools were evaluated only after this grid froze its winner.
+
+The direct teacher is strong on the pilot (`.7882` native AUC, `.6803` benefit
+AUC), and the hidden-state ridge predicts it with OOF Spearman `.6503`.
+Selection chooses P3a's `eot_mean8 + user_mean` blocks, ridge `alpha=100`,
+blended `.25` with the P3a score. It does not preserve the teacher's external
+advantage: five-pool mean native AUC improves only `+.0097`, benefit AUC
+`+.0057`, and cascade accuracy `-.0008/+.0013/+.0064` at 15/30/50%. No
+pool-level native interval excludes zero. The transfer pattern also changes:
+Reasoning-zh and TriviaQA gain, while the direct fusion's reliable SD-QA/WebQ
+gains disappear.
+
+Decision: do not deploy this distilled head. It is essentially another modest
+single-pass regularizer, comparable to P4, rather than a faithful substitute
+for answer-conditioned inference. Result receipt SHA256:
+`c023704d7421d8fec48d4dab466d2d867aa524ce48025d08a9ab3503baf1c3f1`.
+
 ## P1 execution result: aligned labels do not improve the gate
 
 The bundle from
