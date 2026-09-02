@@ -476,3 +476,28 @@ def run_native(pool: str = "frozen", workers: int = 4, limit: int = 0,
         [(shards[i], i if not limit else -1, tag, audio_dir, temp,
           carrier, official) for i in range(workers)]))
     print(f">>> complete: {sum(len(d) for d in done)} traces")
+
+
+@app.local_entrypoint()
+def judge_training_official():
+    """Judge the existing official-config training traces in parallel.
+
+    This does not regenerate features or answers. Each remote is resumable:
+    ``judge_native`` skips IDs already present in its output parquet.
+    """
+    targets = [
+        ("caliboff", "frozen"),
+        ("expoff", "expansion"),
+        ("exp2off", "expansion2"),
+        ("exp3off", "expansion3"),
+        ("exp3zhoff", "expansion3zh"),
+        ("freshoff", "fresh"),
+    ]
+    calls = [(tag, pool, judge_native.spawn(tag=tag, pool=pool))
+             for tag, pool in targets]
+    total = 0
+    for tag, pool, call in calls:
+        judged = call.get()
+        total += judged
+        print(f">>> {tag}/{pool}: {judged} newly judged")
+    print(f">>> official training relabel complete: {total} new rows")
