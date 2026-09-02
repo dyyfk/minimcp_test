@@ -820,3 +820,19 @@ correction's macro AUC delta was only `+.00311` (95% CI
 therefore rejected. It adds no forward pass, but its apparent P19 gain did not
 transfer. Keep P16 shadow-only and require organic first-turn/follow-up logs
 before any activation decision.
+
+P21 tested whether the representation could recover when trained directly on
+the contextual distribution. It replayed 1,000 source-balanced official
+targets after completed cross-pool carrier turns; 960 sessions produced
+scoreable target-onset features (27 carrier non-EOT and 13 target no-onset
+rows were excluded before fitting). The complete pre-output grid compared
+two feature-block choices and five regularization values under target-pool
+grouped cross-validation.
+
+The selected `eot_mean8+user_mean`, `C=1e-4` probe is worse than live even on
+grouped OOF: macro pool AUC `.79759→.78015` (`-.01744`, source bootstrap 95%
+CI `[-.06856,+.02629]`) and pooled AUC `.86443→.80753`. Ten of 18 target
+pools regress. No independent P22 set was opened because P21 failed its
+training-stage screen. Direct contextual relabeling/refitting with the same
+L22 linear representation is therefore rejected; the remaining gap is not
+fixed by exposing this head to more unrelated prior-turn state.

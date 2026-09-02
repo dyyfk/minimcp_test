@@ -24,6 +24,7 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--concurrency", type=int, default=8)
     parser.add_argument("--batch-size", type=int, default=40)
+    parser.add_argument("--allow-skip-failed", action="store_true")
     args = parser.parse_args()
     sys.path.insert(0, str(args.source_dir.resolve()))
     import escalate
@@ -41,7 +42,7 @@ def main():
     old = old.drop_duplicates("id", keep="last")
     have = set(old.loc[old.get("adequate", pd.Series(dtype=object)).notna(),
                        "id"])
-    todo = []
+    todo, skipped = [], []
     for row_id in sorted(metadata):
         if row_id in have:
             continue
@@ -49,6 +50,9 @@ def main():
         if trace is None:
             raise RuntimeError(f"missing or failed trace for {row_id}")
         error = trace.get("error")
+        if error and args.allow_skip_failed:
+            skipped.append({"id": row_id, "error": error})
+            continue
         if error and error != "RuntimeError: target never reached speak onset":
             raise RuntimeError(f"failed trace for {row_id}: {error}")
         row = metadata[row_id]
@@ -63,8 +67,13 @@ def main():
             "eot_seen": bool(trace.get("target_eot_seen")),
             "native_no_speak": bool(error),
         })
-    print(f"{len(traces)} traces; {len(have)} judged; {len(todo)} pending",
-          flush=True)
+    print(f"{len(traces)} traces; {len(have)} judged; {len(todo)} pending; "
+          f"{len(skipped)} skipped failures", flush=True)
+    if skipped:
+        skipped_path = args.output.with_suffix(args.output.suffix +
+                                               ".excluded.json")
+        skipped_path.parent.mkdir(parents=True, exist_ok=True)
+        skipped_path.write_text(json.dumps(skipped, indent=2) + "\n")
 
     async def judge_batch(rows):
         client = escalate._async_client()
