@@ -290,6 +290,45 @@ SHA256: `c759a0c273b48a26cbd0074ce42588e7ae223b502bc616479c50d2b3db6ed1ab`;
 three-way result SHA256:
 `bd4bbee4704bb55d560d9134c8ccdf4132969e3e7dbb6b4014232e23d598db0b`.
 
+### P7: local repeat-then-judge validates and strengthens the candidate
+
+A fixed 50-row parity sample first tested the complete audio-to-transcript-to-
+p(True) path. Normalized transcripts exactly matched the query on 78% of rows
+and had mean character similarity `.954`; RTJ and ground-truth-text p(True)
+had Pearson correlation `.893`, median absolute difference `.011`, and mean
+difference `.071`. Median end-to-end latency was `.80s`, mean `1.52s`, and
+p90 `4.48s`; the initial 25.7-second smoke was a long-tail outlier. Some ASR
+instructions elicited an answer rather than a transcript, confirming that the
+text ceiling could not substitute for the actual RTJ pass.
+
+The full fixed 1,000/1,138 train/external run then completed with zero errors
+and no OpenAI calls. External latency after model load was median `.62s`, mean
+`.90s`, p90 `1.56s`; RTJ/text-p(True) correlation was `.909` with mean absolute
+difference `.058`. RTJ alone fused with P3a improves five-pool mean native AUC
+by `+.0216`, benefit AUC by `+.0117`, and cascade accuracy by
+`-.0030/+.0066/+.0105`. Native gains are reliable on SD-QA, Llama Questions,
+and TriviaQA, while Reasoning-zh is nearly flat rather than suffering the text
+ceiling's larger inversion.
+
+The same predeclared three-way grid selects `.50` P3a + `.25` two-sample
+semantic entropy + `.25` RTJ. This is the strongest overall candidate:
+five-pool mean native AUC `+.0334`, benefit AUC `+.0202`, and cascade
+`+.0005/+.0097/+.0094` at 15/30/50%. Native AUC improves on all five pools;
+SD-QA gains `+.0551` (95% CI `[+.0057,+.1028]`) and WebQ `+.0435`
+(`[+.0105,+.0787]`). It clears the aggregate ranking gate with broader support
+than direct semantic uncertainty alone, though its extra inference cost and
+sub-two-point 30% cascade gain still argue for a shadow deployment rather than
+immediate replacement.
+
+RTJ sample-stream SHA256 values: train
+`be0e4a60565253021accd43ecedbbbeecd0018eb08c79ac76ff561828b494d5d`,
+external
+`b17b444fc5a867835690c98597115dcdb3b4838d1f933e961ed7a897c6e9fe90`.
+RTJ-only result SHA256:
+`94d42c74b88741c1d9b5315d662c66bd8ab0d00d743959cd483a2a084700120d`;
+RTJ+semantic fusion result SHA256:
+`396de32461de11111071008f1729262c6f5b21401d72ecce6a25413d0477ad51`.
+
 ## P1 execution result: aligned labels do not improve the gate
 
 The bundle from

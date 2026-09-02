@@ -34,7 +34,7 @@ def load_p3a():
     return module
 
 
-def read_signal(directory):
+def read_signal(directory, column="p_yes_textq"):
     rows = []
     for path in sorted(directory.glob("rtj.rank*.jsonl")):
         with path.open(encoding="utf-8") as fh:
@@ -42,7 +42,9 @@ def read_signal(directory):
     frame = pd.DataFrame(rows).drop_duplicates("id", keep="last")
     if frame.empty or frame["error"].notna().any():
         raise RuntimeError("missing or errored p(True) rows")
-    return frame[["id", "p_yes_textq", "mass_textq", "elapsed_s"]]
+    mass_column = "mass_rtj" if column == "p_yes_rtj" else "mass_textq"
+    return frame[["id", column, mass_column, "elapsed_s"]].rename(
+        columns={column: "p_yes", mass_column: "yes_no_mass"})
 
 
 def logit(values):
@@ -84,18 +86,21 @@ def main():
     parser.add_argument("--aligned-artifact", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--jobs", type=int, default=10)
+    parser.add_argument("--signal-column", choices=("p_yes_textq", "p_yes_rtj"),
+                        default="p_yes_textq")
     args = parser.parse_args()
 
     p3a = load_p3a()
     train = pd.read_parquet(args.train_selection).merge(
-        read_signal(args.train_signal), on="id", validate="one_to_one")
+        read_signal(args.train_signal, args.signal_column), on="id",
+        validate="one_to_one")
     x, y, ids, groups, _blocks = p3a.collect_training(args.data_dir)
     id_to_index = {row_id: i for i, row_id in enumerate(ids)}
     train = train[train["id"].isin(id_to_index)].copy()
     index = np.array([id_to_index[row_id] for row_id in train["id"]])
     local_ok = 1 - y[index]
     expert_ok = train["adequate"].astype(int).to_numpy()
-    uncertainty = -logit(train["p_yes_textq"])
+    uncertainty = -logit(train["p_yes"])
 
     columns = {"aligned": np.arange(3 * BLOCK),
                "p3a": np.arange(BLOCK, 3 * BLOCK)}
@@ -173,7 +178,8 @@ def main():
                 meta_scaler.transform(features), y[index])
 
     external = pd.read_parquet(args.external_selection).merge(
-        read_signal(args.external_signal), on="id", validate="one_to_one")
+        read_signal(args.external_signal, args.signal_column), on="id",
+        validate="one_to_one")
     pools = {}
     for pool, frame in external.groupby("pool", sort=True):
         pool_ids, xp = p3a.load_feats(args.data_dir, f"{pool}off")
@@ -183,7 +189,7 @@ def main():
         aligned = p3a.artifact_score(args.aligned_artifact, xp)
         base = (aligned if winner["base"] == "aligned" else
                 p3a_model.decision_function(xp[:, p3a_cols]))
-        ptrue = -logit(frame["p_yes_textq"])
+        ptrue = -logit(frame["p_yes"])
         if winner["kind"] == "blend":
             candidate = ((1 - winner["blend"]) * zapply(
                 base, winner["deploy_base_center"],
@@ -225,7 +231,7 @@ def main():
             args.external_signal.glob("rtj.rank*.jsonl"))],
         "aligned_sha256": p3a.sha256(args.aligned_artifact)},
         "selection_rule": "max routing OOF among configs within .005 of best native OOF AUC",
-        "signal": "original-query text p(True) ceiling; not RTJ transcript",
+        "signal": args.signal_column,
         "train_n": len(train), "sweep": candidates, "winner": winner,
         "pools": pools}
     args.output.parent.mkdir(parents=True, exist_ok=True)

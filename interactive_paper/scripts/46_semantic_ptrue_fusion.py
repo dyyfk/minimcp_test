@@ -68,6 +68,8 @@ def main():
     parser.add_argument("--aligned-artifact", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--jobs", type=int, default=5)
+    parser.add_argument("--ptrue-column", choices=("p_yes_textq", "p_yes_rtj"),
+                        default="p_yes_textq")
     args = parser.parse_args()
 
     p3a = load_module("35_feature_conditioning.py", "feature_conditioning")
@@ -77,7 +79,8 @@ def main():
     train = (pd.read_parquet(args.train_selection)
              .merge(pd.read_parquet(args.train_semantic), on="id",
                     validate="one_to_one")
-             .merge(ptrue_mod.read_signal(args.train_ptrue), on="id",
+             .merge(ptrue_mod.read_signal(
+                 args.train_ptrue, args.ptrue_column), on="id",
                     validate="one_to_one"))
     x, y, ids, groups, _ = p3a.collect_training(args.data_dir)
     id_to_index = {row_id: i for i, row_id in enumerate(ids)}
@@ -86,7 +89,7 @@ def main():
     local = 1 - y[index]
     expert = train["adequate"].astype(int).to_numpy()
     semantic = train[target].to_numpy(dtype=float)
-    ptrue = -logit(train["p_yes_textq"])
+    ptrue = -logit(train["p_yes"])
     cols = np.arange(BLOCK, 3 * BLOCK)
     cv = list(StratifiedGroupKFold(
         5, shuffle=True, random_state=42).split(x, y, groups))
@@ -154,7 +157,8 @@ def main():
     external = (pd.read_parquet(args.external_selection)
                 .merge(pd.read_parquet(args.external_semantic), on="id",
                        validate="one_to_one")
-                .merge(ptrue_mod.read_signal(args.external_ptrue), on="id",
+                .merge(ptrue_mod.read_signal(
+                    args.external_ptrue, args.ptrue_column), on="id",
                        validate="one_to_one"))
     pools = {}
     for pool, frame in external.groupby("pool", sort=True):
@@ -165,7 +169,7 @@ def main():
         aligned = p3a.artifact_score(args.aligned_artifact, xp)
         base_e = full.decision_function(xp[:, cols])
         sem_e = frame[target].to_numpy(dtype=float)
-        pt_e = -logit(frame["p_yes_textq"])
+        pt_e = -logit(frame["p_yes"])
         if winner["kind"] == "fixed":
             ws, wp = winner["semantic_weight"], winner["ptrue_weight"]
             candidate = ((1 - ws - wp) * zapply(base_e, *deploy_center) +
@@ -194,7 +198,7 @@ def main():
                 "candidate_vs_aligned_delta_ci": p3a.bootstrap_cascade_delta(
                     lo, eo, candidate, aligned, rate)}
         pools[pool] = result
-    out = {"signal": "two-sample semantic + original-query text p(True)",
+    out = {"signal": f"two-sample semantic + {args.ptrue_column}",
            "selection_rule": "max routing OOF among configs within .005 of best native OOF AUC",
            "train_n": len(train), "target": target, "sweep": candidates,
            "winner": winner, "pools": pools}
