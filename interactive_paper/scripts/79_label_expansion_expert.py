@@ -83,6 +83,11 @@ def main():
             if verdict:
                 row["adequate"] = verdict.get("adequate")
                 row["judge_reason"] = verdict.get("judge_reason")
+                row["judge_prompt_tokens"] = verdict.get("judge_prompt_tokens")
+                row["judge_completion_tokens"] = verdict.get(
+                    "judge_completion_tokens")
+                row["judge_cached_prompt_tokens"] = verdict.get(
+                    "judge_cached_prompt_tokens")
             rows[row["id"]] = row
         ordered = [rows[str(row_id)] for row_id in selection.id
                    if str(row_id) in rows]
@@ -91,7 +96,12 @@ def main():
         print(f"checkpoint {len(ordered)}/{len(selection)} "
               f"judged={judged_count}", flush=True)
     result = pd.read_parquet(args.output)
-    usage = result[["expert_prompt_tokens", "expert_completion_tokens"]]
+    usage_columns = [
+        "expert_prompt_tokens", "expert_completion_tokens",
+        "judge_prompt_tokens", "judge_completion_tokens",
+        "judge_cached_prompt_tokens",
+    ]
+    usage = result.reindex(columns=usage_columns)
     usage = usage.fillna(0).sum().astype(int).to_dict()
     print(json.dumps({"rows": len(result),
                       "judged": int(result.adequate.notna().sum()),
