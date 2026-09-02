@@ -26,6 +26,8 @@ from sklearn.preprocessing import StandardScaler
 LAYERS = [14, 18, 22, 26, 30]
 K_EOT = 8
 RNG = np.random.default_rng(20260902)
+REPLAY_MEAN_ABS_TOL = 1e-3
+REPLAY_MAX_ABS_TOL = .05
 
 
 def sha256(path):
@@ -85,6 +87,47 @@ def load_dataset(root):
     keep = [index for index, row_id in enumerate(ids)
             if row_id in judged.index and row_id in pairs.index and
             row_id in traces and traces[row_id].get("error") is None]
+
+    # Generation after speak onset can take a nondeterministic branch even
+    # under the same seed.  The score, however, is defined at speak onset.
+    # Compare the replayed L22 deployed feature to the original capture and
+    # exclude any row whose pre-answer state did not replay faithfully.  This
+    # check happens before labels or validation metrics are read.
+    original = {}
+    for path in sorted((root / "native").glob(
+            "controlled_multiturn_feats.rank*.npz")):
+        shard = np.load(path, allow_pickle=True)
+        original.update({str(row_id): vector.astype(np.float32)
+                         for row_id, vector in zip(shard["ids"], shard["X"])})
+    missing_original = [ids[index] for index in keep
+                        if ids[index] not in original]
+    if missing_original:
+        raise RuntimeError(
+            f"{len(missing_original)} rows lack original onset features; "
+            f"first={missing_original[:3]}")
+    layer_index = data["layers"].index(22)
+    replay_excluded = []
+    replay_errors = {}
+    replay_keep = []
+    for index in keep:
+        row_id = ids[index]
+        hidden = data["H_eot"][index, layer_index].astype(np.float32)
+        length = max(1, min(K_EOT, int(data["eot_len"][index])))
+        replayed = np.concatenate([
+            hidden[-1], hidden[-length:].mean(0),
+            data["H_turn_mean"][index, layer_index].astype(np.float32),
+        ])
+        delta = np.abs(replayed - original[row_id])
+        mean_abs = float(delta.mean())
+        max_abs = float(delta.max())
+        if (mean_abs > REPLAY_MEAN_ABS_TOL or
+                max_abs > REPLAY_MAX_ABS_TOL):
+            replay_excluded.append(row_id)
+            replay_errors[row_id] = {
+                "mean_abs": mean_abs, "max_abs": max_abs}
+        else:
+            replay_keep.append(index)
+    keep = replay_keep
     selected_ids = [ids[index] for index in keep]
     mismatched = [row_id for row_id in selected_ids
                   if traces[row_id].get("target_answer") !=
@@ -105,6 +148,15 @@ def load_dataset(root):
         str(pairs.loc[row_id].get("language", "unknown"))
         for row_id in selected_ids])
     selected["answer_parity_rows"] = len(selected_ids)
+    selected["replay_state_qc"] = {
+        "original_rows": len(original),
+        "included_rows": len(selected_ids),
+        "excluded_rows": len(replay_excluded),
+        "excluded_ids": replay_excluded,
+        "excluded_errors": replay_errors,
+        "mean_abs_tolerance": REPLAY_MEAN_ABS_TOL,
+        "max_abs_tolerance": REPLAY_MAX_ABS_TOL,
+    }
     return selected
 
 
@@ -348,8 +400,10 @@ def main():
 
     train_eval = evaluate(train, scores[winner["name"]], live_train)
     validations = {}
+    dataset_qc = {args.train_root.name: train["replay_state_qc"]}
     for root in args.validation_root:
         data = load_dataset(root)
+        dataset_qc[root.name] = data["replay_state_qc"]
         live = artifact_score(args.live_artifact, live_matrix(data))
         x = matrix(data, selected_config, live)
         candidate = score_full(*fitted, x)
@@ -393,6 +447,7 @@ def main():
                 args.train_root / "judged.parquet"),
         },
         "sweep": sweep, "baseline": baseline, "winner": winner,
+        "dataset_replay_state_qc": dataset_qc,
         "selection_evaluation": train_eval,
         "development_validations": validations,
         "prospective_graduation_rules": rules,
