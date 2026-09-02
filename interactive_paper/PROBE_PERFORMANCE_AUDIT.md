@@ -464,6 +464,26 @@ per-language exact-budget cascade accuracy and harmful escalation, observed
 policy accuracy, latency, score drift, and hashes of both inputs. It has no
 activation path. A synthetic end-to-end smoke passes.
 
+### P14: one-shot FreshQA heldout is directionally positive
+
+After freezing P9--P10, I opened the 60 feature-bearing FreshQA heldout rows
+for the first and only time (30 stable `fresh_never`, 30 fast-changing
+`fresh_fast`). These rows were excluded from the 5,228-row base fit, the
+1,000-row teacher fit, and all prior external evaluations. The evaluator pins
+both artifact SHA256 values and permits no selection or retuning.
+
+On actual official-native failures, AUC changes `.8193 -> .8400` (`+.0207`,
+95% bootstrap CI `[-.0278,+.0802]`). On the deployed policy target, which
+forces all fast-changing rows positive, AUC changes `.8727 -> .8975`
+(`+.0248`, CI `[-.0229,+.0852]`). Exact 15/30/50% failure precision and recall
+are tied because the two rankings overlap on 93--97% of rows at this small
+sample size. The result is supportive and directionally consistent with P9,
+but not individually significant; FreshQA family overlap and `n=60` mean it
+does not replace a new source-disjoint shadow set.
+
+Receipt SHA256:
+`1bf1ee5ac2da315192f6b2b0a782047ee33598c522b7422d7f20bb57dddfddd5`.
+
 ## P1 execution result: aligned labels do not improve the gate
 
 The bundle from
