@@ -409,6 +409,29 @@ The exported artifact is `data/gate_shadow_distilled_semantic_rtj.json`,
 SHA256 `c85e0697788b2f8ce819fc963aa68c5a5ef34e0ae59c4f58b7917ccbf848dbb0`;
 its algebraic fold differs from the two-component scorer by at most `1.8e-6`.
 
+### P10: leave-one-family-out robustness supports freezing P9
+
+The 1,000-row teacher set spans 33 source families. Holding out each family in
+turn from the ridge fit, without changing the frozen blocks, alpha, blend, or
+external evaluation, gives a narrow stability envelope:
+
+- mean native-AUC delta: minimum `+.0151`, median `+.0211`, maximum `+.0240`;
+- mean benefit-AUC delta: minimum `+.0097`, median `+.0148`, maximum `+.0174`;
+- mean balanced-cascade delta: minimum `+.0019`, median `+.0073`, maximum
+  `+.0108`.
+
+All 33 leave-one-family-out fits still clear the `+.015` mean native-AUC gate,
+and all 33 improve native AUC on every external pool. The worst native-AUC
+cases omit `know-openbook` (`+.0151`) or `know-longtail` (`+.0159`), so the
+result is not driven by one small family. Robustness receipt SHA256:
+`78dcc9f6bef45c81e8ef0f81d78dfd679a9097e91c1f48f245aa65fcf928a5bf`.
+
+This supports freezing the P9 artifact for shadow evaluation. It does not
+create a new independent test set: all robustness fits are still scored on the
+same five external pools. Stop offline candidate tuning on those pools; the
+next acceptance evidence must come from new source-disjoint data or live
+shadow traffic.
+
 ## P1 execution result: aligned labels do not improve the gate
 
 The bundle from

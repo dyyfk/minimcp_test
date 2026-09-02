@@ -1,0 +1,1971 @@
+{
+  "method": "leave one source family out of the 1,000-row teacher fit",
+  "families": 33,
+  "fixed_candidate": "p3a_ridge100_blend0.25",
+  "mean_native_auc_delta": {
+    "min": 0.015069822529581911,
+    "median": 0.021057971877131786,
+    "max": 0.024008378185071223
+  },
+  "mean_benefit_auc_delta": {
+    "min": 0.00969316670104472,
+    "median": 0.014813851097361197,
+    "max": 0.017442523078098127
+  },
+  "mean_balanced_cascade_delta": {
+    "min": 0.0019312184279652645,
+    "median": 0.007338514423887133,
+    "max": 0.01079114201368483
+  },
+  "auc_gate_passes": 33,
+  "all_five_native_positive": 33,
+  "rows": [
+    {
+      "held_out_group": "alpaca-zh",
+      "held_out_rows": 8,
+      "mean_native_auc_delta": 0.02055646151560604,
+      "mean_benefit_auc_delta": 0.013848418347296488,
+      "mean_cascade_delta": {
+        "conservative": 0.009646202049284425,
+        "balanced": 0.007154840954499387,
+        "aggressive": 0.008026400069086415
+      },
+      "positive_native_pools": 5,
+      "pools": {
+        "sdqa": {
+          "native_auc_delta": 0.032664583123298785,
+          "benefit_auc_delta": 0.02659574468085102,
+          "cascade_delta": {
+            "conservative": 0.019999999999999907,
+            "balanced": 0.0,
+            "aggressive": 0.010000000000000009
+          }
+        },
+        "sllama": {
+          "native_auc_delta": 0.011944755505785776,
+          "benefit_auc_delta": 0.0035868005738880493,
+          "cascade_delta": {
+            "conservative": 0.004081632653061162,
+            "balanced": -0.01632653061224487,
+            "aggressive": 0.004081632653061162
+          }
+        },
+        "sreason": {
+          "native_auc_delta": 0.02594339622641506,
+          "benefit_auc_delta": 0.007074677147669961,
+          "cascade_delta": {
+            "conservative": 0.0,
+            "balanced": 0.01980198019801982,
+            "aggressive": 0.00990099009900991
+          }
+        },
+        "striviaqa": {
+          "native_auc_delta": 0.012454355764214942,
+          "benefit_auc_delta": 0.014859658778205831,
+          "cascade_delta": {
+            "conservative": 0.020000000000000018,
+            "balanced": 0.02400000000000002,
+            "aggressive": 0.01200000000000001
+          }
+        },
+        "swebq": {
+          "native_auc_delta": 0.019775216958315633,
+          "benefit_auc_delta": 0.017125210555867576,
+          "cascade_delta": {
+            "conservative": 0.004149377593361037,
+            "balanced": 0.008298755186721962,
+            "aggressive": 0.004149377593360981
+          }
+        }
+      }
+    },
+    {
+      "held_out_group": "dolly-15k",
+      "held_out_rows": 8,
+      "mean_native_auc_delta": 0.0206824240860084,
+      "mean_benefit_auc_delta": 0.013770347539906979,
+      "mean_cascade_delta": {
+        "conservative": 0.007216326530612216,
+        "balanced": 0.005538514423887131,
+        "aggressive": 0.005580198019801985
+      },
+      "positive_native_pools": 5,
+      "pools": {
+        "sdqa": {
+          "native_auc_delta": 0.03397519911281377,
+          "benefit_auc_delta": 0.028000802890405407,
+          "cascade_delta": {
+            "conservative": 0.019999999999999907,
+            "balanced": 0.0,
+            "aggressive": 0.010000000000000009
+          }
+        },
+        "sllama": {
+          "native_auc_delta": 0.009611795446061944,
+          "benefit_auc_delta": 0.0015542802486847584,
+          "cascade_delta": {
+            "conservative": 0.004081632653061162,
+            "balanced": -0.020408163265306145,
+            "aggressive": 0.0
+          }
+        },
+        "sreason": {
+          "native_auc_delta": 0.028105345911949686,
+          "benefit_auc_delta": 0.011229646266142645,
+          "cascade_delta": {
+            "conservative": 0.0,
+            "balanced": 0.01980198019801982,
+            "aggressive": 0.00990099009900991
+          }
+        },
+        "striviaqa": {
+          "native_auc_delta": 0.013367240479916553,
+          "benefit_auc_delta": 0.014240506329113889,
+          "cascade_delta": {
+            "conservative": 0.01200000000000001,
+            "balanced": 0.020000000000000018,
+            "aggressive": 0.008000000000000007
+          }
+        },
+        "swebq": {
+          "native_auc_delta": 0.018352539479300045,
+          "benefit_auc_delta": 0.013826501965188198,
+          "cascade_delta": {
+            "conservative": 0.0,
+            "balanced": 0.008298755186721962,
+            "aggressive": 0.0
+          }
+        }
+      }
+    },
+    {
+      "held_out_group": "easy-chat",
+      "held_out_rows": 29,
+      "mean_native_auc_delta": 0.023069437161593886,
+      "mean_benefit_auc_delta": 0.017442523078098127,
+      "mean_cascade_delta": {
+        "conservative": 0.008059751037344387,
+        "balanced": 0.008974815483072574,
+        "aggressive": 0.005296052096529835
+      },
+      "positive_native_pools": 5,
+      "pools": {
+        "sdqa": {
+          "native_auc_delta": 0.03770541385220283,
+          "benefit_auc_delta": 0.03271778402248082,
+          "cascade_delta": {
+            "conservative": 0.019999999999999907,
+            "balanced": 0.0,
+            "aggressive": 0.0050000000000000044
+          }
+        },
+        "sllama": {
+          "native_auc_delta": 0.009518477043672924,
+          "benefit_auc_delta": 0.00430416068866557,
+          "cascade_delta": {
+            "conservative": 0.0,
+            "balanced": -0.01632653061224487,
+            "aggressive": 0.004081632653061162
+          }
+        },
+        "sreason": {
+          "native_auc_delta": 0.03046383647798745,
+          "benefit_auc_delta": 0.013475575519371175,
+          "cascade_delta": {
+            "conservative": 0.0,
+            "balanced": 0.024752475247524774,
+            "aggressive": 0.004950495049504955
+          }
+        },
+        "striviaqa": {
+          "native_auc_delta": 0.010628586332811607,
+          "benefit_auc_delta": 0.01348376444689059,
+          "cascade_delta": {
+            "conservative": 0.01200000000000001,
+            "balanced": 0.02400000000000002,
+            "aggressive": 0.0
+          }
+        },
+        "swebq": {
+          "native_auc_delta": 0.027030872101294623,
+          "benefit_auc_delta": 0.023231330713082476,
+          "cascade_delta": {
+            "conservative": 0.008298755186722018,
+            "balanced": 0.012448132780082943,
+            "aggressive": 0.012448132780083054
+          }
+        }
+      }
+    },
+    {
+      "held_out_group": "easy-fact",
+      "held_out_rows": 29,
+      "mean_native_auc_delta": 0.018763524873786453,
+      "mean_benefit_auc_delta": 0.012279829773345519,
+      "mean_cascade_delta": {
+        "conservative": 0.006056103039383432,
+        "balanced": 0.0043647419445983935,
+        "aggressive": 0.005596524550414217
+      },
+      "positive_native_pools": 5,
+      "pools": {
+        "sdqa": {
+          "native_auc_delta": 0.03135396713378369,
+          "benefit_auc_delta": 0.026495383380168547,
+          "cascade_delta": {
+            "conservative": 0.014999999999999902,
+            "balanced": -0.0050000000000000044,
+            "aggressive": 0.010000000000000009
+          }
+        },
+        "sllama": {
+          "native_auc_delta": 0.009331840238894995,
+          "benefit_auc_delta": 0.002152080344332674,
+          "cascade_delta": {
+            "conservative": 0.004081632653061162,
+            "balanced": -0.01632653061224487,
+            "aggressive": 0.004081632653061162
+          }
+        },
+        "sreason": {
+          "native_auc_delta": 0.02604166666666663,
+          "benefit_auc_delta": 0.009432902863559911,
+          "cascade_delta": {
+            "conservative": -0.004950495049504955,
+            "balanced": 0.014851485148514865,
+            "aggressive": 0.00990099009900991
+          }
+        },
+        "striviaqa": {
+          "native_auc_delta": 0.008737610850286903,
+          "benefit_auc_delta": 0.009562465602641845,
+          "cascade_delta": {
+            "conservative": 0.01200000000000001,
+            "balanced": 0.020000000000000018,
+            "aggressive": 0.0040000000000000036
+          }
+        },
+        "swebq": {
+          "native_auc_delta": 0.018352539479300045,
+          "benefit_auc_delta": 0.013756316676024616,
+          "cascade_delta": {
+            "conservative": 0.004149377593361037,
+            "balanced": 0.008298755186721962,
+            "aggressive": 0.0
+          }
+        }
+      }
+    },
+    {
+      "held_out_group": "easy-mathword",
+      "held_out_rows": 57,
+      "mean_native_auc_delta": 0.02002926084875356,
+      "mean_benefit_auc_delta": 0.014500186019608475,
+      "mean_cascade_delta": {
+        "conservative": 0.009849850047245378,
+        "balanced": 0.007535038974301367,
+        "aggressive": 0.006036301059185423
+      },
+      "positive_native_pools": 5,
+      "pools": {
+        "sdqa": {
+          "native_auc_delta": 0.029841717915112365,
+          "benefit_auc_delta": 0.024789241268566742,
+          "cascade_delta": {
+            "conservative": 0.019999999999999907,
+            "balanced": 0.0,
+            "aggressive": 0.0050000000000000044
+          }
+        },
+        "sllama": {
+          "native_auc_delta": 0.01026502426278475,
+          "benefit_auc_delta": 0.001076040172166226,
+          "cascade_delta": {
+            "conservative": 0.0,
+            "balanced": -0.01632653061224487,
+            "aggressive": 0.004081632653061162
+          }
+        },
+        "sreason": {
+          "native_auc_delta": 0.022012578616352196,
+          "benefit_auc_delta": 0.010892756878158383,
+          "cascade_delta": {
+            "conservative": 0.004950495049504955,
+            "balanced": 0.02970297029702973,
+            "aggressive": 0.004950495049504955
+          }
+        },
+        "striviaqa": {
+          "native_auc_delta": 0.015975482524778206,
+          "benefit_auc_delta": 0.016441937259218498,
+          "cascade_delta": {
+            "conservative": 0.016000000000000014,
+            "balanced": 0.016000000000000014,
+            "aggressive": 0.01200000000000001
+          }
+        },
+        "swebq": {
+          "native_auc_delta": 0.022051500924740286,
+          "benefit_auc_delta": 0.019300954519932523,
+          "cascade_delta": {
+            "conservative": 0.008298755186722018,
+            "balanced": 0.008298755186721962,
+            "aggressive": 0.004149377593360981
+          }
+        }
+      }
+    },
+    {
+      "held_out_group": "fresh_fast",
+      "held_out_rows": 24,
+      "mean_native_auc_delta": 0.021863371516331952,
+      "mean_benefit_auc_delta": 0.015248643203201651,
+      "mean_cascade_delta": {
+        "conservative": 0.0070561030393834325,
+        "balanced": 0.0065982654612315225,
+        "aggressive": 0.006039949057146376
+      },
+      "positive_native_pools": 5,
+      "pools": {
+        "sdqa": {
+          "native_auc_delta": 0.03488254864401652,
+          "benefit_auc_delta": 0.029004415897230018,
+          "cascade_delta": {
+            "conservative": 0.019999999999999907,
+            "balanced": 0.0050000000000000044,
+            "aggressive": 0.0
+          }
+        },
+        "sllama": {
+          "native_auc_delta": 0.008398656215005684,
+          "benefit_auc_delta": -0.00011956001912971637,
+          "cascade_delta": {
+            "conservative": 0.004081632653061162,
+            "balanced": -0.020408163265306145,
+            "aggressive": 0.0
+          }
+        },
+        "sreason": {
+          "native_auc_delta": 0.03213443396226401,
+          "benefit_auc_delta": 0.013700168444694127,
+          "cascade_delta": {
+            "conservative": -0.004950495049504955,
+            "balanced": 0.01980198019801982,
+            "aggressive": 0.00990099009900991
+          }
+        },
+        "striviaqa": {
+          "native_auc_delta": 0.013628064684402696,
+          "benefit_auc_delta": 0.01541001651073215,
+          "cascade_delta": {
+            "conservative": 0.01200000000000001,
+            "balanced": 0.01200000000000001,
+            "aggressive": 0.01200000000000001
+          }
+        },
+        "swebq": {
+          "native_auc_delta": 0.020273154075970856,
+          "benefit_auc_delta": 0.018248175182481674,
+          "cascade_delta": {
+            "conservative": 0.004149377593361037,
+            "balanced": 0.016597510373443924,
+            "aggressive": 0.008298755186721962
+          }
+        }
+      }
+    },
+    {
+      "held_out_group": "fresh_never",
+      "held_out_rows": 23,
+      "mean_native_auc_delta": 0.020916064119464627,
+      "mean_benefit_auc_delta": 0.013867155316649393,
+      "mean_cascade_delta": {
+        "conservative": 0.007216326530612216,
+        "balanced": 0.00698106847521065,
+        "aggressive": 0.005196524550414217
+      },
+      "positive_native_pools": 5,
+      "pools": {
+        "sdqa": {
+          "native_auc_delta": 0.03699969755015631,
+          "benefit_auc_delta": 0.03261742272179835,
+          "cascade_delta": {
+            "conservative": 0.019999999999999907,
+            "balanced": 0.0,
+            "aggressive": 0.0
+          }
+        },
+        "sllama": {
+          "native_auc_delta": 0.010358342665173659,
+          "benefit_auc_delta": 0.00430416068866557,
+          "cascade_delta": {
+            "conservative": 0.004081632653061162,
+            "balanced": -0.012244897959183598,
+            "aggressive": 0.004081632653061162
+          }
+        },
+        "sreason": {
+          "native_auc_delta": 0.026729559748427723,
+          "benefit_auc_delta": 0.0053902302077485365,
+          "cascade_delta": {
+            "conservative": 0.0,
+            "balanced": 0.014851485148514865,
+            "aggressive": 0.00990099009900991
+          }
+        },
+        "striviaqa": {
+          "native_auc_delta": 0.012780386019822454,
+          "benefit_auc_delta": 0.013758943313153638,
+          "cascade_delta": {
+            "conservative": 0.01200000000000001,
+            "balanced": 0.02400000000000002,
+            "aggressive": 0.01200000000000001
+          }
+        },
+        "swebq": {
+          "native_auc_delta": 0.017712334613742997,
+          "benefit_auc_delta": 0.013265019651880872,
+          "cascade_delta": {
+            "conservative": 0.0,
+            "balanced": 0.008298755186721962,
+            "aggressive": 0.0
+          }
+        }
+      }
+    },
+    {
+      "held_out_group": "gsm8k",
+      "held_out_rows": 8,
+      "mean_native_auc_delta": 0.02143453317672308,
+      "mean_benefit_auc_delta": 0.0159644370901429,
+      "mean_cascade_delta": {
+        "conservative": 0.008046202049284423,
+        "balanced": 0.007374815483072572,
+        "aggressive": 0.0063866235603152076
+      },
+      "positive_native_pools": 5,
+      "pools": {
+        "sdqa": {
+          "native_auc_delta": 0.03599153140437539,
+          "benefit_auc_delta": 0.029305499799277324,
+          "cascade_delta": {
+            "conservative": 0.019999999999999907,
+            "balanced": 0.0,
+            "aggressive": 0.0050000000000000044
+          }
+        },
+        "sllama": {
+          "native_auc_delta": 0.01119820828667406,
+          "benefit_auc_delta": 0.004065040650406471,
+          "cascade_delta": {
+            "conservative": 0.004081632653061162,
+            "balanced": -0.01632653061224487,
+            "aggressive": 0.004081632653061162
+          }
+        },
+        "sreason": {
+          "native_auc_delta": 0.02446933962264153,
+          "benefit_auc_delta": 0.012240314430095545,
+          "cascade_delta": {
+            "conservative": 0.0,
+            "balanced": 0.024752475247524774,
+            "aggressive": 0.014851485148514865
+          }
+        },
+        "striviaqa": {
+          "native_auc_delta": 0.014671361502347269,
+          "benefit_auc_delta": 0.015822784810126667,
+          "cascade_delta": {
+            "conservative": 0.01200000000000001,
+            "balanced": 0.016000000000000014,
+            "aggressive": 0.008000000000000007
+          }
+        },
+        "swebq": {
+          "native_auc_delta": 0.020842225067577158,
+          "benefit_auc_delta": 0.018388545760808506,
+          "cascade_delta": {
+            "conservative": 0.004149377593361037,
+            "balanced": 0.012448132780082943,
+            "aggressive": 0.0
+          }
+        }
+      }
+    },
+    {
+      "held_out_group": "hard-math",
+      "held_out_rows": 30,
+      "mean_native_auc_delta": 0.02049853572192233,
+      "mean_benefit_auc_delta": 0.01525986973229505,
+      "mean_cascade_delta": {
+        "conservative": 0.009676077567956621,
+        "balanced": 0.008801043003783838,
+        "aggressive": 0.006370297029702976
+      },
+      "positive_native_pools": 5,
+      "pools": {
+        "sdqa": {
+          "native_auc_delta": 0.035084181873172526,
+          "benefit_auc_delta": 0.028301886792452824,
+          "cascade_delta": {
+            "conservative": 0.019999999999999907,
+            "balanced": 0.0,
+            "aggressive": 0.0050000000000000044
+          }
+        },
+        "sllama": {
+          "native_auc_delta": 0.008398656215005573,
+          "benefit_auc_delta": 0.003467240554758333,
+          "cascade_delta": {
+            "conservative": 0.004081632653061162,
+            "balanced": -0.012244897959183598,
+            "aggressive": 0.0
+          }
+        },
+        "sreason": {
+          "native_auc_delta": 0.02427279874213828,
+          "benefit_auc_delta": 0.010555867490174009,
+          "cascade_delta": {
+            "conservative": 0.0,
+            "balanced": 0.01980198019801982,
+            "aggressive": 0.014851485148514865
+          }
+        },
+        "striviaqa": {
+          "native_auc_delta": 0.015388628064684329,
+          "benefit_auc_delta": 0.017129884424876063,
+          "cascade_delta": {
+            "conservative": 0.016000000000000014,
+            "balanced": 0.02400000000000002,
+            "aggressive": 0.01200000000000001
+          }
+        },
+        "swebq": {
+          "native_auc_delta": 0.019348413714610935,
+          "benefit_auc_delta": 0.016844469399214024,
+          "cascade_delta": {
+            "conservative": 0.008298755186722018,
+            "balanced": 0.012448132780082943,
+            "aggressive": 0.0
+          }
+        }
+      }
+    },
+    {
+      "held_out_group": "hard-multihop",
+      "held_out_rows": 115,
+      "mean_native_auc_delta": 0.020758274241424356,
+      "mean_benefit_auc_delta": 0.014260943377259316,
+      "mean_cascade_delta": {
+        "conservative": 0.007849850047245399,
+        "balanced": 0.0019312184279652645,
+        "aggressive": 0.005426400069086412
+      },
+      "positive_native_pools": 5,
+      "pools": {
+        "sdqa": {
+          "native_auc_delta": 0.02843028531101932,
+          "benefit_auc_delta": 0.021477318346045715,
+          "cascade_delta": {
+            "conservative": 0.010000000000000009,
+            "balanced": 0.0,
+            "aggressive": 0.0050000000000000044
+          }
+        },
+        "sllama": {
+          "native_auc_delta": 0.010824934677118425,
+          "benefit_auc_delta": 0.009325681492108884,
+          "cascade_delta": {
+            "conservative": 0.0,
+            "balanced": -0.012244897959183598,
+            "aggressive": 0.004081632653061162
+          }
+        },
+        "sreason": {
+          "native_auc_delta": 0.023977987421383684,
+          "benefit_auc_delta": 0.0019090398652442664,
+          "cascade_delta": {
+            "conservative": 0.004950495049504955,
+            "balanced": 0.00990099009900991,
+            "aggressive": 0.00990099009900991
+          }
+        },
+        "striviaqa": {
+          "native_auc_delta": 0.01473656755346886,
+          "benefit_auc_delta": 0.01781783159053385,
+          "cascade_delta": {
+            "conservative": 0.016000000000000014,
+            "balanced": 0.01200000000000001,
+            "aggressive": 0.0040000000000000036
+          }
+        },
+        "swebq": {
+          "native_auc_delta": 0.025821596244131495,
+          "benefit_auc_delta": 0.020774845592363866,
+          "cascade_delta": {
+            "conservative": 0.008298755186722018,
+            "balanced": 0.0,
+            "aggressive": 0.004149377593360981
+          }
+        }
+      }
+    },
+    {
+      "held_out_group": "know-arc",
+      "held_out_rows": 20,
+      "mean_native_auc_delta": 0.02143603521569193,
+      "mean_benefit_auc_delta": 0.014189496462682638,
+      "mean_cascade_delta": {
+        "conservative": 0.008876077567956619,
+        "balanced": 0.006571167485111639,
+        "aggressive": 0.006210073538474181
+      },
+      "positive_native_pools": 5,
+      "pools": {
+        "sdqa": {
+          "native_auc_delta": 0.033571932654501424,
+          "benefit_auc_delta": 0.029305499799277213,
+          "cascade_delta": {
+            "conservative": 0.019999999999999907,
+            "balanced": 0.0050000000000000044,
+            "aggressive": 0.0050000000000000044
+          }
+        },
+        "sllama": {
+          "native_auc_delta": 0.009798432250839872,
+          "benefit_auc_delta": 0.0019129603060734635,
+          "cascade_delta": {
+            "conservative": 0.004081632653061162,
+            "balanced": -0.012244897959183598,
+            "aggressive": 0.0
+          }
+        },
+        "sreason": {
+          "native_auc_delta": 0.028989779874213806,
+          "benefit_auc_delta": 0.00808534531162275,
+          "cascade_delta": {
+            "conservative": 0.0,
+            "balanced": 0.01980198019801982,
+            "aggressive": 0.00990099009900991
+          }
+        },
+        "striviaqa": {
+          "native_auc_delta": 0.012910798122065636,
+          "benefit_auc_delta": 0.014378095762245469,
+          "cascade_delta": {
+            "conservative": 0.01200000000000001,
+            "balanced": 0.01200000000000001,
+            "aggressive": 0.01200000000000001
+          }
+        },
+        "swebq": {
+          "native_auc_delta": 0.021909233176838905,
+          "benefit_auc_delta": 0.017265581134194297,
+          "cascade_delta": {
+            "conservative": 0.008298755186722018,
+            "balanced": 0.008298755186721962,
+            "aggressive": 0.004149377593360981
+          }
+        }
+      }
+    },
+    {
+      "held_out_group": "know-commonsense",
+      "held_out_rows": 86,
+      "mean_native_auc_delta": 0.017477867577045815,
+      "mean_benefit_auc_delta": 0.01058550706988155,
+      "mean_cascade_delta": {
+        "conservative": 0.008672429569995688,
+        "balanced": 0.005990969465309659,
+        "aggressive": 0.005216326530612237
+      },
+      "positive_native_pools": 5,
+      "pools": {
+        "sdqa": {
+          "native_auc_delta": 0.030446617602580717,
+          "benefit_auc_delta": 0.024889602569249214,
+          "cascade_delta": {
+            "conservative": 0.019999999999999907,
+            "balanced": 0.0,
+            "aggressive": 0.010000000000000009
+          }
+        },
+        "sllama": {
+          "native_auc_delta": 0.013717805151175932,
+          "benefit_auc_delta": 0.0068149210903871715,
+          "cascade_delta": {
+            "conservative": 0.008163265306122436,
+            "balanced": -0.012244897959183598,
+            "aggressive": 0.004081632653061162
+          }
+        },
+        "sreason": {
+          "native_auc_delta": 0.006780660377358472,
+          "benefit_auc_delta": -0.011566535654126908,
+          "cascade_delta": {
+            "conservative": -0.004950495049504955,
+            "balanced": 0.00990099009900991,
+            "aggressive": 0.0
+          }
+        },
+        "striviaqa": {
+          "native_auc_delta": 0.0146061554512259,
+          "benefit_auc_delta": 0.016717116125481768,
+          "cascade_delta": {
+            "conservative": 0.016000000000000014,
+            "balanced": 0.02400000000000002,
+            "aggressive": 0.01200000000000001
+          }
+        },
+        "swebq": {
+          "native_auc_delta": 0.021838099302888048,
+          "benefit_auc_delta": 0.016072431218416505,
+          "cascade_delta": {
+            "conservative": 0.004149377593361037,
+            "balanced": 0.008298755186721962,
+            "aggressive": 0.0
+          }
+        }
+      }
+    },
+    {
+      "held_out_group": "know-longtail",
+      "held_out_rows": 142,
+      "mean_native_auc_delta": 0.01592301860840282,
+      "mean_benefit_auc_delta": 0.00969316670104472,
+      "mean_cascade_delta": {
+        "conservative": 0.002062528579896694,
+        "balanced": 0.005824492981942786,
+        "aggressive": -1.354898805996374e-05
+      },
+      "positive_native_pools": 5,
+      "pools": {
+        "sdqa": {
+          "native_auc_delta": 0.028732735154753608,
+          "benefit_auc_delta": 0.021878763548775493,
+          "cascade_delta": {
+            "conservative": -0.010000000000000009,
+            "balanced": 0.010000000000000009,
+            "aggressive": 0.0
+          }
+        },
+        "sllama": {
+          "native_auc_delta": 0.005599104143337086,
+          "benefit_auc_delta": -0.0026303204208514286,
+          "cascade_delta": {
+            "conservative": 0.008163265306122436,
+            "balanced": -0.01632653061224487,
+            "aggressive": 0.004081632653061162
+          }
+        },
+        "sreason": {
+          "native_auc_delta": 0.02790880503144655,
+          "benefit_auc_delta": 0.007186973610331382,
+          "cascade_delta": {
+            "conservative": 0.0,
+            "balanced": 0.014851485148514865,
+            "aggressive": 0.0
+          }
+        },
+        "striviaqa": {
+          "native_auc_delta": 0.009194053208137709,
+          "benefit_auc_delta": 0.010800770500825618,
+          "cascade_delta": {
+            "conservative": 0.008000000000000007,
+            "balanced": 0.0040000000000000036,
+            "aggressive": 0.0
+          }
+        },
+        "swebq": {
+          "native_auc_delta": 0.008180395504339133,
+          "benefit_auc_delta": 0.011229646266142534,
+          "cascade_delta": {
+            "conservative": 0.004149377593361037,
+            "balanced": 0.016597510373443924,
+            "aggressive": -0.004149377593360981
+          }
+        }
+      }
+    },
+    {
+      "held_out_group": "know-mmlu",
+      "held_out_rows": 114,
+      "mean_native_auc_delta": 0.024008378185071223,
+      "mean_benefit_auc_delta": 0.017262065207498622,
+      "mean_cascade_delta": {
+        "conservative": 0.006846202049284445,
+        "balanced": 0.008331390976340437,
+        "aggressive": 0.008216499078987406
+      },
+      "positive_native_pools": 5,
+      "pools": {
+        "sdqa": {
+          "native_auc_delta": 0.03881439661256181,
+          "benefit_auc_delta": 0.035327177840224766,
+          "cascade_delta": {
+            "conservative": 0.010000000000000009,
+            "balanced": 0.0050000000000000044,
+            "aggressive": 0.010000000000000009
+          }
+        },
+        "sllama": {
+          "native_auc_delta": 0.010731616274729294,
+          "benefit_auc_delta": 0.0037063605930175436,
+          "cascade_delta": {
+            "conservative": 0.004081632653061162,
+            "balanced": -0.012244897959183598,
+            "aggressive": 0.004081632653061162
+          }
+        },
+        "sreason": {
+          "native_auc_delta": 0.03203616352201255,
+          "benefit_auc_delta": 0.01268950028074134,
+          "cascade_delta": {
+            "conservative": 0.0,
+            "balanced": 0.024752475247524774,
+            "aggressive": 0.014851485148514865
+          }
+        },
+        "striviaqa": {
+          "native_auc_delta": 0.013562858633281105,
+          "benefit_auc_delta": 0.014584479911942894,
+          "cascade_delta": {
+            "conservative": 0.016000000000000014,
+            "balanced": 0.020000000000000018,
+            "aggressive": 0.008000000000000007
+          }
+        },
+        "swebq": {
+          "native_auc_delta": 0.02489685588277135,
+          "benefit_auc_delta": 0.02000280741156657,
+          "cascade_delta": {
+            "conservative": 0.004149377593361037,
+            "balanced": 0.004149377593360981,
+            "aggressive": 0.004149377593360981
+          }
+        }
+      }
+    },
+    {
+      "held_out_group": "know-open",
+      "held_out_rows": 29,
+      "mean_native_auc_delta": 0.019749055704441344,
+      "mean_benefit_auc_delta": 0.013311214557402074,
+      "mean_cascade_delta": {
+        "conservative": 0.01028597855805563,
+        "balanced": 0.004724965435827189,
+        "aggressive": 0.006066176577857618
+      },
+      "positive_native_pools": 5,
+      "pools": {
+        "sdqa": {
+          "native_auc_delta": 0.03155560036293992,
+          "benefit_auc_delta": 0.02659574468085102,
+          "cascade_delta": {
+            "conservative": 0.019999999999999907,
+            "balanced": 0.0,
+            "aggressive": 0.0050000000000000044
+          }
+        },
+        "sllama": {
+          "native_auc_delta": 0.009518477043673035,
+          "benefit_auc_delta": 0.003825920612147149,
+          "cascade_delta": {
+            "conservative": 0.004081632653061162,
+            "balanced": -0.01632653061224487,
+            "aggressive": 0.004081632653061162
+          }
+        },
+        "sreason": {
+          "native_auc_delta": 0.02260220125786161,
+          "benefit_auc_delta": 0.0038180797304885328,
+          "cascade_delta": {
+            "conservative": -0.004950495049504955,
+            "balanced": 0.01980198019801982,
+            "aggressive": 0.004950495049504955
+          }
+        },
+        "striviaqa": {
+          "native_auc_delta": 0.014084507042253502,
+          "benefit_auc_delta": 0.015822784810126667,
+          "cascade_delta": {
+            "conservative": 0.02400000000000002,
+            "balanced": 0.016000000000000014,
+            "aggressive": 0.008000000000000007
+          }
+        },
+        "swebq": {
+          "native_auc_delta": 0.02098449281547865,
+          "benefit_auc_delta": 0.016493542953397,
+          "cascade_delta": {
+            "conservative": 0.008298755186722018,
+            "balanced": 0.004149377593360981,
+            "aggressive": 0.008298755186721962
+          }
+        }
+      }
+    },
+    {
+      "held_out_group": "know-openbook",
+      "held_out_rows": 57,
+      "mean_native_auc_delta": 0.015069822529581911,
+      "mean_benefit_auc_delta": 0.010011718894332411,
+      "mean_cascade_delta": {
+        "conservative": 0.0030760775679566366,
+        "balanced": 0.006594617463270591,
+        "aggressive": 0.005830048067047367
+      },
+      "positive_native_pools": 5,
+      "pools": {
+        "sdqa": {
+          "native_auc_delta": 0.023490271196693224,
+          "benefit_auc_delta": 0.02217984745082291,
+          "cascade_delta": {
+            "conservative": -0.0050000000000000044,
+            "balanced": 0.010000000000000009,
+            "aggressive": -0.010000000000000009
+          }
+        },
+        "sllama": {
+          "native_auc_delta": 0.0010265024262783307,
+          "benefit_auc_delta": -0.0050215208034434244,
+          "cascade_delta": {
+            "conservative": 0.004081632653061162,
+            "balanced": -0.01632653061224487,
+            "aggressive": 0.0
+          }
+        },
+        "sreason": {
+          "native_auc_delta": 0.022995283018867885,
+          "benefit_auc_delta": 0.006400898371701436,
+          "cascade_delta": {
+            "conservative": 0.0,
+            "balanced": 0.014851485148514865,
+            "aggressive": 0.014851485148514865
+          }
+        },
+        "striviaqa": {
+          "native_auc_delta": 0.006781429316640497,
+          "benefit_auc_delta": 0.008461750137589541,
+          "cascade_delta": {
+            "conservative": 0.008000000000000007,
+            "balanced": 0.01200000000000001,
+            "aggressive": 0.016000000000000014
+          }
+        },
+        "swebq": {
+          "native_auc_delta": 0.02105562668942962,
+          "benefit_auc_delta": 0.018037619314991593,
+          "cascade_delta": {
+            "conservative": 0.008298755186722018,
+            "balanced": 0.012448132780082943,
+            "aggressive": 0.008298755186721962
+          }
+        }
+      }
+    },
+    {
+      "held_out_group": "math500",
+      "held_out_rows": 7,
+      "mean_native_auc_delta": 0.02130065026057206,
+      "mean_benefit_auc_delta": 0.01515266743539374,
+      "mean_cascade_delta": {
+        "conservative": 0.008046202049284423,
+        "balanced": 0.007971167485111641,
+        "aggressive": 0.007196524550414219
+      },
+      "positive_native_pools": 5,
+      "pools": {
+        "sdqa": {
+          "native_auc_delta": 0.03397519911281377,
+          "benefit_auc_delta": 0.0297069450020071,
+          "cascade_delta": {
+            "conservative": 0.019999999999999907,
+            "balanced": 0.0,
+            "aggressive": 0.010000000000000009
+          }
+        },
+        "sllama": {
+          "native_auc_delta": 0.00886524822695034,
+          "benefit_auc_delta": 0.0017934002869439691,
+          "cascade_delta": {
+            "conservative": 0.004081632653061162,
+            "balanced": -0.012244897959183598,
+            "aggressive": 0.004081632653061162
+          }
+        },
+        "sreason": {
+          "native_auc_delta": 0.029874213836477925,
+          "benefit_auc_delta": 0.012689500280741228,
+          "cascade_delta": {
+            "conservative": 0.0,
+            "balanced": 0.01980198019801982,
+            "aggressive": 0.00990099009900991
+          }
+        },
+        "striviaqa": {
+          "native_auc_delta": 0.013302034428794962,
+          "benefit_auc_delta": 0.014378095762245469,
+          "cascade_delta": {
+            "conservative": 0.01200000000000001,
+            "balanced": 0.02400000000000002,
+            "aggressive": 0.01200000000000001
+          }
+        },
+        "swebq": {
+          "native_auc_delta": 0.020486555697823317,
+          "benefit_auc_delta": 0.017195395845030936,
+          "cascade_delta": {
+            "conservative": 0.004149377593361037,
+            "balanced": 0.008298755186721962,
+            "aggressive": 0.0
+          }
+        }
+      }
+    },
+    {
+      "held_out_group": "mmlu-pro/chemistry",
+      "held_out_rows": 2,
+      "mean_native_auc_delta": 0.0216349138407566,
+      "mean_benefit_auc_delta": 0.015310279819531614,
+      "mean_cascade_delta": {
+        "conservative": 0.008846202049284425,
+        "balanced": 0.007971167485111641,
+        "aggressive": 0.007196524550414219
+      },
+      "positive_native_pools": 5,
+      "pools": {
+        "sdqa": {
+          "native_auc_delta": 0.03478173202943846,
+          "benefit_auc_delta": 0.030208751505419462,
+          "cascade_delta": {
+            "conservative": 0.019999999999999907,
+            "balanced": 0.0,
+            "aggressive": 0.010000000000000009
+          }
+        },
+        "sllama": {
+          "native_auc_delta": 0.009518477043673035,
+          "benefit_auc_delta": 0.0016738402678143638,
+          "cascade_delta": {
+            "conservative": 0.004081632653061162,
+            "balanced": -0.012244897959183598,
+            "aggressive": 0.004081632653061162
+          }
+        },
+        "sreason": {
+          "native_auc_delta": 0.02948113207547165,
+          "benefit_auc_delta": 0.012128017967434124,
+          "cascade_delta": {
+            "conservative": 0.0,
+            "balanced": 0.01980198019801982,
+            "aggressive": 0.00990099009900991
+          }
+        },
+        "striviaqa": {
+          "native_auc_delta": 0.013693270735524177,
+          "benefit_auc_delta": 0.01513483764446899,
+          "cascade_delta": {
+            "conservative": 0.016000000000000014,
+            "balanced": 0.02400000000000002,
+            "aggressive": 0.01200000000000001
+          }
+        },
+        "swebq": {
+          "native_auc_delta": 0.020699957319675666,
+          "benefit_auc_delta": 0.01740595171252113,
+          "cascade_delta": {
+            "conservative": 0.004149377593361037,
+            "balanced": 0.008298755186721962,
+            "aggressive": 0.0
+          }
+        }
+      }
+    },
+    {
+      "held_out_group": "mmlu-pro/engineering",
+      "held_out_rows": 1,
+      "mean_native_auc_delta": 0.021407215978140392,
+      "mean_benefit_auc_delta": 0.015426002061494627,
+      "mean_cascade_delta": {
+        "conservative": 0.009676077567956621,
+        "balanced": 0.007971167485111641,
+        "aggressive": 0.00818662356031521
+      },
+      "positive_native_pools": 5,
+      "pools": {
+        "sdqa": {
+          "native_auc_delta": 0.03508418187317264,
+          "benefit_auc_delta": 0.030208751505419462,
+          "cascade_delta": {
+            "conservative": 0.019999999999999907,
+            "balanced": 0.0,
+            "aggressive": 0.010000000000000009
+          }
+        },
+        "sllama": {
+          "native_auc_delta": 0.009611795446061944,
+          "benefit_auc_delta": 0.0017934002869439691,
+          "cascade_delta": {
+            "conservative": 0.004081632653061162,
+            "balanced": -0.012244897959183598,
+            "aggressive": 0.004081632653061162
+          }
+        },
+        "sreason": {
+          "native_auc_delta": 0.02781053459119509,
+          "benefit_auc_delta": 0.012240314430095545,
+          "cascade_delta": {
+            "conservative": 0.0,
+            "balanced": 0.01980198019801982,
+            "aggressive": 0.014851485148514865
+          }
+        },
+        "striviaqa": {
+          "native_auc_delta": 0.013758476786645768,
+          "benefit_auc_delta": 0.015341221794166304,
+          "cascade_delta": {
+            "conservative": 0.016000000000000014,
+            "balanced": 0.02400000000000002,
+            "aggressive": 0.01200000000000001
+          }
+        },
+        "swebq": {
+          "native_auc_delta": 0.020771091193626523,
+          "benefit_auc_delta": 0.01754632229084785,
+          "cascade_delta": {
+            "conservative": 0.008298755186722018,
+            "balanced": 0.008298755186721962,
+            "aggressive": 0.0
+          }
+        }
+      }
+    },
+    {
+      "held_out_group": "mmlu-pro/health",
+      "held_out_rows": 1,
+      "mean_native_auc_delta": 0.02162531475078757,
+      "mean_benefit_auc_delta": 0.01544406674058163,
+      "mean_cascade_delta": {
+        "conservative": 0.008846202049284425,
+        "balanced": 0.007971167485111641,
+        "aggressive": 0.007226400069086414
+      },
+      "positive_native_pools": 5,
+      "pools": {
+        "sdqa": {
+          "native_auc_delta": 0.03578989817521927,
+          "benefit_auc_delta": 0.031011641910879018,
+          "cascade_delta": {
+            "conservative": 0.019999999999999907,
+            "balanced": 0.0,
+            "aggressive": 0.010000000000000009
+          }
+        },
+        "sllama": {
+          "native_auc_delta": 0.009145203434117288,
+          "benefit_auc_delta": 0.0013151602104256588,
+          "cascade_delta": {
+            "conservative": 0.004081632653061162,
+            "balanced": -0.012244897959183598,
+            "aggressive": 0.004081632653061162
+          }
+        },
+        "sreason": {
+          "native_auc_delta": 0.02859669811320764,
+          "benefit_auc_delta": 0.011454239191465598,
+          "cascade_delta": {
+            "conservative": 0.0,
+            "balanced": 0.01980198019801982,
+            "aggressive": 0.00990099009900991
+          }
+        },
+        "striviaqa": {
+          "native_auc_delta": 0.014606155451225789,
+          "benefit_auc_delta": 0.015822784810126556,
+          "cascade_delta": {
+            "conservative": 0.016000000000000014,
+            "balanced": 0.02400000000000002,
+            "aggressive": 0.008000000000000007
+          }
+        },
+        "swebq": {
+          "native_auc_delta": 0.019988618580167872,
+          "benefit_auc_delta": 0.01761650758001132,
+          "cascade_delta": {
+            "conservative": 0.004149377593361037,
+            "balanced": 0.008298755186721962,
+            "aggressive": 0.004149377593360981
+          }
+        }
+      }
+    },
+    {
+      "held_out_group": "mmlu-pro/history",
+      "held_out_rows": 1,
+      "mean_native_auc_delta": 0.021701050738991846,
+      "mean_benefit_auc_delta": 0.01530341224019205,
+      "mean_cascade_delta": {
+        "conservative": 0.008846202049284425,
+        "balanced": 0.01079114201368483,
+        "aggressive": 0.0063965245504142175
+      },
+      "positive_native_pools": 5,
+      "pools": {
+        "sdqa": {
+          "native_auc_delta": 0.03568908156064121,
+          "benefit_auc_delta": 0.030008028904054518,
+          "cascade_delta": {
+            "conservative": 0.019999999999999907,
+            "balanced": 0.0050000000000000044,
+            "aggressive": 0.010000000000000009
+          }
+        },
+        "sllama": {
+          "native_auc_delta": 0.009145203434117177,
+          "benefit_auc_delta": 0.0013151602104255478,
+          "cascade_delta": {
+            "conservative": 0.004081632653061162,
+            "balanced": -0.012244897959183598,
+            "aggressive": 0.004081632653061162
+          }
+        },
+        "sreason": {
+          "native_auc_delta": 0.029088050314465486,
+          "benefit_auc_delta": 0.012240314430095545,
+          "cascade_delta": {
+            "conservative": 0.0,
+            "balanced": 0.024752475247524774,
+            "aggressive": 0.00990099009900991
+          }
+        },
+        "striviaqa": {
+          "native_auc_delta": 0.01395409494001032,
+          "benefit_auc_delta": 0.015547605943863618,
+          "cascade_delta": {
+            "conservative": 0.016000000000000014,
+            "balanced": 0.02400000000000002,
+            "aggressive": 0.008000000000000007
+          }
+        },
+        "swebq": {
+          "native_auc_delta": 0.02062882344572503,
+          "benefit_auc_delta": 0.017405951712521017,
+          "cascade_delta": {
+            "conservative": 0.004149377593361037,
+            "balanced": 0.012448132780082943,
+            "aggressive": 0.0
+          }
+        }
+      }
+    },
+    {
+      "held_out_group": "mmlu-pro/law",
+      "held_out_rows": 2,
+      "mean_native_auc_delta": 0.021057971877131786,
+      "mean_benefit_auc_delta": 0.014813851097361197,
+      "mean_cascade_delta": {
+        "conservative": 0.008846202049284425,
+        "balanced": 0.007971167485111641,
+        "aggressive": 0.007196524550414219
+      },
+      "positive_native_pools": 5,
+      "pools": {
+        "sdqa": {
+          "native_auc_delta": 0.03397519911281377,
+          "benefit_auc_delta": 0.029506222400642268,
+          "cascade_delta": {
+            "conservative": 0.019999999999999907,
+            "balanced": 0.0,
+            "aggressive": 0.010000000000000009
+          }
+        },
+        "sllama": {
+          "native_auc_delta": 0.009051885031728268,
+          "benefit_auc_delta": 0.0017934002869439691,
+          "cascade_delta": {
+            "conservative": 0.004081632653061162,
+            "balanced": -0.012244897959183598,
+            "aggressive": 0.004081632653061162
+          }
+        },
+        "sreason": {
+          "native_auc_delta": 0.027122641509433887,
+          "benefit_auc_delta": 0.009882088714205595,
+          "cascade_delta": {
+            "conservative": 0.0,
+            "balanced": 0.01980198019801982,
+            "aggressive": 0.00990099009900991
+          }
+        },
+        "striviaqa": {
+          "native_auc_delta": 0.014084507042253502,
+          "benefit_auc_delta": 0.015341221794166304,
+          "cascade_delta": {
+            "conservative": 0.016000000000000014,
+            "balanced": 0.02400000000000002,
+            "aggressive": 0.01200000000000001
+          }
+        },
+        "swebq": {
+          "native_auc_delta": 0.021055626689429507,
+          "benefit_auc_delta": 0.01754632229084785,
+          "cascade_delta": {
+            "conservative": 0.004149377593361037,
+            "balanced": 0.008298755186721962,
+            "aggressive": 0.0
+          }
+        }
+      }
+    },
+    {
+      "held_out_group": "mmlu-pro/math",
+      "held_out_rows": 3,
+      "mean_native_auc_delta": 0.02169332341034158,
+      "mean_benefit_auc_delta": 0.015577479883193069,
+      "mean_cascade_delta": {
+        "conservative": 0.008046202049284423,
+        "balanced": 0.008961266495012632,
+        "aggressive": 0.007196524550414219
+      },
+      "positive_native_pools": 5,
+      "pools": {
+        "sdqa": {
+          "native_auc_delta": 0.03508418187317264,
+          "benefit_auc_delta": 0.03141308711360902,
+          "cascade_delta": {
+            "conservative": 0.019999999999999907,
+            "balanced": 0.0,
+            "aggressive": 0.010000000000000009
+          }
+        },
+        "sllama": {
+          "native_auc_delta": 0.009985069055617801,
+          "benefit_auc_delta": 0.0022716403634622795,
+          "cascade_delta": {
+            "conservative": 0.004081632653061162,
+            "balanced": -0.012244897959183598,
+            "aggressive": 0.004081632653061162
+          }
+        },
+        "sreason": {
+          "native_auc_delta": 0.028891509433962237,
+          "benefit_auc_delta": 0.011791128579449861,
+          "cascade_delta": {
+            "conservative": 0.0,
+            "balanced": 0.024752475247524774,
+            "aggressive": 0.00990099009900991
+          }
+        },
+        "striviaqa": {
+          "native_auc_delta": 0.01323682837767337,
+          "benefit_auc_delta": 0.014584479911942783,
+          "cascade_delta": {
+            "conservative": 0.01200000000000001,
+            "balanced": 0.02400000000000002,
+            "aggressive": 0.01200000000000001
+          }
+        },
+        "swebq": {
+          "native_auc_delta": 0.021269028311281857,
+          "benefit_auc_delta": 0.0178270634475014,
+          "cascade_delta": {
+            "conservative": 0.004149377593361037,
+            "balanced": 0.008298755186721962,
+            "aggressive": 0.0
+          }
+        }
+      }
+    },
+    {
+      "held_out_group": "mmlu-pro/other",
+      "held_out_rows": 1,
+      "mean_native_auc_delta": 0.022380337391445227,
+      "mean_benefit_auc_delta": 0.015772837430688247,
+      "mean_cascade_delta": {
+        "conservative": 0.008846202049284425,
+        "balanced": 0.008971167485111642,
+        "aggressive": 0.0063965245504142175
+      },
+      "positive_native_pools": 5,
+      "pools": {
+        "sdqa": {
+          "native_auc_delta": 0.03558826494606315,
+          "benefit_auc_delta": 0.030810919309514184,
+          "cascade_delta": {
+            "conservative": 0.019999999999999907,
+            "balanced": 0.0050000000000000044,
+            "aggressive": 0.010000000000000009
+          }
+        },
+        "sllama": {
+          "native_auc_delta": 0.009985069055617801,
+          "benefit_auc_delta": 0.002749880439980701,
+          "cascade_delta": {
+            "conservative": 0.004081632653061162,
+            "balanced": -0.012244897959183598,
+            "aggressive": 0.004081632653061162
+          }
+        },
+        "sreason": {
+          "native_auc_delta": 0.03134827044025157,
+          "benefit_auc_delta": 0.012352610892756966,
+          "cascade_delta": {
+            "conservative": 0.0,
+            "balanced": 0.01980198019801982,
+            "aggressive": 0.00990099009900991
+          }
+        },
+        "striviaqa": {
+          "native_auc_delta": 0.014280125195618054,
+          "benefit_auc_delta": 0.015685195376995087,
+          "cascade_delta": {
+            "conservative": 0.016000000000000014,
+            "balanced": 0.02400000000000002,
+            "aggressive": 0.008000000000000007
+          }
+        },
+        "swebq": {
+          "native_auc_delta": 0.020699957319675555,
+          "benefit_auc_delta": 0.017265581134194297,
+          "cascade_delta": {
+            "conservative": 0.004149377593361037,
+            "balanced": 0.008298755186721962,
+            "aggressive": 0.0
+          }
+        }
+      }
+    },
+    {
+      "held_out_group": "mmlu-pro/philosophy",
+      "held_out_rows": 1,
+      "mean_native_auc_delta": 0.021286018718805,
+      "mean_benefit_auc_delta": 0.015068646402767994,
+      "mean_cascade_delta": {
+        "conservative": 0.008846202049284425,
+        "balanced": 0.007971167485111641,
+        "aggressive": 0.0063965245504142175
+      },
+      "positive_native_pools": 5,
+      "pools": {
+        "sdqa": {
+          "native_auc_delta": 0.03417683234197,
+          "benefit_auc_delta": 0.03020875150541935,
+          "cascade_delta": {
+            "conservative": 0.019999999999999907,
+            "balanced": 0.0,
+            "aggressive": 0.010000000000000009
+          }
+        },
+        "sllama": {
+          "native_auc_delta": 0.00886524822695034,
+          "benefit_auc_delta": 0.0011956001912958314,
+          "cascade_delta": {
+            "conservative": 0.004081632653061162,
+            "balanced": -0.012244897959183598,
+            "aggressive": 0.004081632653061162
+          }
+        },
+        "sreason": {
+          "native_auc_delta": 0.02879323899371078,
+          "benefit_auc_delta": 0.011117349803481225,
+          "cascade_delta": {
+            "conservative": 0.0,
+            "balanced": 0.01980198019801982,
+            "aggressive": 0.00990099009900991
+          }
+        },
+        "striviaqa": {
+          "native_auc_delta": 0.01382368283776736,
+          "benefit_auc_delta": 0.01513483764446888,
+          "cascade_delta": {
+            "conservative": 0.016000000000000014,
+            "balanced": 0.02400000000000002,
+            "aggressive": 0.008000000000000007
+          }
+        },
+        "swebq": {
+          "native_auc_delta": 0.020771091193626523,
+          "benefit_auc_delta": 0.01768669286917468,
+          "cascade_delta": {
+            "conservative": 0.004149377593361037,
+            "balanced": 0.008298755186721962,
+            "aggressive": 0.0
+          }
+        }
+      }
+    },
+    {
+      "held_out_group": "mmlu-pro/physics",
+      "held_out_rows": 1,
+      "mean_native_auc_delta": 0.021485146738909687,
+      "mean_benefit_auc_delta": 0.01525164148928464,
+      "mean_cascade_delta": {
+        "conservative": 0.008846202049284425,
+        "balanced": 0.007971167485111641,
+        "aggressive": 0.0063965245504142175
+      },
+      "positive_native_pools": 5,
+      "pools": {
+        "sdqa": {
+          "native_auc_delta": 0.03589071478979744,
+          "benefit_auc_delta": 0.030810919309514073,
+          "cascade_delta": {
+            "conservative": 0.019999999999999907,
+            "balanced": 0.0,
+            "aggressive": 0.010000000000000009
+          }
+        },
+        "sllama": {
+          "native_auc_delta": 0.00877192982456143,
+          "benefit_auc_delta": 0.001076040172166337,
+          "cascade_delta": {
+            "conservative": 0.004081632653061162,
+            "balanced": -0.012244897959183598,
+            "aggressive": 0.004081632653061162
+          }
+        },
+        "sreason": {
+          "native_auc_delta": 0.028891509433962348,
+          "benefit_auc_delta": 0.012464907355418386,
+          "cascade_delta": {
+            "conservative": 0.0,
+            "balanced": 0.01980198019801982,
+            "aggressive": 0.00990099009900991
+          }
+        },
+        "striviaqa": {
+          "native_auc_delta": 0.01395409494001032,
+          "benefit_auc_delta": 0.01527242707760057,
+          "cascade_delta": {
+            "conservative": 0.016000000000000014,
+            "balanced": 0.02400000000000002,
+            "aggressive": 0.008000000000000007
+          }
+        },
+        "swebq": {
+          "native_auc_delta": 0.019917484706216904,
+          "benefit_auc_delta": 0.016633913531723832,
+          "cascade_delta": {
+            "conservative": 0.004149377593361037,
+            "balanced": 0.008298755186721962,
+            "aggressive": 0.0
+          }
+        }
+      }
+    },
+    {
+      "held_out_group": "mmlu-pro/psychology",
+      "held_out_rows": 4,
+      "mean_native_auc_delta": 0.02159128784379243,
+      "mean_benefit_auc_delta": 0.015877179380428142,
+      "mean_cascade_delta": {
+        "conservative": 0.008846202049284425,
+        "balanced": 0.007971167485111641,
+        "aggressive": 0.004596524550414216
+      },
+      "positive_native_pools": 5,
+      "pools": {
+        "sdqa": {
+          "native_auc_delta": 0.0364956144772659,
+          "benefit_auc_delta": 0.03061019670814913,
+          "cascade_delta": {
+            "conservative": 0.019999999999999907,
+            "balanced": 0.0,
+            "aggressive": 0.0050000000000000044
+          }
+        },
+        "sllama": {
+          "native_auc_delta": 0.010544979469951477,
+          "benefit_auc_delta": 0.0032281205164992333,
+          "cascade_delta": {
+            "conservative": 0.004081632653061162,
+            "balanced": -0.012244897959183598,
+            "aggressive": 0.004081632653061162
+          }
+        },
+        "sreason": {
+          "native_auc_delta": 0.028105345911949575,
+          "benefit_auc_delta": 0.012240314430095545,
+          "cascade_delta": {
+            "conservative": 0.0,
+            "balanced": 0.01980198019801982,
+            "aggressive": 0.00990099009900991
+          }
+        },
+        "striviaqa": {
+          "native_auc_delta": 0.0131064162754303,
+          "benefit_auc_delta": 0.015410016510732039,
+          "cascade_delta": {
+            "conservative": 0.016000000000000014,
+            "balanced": 0.02400000000000002,
+            "aggressive": 0.0040000000000000036
+          }
+        },
+        "swebq": {
+          "native_auc_delta": 0.019704083084364887,
+          "benefit_auc_delta": 0.01789724873666476,
+          "cascade_delta": {
+            "conservative": 0.004149377593361037,
+            "balanced": 0.008298755186721962,
+            "aggressive": 0.0
+          }
+        }
+      }
+    },
+    {
+      "held_out_group": "simpleqa",
+      "held_out_rows": 7,
+      "mean_native_auc_delta": 0.018947509160005538,
+      "mean_benefit_auc_delta": 0.013399133702198873,
+      "mean_cascade_delta": {
+        "conservative": 0.007216326530612216,
+        "balanced": 0.00455831640408515,
+        "aggressive": 0.006186623560315208
+      },
+      "positive_native_pools": 5,
+      "pools": {
+        "sdqa": {
+          "native_auc_delta": 0.030849884060893173,
+          "benefit_auc_delta": 0.02810116419108788,
+          "cascade_delta": {
+            "conservative": 0.019999999999999907,
+            "balanced": 0.0050000000000000044,
+            "aggressive": 0.0
+          }
+        },
+        "sllama": {
+          "native_auc_delta": 0.007092198581560183,
+          "benefit_auc_delta": 0.00023912003825909967,
+          "cascade_delta": {
+            "conservative": 0.004081632653061162,
+            "balanced": -0.020408163265306145,
+            "aggressive": 0.004081632653061162
+          }
+        },
+        "sreason": {
+          "native_auc_delta": 0.022307389937106792,
+          "benefit_auc_delta": 0.00583941605839422,
+          "cascade_delta": {
+            "conservative": 0.0,
+            "balanced": 0.00990099009900991,
+            "aggressive": 0.014851485148514865
+          }
+        },
+        "striviaqa": {
+          "native_auc_delta": 0.013432446531037923,
+          "benefit_auc_delta": 0.015410016510732039,
+          "cascade_delta": {
+            "conservative": 0.01200000000000001,
+            "balanced": 0.020000000000000018,
+            "aggressive": 0.01200000000000001
+          }
+        },
+        "swebq": {
+          "native_auc_delta": 0.02105562668942962,
+          "benefit_auc_delta": 0.01740595171252113,
+          "cascade_delta": {
+            "conservative": 0.0,
+            "balanced": 0.008298755186721962,
+            "aggressive": 0.0
+          }
+        }
+      }
+    },
+    {
+      "held_out_group": "trap",
+      "held_out_rows": 18,
+      "mean_native_auc_delta": 0.021713600337393935,
+      "mean_benefit_auc_delta": 0.015541983925671942,
+      "mean_cascade_delta": {
+        "conservative": 0.008016326530612216,
+        "balanced": 0.00632496543582719,
+        "aggressive": 0.0054064255405132265
+      },
+      "positive_native_pools": 5,
+      "pools": {
+        "sdqa": {
+          "native_auc_delta": 0.035285815102328755,
+          "benefit_auc_delta": 0.03111200321156149,
+          "cascade_delta": {
+            "conservative": 0.019999999999999907,
+            "balanced": 0.0,
+            "aggressive": 0.010000000000000009
+          }
+        },
+        "sllama": {
+          "native_auc_delta": 0.007932064203060807,
+          "benefit_auc_delta": 0.0015542802486846474,
+          "cascade_delta": {
+            "conservative": 0.004081632653061162,
+            "balanced": -0.01632653061224487,
+            "aggressive": 0.004081632653061162
+          }
+        },
+        "sreason": {
+          "native_auc_delta": 0.02879323899371078,
+          "benefit_auc_delta": 0.011454239191465598,
+          "cascade_delta": {
+            "conservative": 0.0,
+            "balanced": 0.01980198019801982,
+            "aggressive": 0.004950495049504955
+          }
+        },
+        "striviaqa": {
+          "native_auc_delta": 0.014149713093374983,
+          "benefit_auc_delta": 0.015341221794166304,
+          "cascade_delta": {
+            "conservative": 0.016000000000000014,
+            "balanced": 0.02400000000000002,
+            "aggressive": 0.008000000000000007
+          }
+        },
+        "swebq": {
+          "native_auc_delta": 0.02240717029449435,
+          "benefit_auc_delta": 0.018248175182481674,
+          "cascade_delta": {
+            "conservative": 0.0,
+            "balanced": 0.004149377593360981,
+            "aggressive": 0.0
+          }
+        }
+      }
+    },
+    {
+      "held_out_group": "trap-truthful",
+      "held_out_rows": 84,
+      "mean_native_auc_delta": 0.017361843304915768,
+      "mean_benefit_auc_delta": 0.012060637002891084,
+      "mean_cascade_delta": {
+        "conservative": 0.0020958795481546555,
+        "balanced": 0.00439739500582288,
+        "aggressive": 0.0035801980198019836
+      },
+      "positive_native_pools": 5,
+      "pools": {
+        "sdqa": {
+          "native_auc_delta": 0.03044661760258094,
+          "benefit_auc_delta": 0.02719791248494574,
+          "cascade_delta": {
+            "conservative": 0.0,
+            "balanced": -0.0050000000000000044,
+            "aggressive": 0.0
+          }
+        },
+        "sllama": {
+          "native_auc_delta": 0.006159014557670872,
+          "benefit_auc_delta": -0.0025107604017217122,
+          "cascade_delta": {
+            "conservative": 0.004081632653061162,
+            "balanced": -0.008163265306122436,
+            "aggressive": 0.0
+          }
+        },
+        "sreason": {
+          "native_auc_delta": 0.019752358490566002,
+          "benefit_auc_delta": 0.006625491297024277,
+          "cascade_delta": {
+            "conservative": -0.00990099009900991,
+            "balanced": 0.014851485148514865,
+            "aggressive": 0.00990099009900991
+          }
+        },
+        "striviaqa": {
+          "native_auc_delta": 0.01245435576421483,
+          "benefit_auc_delta": 0.013690148596587792,
+          "cascade_delta": {
+            "conservative": 0.008000000000000007,
+            "balanced": 0.01200000000000001,
+            "aggressive": 0.008000000000000007
+          }
+        },
+        "swebq": {
+          "native_auc_delta": 0.017996870109546204,
+          "benefit_auc_delta": 0.01530039303761932,
+          "cascade_delta": {
+            "conservative": 0.008298755186722018,
+            "balanced": 0.008298755186721962,
+            "aggressive": 0.0
+          }
+        }
+      }
+    },
+    {
+      "held_out_group": "triviaqa",
+      "held_out_rows": 11,
+      "mean_native_auc_delta": 0.01914833531495457,
+      "mean_benefit_auc_delta": 0.012681678706933309,
+      "mean_cascade_delta": {
+        "conservative": 0.006846202049284445,
+        "balanced": 0.005744939964400375,
+        "aggressive": 0.008016499078987405
+      },
+      "positive_native_pools": 5,
+      "pools": {
+        "sdqa": {
+          "native_auc_delta": 0.03115233390462746,
+          "benefit_auc_delta": 0.02619429947812113,
+          "cascade_delta": {
+            "conservative": 0.010000000000000009,
+            "balanced": 0.0,
+            "aggressive": 0.0050000000000000044
+          }
+        },
+        "sllama": {
+          "native_auc_delta": 0.006998880179171274,
+          "benefit_auc_delta": 0.001076040172166226,
+          "cascade_delta": {
+            "conservative": 0.004081632653061162,
+            "balanced": -0.01632653061224487,
+            "aggressive": 0.004081632653061162
+          }
+        },
+        "sreason": {
+          "native_auc_delta": 0.02623820754716988,
+          "benefit_auc_delta": 0.009096013475575537,
+          "cascade_delta": {
+            "conservative": 0.0,
+            "balanced": 0.024752475247524774,
+            "aggressive": 0.014851485148514865
+          }
+        },
+        "striviaqa": {
+          "native_auc_delta": 0.012715179968701085,
+          "benefit_auc_delta": 0.012864611997798647,
+          "cascade_delta": {
+            "conservative": 0.016000000000000014,
+            "balanced": 0.01200000000000001,
+            "aggressive": 0.01200000000000001
+          }
+        },
+        "swebq": {
+          "native_auc_delta": 0.01863707497510314,
+          "benefit_auc_delta": 0.014177428411005,
+          "cascade_delta": {
+            "conservative": 0.004149377593361037,
+            "balanced": 0.008298755186721962,
+            "aggressive": 0.004149377593360981
+          }
+        }
+      }
+    },
+    {
+      "held_out_group": "zh-causal",
+      "held_out_rows": 29,
+      "mean_native_auc_delta": 0.018447326067802926,
+      "mean_benefit_auc_delta": 0.011965095143084659,
+      "mean_cascade_delta": {
+        "conservative": 0.008046202049284423,
+        "balanced": 0.007010943993882845,
+        "aggressive": 0.005596524550414217
+      },
+      "positive_native_pools": 5,
+      "pools": {
+        "sdqa": {
+          "native_auc_delta": 0.03195886682125215,
+          "benefit_auc_delta": 0.02629466077880349,
+          "cascade_delta": {
+            "conservative": 0.019999999999999907,
+            "balanced": 0.0,
+            "aggressive": 0.010000000000000009
+          }
+        },
+        "sllama": {
+          "native_auc_delta": 0.006438969764837599,
+          "benefit_auc_delta": -0.0016738402678145858,
+          "cascade_delta": {
+            "conservative": 0.004081632653061162,
+            "balanced": -0.012244897959183598,
+            "aggressive": 0.004081632653061162
+          }
+        },
+        "sreason": {
+          "native_auc_delta": 0.021324685534591326,
+          "benefit_auc_delta": 0.004941044357102853,
+          "cascade_delta": {
+            "conservative": 0.0,
+            "balanced": 0.014851485148514865,
+            "aggressive": 0.00990099009900991
+          }
+        },
+        "striviaqa": {
+          "native_auc_delta": 0.012454355764214942,
+          "benefit_auc_delta": 0.01320858558062743,
+          "cascade_delta": {
+            "conservative": 0.01200000000000001,
+            "balanced": 0.020000000000000018,
+            "aggressive": 0.0040000000000000036
+          }
+        },
+        "swebq": {
+          "native_auc_delta": 0.020059752454118618,
+          "benefit_auc_delta": 0.017055025266704105,
+          "cascade_delta": {
+            "conservative": 0.004149377593361037,
+            "balanced": 0.012448132780082943,
+            "aggressive": 0.0
+          }
+        }
+      }
+    },
+    {
+      "held_out_group": "zh-mathword",
+      "held_out_rows": 48,
+      "mean_native_auc_delta": 0.020060968290012027,
+      "mean_benefit_auc_delta": 0.012985046611544005,
+      "mean_cascade_delta": {
+        "conservative": 0.010636301059185416,
+        "balanced": 0.007338514423887133,
+        "aggressive": 0.005606425540513227
+      },
+      "positive_native_pools": 5,
+      "pools": {
+        "sdqa": {
+          "native_auc_delta": 0.03407601572739194,
+          "benefit_auc_delta": 0.02820152549177024,
+          "cascade_delta": {
+            "conservative": 0.019999999999999907,
+            "balanced": 0.0050000000000000044,
+            "aggressive": 0.015000000000000013
+          }
+        },
+        "sllama": {
+          "native_auc_delta": 0.013157894736842146,
+          "benefit_auc_delta": 0.004304160688665681,
+          "cascade_delta": {
+            "conservative": 0.004081632653061162,
+            "balanced": -0.020408163265306145,
+            "aggressive": 0.004081632653061162
+          }
+        },
+        "sreason": {
+          "native_auc_delta": 0.01749213836477992,
+          "benefit_auc_delta": -0.0026951151038741017,
+          "cascade_delta": {
+            "conservative": 0.004950495049504955,
+            "balanced": 0.01980198019801982,
+            "aggressive": 0.004950495049504955
+          }
+        },
+        "striviaqa": {
+          "native_auc_delta": 0.01630151278038605,
+          "benefit_auc_delta": 0.01974408365437552,
+          "cascade_delta": {
+            "conservative": 0.020000000000000018,
+            "balanced": 0.02400000000000002,
+            "aggressive": 0.0040000000000000036
+          }
+        },
+        "swebq": {
+          "native_auc_delta": 0.019277279840660078,
+          "benefit_auc_delta": 0.01537057832678268,
+          "cascade_delta": {
+            "conservative": 0.004149377593361037,
+            "balanced": 0.008298755186721962,
+            "aggressive": 0.0
+          }
+        }
+      }
+    }
+  ]
+}

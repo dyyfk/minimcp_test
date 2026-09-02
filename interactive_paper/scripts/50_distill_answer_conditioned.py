@@ -92,6 +92,7 @@ def main():
     parser.add_argument("--aligned-artifact", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--artifact", type=Path)
+    parser.add_argument("--robustness-output", type=Path)
     parser.add_argument("--jobs", type=int, default=5)
     args = parser.parse_args()
 
@@ -180,7 +181,7 @@ def main():
                        validate="one_to_one")
                 .merge(ptrue_mod.read_signal(args.external_rtj, "p_yes_rtj"),
                        on="id", validate="one_to_one"))
-    pools = {}
+    pools, external_cache = {}, {}
     for pool, frame in external.groupby("pool", sort=True):
         pool_ids, xp = p3a.load_feats(args.data_dir, f"{pool}off")
         pool_positions = {row_id: i for i, row_id in enumerate(pool_ids)}
@@ -218,6 +219,11 @@ def main():
                     lo, eo, candidate, aligned, rate),
             }
         pools[pool] = result
+        external_cache[pool] = {
+            "x": xp[:, BLOCKS[winner["blocks"]]],
+            "aligned": aligned, "base": base_external,
+            "local": lo, "expert": eo,
+        }
     result = {
         "signal": "single-pass ridge distillation of frozen semantic+RTJ teacher",
         "selection_rule": "max routing OOF among candidates within .005 of best native OOF AUC",
@@ -299,6 +305,90 @@ def main():
         args.artifact.write_text(json.dumps(artifact, indent=2) + "\n")
         print("wrote", args.artifact, "sha256", p3a.sha256(args.artifact),
               flush=True)
+    if args.robustness_output:
+        pilot_groups = np.asarray(groups)[pilot_index]
+        rows = []
+        for held_out in sorted(set(pilot_groups)):
+            keep = pilot_groups != held_out
+            model = Ridge(alpha=winner["alpha"]).fit(
+                x[pilot_index[keep]][:, BLOCKS[winner["blocks"]]],
+                teacher[keep])
+            pool_rows = {}
+            for pool, cache in external_cache.items():
+                distilled = zapply(
+                    model.predict(cache["x"]),
+                    winner["prediction_center"], winner["prediction_scale"])
+                score = ((1 - winner["blend"]) * cache["base"] +
+                         winner["blend"] * distilled)
+                native = 1 - cache["local"]
+                benefit = (cache["expert"] - cache["local"]) > 0
+                row = {
+                    "native_auc_delta": float(
+                        roc_auc_score(native, score) -
+                        roc_auc_score(native, cache["aligned"])),
+                    "benefit_auc_delta": float(
+                        roc_auc_score(benefit, score) -
+                        roc_auc_score(benefit, cache["aligned"])),
+                    "cascade_delta": {},
+                }
+                for tier, rate in RATES.items():
+                    aligned_mask = p3a.top_mask(cache["aligned"], rate)
+                    candidate_mask = p3a.top_mask(score, rate)
+                    aligned_accuracy = np.where(
+                        aligned_mask, cache["expert"], cache["local"]).mean()
+                    candidate_accuracy = np.where(
+                        candidate_mask, cache["expert"], cache["local"]).mean()
+                    row["cascade_delta"][tier] = float(
+                        candidate_accuracy - aligned_accuracy)
+                pool_rows[pool] = row
+            values = list(pool_rows.values())
+            rows.append({
+                "held_out_group": str(held_out),
+                "held_out_rows": int(np.sum(~keep)),
+                "mean_native_auc_delta": float(np.mean([
+                    row["native_auc_delta"] for row in values])),
+                "mean_benefit_auc_delta": float(np.mean([
+                    row["benefit_auc_delta"] for row in values])),
+                "mean_cascade_delta": {
+                    tier: float(np.mean([
+                        row["cascade_delta"][tier] for row in values]))
+                    for tier in RATES},
+                "positive_native_pools": int(sum(
+                    row["native_auc_delta"] > 0 for row in values)),
+                "pools": pool_rows,
+            })
+
+        def distribution(key):
+            values = np.asarray([row[key] for row in rows])
+            return {"min": float(values.min()),
+                    "median": float(np.median(values)),
+                    "max": float(values.max())}
+
+        robustness = {
+            "method": "leave one source family out of the 1,000-row teacher fit",
+            "families": len(rows),
+            "fixed_candidate": winner["name"],
+            "mean_native_auc_delta": distribution("mean_native_auc_delta"),
+            "mean_benefit_auc_delta": distribution("mean_benefit_auc_delta"),
+            "mean_balanced_cascade_delta": {
+                "min": float(min(row["mean_cascade_delta"]["balanced"]
+                                 for row in rows)),
+                "median": float(np.median([
+                    row["mean_cascade_delta"]["balanced"] for row in rows])),
+                "max": float(max(row["mean_cascade_delta"]["balanced"]
+                                 for row in rows)),
+            },
+            "auc_gate_passes": int(sum(
+                row["mean_native_auc_delta"] >= .015 for row in rows)),
+            "all_five_native_positive": int(sum(
+                row["positive_native_pools"] == 5 for row in rows)),
+            "rows": rows,
+        }
+        args.robustness_output.parent.mkdir(parents=True, exist_ok=True)
+        args.robustness_output.write_text(
+            json.dumps(robustness, indent=2) + "\n")
+        print("wrote", args.robustness_output,
+              "sha256", p3a.sha256(args.robustness_output), flush=True)
 
 
 if __name__ == "__main__":
