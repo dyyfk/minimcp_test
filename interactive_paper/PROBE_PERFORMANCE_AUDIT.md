@@ -260,6 +260,36 @@ The one- and two-sample result SHA256 values are respectively
 `9ddf2f53e35efa3e821bc659f88cc600f55c68ba9251caa38c0d22fd80691f04`
 and `b9814205309778897397363f24680bb34210a45acbbe8874ee07e29b5c22815a`.
 
+### P6: text p(True) adds ranking signal, but is a transcript ceiling
+
+The next local iteration collected the repository's exact first-token
+p(True) signal on the known query text for the 1,000-row training pilot and
+1,138-row external set. All 2,138 rows completed without error; external
+self-assessment averaged 52 ms per row after model load. On its own, negative
+p(Yes) has `.7175` mean external native AUC. The source-grouped frozen p(True)
+fusion improves native AUC by `+.0188`, benefit AUC by `+.0080`, but cascade
+accuracy only by `-.0040/+.0008/+.0074` at 15/30/50%.
+
+P(True) and two-sample semantic uncertainty are complementary. A predeclared
+fixed three-way grid selects `.50` P3a score + `.25` semantic entropy + `.25`
+text p(True), reaching training-pilot native AUC `.8299`, benefit AUC `.7035`,
+and routing objective `+.1703`. Externally it is the strongest ranking result
+so far: mean native AUC `+.0311`, benefit AUC `+.0179`, and cascade
+`+.0033/+.0077/+.0070`. Native gains are reliable on SD-QA (`+.0616`, 95% CI
+`[+.0137,+.1101]`) and WebQ (`+.0474`, `[+.0152,+.0812]`); TriviaQA and Llama
+also improve, while Reasoning-zh regresses (`-.0130`). This supports the
+roadmap's predeclared English-only p(True) guard, but does not improve the
+30%-budget cascade metric over semantic sampling alone.
+
+This is not yet a deployable RTJ result because the p(True) prompt sees the
+ground-truth query text. A one-row audio-transcribe-then-judge smoke produced
+an exact transcript and numerically identical p(True), but cost 25.7 seconds,
+far above the 52 ms text-only diagnostic. Run a small stratified RTJ parity
+and latency sample before paying that cost on all rows. Text-p(True) result
+SHA256: `c759a0c273b48a26cbd0074ce42588e7ae223b502bc616479c50d2b3db6ed1ab`;
+three-way result SHA256:
+`bd4bbee4704bb55d560d9134c8ccdf4132969e3e7dbb6b4014232e23d598db0b`.
+
 ## P1 execution result: aligned labels do not improve the gate
 
 The bundle from
