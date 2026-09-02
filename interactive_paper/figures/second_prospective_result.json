@@ -1,0 +1,206 @@
+{
+  "status": "one_shot_second_prospective_source_disjoint_validation",
+  "overall": {
+    "rows": 450,
+    "failure_rate": 0.3244444444444444,
+    "live_auc": 0.594448449891853,
+    "candidate_auc": 0.6076964671953857,
+    "auc_delta": 0.013248017303532755,
+    "auc_delta_bootstrap_95ci": [
+      0.01313760424817377,
+      0.0032343299526750523,
+      0.023065213579392594
+    ],
+    "budgets": {
+      "conservative": {
+        "rate": 0.15,
+        "live_precision": 0.5147058823529411,
+        "candidate_precision": 0.5588235294117647,
+        "precision_delta": 0.044117647058823595,
+        "live_recall": 0.23972602739726026,
+        "candidate_recall": 0.2602739726027397,
+        "selection_agreement": 0.9644444444444444
+      },
+      "balanced": {
+        "rate": 0.3,
+        "live_precision": 0.4222222222222222,
+        "candidate_precision": 0.43703703703703706,
+        "precision_delta": 0.014814814814814836,
+        "live_recall": 0.3904109589041096,
+        "candidate_recall": 0.4041095890410959,
+        "selection_agreement": 0.9511111111111111
+      },
+      "aggressive": {
+        "rate": 0.5,
+        "live_precision": 0.37777777777777777,
+        "candidate_precision": 0.37333333333333335,
+        "precision_delta": -0.0044444444444444176,
+        "live_recall": 0.5821917808219178,
+        "candidate_recall": 0.5753424657534246,
+        "selection_agreement": 0.9422222222222222
+      }
+    }
+  },
+  "by_pool": {
+    "p16_boolq": {
+      "rows": 150,
+      "failure_rate": 0.18,
+      "live_auc": 0.6763023185787413,
+      "candidate_auc": 0.6841312857573021,
+      "auc_delta": 0.007828967178560742,
+      "auc_delta_bootstrap_95ci": [
+        0.007935049157969231,
+        -0.00779886940627977,
+        0.025596041203121388
+      ],
+      "budgets": {
+        "conservative": {
+          "rate": 0.15,
+          "live_precision": 0.45454545454545453,
+          "candidate_precision": 0.5454545454545454,
+          "precision_delta": 0.09090909090909088,
+          "live_recall": 0.37037037037037035,
+          "candidate_recall": 0.4444444444444444,
+          "selection_agreement": 0.9733333333333334
+        },
+        "balanced": {
+          "rate": 0.3,
+          "live_precision": 0.28888888888888886,
+          "candidate_precision": 0.3333333333333333,
+          "precision_delta": 0.04444444444444445,
+          "live_recall": 0.48148148148148145,
+          "candidate_recall": 0.5555555555555556,
+          "selection_agreement": 0.9333333333333333
+        },
+        "aggressive": {
+          "rate": 0.5,
+          "live_precision": 0.24,
+          "candidate_precision": 0.24,
+          "precision_delta": 0.0,
+          "live_recall": 0.6666666666666666,
+          "candidate_recall": 0.6666666666666666,
+          "selection_agreement": 0.96
+        }
+      }
+    },
+    "p16_hellaswag": {
+      "rows": 150,
+      "failure_rate": 0.36666666666666664,
+      "live_auc": 0.5860287081339713,
+      "candidate_auc": 0.6114832535885167,
+      "auc_delta": 0.025454545454545396,
+      "auc_delta_bootstrap_95ci": [
+        0.02548749202575995,
+        0.0019282794382529309,
+        0.049613757323812395
+      ],
+      "budgets": {
+        "conservative": {
+          "rate": 0.15,
+          "live_precision": 0.5454545454545454,
+          "candidate_precision": 0.5454545454545454,
+          "precision_delta": 0.0,
+          "live_recall": 0.21818181818181817,
+          "candidate_recall": 0.21818181818181817,
+          "selection_agreement": 0.9733333333333334
+        },
+        "balanced": {
+          "rate": 0.3,
+          "live_precision": 0.4222222222222222,
+          "candidate_precision": 0.4444444444444444,
+          "precision_delta": 0.0222222222222222,
+          "live_recall": 0.34545454545454546,
+          "candidate_recall": 0.36363636363636365,
+          "selection_agreement": 0.9333333333333333
+        },
+        "aggressive": {
+          "rate": 0.5,
+          "live_precision": 0.44,
+          "candidate_precision": 0.48,
+          "precision_delta": 0.03999999999999998,
+          "live_recall": 0.6,
+          "candidate_recall": 0.6545454545454545,
+          "selection_agreement": 0.9333333333333333
+        }
+      }
+    },
+    "p16_qasc": {
+      "rows": 150,
+      "failure_rate": 0.4266666666666667,
+      "live_auc": 0.6769622093023255,
+      "candidate_auc": 0.6864098837209301,
+      "auc_delta": 0.009447674418604612,
+      "auc_delta_bootstrap_95ci": [
+        0.009543423460089507,
+        -0.01112130398737885,
+        0.030105413377472176
+      ],
+      "budgets": {
+        "conservative": {
+          "rate": 0.15,
+          "live_precision": 0.7272727272727273,
+          "candidate_precision": 0.7272727272727273,
+          "precision_delta": 0.0,
+          "live_recall": 0.25,
+          "candidate_recall": 0.25,
+          "selection_agreement": 0.9866666666666667
+        },
+        "balanced": {
+          "rate": 0.3,
+          "live_precision": 0.6,
+          "candidate_precision": 0.6,
+          "precision_delta": 0.0,
+          "live_recall": 0.421875,
+          "candidate_recall": 0.421875,
+          "selection_agreement": 0.9866666666666667
+        },
+        "aggressive": {
+          "rate": 0.5,
+          "live_precision": 0.5333333333333333,
+          "candidate_precision": 0.5466666666666666,
+          "precision_delta": 0.013333333333333308,
+          "live_recall": 0.625,
+          "candidate_recall": 0.640625,
+          "selection_agreement": 0.96
+        }
+      }
+    }
+  },
+  "decision_rule": {
+    "replacement_auc_gate": "macro mean source AUC delta >= .015",
+    "broad_support": "positive AUC delta in all three frozen sources",
+    "statistical_support": "source-stratified macro bootstrap 95% CI lower bound > 0",
+    "no_p16_retuning": true
+  },
+  "macro_source_auc_delta": {
+    "point": 0.014243729017236917,
+    "source_stratified_bootstrap_95ci": [
+      0.014380552344040148,
+      0.0028047353671390137,
+      0.026347500218267535
+    ]
+  },
+  "decision": {
+    "replacement_auc_gate": false,
+    "broad_support": true,
+    "statistical_support": true
+  },
+  "judge_usage": {
+    "model": "gpt-5.4-mini",
+    "prompt_tokens": 147854,
+    "cached_prompt_tokens": 0,
+    "completion_tokens": 33259,
+    "cost_usd_at_published_standard_rates": 0.260556,
+    "pricing_source": "https://developers.openai.com/api/docs/pricing",
+    "pricing_checked_utc": "2026-09-02"
+  },
+  "provenance": {
+    "selection_sha256": "39d18e50d08c5f2c85e23a343c43a914f4791574ee91e1a70a3ee8b2d714c40c",
+    "ordered_ids_sha256": "78e1dd6eb01de4082db9722277e575ec611372b560ea6ebf33b41b3dc5095bfe",
+    "trace_manifest_sha256": "22c1e173c6b206729e0e603e22220dae767b4ae717ac4f367e92f97d0a9cad1b",
+    "feature_manifest_sha256": "c444d2b88359eaabab2b92c8c437ff06cb9bb6a4627bf3e8dc72d4f55ae34b50",
+    "judged_sha256": "d6ecf2a3ad37c8c4da4687ec75ce653626525f71c4e42396272178051fd9c079",
+    "live_artifact_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
+    "candidate_artifact_sha256": "4d75a506a59e6206e4687a6b3630b1dae54034f902d9136112689c9091eeec15"
+  }
+}

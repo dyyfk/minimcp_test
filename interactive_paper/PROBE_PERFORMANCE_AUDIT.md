@@ -529,6 +529,44 @@ Judging used 122,934 input and 31,086 output tokens with zero errors. At the
 published standard `gpt-5.4-mini` rates checked 2026-09-02, that is `$0.23209`;
 conservative cumulative OpenAI spend is `$28.95545 / $500`.
 
+### P16: conservative ensemble transfers broadly and significantly
+
+After P15 became development data, a fixed grid selected the smallest blend
+that retained at least `+.015` mean AUC on the five old external pools while
+improving both P15 sources. The winner, `z(live) + 1.0*z(distilled)`, folds
+exactly into one 12,288-dimensional dot product (maximum algebraic discrepancy
+`4.4e-15`). Its frozen shadow-only artifact SHA256 is
+`4d75a506a59e6206e4687a6b3630b1dae54034f902d9136112689c9091eeec15`.
+
+Only after freezing that artifact, I selected 450 untouched rows from three
+additional repositories absent from the teacher families: BoolQ, HellaSwag,
+and QASC (150 each). IDs/content were frozen before TTS/native/judge outputs;
+the selection SHA256 is
+`39d18e50d08c5f2c85e23a343c43a914f4791574ee91e1a70a3ee8b2d714c40c`.
+Official-native capture completed 450/450 with finite features and no inference
+or no-speak errors; one answer reached the 60-chunk cap without an end marker
+and remained subject to the same strict judge.
+
+| frozen source | n | failure rate | live AUC | ensemble AUC | delta (95% CI) |
+|---|---:|---:|---:|---:|---:|
+| BoolQ | 150 | .180 | .6763 | .6841 | +.0078 [-.0078,+.0256] |
+| HellaSwag | 150 | .367 | .5860 | .6115 | +.0255 [+.0019,+.0496] |
+| QASC | 150 | .427 | .6770 | .6864 | +.0094 [-.0111,+.0301] |
+
+The macro source delta is `+.01424`, source-stratified bootstrap 95% CI
+`[+.00280,+.02635]`; the pooled delta is `+.01325`, CI
+`[+.00323,+.02307]`. All three sources improve and both aggregate intervals
+exclude zero. Exact global failure precision changes by `+4.41`, `+1.48`, and
+`-0.44` points at 15/30/50% budgets. Thus the ensemble clears breadth and
+statistical-support gates, but narrowly misses the original `+.015` macro AUC
+replacement threshold. It remains shadow-only and the live gate is unchanged.
+Result receipt SHA256:
+`8a55fdc35fb376a23f560eeadaf65643fe44fe873f5087701ad8859bf6f67806`.
+
+P16 TTS cost `$1.56219`; judge usage 147,854 input and 33,259 output tokens,
+cost `$0.26056` at the published standard rates. Conservative cumulative
+OpenAI spend is `$30.77819 / $500`.
+
 ## P1 execution result: aligned labels do not improve the gate
 
 The bundle from

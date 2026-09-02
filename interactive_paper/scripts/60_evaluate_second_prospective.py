@@ -136,9 +136,9 @@ def main():
         "status": "one_shot_second_prospective_source_disjoint_validation",
         "overall": metrics(y, candidate, live, rng), "by_pool": {},
         "decision_rule": {
-            "replacement_auc_gate": "aggregate AUC delta >= .015",
+            "replacement_auc_gate": "macro mean source AUC delta >= .015",
             "broad_support": "positive AUC delta in all three frozen sources",
-            "statistical_support": "aggregate bootstrap 95% CI lower bound > 0",
+            "statistical_support": "source-stratified macro bootstrap 95% CI lower bound > 0",
             "no_p16_retuning": True,
         },
     }
@@ -146,12 +146,33 @@ def main():
         mask = rows.pool.to_numpy() == pool
         result["by_pool"][pool] = metrics(
             y[mask], candidate[mask], live[mask], rng)
+    macro_point = float(np.mean([
+        value["auc_delta"] for value in result["by_pool"].values()]))
+    macro_boot = []
+    pool_array = rows.pool.to_numpy()
+    for _ in range(5000):
+        deltas = []
+        for pool in sorted(rows.pool.unique()):
+            indices = np.flatnonzero(pool_array == pool)
+            sample = rng.choice(indices, len(indices), replace=True)
+            if np.unique(y[sample]).size < 2:
+                break
+            deltas.append(roc_auc_score(y[sample], candidate[sample]) -
+                          roc_auc_score(y[sample], live[sample]))
+        if len(deltas) == len(result["by_pool"]):
+            macro_boot.append(float(np.mean(deltas)))
+    result["macro_source_auc_delta"] = {
+        "point": macro_point,
+        "source_stratified_bootstrap_95ci": [
+            float(np.mean(macro_boot)), float(np.percentile(macro_boot, 2.5)),
+            float(np.percentile(macro_boot, 97.5))],
+    }
     result["decision"] = {
-        "replacement_auc_gate": bool(result["overall"]["auc_delta"] >= .015),
+        "replacement_auc_gate": bool(macro_point >= .015),
         "broad_support": bool(all(value["auc_delta"] > 0
                                   for value in result["by_pool"].values())),
-        "statistical_support": bool(
-            result["overall"]["auc_delta_bootstrap_95ci"][1] > 0),
+        "statistical_support": bool(result["macro_source_auc_delta"]
+                                    ["source_stratified_bootstrap_95ci"][1] > 0),
     }
     prompt = int(judged_full.prompt_tokens.fillna(0).sum())
     cached = int(judged_full.cached_prompt_tokens.fillna(0).sum())
