@@ -1,0 +1,41 @@
+{
+  "status": "frozen_before_p21_outputs",
+  "training_set": {
+    "rows": 1000,
+    "target_pools": 18,
+    "pair_selection_sha256": "3911126da3945afbce096f700555cb4cae80e668b5c470cf369a6ee5e59280a3",
+    "canonical_content_sha256": "5500157487a58bdc0d66e58e54df7108b61eb770228afc733b66c11d453baa3c",
+    "source_selection_sha256": "c4a3581df4f8718886de0d404a80ed086881e8e9b2131c6e47e03e6ca11e8041"
+  },
+  "candidate_family": {
+    "model": "l2_logistic_regression",
+    "feature_blocks": [
+      "eot_mean8+user_mean",
+      "eot_last+eot_mean8+user_mean"
+    ],
+    "C": [
+      0.00001,
+      0.00003,
+      0.0001,
+      0.0003,
+      0.001
+    ],
+    "preprocessing": "none",
+    "deployment_scope": "followup_turns_only",
+    "extra_model_forwards": 0
+  },
+  "selection": {
+    "validation": "five-fold stratified group CV by target source family",
+    "primary": "macro target-pool native-failure AUC",
+    "tie_break": "30-percent exact-budget failure precision",
+    "baseline": "live 8bq score on the same contextual rows"
+  },
+  "next_gate": {
+    "dataset": "new P15 WinoGrande/SciQ controlled-context outputs, frozen only after the P21 winner",
+    "macro_auc_delta_minimum": 0.015,
+    "require_both_source_deltas_positive": true,
+    "require_source_stratified_ci_lower_positive": true,
+    "activation_prohibited": true
+  },
+  "guard": "Training pairs, model grid, selection rule, and the independent-validation contract were frozen before any P21 native outputs."
+}

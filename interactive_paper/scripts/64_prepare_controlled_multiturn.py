@@ -29,6 +29,7 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--receipt", type=Path, required=True)
     parser.add_argument("--per-source", type=int, default=40)
+    parser.add_argument("--all-targets", action="store_true")
     parser.add_argument("--seed", type=int, default=64)
     parser.add_argument("--id-prefix", default="p19")
     args = parser.parse_args()
@@ -49,16 +50,23 @@ def main():
         targets = (source[source.pool == pool].assign(
             _key=lambda frame: frame.id.map(
                 lambda value: stable(args.seed, f"target:{value}")))
-            .sort_values("_key").head(args.per_source))
+            .sort_values("_key"))
+        if not args.all_targets:
+            targets = targets.head(args.per_source)
         carrier_pool = pools[(pool_index + 1) % len(pools)]
         carriers = (source[source.pool == carrier_pool].assign(
             _key=lambda frame: frame.id.map(
                 lambda value: stable(args.seed, f"carrier:{pool}:{value}")))
-            .sort_values("_key").head(args.per_source))
-        if len(targets) != args.per_source or len(carriers) != args.per_source:
+            .sort_values("_key"))
+        if not args.all_targets:
+            carriers = carriers.head(args.per_source)
+        if not args.all_targets and (len(targets) != args.per_source or
+                                     len(carriers) != args.per_source):
             raise RuntimeError(f"insufficient rows for {pool}")
-        for target, carrier in zip(targets.itertuples(), carriers.itertuples()):
-            chosen.append({
+        carrier_rows = list(carriers.itertuples())
+        for target_index, target in enumerate(targets.itertuples()):
+            carrier = carrier_rows[target_index % len(carrier_rows)]
+            row = {
                 "id": f"{args.id_prefix}-{carrier.id}-{target.id}",
                 "target_id": str(target.id),
                 "target_pool": str(target.pool),
@@ -69,7 +77,13 @@ def main():
                 "carrier_query": str(carrier.query),
                 "language": str(target.language),
                 "context_condition": "completed_unrelated_prior_turn",
-            })
+            }
+            for column in ("source", "training_tag"):
+                if hasattr(target, column):
+                    row[f"target_{column}"] = str(getattr(target, column))
+                if hasattr(carrier, column):
+                    row[f"carrier_{column}"] = str(getattr(carrier, column))
+            chosen.append(row)
     output = pd.DataFrame(chosen).sort_values("id")
     if output.id.duplicated().any() or output.target_id.duplicated().any():
         raise RuntimeError("pair IDs and targets must be unique")
