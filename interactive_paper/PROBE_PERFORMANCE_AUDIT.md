@@ -484,6 +484,23 @@ does not replace a new source-disjoint shadow set.
 Receipt SHA256:
 `1bf1ee5ac2da315192f6b2b0a782047ee33598c522b7422d7f20bb57dddfddd5`.
 
+### P15: prospective source-disjoint validation frozen
+
+Before generating any audio, native answer, hidden feature, or label, I froze
+400 new public validation rows: 200 from WinoGrande-debiased validation and
+200 from SciQ validation, seed 45. Neither source appears among the 33 teacher
+families; normalized source questions have zero exact overlap with all bundled
+training/evaluation query metadata. SciQ answer positions are deterministically
+permuted to avoid a fixed correct option.
+
+Ordered ID-list SHA256:
+`301bdd18e3e03e54a2969f2eaecf3350e4c5102b5fcdc0fd423715cabeb52968`;
+canonical content SHA256:
+`9295e1a47bd493af7f14dfb35d4bf395ab3d58fafd17fd465b58efb3b2f61f9a`.
+The 60,104 rendered characters imply `$0.90156` at the recorded TTS rate.
+The candidate and comparison protocol stay frozen; this set is validation
+only and cannot be used for refitting or candidate selection.
+
 ## P1 execution result: aligned labels do not improve the gate
 
 The bundle from
