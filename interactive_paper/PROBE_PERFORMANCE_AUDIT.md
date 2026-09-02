@@ -432,6 +432,17 @@ same five external pools. Stop offline candidate tuning on those pools; the
 next acceptance evidence must come from new source-disjoint data or live
 shadow traffic.
 
+### P11: inactive demo shadow wiring
+
+`demo_duplex.py` now packages and loads the frozen distilled artifact, checks
+that it is explicitly `shadow_only` with `activation_prohibited: true`, and
+computes its score from `eot_mean8 + user_mean` beside the live score. The
+shadow value is emitted in existing websocket score/gate events for
+observation. It has no threshold and is not referenced by the `fired`
+expression, so it cannot change escalation behavior. The live artifact,
+threshold selection, dialogue-act guard, and expert path are unchanged. This
+is code-level plumbing only; it has not been deployed.
+
 ## P1 execution result: aligned labels do not improve the gate
 
 The bundle from

@@ -64,6 +64,8 @@ from modal_app import OPENAI  # noqa: E402
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 _APP_PY = os.path.join(_HERE, "modal_app.py")
+_SHADOW_ARTIFACT = os.path.join(
+    _HERE, "data", "gate_shadow_distilled_semantic_rtj.json")
 
 web_image = (modal.Image.debian_slim(python_version="3.11")
              .pip_install("fastapi[standard]")
@@ -95,6 +97,9 @@ gpu_image = (
     )
     .add_local_dir(os.path.join(_HERE, "src"), "/workspace/gate")
     .add_local_dir(os.path.join(_HERE, "_model_src"), "/workspace/model_src")
+    .add_local_file(
+        _SHADOW_ARTIFACT,
+        "/workspace/gate_shadow_distilled_semantic_rtj.json")
     .add_local_file(_APP_PY, "/root/modal_app.py"))
 
 # proven wording (first escalate smoke: relayed + self-corrected);
@@ -163,6 +168,16 @@ class DuplexVoice:
         # in-regime probe: 8be native-duplex refit (2310 rows, same
         # speak-onset read point as this app; scripts/22)
         self.art = json.load(open(f"{DATA}/gate_native.json"))
+        # Candidate scoring is observational only. Its artifact explicitly
+        # prohibits activation, and no threshold from it enters `fired`.
+        self.shadow_art = json.load(open(
+            "/workspace/gate_shadow_distilled_semantic_rtj.json"))
+        if (self.shadow_art.get("status") != "shadow_only" or
+                self.shadow_art.get("activation_prohibited") is not True):
+            raise RuntimeError("distilled candidate is not shadow-safe")
+        self.shadow_probe = gate_mod.Probe(
+            self.shadow_art["w"], self.shadow_art["b"])
+        self.shadow_modes = self.shadow_art["feature_recipe"]["blocks"]
         # 8bh dialogue-act gate: stop words / backchannels hit the same
         # commit as questions and the failure probe is OOD on them —
         # escalate only when the SAME L22 read says "info-seeking"
@@ -172,6 +187,11 @@ class DuplexVoice:
             self.act = None
         self.probe = gate_mod.Probe(self.art["w"], self.art["b"])
         self.K3 = self.art.get("k_eot", 8)
+        shadow_tail = max([
+            int(mode.removeprefix("eot_mean"))
+            for mode in self.shadow_modes
+            if mode.startswith("eot_mean") and mode != "eot_mean"] or [1])
+        self.tail_k = max(self.K3, shadow_tail)
         self.st3 = {"accum": False, "tail": None, "sum": None, "cnt": 0}
 
         import torch as _t
@@ -179,10 +199,10 @@ class DuplexVoice:
         def hook(_m, _i, out):
             hs = out[0] if isinstance(out, tuple) else out
             h = hs[0].detach().float()
-            t = h[-self.K3:].cpu()
+            t = h[-self.tail_k:].cpu()
             self.st3["tail"] = (t if self.st3["tail"] is None
                                 else _t.cat([self.st3["tail"],
-                                             t])[-self.K3:])
+                                             t])[-self.tail_k:])
             if self.st3["accum"]:
                 sm = h.sum(0).cpu()
                 self.st3["sum"] = (sm if self.st3["sum"] is None
@@ -229,23 +249,34 @@ class DuplexVoice:
         self.load_s = round(time.time() - t0, 1)
         print(f">>> DuplexVoice ready in {self.load_s}s", flush=True)
 
-    def _feat_now(self):
+    def _feat_now(self, artifact=None):
         import torch
         if self.st3["tail"] is None or self.st3["cnt"] == 0:
             return None
+        artifact = self.art if artifact is None else artifact
+        modes = artifact.get("modes", artifact.get("feature_recipe", {}).get(
+            "blocks", []))
         parts = []
-        for m in self.art["modes"]:
+        for m in modes:
             if m == "eot_last":
                 parts.append(self.st3["tail"][-1])
-            elif m == "eot_mean":
-                parts.append(self.st3["tail"].mean(0))
+            elif m.startswith("eot_mean"):
+                suffix = m.removeprefix("eot_mean")
+                k = int(suffix) if suffix else artifact.get("k_eot", self.K3)
+                parts.append(self.st3["tail"][-k:].mean(0))
             elif m == "user_mean":
                 parts.append(self.st3["sum"] / max(1, self.st3["cnt"]))
+            else:
+                raise ValueError(f"unknown probe feature mode: {m}")
         return torch.cat(parts).numpy()
 
     def _score_now(self):
         v = self._feat_now()
         return None if v is None else float(self.probe.score(v))
+
+    def _shadow_score_now(self):
+        v = self._feat_now(self.shadow_art)
+        return None if v is None else float(self.shadow_probe.score(v))
 
     def _act_now(self):
         """P(info-seeking) from the same read; None = act gate off."""
@@ -287,7 +318,8 @@ class DuplexVoice:
         @wapp.get(f"/{TOKEN}/ready")
         def ready():
             return JSONResponse({"ready": True, "load_s": self.load_s,
-                                 "busy": self.lock.locked()})
+                                 "busy": self.lock.locked(),
+                                 "distilled_shadow": True})
 
         @wapp.websocket(f"/{TOKEN}/ws")
         async def ws(sock: WebSocket):
@@ -440,9 +472,12 @@ class DuplexVoice:
                             n_chunk += 1
 
                             score = self._score_now()
+                            shadow_score = self._shadow_score_now()
                             if score is not None:
                                 emit({"type": "score", "i": n_chunk,
                                       "v": round(score, 4),
+                                      "shadow_v": (None if shadow_score is None
+                                                   else round(shadow_score, 4)),
                                       "listen": bool(r["is_listen"])})
 
                             fired_now = False
@@ -464,6 +499,9 @@ class DuplexVoice:
                                 emit({"type": "gate",
                                       "score": (None if score is None
                                                 else round(score, 4)),
+                                      "shadow_score": (
+                                          None if shadow_score is None
+                                          else round(shadow_score, 4)),
                                       "thr": round(thr, 4), "fired": fired,
                                       "act": (None if act is None
                                               else round(act, 4)),
