@@ -13,7 +13,7 @@ from sklearn.metrics import roc_auc_score
 
 RATES = {"conservative": .15, "balanced": .30, "aggressive": .50}
 REQUIRED = {
-    "id", "language", "live_score", "distilled_score", "latency_ms",
+    "id", "language", "live_score", "latency_ms",
     "realized_escalation", "local_outcome", "expert_outcome",
 }
 
@@ -53,6 +53,11 @@ def analyze(log_path: Path, artifact_path: Path, min_rows: int):
     rows = [json.loads(line) for line in log_path.read_text().splitlines()
             if line.strip()]
     frame = pd.DataFrame(rows)
+    candidate_column = ("shadow_score" if "shadow_score" in frame
+                        else "distilled_score")
+    if candidate_column not in frame:
+        raise RuntimeError(
+            "missing shadow score field: expected shadow_score")
     missing = REQUIRED - set(frame)
     if missing:
         raise RuntimeError(f"missing shadow fields: {sorted(missing)}")
@@ -60,7 +65,8 @@ def analyze(log_path: Path, artifact_path: Path, min_rows: int):
         raise RuntimeError(f"need at least {min_rows} rows, got {len(frame)}")
     if frame.id.astype(str).duplicated().any():
         raise RuntimeError("shadow log contains duplicate IDs")
-    if frame[list(REQUIRED - {"id", "language"})].isna().any().any():
+    value_columns = list(REQUIRED - {"id", "language"}) + [candidate_column]
+    if frame[value_columns].isna().any().any():
         raise RuntimeError("shadow log contains null required values")
     for column in ("local_outcome", "expert_outcome",
                    "realized_escalation"):
@@ -72,11 +78,11 @@ def analyze(log_path: Path, artifact_path: Path, min_rows: int):
     native = 1 - local
     benefit = (expert - local) > 0
     live = frame.live_score.to_numpy(dtype=float)
-    candidate = frame.distilled_score.to_numpy(dtype=float)
+    candidate = frame[candidate_column].to_numpy(dtype=float)
     budgets = {}
     for tier, rate in RATES.items():
         live_mask = exact_mask(frame, "live_score", rate)
-        candidate_mask = exact_mask(frame, "distilled_score", rate)
+        candidate_mask = exact_mask(frame, candidate_column, rate)
         budgets[tier] = {
             "target_rate": rate,
             "live_realized_rate": float(live_mask.mean()),
@@ -115,7 +121,9 @@ def analyze(log_path: Path, artifact_path: Path, min_rows: int):
         "provenance": {
             "log_sha256": sha256(log_path),
             "artifact_sha256": sha256(artifact_path),
-            "artifact_result_sha256": artifact["validation"]["result_sha256"],
+            "artifact_result_sha256": artifact.get(
+                "validation", {}).get("result_sha256"),
+            "artifact_selection": artifact.get("selection"),
         },
         "note": "This analyzer reports evidence only and cannot activate the candidate.",
     }

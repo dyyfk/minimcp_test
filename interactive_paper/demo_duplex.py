@@ -65,7 +65,7 @@ from modal_app import OPENAI  # noqa: E402
 _HERE = os.path.dirname(os.path.abspath(__file__))
 _APP_PY = os.path.join(_HERE, "modal_app.py")
 _SHADOW_ARTIFACT = os.path.join(
-    _HERE, "data", "gate_shadow_distilled_semantic_rtj.json")
+    _HERE, "data", "gate_shadow_robust_ensemble.json")
 
 web_image = (modal.Image.debian_slim(python_version="3.11")
              .pip_install("fastapi[standard]")
@@ -99,7 +99,7 @@ gpu_image = (
     .add_local_dir(os.path.join(_HERE, "_model_src"), "/workspace/model_src")
     .add_local_file(
         _SHADOW_ARTIFACT,
-        "/workspace/gate_shadow_distilled_semantic_rtj.json")
+        "/workspace/gate_shadow_robust_ensemble.json")
     .add_local_file(_APP_PY, "/root/modal_app.py"))
 
 # proven wording (first escalate smoke: relayed + self-corrected);
@@ -171,10 +171,10 @@ class DuplexVoice:
         # Candidate scoring is observational only. Its artifact explicitly
         # prohibits activation, and no threshold from it enters `fired`.
         self.shadow_art = json.load(open(
-            "/workspace/gate_shadow_distilled_semantic_rtj.json"))
+            "/workspace/gate_shadow_robust_ensemble.json"))
         if (self.shadow_art.get("status") != "shadow_only" or
                 self.shadow_art.get("activation_prohibited") is not True):
-            raise RuntimeError("distilled candidate is not shadow-safe")
+            raise RuntimeError("candidate is not shadow-safe")
         self.shadow_probe = gate_mod.Probe(
             self.shadow_art["w"], self.shadow_art["b"])
         self.shadow_modes = self.shadow_art["feature_recipe"]["blocks"]

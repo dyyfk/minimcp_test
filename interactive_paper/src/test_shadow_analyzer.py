@@ -22,14 +22,14 @@ with tempfile.TemporaryDirectory() as directory:
             "id": f"row-{index:02d}",
             "language": "zh" if index % 5 == 0 else "en",
             "live_score": index / 20,
-            "distilled_score": (1 if failure else 0) + index / 100,
+            "shadow_score": (1 if failure else 0) + index / 100,
             "latency_ms": 2 + index / 10,
             "realized_escalation": index >= 14,
             "local_outcome": int(not failure),
             "expert_outcome": 1,
         })
     log.write_text("".join(json.dumps(row) + "\n" for row in rows))
-    artifact = PAPER / "data" / "gate_shadow_distilled_semantic_rtj.json"
+    artifact = PAPER / "data" / "gate_shadow_robust_ensemble.json"
     result = module.analyze(log, artifact, min_rows=20)
     assert result["rows"] == 20
     assert result["native_auc_candidate"] == 1.0

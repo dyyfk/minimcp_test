@@ -1,4 +1,4 @@
-"""Safety contract for the inactive distilled-gate shadow integration.
+"""Safety contract for the inactive robust-gate shadow integration.
 
 Run: python interactive_paper/src/test_distilled_shadow.py
 """
@@ -18,7 +18,7 @@ from gate import Probe  # noqa: E402
 
 
 artifact = json.loads((
-    PAPER / "data" / "gate_shadow_distilled_semantic_rtj.json").read_text())
+    PAPER / "data" / "gate_shadow_robust_ensemble.json").read_text())
 source_path = PAPER / "demo_duplex.py"
 source = source_path.read_text()
 tree = ast.parse(source)
@@ -36,13 +36,16 @@ check(artifact["activation_prohibited"] is True,
       "artifact explicitly prohibits activation")
 check(artifact["live_gate_unchanged"] is True,
       "artifact records that the live gate is unchanged")
+check(artifact["selection"]["chosen_alpha"] == 1.0,
+      "packaged candidate is the P16 alpha-1 ensemble")
 check("thresholds" not in artifact and "eot_thresholds" not in artifact,
       "artifact carries no activation thresholds")
-check(artifact["feature_recipe"]["blocks"] == ["eot_mean8", "user_mean"],
-      "feature recipe is the frozen two-block recipe")
-check(len(artifact["w"]) == artifact["feature_recipe"]["dimension"] == 8192,
+check(artifact["feature_recipe"]["blocks"] == [
+    "eot_last", "eot_mean8", "user_mean"],
+      "feature recipe is the frozen alpha-1 ensemble recipe")
+check(len(artifact["w"]) == artifact["feature_recipe"]["dimension"] == 12288,
       "coefficient dimension matches the feature recipe")
-check(0 < Probe(artifact["w"], artifact["b"]).score([0.] * 8192) < 1,
+check(0 < Probe(artifact["w"], artifact["b"]).score([0.] * 12288) < 1,
       "artifact loads in the production pure-Python Probe")
 
 fired_values = []
@@ -62,5 +65,7 @@ check('"shadow_v"' in source and '"shadow_score"' in source,
       "shadow values remain observable in websocket events")
 check("_SHADOW_ARTIFACT" in source and ".add_local_file(" in source,
       "the frozen artifact is packaged into the runtime image")
+check("gate_shadow_robust_ensemble.json" in source,
+      "the runtime packages the robust P16 artifact")
 
 print(f"OK ({checks} distilled-shadow safety checks)")
