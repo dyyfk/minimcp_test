@@ -1,7 +1,7 @@
 """Run frozen two-turn audio sessions through the native duplex model.
 
 Each pair starts a fresh session, completes the carrier turn, then captures
-the target turn's answer and exact deployed L22 speak-onset feature recipe.
+both turns' exact deployed L22 speak-onset feature recipe and the target answer.
 Launch with ``torchrun --standalone --nproc-per-node 8``.
 """
 from __future__ import annotations
@@ -35,8 +35,8 @@ def chunks(audio):
             for value in output]
 
 
-def row_seed(row_id):
-    return int(hashlib.sha256(f"p19-context:{row_id}".encode()).hexdigest()[:8],
+def row_seed(namespace, row_id):
+    return int(hashlib.sha256(f"{namespace}:{row_id}".encode()).hexdigest()[:8],
                16)
 
 
@@ -47,6 +47,7 @@ def main():
     parser.add_argument("--model-dir", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--limit", type=int, default=0)
+    parser.add_argument("--seed-namespace", default="p19-context")
     args = parser.parse_args()
 
     rank = int(os.environ.get("LOCAL_RANK", "0"))
@@ -55,6 +56,8 @@ def main():
     args.output_dir.mkdir(parents=True, exist_ok=True)
     feature_dir = args.output_dir / "features"
     feature_dir.mkdir(exist_ok=True)
+    carrier_feature_dir = args.output_dir / "carrier_features"
+    carrier_feature_dir.mkdir(exist_ok=True)
     trace_path = args.output_dir / f"controlled_multiturn.rank{rank}.jsonl"
 
     frame = pd.read_parquet(args.pairs).sort_values("id")
@@ -67,7 +70,8 @@ def main():
         done = {json.loads(line)["id"] for line in trace_path.read_text().splitlines()
                 if line.strip()}
     pending = [row for row in owned if row.id not in done or not (
-        feature_dir / f"{row.id}.npy").exists()]
+        feature_dir / f"{row.id}.npy").exists() or not (
+        carrier_feature_dir / f"{row.id}.npy").exists()]
 
     cache = (Path.home() / ".cache/huggingface/modules/transformers_modules"
              / args.model_dir.name)
@@ -142,7 +146,7 @@ def main():
         with trace_path.open("a", encoding="utf-8") as stream:
             for index, row in enumerate(pending):
                 started = time.perf_counter()
-                seed = row_seed(str(row.id))
+                seed = row_seed(args.seed_namespace, str(row.id))
                 random.seed(seed); np.random.seed(seed % (2**32 - 1))
                 torch.manual_seed(seed); torch.cuda.manual_seed_all(seed)
                 noise_rng = np.random.default_rng(seed ^ 0xA519)
@@ -158,7 +162,7 @@ def main():
                         args.audio_dir / f"{row.target_id}.wav", sr=16000,
                         mono=True)
                     with torch.inference_mode():
-                        carrier = run_turn(carrier_audio, noise_rng, capture=False)
+                        carrier = run_turn(carrier_audio, noise_rng, capture=True)
                         if not carrier["eot_seen"]:
                             raise RuntimeError("carrier did not reach end of turn")
                         state.update(sum=None, count=0)
@@ -169,11 +173,17 @@ def main():
                     error = f"{type(exc).__name__}: {exc}"
                 finally:
                     state["accum"] = False
-                if target is not None and target["feature"] is not None:
-                    destination = feature_dir / f"{row.id}.npy"
-                    temporary = feature_dir / f".{row.id}.rank{rank}.tmp"
+                for value, directory in [
+                        (None if target is None else target["feature"],
+                         feature_dir),
+                        (None if carrier is None else carrier["feature"],
+                         carrier_feature_dir)]:
+                    if value is None:
+                        continue
+                    destination = directory / f"{row.id}.npy"
+                    temporary = directory / f".{row.id}.rank{rank}.tmp"
                     with temporary.open("wb") as fh:
-                        np.save(fh, target["feature"])
+                        np.save(fh, value)
                     temporary.replace(destination)
                 record = {
                     "id": str(row.id), "rank": rank, "seed": seed,
@@ -200,12 +210,18 @@ def main():
         handle.remove()
 
     ids = [str(row.id) for row in owned if (
-        feature_dir / f"{row.id}.npy").exists()]
+        feature_dir / f"{row.id}.npy").exists() and (
+        carrier_feature_dir / f"{row.id}.npy").exists()]
     values = [np.load(feature_dir / f"{row_id}.npy") for row_id in ids]
+    carrier_values = [np.load(carrier_feature_dir / f"{row_id}.npy")
+                      for row_id in ids]
     if values:
         np.savez_compressed(args.output_dir /
                             f"controlled_multiturn_feats.rank{rank}.npz",
                             ids=np.asarray(ids), X=np.stack(values))
+        np.savez_compressed(args.output_dir /
+                            f"controlled_multiturn_carrier_feats.rank{rank}.npz",
+                            ids=np.asarray(ids), X=np.stack(carrier_values))
     print(f"rank {rank}: consolidated {len(ids)}/{len(owned)}", flush=True)
 
 

@@ -1,4 +1,4 @@
-"""Freeze deterministic cross-source two-turn sessions from P16 audio.
+"""Freeze deterministic cross-source two-turn sessions from prospective audio.
 
 The target questions already have standalone outcomes.  Replaying each after
 an unrelated, completed carrier turn creates a matched context-shift test
@@ -30,6 +30,7 @@ def main():
     parser.add_argument("--receipt", type=Path, required=True)
     parser.add_argument("--per-source", type=int, default=40)
     parser.add_argument("--seed", type=int, default=64)
+    parser.add_argument("--id-prefix", default="p19")
     args = parser.parse_args()
 
     source = pd.read_parquet(args.selection).sort_values("id")
@@ -58,7 +59,7 @@ def main():
             raise RuntimeError(f"insufficient rows for {pool}")
         for target, carrier in zip(targets.itertuples(), carriers.itertuples()):
             chosen.append({
-                "id": f"p19-{carrier.id}-{target.id}",
+                "id": f"{args.id_prefix}-{carrier.id}-{target.id}",
                 "target_id": str(target.id),
                 "target_pool": str(target.pool),
                 "target_query": str(target.query),
