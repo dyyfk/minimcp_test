@@ -125,6 +125,24 @@ Result receipt SHA256:
 Simple activation magnitude and block geometry do not explain the remaining
 transfer error; stop this branch rather than increasing tree capacity.
 
+### P3c: low-rank PCA improves OOF routing but loses externally
+
+Five outer family-grouped folds each fit a 512-component randomized PCA on
+the P3a `eot_mean8 + user_mean` features, reusing the decomposition for
+128/256/512-dimensional, raw/whitened, and four-`C` logistic candidates. The
+winner was raw PCA-512 (`C=1e-3`, 84.9% full-fit explained variance), with
+native OOF AUC `.8105`, benefit OOF AUC `.6916`, and routing objective
+`+.1724`. The latter is the best internal routing score in P3, but it does not
+transfer.
+
+Across the five external pools, mean native AUC changes `.7429 -> .7339`,
+benefit AUC `.6767 -> .6656`, and cascade accuracy
+`-.0012/-.0061/-.0022` at 15/30/50%. No pool has a reliable improvement.
+Receipt SHA256:
+`370d5a9b13eb491540a775bc26cf0d092eadd4f80840b8a714e2bffc57e270a4`.
+Stop low-rank linear compression: its grouped training advantage is another
+non-transferable regularization artifact.
+
 ## P1 execution result: aligned labels do not improve the gate
 
 The bundle from
