@@ -29,12 +29,15 @@ def main():
     parser.add_argument("--fusion-result", type=Path, required=True)
     parser.add_argument("--semantic-result", type=Path, required=True)
     parser.add_argument("--rtj-result", type=Path, required=True)
+    parser.add_argument("--latency-result", type=Path)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     p3a = load_p3a()
     fusion = json.loads(args.fusion_result.read_text())
     semantic = json.loads(args.semantic_result.read_text())
     rtj = json.loads(args.rtj_result.read_text())
+    latency = (json.loads(args.latency_result.read_text())
+               if args.latency_result else None)
     winner = fusion["winner"]
     if winner["kind"] != "fixed":
         raise RuntimeError("expected the fixed three-way P7 winner")
@@ -49,7 +52,7 @@ def main():
     artifact = {
         "status": "shadow_only",
         "activation_prohibited": True,
-        "reason": "aggregate AUC gate passed; online latency and routing lift not yet validated",
+        "reason": "aggregate AUC gate passed; fixed-set latency is high and online routing lift is not validated",
         "feature_recipe": {
             "blocks": ["eot_mean8", "user_mean"], "dimension": 2 * BLOCK,
             "training_rows": len(y), "source_groups": len(set(groups)),
@@ -108,6 +111,19 @@ def main():
             "fused_score", "latency_ms", "realized_escalation",
             "local_outcome", "expert_outcome"],
     }
+    if latency:
+        artifact["semantic"]["fixed_50_serial_latency_seconds"] = latency[
+            "latency_seconds"]["semantic_two_sample_serial_measured"]
+        artifact["latency_benchmark"] = {
+            "fixed_rows": latency["fixed_rows"],
+            "rows_per_pool": latency["rows_per_pool"],
+            "semantic_plus_rtj_serial_estimate_seconds": latency[
+                "latency_seconds"]["semantic_plus_rtj_serial_estimate"],
+            "three_replica_parallel_estimate_seconds": latency[
+                "latency_seconds"]["three_replica_parallel_estimate"],
+            "notes": latency["notes"],
+            "receipt_sha256": p3a.sha256(args.latency_result),
+        }
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(artifact, indent=2) + "\n")
     print("wrote", args.output, "sha256", p3a.sha256(args.output))

@@ -30,6 +30,13 @@ does not support replacing the live artifact. The next useful experiment needs
 a different representation or a richer routing model, not more labels for the
 same 12288-dimensional linear head.
 
+Later local-only iterations found that independent answer-conditioned signals
+do transfer: the frozen P3a + two-sample semantic entropy + RTJ fusion improves
+five-pool mean native AUC by `.0334`. It remains shadow-only. A fixed latency
+benchmark shows the two semantic generations cost median `7.21s` and p90
+`25.52s` before RTJ, making the current formulation too slow for synchronous
+activation despite its offline ranking gain.
+
 ## P2 execution result: direct expert-gain routing does not transfer
 
 A fixed 1500/5228 subset was sampled by source family, language, and native
@@ -330,12 +337,39 @@ RTJ+semantic fusion result SHA256:
 `396de32461de11111071008f1729262c6f5b21401d72ecce6a25413d0477ad51`.
 
 The frozen scorer is exported as `data/gate_shadow_semantic_rtj.json`, SHA256
-`caf3dbd8df49e0e17236584b909af80a4c03fe195dc6683859ef352245fac54c`.
+`55fff3ceab5a294e24b19ee46c527b8f91f6d6b81bcc7dc66e8ce0a63e573b34`.
 It contains the fitted 8,192-dimensional P3a coefficients, all three training
 centers/scales and fusion weights, exact semantic/RTJ recipes, validation
-receipts, a per-language rolling-quantile requirement, and required shadow
-logs. The artifact is explicitly marked `shadow_only` with activation
-prohibited; it does not overwrite or alter `gate_native.json`.
+receipts, fixed-set latency evidence, a per-language rolling-quantile
+requirement, and required shadow logs. The artifact is explicitly marked
+`shadow_only` with activation prohibited; it does not overwrite or alter
+`gate_native.json`.
+
+### P8: fixed-set latency rules out synchronous activation
+
+The semantic generator now records per-sample and per-row elapsed time. I
+reran exactly two stochastic answers on the frozen 50-row RTJ parity sample
+(10 rows per external pool) using eight B300 ranks. All 50 rows completed with
+zero errors; model loading and embedding time are excluded. Two-sample native
+generation measured median `7.21s`, mean `10.25s`, p90 `25.52s`, and maximum
+`30.27s`. The long tail is workload-dependent: SD-QA's ten rows have median
+`25.02s`, while Llama Questions, TriviaQA, and WebQ medians are `5.46s`,
+`5.98s`, and `5.11s`.
+
+Adding the matched RTJ measurements gives a serial capacity estimate of median
+`8.14s`, mean `11.77s`, and p90 `30.08s`. Even an optimistic three-replica
+estimate—two semantic samples and RTJ run concurrently—has median `3.93s` and
+p90 `22.22s`; this is an estimate from matched branch timings, not a measured
+concurrent serving run. The result strengthens the existing shadow-only
+decision: keep collecting scores asynchronously, but do not put the P7 fusion
+on the synchronous user path. The next optimization target should be
+distillation of the answer-conditioned signal into a single pass, not more
+sampling or serving parallelism.
+
+Latency receipt: `figures/shadow_latency_benchmark.json`, SHA256
+`5888a5ce615bc91c00f3d0a3790f0340f88ce2cec0f2ef7a012ac28323cf5bb1`;
+semantic stream SHA256
+`3eece7d4811a73e1152acf11e105f83cc59e8f4d68c5c3eb03d5a4224528d78c`.
 
 ## P1 execution result: aligned labels do not improve the gate
 

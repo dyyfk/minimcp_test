@@ -11,6 +11,7 @@ import glob
 import json
 import os
 import random
+import time
 from pathlib import Path
 
 import librosa
@@ -124,6 +125,7 @@ def main():
     with output.open("a", encoding="utf-8") as fh:
         for index, row in enumerate(rows):
             row_id = str(row.id)
+            row_started = time.perf_counter()
             record = {
                 "id": row_id, "rank": rank,
                 "official_answer": official.get(row_id, ""),
@@ -137,12 +139,15 @@ def main():
                 for sample_index in range(args.samples):
                     seed = 430000 + sample_index * 100000 + int(
                         row_id.encode().hex()[:8], 16)
+                    sample_started = time.perf_counter()
                     answer, onset, n_answer = generate(audio_chunks, seed)
                     record["samples"].append({
                         "seed": seed, "answer": answer,
-                        "onset_chunk": onset, "n_answer_chunks": n_answer})
+                        "onset_chunk": onset, "n_answer_chunks": n_answer,
+                        "elapsed_s": time.perf_counter() - sample_started})
             except Exception as exc:
                 record["error"] = f"{type(exc).__name__}: {exc}"
+            record["elapsed_s"] = time.perf_counter() - row_started
             fh.write(json.dumps(record, ensure_ascii=False) + "\n")
             fh.flush()
             if index < 2 or (index + 1) % 10 == 0:
