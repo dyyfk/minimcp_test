@@ -18,6 +18,7 @@ EXPECTED_ROWS = 450
 RATES = {"conservative": .15, "balanced": .30, "aggressive": .50}
 LIVE_SHA = "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372"
 CANDIDATE_SHA = "4d75a506a59e6206e4687a6b3630b1dae54034f902d9136112689c9091eeec15"
+RESULT_STATUS = "one_shot_second_prospective_source_disjoint_validation"
 
 
 def support_module():
@@ -133,13 +134,13 @@ def main():
 
     rng = np.random.default_rng(48)
     result = {
-        "status": "one_shot_second_prospective_source_disjoint_validation",
+        "status": RESULT_STATUS,
         "overall": metrics(y, candidate, live, rng), "by_pool": {},
         "decision_rule": {
             "replacement_auc_gate": "macro mean source AUC delta >= .015",
             "broad_support": "positive AUC delta in all three frozen sources",
             "statistical_support": "source-stratified macro bootstrap 95% CI lower bound > 0",
-            "no_p16_retuning": True,
+            "no_evaluation_set_retuning": True,
         },
     }
     for pool in sorted(rows.pool.unique()):

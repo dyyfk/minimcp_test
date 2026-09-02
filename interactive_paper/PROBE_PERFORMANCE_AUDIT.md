@@ -567,6 +567,41 @@ P16 TTS cost `$1.56219`; judge usage 147,854 input and 33,259 output tokens,
 cost `$0.26056` at the published standard rates. Conservative cumulative
 OpenAI spend is `$30.77819 / $500`.
 
+### P17: stronger blend is not source-robust
+
+After P16 became development-only, alpha 2 from the original blend grid
+improved all P16 sources and moved their macro delta to `+.01775`. I froze the
+corresponding one-pass artifact (SHA256
+`a26829f06561e34cc957e437138ea9b03571c8a487e37ee22e91001ce5541be5`)
+before selecting a third independent 450-row set: balanced SNLI, SST-2, and WiC
+validation samples, with zero exact overlap against bundled queries, P15, or
+P16. Official-native capture and judging both completed 450/450 with zero
+errors, no no-speak cases, and complete end-of-turn answers.
+
+| frozen source | n | failure rate | live AUC | alpha-2 AUC | delta (95% CI) |
+|---|---:|---:|---:|---:|---:|
+| SNLI | 150 | .300 | .6193 | .6552 | +.0360 [-.0040,+.0788] |
+| SST-2 | 150 | .153 | .8370 | .7925 | -.0445 [-.0874,-.0044] |
+| WiC | 150 | .333 | .5838 | .6364 | +.0526 [+.0166,+.0922] |
+
+The macro source delta is `+.01469`, source-stratified CI
+`[-.00841,+.03906]`; pooled AUC changes by `+.01715`, CI
+`[+.00117,+.03377]`. The pooled result is misleading for a global activation
+decision: SST-2 has a statistically reliable regression that offsets strong
+WiC and SNLI improvements. P17 therefore fails breadth, statistical macro
+support, and the `+.015` macro replacement gate. Do not activate alpha 2.
+
+This ends coefficient-only global blend escalation: increasing distilled
+weight predictably improves several reasoning/word-sense sources but degrades
+sentiment, and repeated global-alpha testing would overfit the prospective
+sets. The alpha-1 P16 artifact remains the safest shadow candidate, not a live
+replacement. P17 receipt SHA256:
+`a091bb86477e4270eef43960252e3a9f726f319232ab428beb9b7ffca68c3db0`.
+
+P17 TTS cost `$1.24167`; judge usage 139,290 input and 33,813 output tokens,
+cost `$0.25663`. Conservative cumulative OpenAI spend is
+`$32.27649 / $500`.
+
 ## P1 execution result: aligned labels do not improve the gate
 
 The bundle from
