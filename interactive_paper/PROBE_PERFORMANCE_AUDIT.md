@@ -214,8 +214,21 @@ This clears the predeclared `+.015` five-pool mean native-AUC threshold, the
 first iteration to do so. It is not yet a drop-in production replacement:
 the mean 30% cascade gain is only 1.14 points, support is heterogeneous, and
 the score requires three additional native generations plus sentence
-embedding. Run a cached one-/two-sample latency ablation before choosing a
-serving design; retain the single-pass P4 surrogate as the cheap alternative.
+embedding.
+
+A cached latency ablation then rebuilt and reselected the candidate from only
+the first one or two stochastic answers; it made no new model or API calls.
+One extra answer selects entropy at cosine `.78` with blend `.25`: external
+native AUC `+.0151`, benefit AUC `+.0068`, and cascade
+`+.0034/+.0022/+.0078`. Two extra answers select entropy at `.70` with blend
+`.25`: native AUC `+.0240`, benefit AUC `+.0162`, and cascade
+`-.0008/+.0099/+.0050`. The two-sample variant is the quality/latency knee: it
+beats the three-sample candidate on mean native AUC, improves four of five
+pools, and has reliable native gains on both SD-QA (`+.0426`, 95% CI
+`[+.0044,+.0833]`) and WebQ (`+.0491`, `[+.0234,+.0789]`). It gives up only
+0.15 point of mean 30%-budget cascade accuracy versus three samples. Prefer
+two samples for a direct implementation; next test threshold-band adaptive
+second sampling to reduce its average generation count.
 
 An audit correction occurred before the final evaluation: the first selection
 parquet carried expert labels from the ceiling files rather than the exact
@@ -231,6 +244,9 @@ label SHA256:
 `7308ceb11d035d02c510fa798c276d8eff04b5f7d3872dd20f13e2dbd5134ca5`;
 result SHA256:
 `665821747854261244a3569ed3b4f260b461d7d6e7a003de863bb2349742ca04`.
+The one- and two-sample result SHA256 values are respectively
+`9ddf2f53e35efa3e821bc659f88cc600f55c68ba9251caa38c0d22fd80691f04`
+and `b9814205309778897397363f24680bb34210a45acbbe8874ee07e29b5c22815a`.
 
 ## P1 execution result: aligned labels do not improve the gate
 

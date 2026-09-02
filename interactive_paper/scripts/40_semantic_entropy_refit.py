@@ -105,13 +105,14 @@ def entropy_from_components(labels):
                  math.log(len(labels)))
 
 
-def build_labels(selection_path, sample_dir, model_dir, output, batch_size):
+def build_labels(selection_path, sample_dir, model_dir, output, batch_size,
+                 sample_count=3):
     selection = pd.read_parquet(selection_path).set_index("id")
     samples = read_samples(sample_dir)
     missing = sorted(set(selection.index.astype(str)) - set(samples))
     errors = [row_id for row_id, row in samples.items() if row.get("error")]
     short = [row_id for row_id, row in samples.items()
-             if len(row.get("samples", [])) != 3]
+             if len(row.get("samples", [])) < sample_count]
     if missing or errors or short:
         raise RuntimeError(
             f"sample coverage incomplete: missing={len(missing)} "
@@ -122,7 +123,8 @@ def build_labels(selection_path, sample_dir, model_dir, output, batch_size):
     for row_id in ordered_ids:
         row = samples[row_id]
         answers = [row.get("official_answer", "")] + [
-            sample.get("answer", "") for sample in row["samples"]]
+            sample.get("answer", "")
+            for sample in row["samples"][:sample_count]]
         begin = len(texts)
         texts.extend(normalize_text(answer) for answer in answers)
         spans[row_id] = slice(begin, len(texts))
@@ -142,7 +144,7 @@ def build_labels(selection_path, sample_dir, model_dir, output, batch_size):
             "official_sample_dissimilarity": float(
                 np.mean(1 - similarity[0, 1:])),
             "sampled_pairwise_dissimilarity": float(
-                np.mean(1 - sampled_upper)),
+                np.mean(1 - sampled_upper)) if len(sampled_upper) else np.nan,
         }
         for threshold in THRESHOLDS:
             row[f"entropy_{int(threshold * 100)}"] = entropy_from_components(

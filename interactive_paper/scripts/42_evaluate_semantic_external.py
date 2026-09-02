@@ -88,6 +88,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--train-selection", type=Path, required=True)
     parser.add_argument("--train-labels", type=Path, required=True)
+    parser.add_argument("--train-samples", type=Path)
     parser.add_argument("--external-selection", type=Path, required=True)
     parser.add_argument("--external-samples", type=Path, required=True)
     parser.add_argument("--external-labels", type=Path, required=True)
@@ -96,14 +97,24 @@ def main():
     parser.add_argument("--aligned-artifact", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--batch-size", type=int, default=128)
+    parser.add_argument("--sample-count", type=int, choices=(1, 2, 3),
+                        default=3)
     parser.add_argument("--jobs", type=int, default=10)
+    parser.add_argument("--reuse-train-labels", action="store_true")
     parser.add_argument("--reuse-external-labels", action="store_true")
     args = parser.parse_args()
 
     p3a = load_module("35_feature_conditioning.py", "feature_conditioning")
     sem = load_module("40_semantic_entropy_refit.py", "semantic_refit")
     train_sel = pd.read_parquet(args.train_selection)
-    train_lab = pd.read_parquet(args.train_labels)
+    if args.reuse_train_labels:
+        train_lab = pd.read_parquet(args.train_labels)
+    else:
+        if args.train_samples is None:
+            parser.error("--train-samples is required unless --reuse-train-labels")
+        train_lab = sem.build_labels(
+            args.train_selection, args.train_samples, args.embedding_model,
+            args.train_labels, args.batch_size, args.sample_count)
     train = train_sel.merge(train_lab, on="id", validate="one_to_one")
     x, y, ids, groups, _blocks = p3a.collect_training(args.data_dir)
     id_to_index = {row_id: i for i, row_id in enumerate(ids)}
@@ -137,11 +148,12 @@ def main():
     p3a_model.fit(x[:, cols], y)
     bases = {name: score[index] for name, score in base_oof.items()}
 
+    targets = TARGETS if args.sample_count >= 2 else TARGETS[:-1]
     candidates = []
     for base_name, base_score in bases.items():
         bc, bs = zfit(base_score)
         bz = zapply(base_score, bc, bs)
-        for target in TARGETS:
+        for target in targets:
             semantic_score = train[target].to_numpy(dtype=float)
             sc, ss = zfit(semantic_score)
             sz = zapply(semantic_score, sc, ss)
@@ -157,7 +169,7 @@ def main():
                 }
                 candidates.append(row)
                 print(row, flush=True)
-    semantic_train = train[list(TARGETS)].to_numpy(dtype=float)
+    semantic_train = train[list(targets)].to_numpy(dtype=float)
     for base_name in bases:
         for c_value in (.01, .1, 1.):
             score = fit_meta_oof(
@@ -200,7 +212,7 @@ def main():
                     sem.build_labels(
                         args.external_selection, args.external_samples,
                         args.embedding_model, args.external_labels,
-                        args.batch_size))
+                        args.batch_size, args.sample_count))
     external = external_sel.merge(
         external_lab, on="id", validate="one_to_one")
     pools = {}
@@ -221,7 +233,7 @@ def main():
                          winner["blend"] * sz)
         else:
             meta_features = np.column_stack(
-                [base, frame[list(TARGETS)].to_numpy(dtype=float)])
+                [base, frame[list(targets)].to_numpy(dtype=float)])
             candidate = meta_model.predict_proba(
                 meta_scaler.transform(meta_features))[:, 1]
         local = frame["native_ok"].astype(int).to_numpy()
@@ -261,6 +273,7 @@ def main():
             "aligned_sha256": p3a.sha256(args.aligned_artifact),
         },
         "selection_rule": "max routing objective among configs within .005 of best native AUC on fixed training pilot",
+        "sample_count": args.sample_count, "targets": list(targets),
         "train_n": len(train), "sweep": candidates, "winner": winner,
         "pools": pools,
     }
