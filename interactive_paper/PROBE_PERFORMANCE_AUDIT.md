@@ -78,6 +78,36 @@ small-model hidden-state vector can predict expert benefit out of source. Do
 not deploy this candidate or buy the remaining expert labels under the same
 linear-feature hypothesis.
 
+## P3a execution result: block pruning helps ranking slightly, not routing
+
+The first post-P2 iteration kept the live 5228 native/policy labels fixed and
+swept the three feature reads alone and pairwise, the full concatenation,
+`C={1e-4,3e-4,1e-3}`, and fold-local per-dimension standardization. All 120
+fits used five source-family-grouped folds (37 groups); the 1500 paired expert
+outcomes were used only as an internal routing validation signal. Incremental
+OpenAI cost was zero.
+
+The frozen selection rule chose the configuration with the best routing OOF
+objective among candidates within `.005` of the best native grouped-OOF AUC.
+It selected raw `eot_mean8 + user_mean`, dropping `eot_last`, at `C=3e-4`:
+native grouped-OOF AUC `.8127`, paired benefit OOF AUC `.6898`, and routing
+objective `+.1711`. The full raw feature configuration measured `.8091`,
+`.6867`, and `+.1709`; standardization did not help.
+
+On the five untouched external pools, the pruned head changes mean native AUC
+from `.7429` to `.7516` (`+.0087`) and benefit AUC from `.6767` to `.6814`
+(`+.0047`). The only individually reliable gain is SD-QA native AUC
+`.726 -> .751` (paired bootstrap delta `+.0250`, 95% CI
+`[+.0071,+.0446]`). Mean cascade accuracy changes by approximately
+`+.0000/+.0025/+.0022` at 15/30/50% budgets; every 30% pool-level interval
+includes zero. Result receipt SHA256:
+`aa94aa18c6343d5693a78bebc83bc693faf8ee530c6f4d218e32e1de2783ff84`.
+
+This is a real regularization clue—the final-token read is mildly redundant
+or harmful once the rolling tail and user-audio mean are present—but it does
+not clear either replacement threshold. Keep it as the base configuration for
+cheap nonlinear/low-rank follow-ups; do not deploy it alone.
+
 ## P1 execution result: aligned labels do not improve the gate
 
 The bundle from
