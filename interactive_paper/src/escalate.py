@@ -163,7 +163,10 @@ async def judge_many(rows: list[dict], concurrency: int = 8) -> list[dict]:
                                      else int(not row["adequate"]))
             return row
 
-    return await asyncio.gather(*(one(r) for r in rows))
+    try:
+        return await asyncio.gather(*(one(r) for r in rows))
+    finally:
+        await client.close()
 
 
 # ============================ escalation target (gpt-5.5) ==================
@@ -303,4 +306,7 @@ async def ask_expert_many(queries: list[str], concurrency: int = 3,
             _cache_put(cache_dir, q, effort, out)
             return out
 
-    return await asyncio.gather(*(one(q) for q in queries))
+    try:
+        return await asyncio.gather(*(one(q) for q in queries))
+    finally:
+        await client.close()
