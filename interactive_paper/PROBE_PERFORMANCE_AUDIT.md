@@ -153,6 +153,10 @@ Generation completed 1,000/1,000 with zero errors. A local multilingual
 sentence encoder supplied connected-component entropy at three fixed cosine
 thresholds plus continuous answer-dissimilarity targets; no OpenAI judge was
 used. TTS cost was $1.896735 and local generation cost no OpenAI tokens.
+The published bundle contains query text but not the original waveforms, so
+these samples use one fixed Alloy TTS rendering. They measure semantic/model
+instability under a controlled speech surface, not acoustic perturbation
+uncertainty on the original recording.
 
 Direct answer disagreement is informative on the fixed training pilot: mean
 pairwise dissimilarity has native-failure AUC `.7263` and expert-benefit AUC
@@ -184,6 +188,49 @@ result receipt SHA256: `4909e209dfb947a28b9ca4ff36db5867fee85d0b7ae62a1c2b1fcde9
 The next frozen test evaluates the direct multi-sample signal on the exact
 1,138-row external intersection; that separates target quality from surrogate
 fit quality.
+
+### P5: direct semantic uncertainty clears the mean-AUC gate
+
+The direct test generated three new answers for all 1,138 rows in the fixed
+external intersection, with zero errors, then embedded and scored the four
+answers exactly as in the training pilot. Candidate selection did not use the
+external outcomes: source-family OOF scores compared the live three-block and
+P3a two-block bases, six predeclared semantic metrics, fixed blend weights,
+and a seven-scalar logistic stack. The winner is the P3a score blended equally
+with deterministic-to-stochastic answer dissimilarity. On the training pilot
+it records native AUC `.8124`, benefit AUC `.7002`, and routing objective
+`+.1733`.
+
+The external evaluation changes five-pool mean native AUC from `.7429` to
+`.7632` (`+.0203`) and benefit AUC from `.6767` to `.6958` (`+.0191`). Mean
+cascade accuracy changes by `+.0047/+.0114/+.0028` at 15/30/50%. WebQ is the
+strongest pool: native AUC `.772 -> .811`, benefit AUC `.604 -> .671`, and
+cascade `+.021/+.037/+.025`; its benefit-AUC delta is reliable (`+.0667`, 95%
+CI `[+.0149,+.1215]`). SD-QA and Reasoning-zh also gain native AUC, while
+TriviaQA and Llama Questions regress slightly. No individual native-AUC
+interval excludes zero.
+
+This clears the predeclared `+.015` five-pool mean native-AUC threshold, the
+first iteration to do so. It is not yet a drop-in production replacement:
+the mean 30% cascade gain is only 1.14 points, support is heterogeneous, and
+the score requires three additional native generations plus sentence
+embedding. Run a cached one-/two-sample latency ablation before choosing a
+serving design; retain the single-pass P4 surrogate as the cheap alternative.
+
+An audit correction occurred before the final evaluation: the first selection
+parquet carried expert labels from the ceiling files rather than the exact
+`tier=always` conclive files used by every preceding external comparison. The
+1,138 IDs, queries, audio renders, native labels, and generated answers were
+identical, but 83 expert outcomes differed. The corrected result reproduces
+all live-aligned benefit baselines from P3 and is the only result reported
+above. Corrected selection SHA256:
+`f04677d7af5a977d8e1e4e48ab132e934d33647bcc6929a3c5e1b18798ac6669`;
+sample-stream SHA256:
+`de873a9ea06813ab7944745d086a244386c26e29897692acedc7ca1ed6a7bc2f`;
+label SHA256:
+`7308ceb11d035d02c510fa798c276d8eff04b5f7d3872dd20f13e2dbd5134ca5`;
+result SHA256:
+`665821747854261244a3569ed3b4f260b461d7d6e7a003de863bb2349742ca04`.
 
 ## P1 execution result: aligned labels do not improve the gate
 
