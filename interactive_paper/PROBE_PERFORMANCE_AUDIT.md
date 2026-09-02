@@ -878,3 +878,25 @@ SHA256 is
 P23 TTS cost was `$0.295065`; judge usage was 33,514 input and 10,005 output
 tokens, costing `$0.070158`. Conservative cumulative OpenAI spend is
 `$34.052445 / $500`.
+
+P24 directly tested whether the probe head was under-parameterized or merely
+under-tuned. The frozen audit used nested source-family CV over all 5,228
+official-native training rows and 37 source families. Five outer folds
+estimated the whole selection process; each outer training split used three
+inner source-family folds to choose among a standardized linear head and
+residual MLPs with 32, 128, or 512 hidden units (approximately 0.41M, 1.59M,
+or 6.30M parameters). The sweep also varied dropout, weight decay, learning
+rate, BCE versus focal loss, and inner-only early stopping. The outer test
+fold was never used to choose an epoch or hyperparameter.
+
+Higher capacity is not the missing ingredient. The standardized linear head
+has the best mean inner macro-source AUC (`.70701`); nonlinear heads are chosen
+in only three of five outer folds and disagree on configuration. The complete
+nested selection procedure scores `.67232` macro source AUC and `.79029`
+pooled AUC, versus `.70482` and `.81270` for the prior grouped-OOF P3a linear
+head: deltas `-.03250` and `-.02241`. It fails every frozen graduation rule,
+so no new prospective set is opened and no larger head is packaged. This is a
+zero-API-cost rejection, not evidence that training loss cannot be reduced;
+it shows that added parameters do not transfer across source families at the
+available sample size. Receipt SHA256:
+`5a645a229889076017ec786bbbb9fd24aaa1e385d8bc6636c3571c63dc07e6a1`.
