@@ -108,6 +108,23 @@ or harmful once the rolling tail and user-audio mean are present—but it does
 not clear either replacement threshold. Keep it as the base configuration for
 cheap nonlinear/low-rank follow-ups; do not deploy it alone.
 
+### P3b: hidden-geometry nonlinear residual is rejected
+
+A nested-safe low-capacity residual used only 18 per-row summary scalars:
+mean, standard deviation, RMS, and maximum absolute activation for each of the
+three blocks, plus pairwise cosine and RMS-distance. Source-family outer folds
+fit the P3a linear base and histogram-gradient-boosted residual independently;
+the sweep tested 3/7/15 leaves and residual blend weights
+`0/.1/.25/.5/.75/1`.
+
+Every nonzero residual weight reduces grouped OOF native AUC, benefit AUC, and
+routing utility. The selection rule chooses residual weight zero (`.8127`,
+`.6898`, `+.1711` respectively), so the external candidate is exactly P3a.
+Result receipt SHA256:
+`00efaf371e639a545305b73e3a7378213eb8a7b776d50c060d141d37d6f96a1f`.
+Simple activation magnitude and block geometry do not explain the remaining
+transfer error; stop this branch rather than increasing tree capacity.
+
 ## P1 execution result: aligned labels do not improve the gate
 
 The bundle from
