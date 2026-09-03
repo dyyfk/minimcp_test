@@ -22,3 +22,4 @@ export/
 # pulled volume shards for local layer-ablation runs (scripts/64)
 data/eoth_pull/
 figures/layer_ablation_*.png
+logs/
