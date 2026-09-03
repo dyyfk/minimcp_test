@@ -1,0 +1,731 @@
+{
+  "activation_recommended": false,
+  "all_gates_pass": true,
+  "by_language": {
+    "en": {
+      "auc_delta": 0.02103587297359466,
+      "candidate_auc": 0.8454968098114943,
+      "candidate_routing": 0.2065,
+      "live_auc": 0.8244609368378997,
+      "live_routing": 0.20000000000000004,
+      "routing_delta": 0.00649999999999995,
+      "rows": 2000
+    },
+    "zh": {
+      "auc_delta": 0.015694893552820055,
+      "candidate_auc": 0.7761816024368067,
+      "candidate_routing": 0.2293333333333333,
+      "live_auc": 0.7604867088839866,
+      "live_routing": 0.225,
+      "routing_delta": 0.0043333333333333,
+      "rows": 1000
+    }
+  },
+  "by_pool": {
+    "p25b_arc": {
+      "auc_delta": 0.04940489557601602,
+      "candidate_auc": 0.7969266305219594,
+      "candidate_routing": 0.08666666666666667,
+      "live_auc": 0.7475217349459434,
+      "live_routing": 0.07733333333333332,
+      "routing_delta": 0.009333333333333346,
+      "rows": 500
+    },
+    "p25b_ceval": {
+      "auc_delta": 0.015694893552820055,
+      "candidate_auc": 0.7761816024368067,
+      "candidate_routing": 0.2293333333333333,
+      "live_auc": 0.7604867088839866,
+      "live_routing": 0.225,
+      "routing_delta": 0.0043333333333333,
+      "rows": 1000
+    },
+    "p25b_commonsense": {
+      "auc_delta": 0.03191285090694973,
+      "candidate_auc": 0.6619004339533276,
+      "candidate_routing": 0.08333333333333333,
+      "live_auc": 0.6299875830463779,
+      "live_routing": 0.07888888888888888,
+      "routing_delta": 0.004444444444444445,
+      "rows": 600
+    },
+    "p25b_mbpp": {
+      "auc_delta": null,
+      "routing_delta": 0.006666666666666654,
+      "rows": 100
+    },
+    "p25b_mmlu_pro": {
+      "auc_delta": 0.008080894762436008,
+      "candidate_auc": 0.7660259160731143,
+      "candidate_routing": 0.23666666666666666,
+      "live_auc": 0.7579450213106783,
+      "live_routing": 0.2354166666666667,
+      "routing_delta": 0.0012499999999999734,
+      "rows": 800
+    }
+  },
+  "by_source": {
+    "ai2_arc_challenge": {
+      "auc_delta": 0.04940489557601602,
+      "candidate_auc": 0.7969266305219594,
+      "candidate_routing": 0.08666666666666667,
+      "live_auc": 0.7475217349459434,
+      "live_routing": 0.07733333333333332,
+      "routing_delta": 0.009333333333333346,
+      "rows": 500
+    },
+    "ceval:accountant": {
+      "auc_delta": 0.030303030303030387,
+      "candidate_auc": 0.797979797979798,
+      "candidate_routing": 0.2333333333333333,
+      "live_auc": 0.7676767676767676,
+      "live_routing": 0.21666666666666667,
+      "routing_delta": 0.016666666666666635,
+      "rows": 20
+    },
+    "ceval:advanced_mathematics": {
+      "auc_delta": null,
+      "routing_delta": 0.0,
+      "rows": 19
+    },
+    "ceval:art_studies": {
+      "auc_delta": -0.046875,
+      "candidate_auc": 0.703125,
+      "candidate_routing": 0.26666666666666666,
+      "live_auc": 0.75,
+      "live_routing": 0.26666666666666666,
+      "routing_delta": 0.0,
+      "rows": 20
+    },
+    "ceval:basic_medicine": {
+      "auc_delta": 0.04285714285714293,
+      "candidate_auc": 0.5571428571428572,
+      "candidate_routing": 0.24561403508771928,
+      "live_auc": 0.5142857142857142,
+      "live_routing": 0.22807017543859645,
+      "routing_delta": 0.017543859649122834,
+      "rows": 19
+    },
+    "ceval:business_administration": {
+      "auc_delta": 0.03296703296703296,
+      "candidate_auc": 0.8241758241758241,
+      "candidate_routing": 0.18333333333333335,
+      "live_auc": 0.7912087912087912,
+      "live_routing": 0.16666666666666666,
+      "routing_delta": 0.01666666666666669,
+      "rows": 20
+    },
+    "ceval:chinese_language_and_literature": {
+      "auc_delta": -0.0980392156862745,
+      "candidate_auc": 0.5882352941176471,
+      "candidate_routing": 0.26666666666666666,
+      "live_auc": 0.6862745098039216,
+      "live_routing": 0.2833333333333334,
+      "routing_delta": -0.01666666666666672,
+      "rows": 20
+    },
+    "ceval:civil_servant": {
+      "auc_delta": -0.011904761904761862,
+      "candidate_auc": 0.8571428571428572,
+      "candidate_routing": 0.25,
+      "live_auc": 0.8690476190476191,
+      "live_routing": 0.25,
+      "routing_delta": 0.0,
+      "rows": 20
+    },
+    "ceval:clinical_medicine": {
+      "auc_delta": 1.1102230246251565e-16,
+      "candidate_auc": 0.5416666666666667,
+      "candidate_routing": 0.15,
+      "live_auc": 0.5416666666666666,
+      "live_routing": 0.11666666666666668,
+      "routing_delta": 0.03333333333333331,
+      "rows": 20
+    },
+    "ceval:college_chemistry": {
+      "auc_delta": 0.0,
+      "candidate_auc": 0.9473684210526315,
+      "candidate_routing": 0.31666666666666665,
+      "live_auc": 0.9473684210526315,
+      "live_routing": 0.31666666666666665,
+      "routing_delta": 0.0,
+      "rows": 20
+    },
+    "ceval:college_economics": {
+      "auc_delta": 0.05494505494505508,
+      "candidate_auc": 0.989010989010989,
+      "candidate_routing": 0.21666666666666665,
+      "live_auc": 0.934065934065934,
+      "live_routing": 0.20000000000000004,
+      "routing_delta": 0.016666666666666607,
+      "rows": 20
+    },
+    "ceval:college_physics": {
+      "auc_delta": 0.09999999999999998,
+      "candidate_auc": 0.7,
+      "candidate_routing": 0.3157894736842105,
+      "live_auc": 0.6,
+      "live_routing": 0.2982456140350877,
+      "routing_delta": 0.017543859649122806,
+      "rows": 19
+    },
+    "ceval:college_programming": {
+      "auc_delta": 0.07291666666666652,
+      "candidate_auc": 0.7291666666666666,
+      "candidate_routing": 0.18333333333333335,
+      "live_auc": 0.6562500000000001,
+      "live_routing": 0.16666666666666666,
+      "routing_delta": 0.01666666666666669,
+      "rows": 20
+    },
+    "ceval:computer_architecture": {
+      "auc_delta": -0.02197802197802201,
+      "candidate_auc": 0.6703296703296703,
+      "candidate_routing": 0.11666666666666665,
+      "live_auc": 0.6923076923076923,
+      "live_routing": 0.11666666666666668,
+      "routing_delta": -2.7755575615628914e-17,
+      "rows": 20
+    },
+    "ceval:computer_network": {
+      "auc_delta": 0.022727272727272818,
+      "candidate_auc": 0.8409090909090909,
+      "candidate_routing": 0.1929824561403509,
+      "live_auc": 0.8181818181818181,
+      "live_routing": 0.1929824561403509,
+      "routing_delta": 0.0,
+      "rows": 19
+    },
+    "ceval:discrete_mathematics": {
+      "auc_delta": -0.10416666666666663,
+      "candidate_auc": 0.3541666666666667,
+      "candidate_routing": 0.14583333333333334,
+      "live_auc": 0.4583333333333333,
+      "live_routing": 0.14583333333333334,
+      "routing_delta": 0.0,
+      "rows": 16
+    },
+    "ceval:education_science": {
+      "auc_delta": 0.078125,
+      "candidate_auc": 0.734375,
+      "candidate_routing": 0.08333333333333333,
+      "live_auc": 0.65625,
+      "live_routing": 0.06666666666666667,
+      "routing_delta": 0.016666666666666663,
+      "rows": 20
+    },
+    "ceval:electrical_engineer": {
+      "auc_delta": 0.0505050505050505,
+      "candidate_auc": 0.8282828282828283,
+      "candidate_routing": 0.19999999999999998,
+      "live_auc": 0.7777777777777778,
+      "live_routing": 0.21666666666666665,
+      "routing_delta": -0.016666666666666663,
+      "rows": 20
+    },
+    "ceval:environmental_impact_assessment_engineer": {
+      "auc_delta": 0.09090909090909105,
+      "candidate_auc": 0.595959595959596,
+      "candidate_routing": 0.16666666666666666,
+      "live_auc": 0.505050505050505,
+      "live_routing": 0.15,
+      "routing_delta": 0.016666666666666663,
+      "rows": 20
+    },
+    "ceval:fire_engineer": {
+      "auc_delta": 0.08000000000000007,
+      "candidate_auc": 0.7333333333333334,
+      "candidate_routing": 0.26666666666666666,
+      "live_auc": 0.6533333333333333,
+      "live_routing": 0.25,
+      "routing_delta": 0.016666666666666663,
+      "rows": 20
+    },
+    "ceval:high_school_biology": {
+      "auc_delta": 0.033333333333333326,
+      "candidate_auc": 0.8666666666666667,
+      "candidate_routing": 0.2982456140350877,
+      "live_auc": 0.8333333333333334,
+      "live_routing": 0.2807017543859649,
+      "routing_delta": 0.017543859649122806,
+      "rows": 19
+    },
+    "ceval:high_school_chemistry": {
+      "auc_delta": -0.02083333333333326,
+      "candidate_auc": 0.6666666666666667,
+      "candidate_routing": 0.2631578947368421,
+      "live_auc": 0.6875,
+      "live_routing": 0.2631578947368421,
+      "routing_delta": 0.0,
+      "rows": 19
+    },
+    "ceval:high_school_chinese": {
+      "auc_delta": 0.08333333333333337,
+      "candidate_auc": 0.7708333333333334,
+      "candidate_routing": 0.2631578947368421,
+      "live_auc": 0.6875,
+      "live_routing": 0.2631578947368421,
+      "routing_delta": 0.0,
+      "rows": 19
+    },
+    "ceval:high_school_geography": {
+      "auc_delta": 0.0,
+      "candidate_auc": 0.7000000000000001,
+      "candidate_routing": 0.24561403508771928,
+      "live_auc": 0.7000000000000001,
+      "live_routing": 0.24561403508771928,
+      "routing_delta": 0.0,
+      "rows": 19
+    },
+    "ceval:high_school_history": {
+      "auc_delta": 0.04040404040404044,
+      "candidate_auc": 0.7575757575757576,
+      "candidate_routing": 0.21666666666666667,
+      "live_auc": 0.7171717171717171,
+      "live_routing": 0.18333333333333335,
+      "routing_delta": 0.033333333333333326,
+      "rows": 20
+    },
+    "ceval:high_school_mathematics": {
+      "auc_delta": null,
+      "routing_delta": 0.0,
+      "rows": 18
+    },
+    "ceval:high_school_physics": {
+      "auc_delta": -0.033333333333333326,
+      "candidate_auc": 0.6888888888888889,
+      "candidate_routing": 0.21052631578947367,
+      "live_auc": 0.7222222222222222,
+      "live_routing": 0.22807017543859645,
+      "routing_delta": -0.01754385964912278,
+      "rows": 19
+    },
+    "ceval:high_school_politics": {
+      "auc_delta": -0.02564102564102555,
+      "candidate_auc": 0.7307692307692308,
+      "candidate_routing": 0.2807017543859649,
+      "live_auc": 0.7564102564102564,
+      "live_routing": 0.2807017543859649,
+      "routing_delta": 0.0,
+      "rows": 19
+    },
+    "ceval:ideological_and_moral_cultivation": {
+      "auc_delta": 0.02564102564102566,
+      "candidate_auc": 0.9102564102564102,
+      "candidate_routing": 0.21052631578947367,
+      "live_auc": 0.8846153846153846,
+      "live_routing": 0.21052631578947367,
+      "routing_delta": 0.0,
+      "rows": 19
+    },
+    "ceval:law": {
+      "auc_delta": -0.010416666666666852,
+      "candidate_auc": 0.7083333333333333,
+      "candidate_routing": 0.16666666666666666,
+      "live_auc": 0.7187500000000001,
+      "live_routing": 0.16666666666666666,
+      "routing_delta": 0.0,
+      "rows": 20
+    },
+    "ceval:legal_professional": {
+      "auc_delta": 0.059523809523809534,
+      "candidate_auc": 0.8333333333333334,
+      "candidate_routing": 0.2333333333333333,
+      "live_auc": 0.7738095238095238,
+      "live_routing": 0.19999999999999998,
+      "routing_delta": 0.033333333333333326,
+      "rows": 20
+    },
+    "ceval:logic": {
+      "auc_delta": 0.13186813186813195,
+      "candidate_auc": 0.7142857142857143,
+      "candidate_routing": 0.2333333333333333,
+      "live_auc": 0.5824175824175823,
+      "live_routing": 0.21666666666666665,
+      "routing_delta": 0.016666666666666663,
+      "rows": 20
+    },
+    "ceval:mao_zedong_thought": {
+      "auc_delta": 0.02083333333333326,
+      "candidate_auc": 0.7708333333333333,
+      "candidate_routing": 0.20000000000000004,
+      "live_auc": 0.75,
+      "live_routing": 0.20000000000000004,
+      "routing_delta": 0.0,
+      "rows": 20
+    },
+    "ceval:marxism": {
+      "auc_delta": -0.10256410256410253,
+      "candidate_auc": 0.5897435897435898,
+      "candidate_routing": 0.03508771929824561,
+      "live_auc": 0.6923076923076923,
+      "live_routing": 0.07017543859649122,
+      "routing_delta": -0.03508771929824561,
+      "rows": 19
+    },
+    "ceval:metrology_engineer": {
+      "auc_delta": 0.0625,
+      "candidate_auc": 0.6875,
+      "candidate_routing": 0.19999999999999998,
+      "live_auc": 0.625,
+      "live_routing": 0.21666666666666665,
+      "routing_delta": -0.016666666666666663,
+      "rows": 20
+    },
+    "ceval:middle_school_biology": {
+      "auc_delta": 0.06593406593406592,
+      "candidate_auc": 0.5604395604395604,
+      "candidate_routing": 0.05000000000000001,
+      "live_auc": 0.4945054945054945,
+      "live_routing": 0.03333333333333333,
+      "routing_delta": 0.016666666666666677,
+      "rows": 20
+    },
+    "ceval:middle_school_chemistry": {
+      "auc_delta": 0.02197802197802201,
+      "candidate_auc": 0.6703296703296703,
+      "candidate_routing": 0.16666666666666666,
+      "live_auc": 0.6483516483516483,
+      "live_routing": 0.16666666666666666,
+      "routing_delta": 0.0,
+      "rows": 20
+    },
+    "ceval:middle_school_geography": {
+      "auc_delta": 0.02857142857142858,
+      "candidate_auc": 0.6571428571428571,
+      "candidate_routing": 0.13888888888888887,
+      "live_auc": 0.6285714285714286,
+      "live_routing": 0.1111111111111111,
+      "routing_delta": 0.027777777777777762,
+      "rows": 12
+    },
+    "ceval:middle_school_history": {
+      "auc_delta": 0.04040404040404044,
+      "candidate_auc": 0.6262626262626263,
+      "candidate_routing": 0.21666666666666667,
+      "live_auc": 0.5858585858585859,
+      "live_routing": 0.18333333333333335,
+      "routing_delta": 0.033333333333333326,
+      "rows": 20
+    },
+    "ceval:middle_school_mathematics": {
+      "auc_delta": 0.033333333333333326,
+      "candidate_auc": 0.7166666666666667,
+      "candidate_routing": 0.2982456140350877,
+      "live_auc": 0.6833333333333333,
+      "live_routing": 0.2982456140350877,
+      "routing_delta": 0.0,
+      "rows": 19
+    },
+    "ceval:middle_school_physics": {
+      "auc_delta": -0.04285714285714293,
+      "candidate_auc": 0.8857142857142857,
+      "candidate_routing": 0.1929824561403509,
+      "live_auc": 0.9285714285714286,
+      "live_routing": 0.1929824561403509,
+      "routing_delta": 0.0,
+      "rows": 19
+    },
+    "ceval:middle_school_politics": {
+      "auc_delta": 0.03296703296703307,
+      "candidate_auc": 0.6813186813186813,
+      "candidate_routing": 0.15,
+      "live_auc": 0.6483516483516483,
+      "live_routing": 0.13333333333333333,
+      "routing_delta": 0.016666666666666663,
+      "rows": 20
+    },
+    "ceval:modern_chinese_history": {
+      "auc_delta": -0.022222222222222143,
+      "candidate_auc": 0.6,
+      "candidate_routing": 0.14035087719298245,
+      "live_auc": 0.6222222222222221,
+      "live_routing": 0.15789473684210525,
+      "routing_delta": -0.017543859649122806,
+      "rows": 19
+    },
+    "ceval:operating_system": {
+      "auc_delta": 0.022222222222222254,
+      "candidate_auc": 0.6777777777777778,
+      "candidate_routing": 0.21052631578947367,
+      "live_auc": 0.6555555555555556,
+      "live_routing": 0.1929824561403509,
+      "routing_delta": 0.01754385964912278,
+      "rows": 19
+    },
+    "ceval:physician": {
+      "auc_delta": 0.011904761904761918,
+      "candidate_auc": 0.39285714285714285,
+      "candidate_routing": 0.10526315789473684,
+      "live_auc": 0.38095238095238093,
+      "live_routing": 0.08771929824561403,
+      "routing_delta": 0.017543859649122806,
+      "rows": 19
+    },
+    "ceval:plant_protection": {
+      "auc_delta": 0.0,
+      "candidate_auc": 0.7444444444444445,
+      "candidate_routing": 0.2631578947368421,
+      "live_auc": 0.7444444444444445,
+      "live_routing": 0.2631578947368421,
+      "routing_delta": 0.0,
+      "rows": 19
+    },
+    "ceval:probability_and_statistics": {
+      "auc_delta": null,
+      "routing_delta": -0.01851851851851849,
+      "rows": 18
+    },
+    "ceval:professional_tour_guide": {
+      "auc_delta": 0.04761904761904767,
+      "candidate_auc": 0.5833333333333334,
+      "candidate_routing": 0.2631578947368421,
+      "live_auc": 0.5357142857142857,
+      "live_routing": 0.22807017543859645,
+      "routing_delta": 0.03508771929824564,
+      "rows": 19
+    },
+    "ceval:sports_science": {
+      "auc_delta": 0.022222222222222143,
+      "candidate_auc": 0.8222222222222222,
+      "candidate_routing": 0.22807017543859645,
+      "live_auc": 0.8,
+      "live_routing": 0.24561403508771928,
+      "routing_delta": -0.017543859649122834,
+      "rows": 19
+    },
+    "ceval:tax_accountant": {
+      "auc_delta": 0.06410256410256399,
+      "candidate_auc": 0.7307692307692307,
+      "candidate_routing": 0.2807017543859649,
+      "live_auc": 0.6666666666666667,
+      "live_routing": 0.2631578947368421,
+      "routing_delta": 0.017543859649122806,
+      "rows": 19
+    },
+    "ceval:teacher_qualification": {
+      "auc_delta": 0.07954545454545459,
+      "candidate_auc": 0.9772727272727273,
+      "candidate_routing": 0.24561403508771928,
+      "live_auc": 0.8977272727272727,
+      "live_routing": 0.21052631578947367,
+      "routing_delta": 0.03508771929824561,
+      "rows": 19
+    },
+    "ceval:urban_and_rural_planner": {
+      "auc_delta": -0.033333333333333326,
+      "candidate_auc": 0.6222222222222222,
+      "candidate_routing": 0.10526315789473684,
+      "live_auc": 0.6555555555555556,
+      "live_routing": 0.10526315789473684,
+      "routing_delta": 0.0,
+      "rows": 19
+    },
+    "ceval:veterinary_medicine": {
+      "auc_delta": 0.022727272727272818,
+      "candidate_auc": 0.7159090909090909,
+      "candidate_routing": 0.1929824561403509,
+      "live_auc": 0.6931818181818181,
+      "live_routing": 0.1929824561403509,
+      "routing_delta": 0.0,
+      "rows": 19
+    },
+    "commonsense_qa": {
+      "auc_delta": 0.03191285090694973,
+      "candidate_auc": 0.6619004339533276,
+      "candidate_routing": 0.08333333333333333,
+      "live_auc": 0.6299875830463779,
+      "live_routing": 0.07888888888888888,
+      "routing_delta": 0.004444444444444445,
+      "rows": 600
+    },
+    "mbpp": {
+      "auc_delta": null,
+      "routing_delta": 0.006666666666666654,
+      "rows": 100
+    },
+    "mmlu_pro:biology": {
+      "auc_delta": 0.030952380952381064,
+      "candidate_auc": 0.7857142857142858,
+      "candidate_routing": 0.2471264367816092,
+      "live_auc": 0.7547619047619047,
+      "live_routing": 0.2413793103448276,
+      "routing_delta": 0.005747126436781602,
+      "rows": 58
+    },
+    "mmlu_pro:business": {
+      "auc_delta": 0.011363636363636354,
+      "candidate_auc": 0.773989898989899,
+      "candidate_routing": 0.2471264367816092,
+      "live_auc": 0.7626262626262627,
+      "live_routing": 0.2413793103448276,
+      "routing_delta": 0.005747126436781602,
+      "rows": 58
+    },
+    "mmlu_pro:chemistry": {
+      "auc_delta": 0.006644518272425293,
+      "candidate_auc": 0.8222591362126246,
+      "candidate_routing": 0.23976608187134504,
+      "live_auc": 0.8156146179401993,
+      "live_routing": 0.23391812865497075,
+      "routing_delta": 0.0058479532163742964,
+      "rows": 57
+    },
+    "mmlu_pro:computer science": {
+      "auc_delta": 0.025575447570332477,
+      "candidate_auc": 0.7557544757033249,
+      "candidate_routing": 0.21052631578947367,
+      "live_auc": 0.7301790281329924,
+      "live_routing": 0.20467836257309938,
+      "routing_delta": 0.0058479532163742964,
+      "rows": 57
+    },
+    "mmlu_pro:economics": {
+      "auc_delta": 0.01728395061728405,
+      "candidate_auc": 0.6703703703703704,
+      "candidate_routing": 0.1929824561403509,
+      "live_auc": 0.6530864197530863,
+      "live_routing": 0.1929824561403509,
+      "routing_delta": 0.0,
+      "rows": 57
+    },
+    "mmlu_pro:engineering": {
+      "auc_delta": 0.0,
+      "candidate_auc": 0.9567901234567902,
+      "candidate_routing": 0.24561403508771928,
+      "live_auc": 0.9567901234567902,
+      "live_routing": 0.24561403508771928,
+      "routing_delta": 0.0,
+      "rows": 57
+    },
+    "mmlu_pro:health": {
+      "auc_delta": 0.021164021164021274,
+      "candidate_auc": 0.6917989417989419,
+      "candidate_routing": 0.15204678362573099,
+      "live_auc": 0.6706349206349206,
+      "live_routing": 0.15204678362573099,
+      "routing_delta": 0.0,
+      "rows": 57
+    },
+    "mmlu_pro:history": {
+      "auc_delta": 0.03116883116883118,
+      "candidate_auc": 0.7298701298701299,
+      "candidate_routing": 0.21637426900584797,
+      "live_auc": 0.6987012987012987,
+      "live_routing": 0.23391812865497075,
+      "routing_delta": -0.01754385964912278,
+      "rows": 57
+    },
+    "mmlu_pro:law": {
+      "auc_delta": 0.013289036544850474,
+      "candidate_auc": 0.7441860465116279,
+      "candidate_routing": 0.23391812865497075,
+      "live_auc": 0.7308970099667774,
+      "live_routing": 0.2222222222222222,
+      "routing_delta": 0.011695906432748537,
+      "rows": 57
+    },
+    "mmlu_pro:math": {
+      "auc_delta": 0.032352941176470695,
+      "candidate_auc": 0.8661764705882353,
+      "candidate_routing": 0.27485380116959063,
+      "live_auc": 0.8338235294117646,
+      "live_routing": 0.26900584795321636,
+      "routing_delta": 0.005847953216374269,
+      "rows": 57
+    },
+    "mmlu_pro:other": {
+      "auc_delta": 0.027027027027027084,
+      "candidate_auc": 0.7932432432432434,
+      "candidate_routing": 0.20467836257309938,
+      "live_auc": 0.7662162162162163,
+      "live_routing": 0.19883040935672514,
+      "routing_delta": 0.005847953216374241,
+      "rows": 57
+    },
+    "mmlu_pro:philosophy": {
+      "auc_delta": 0.024074074074074026,
+      "candidate_auc": 0.8074074074074074,
+      "candidate_routing": 0.2631578947368421,
+      "live_auc": 0.7833333333333333,
+      "live_routing": 0.2573099415204678,
+      "routing_delta": 0.005847953216374269,
+      "rows": 57
+    },
+    "mmlu_pro:physics": {
+      "auc_delta": -0.0033222591362127574,
+      "candidate_auc": 0.862126245847176,
+      "candidate_routing": 0.2807017543859649,
+      "live_auc": 0.8654485049833888,
+      "live_routing": 0.27485380116959063,
+      "routing_delta": 0.005847953216374269,
+      "rows": 57
+    },
+    "mmlu_pro:psychology": {
+      "auc_delta": 0.04415954415954415,
+      "candidate_auc": 0.6894586894586895,
+      "candidate_routing": 0.22807017543859645,
+      "live_auc": 0.6452991452991453,
+      "live_routing": 0.21637426900584797,
+      "routing_delta": 0.011695906432748482,
+      "rows": 57
+    }
+  },
+  "claim_boundary": "Opened-development OOF only; passing requires independent evidence before activation.",
+  "configuration": {
+    "anchor_alpha": 0.5,
+    "copied_layer": 23,
+    "learning_rate": 0.0001,
+    "tap_layer": 22,
+    "train_mode": "full_block",
+    "weight_decay": 0.0,
+    "window": 8
+  },
+  "gates": {
+    "broad_pool_routing_ge_minus_0.010": true,
+    "language_routing_nonnegative": true,
+    "macro_native_auc_delta_ge_0.010": true,
+    "macro_routing_delta_ge_0.005": true,
+    "pooled_native_auc_nonnegative": true,
+    "pooled_routing_nonnegative": true
+  },
+  "inputs": [
+    {
+      "path": "../p29_copied_block_screen/tap22_full_block_lr0p0001_wd0p0_fold0.json",
+      "sha256": "3077d74ea6883f326f12a493608313da7fa826f6318b9afbd8f5e79efa78cfb7"
+    },
+    {
+      "path": "../p29_copied_block_screen/tap22_full_block_lr0p0001_wd0p0_fold1.json",
+      "sha256": "cf433a91b34ef38a401586290c63e8fa174526d623c9306027d90e88343b302c"
+    },
+    {
+      "path": "../p29_copied_block_screen/tap22_full_block_lr0p0001_wd0p0_fold2.json",
+      "sha256": "d2aaf3696c94573e9fe5aa611696737940e364d4e778d0489aedd31203d4400e"
+    },
+    {
+      "path": "../p29_copied_block_screen/tap22_full_block_lr0p0001_wd0p0_fold3.json",
+      "sha256": "6fed00b7345eee15357992c25ebe2691cfb8601b6b71fa54a71769873cc5a25e"
+    },
+    {
+      "path": "../p29_copied_block_screen/tap22_full_block_lr0p0001_wd0p0_fold4.json",
+      "sha256": "3b231acc52c0ea4a71aae27af81463eefb4052c7f81303a3e82452d020525d3b"
+    }
+  ],
+  "live_unchanged": true,
+  "macro_source": {
+    "auc_delta": 0.02147861366307023,
+    "routing_delta": 0.006084825033876823,
+    "valid_auc_sources": 65
+  },
+  "pooled": {
+    "auc_delta": 0.018360655737704845,
+    "candidate_auc": 0.8279637677132536,
+    "candidate_routing": 0.21711111111111112,
+    "live_auc": 0.8096031119755488,
+    "live_routing": 0.21,
+    "routing_delta": 0.007111111111111124,
+    "rows": 3000
+  },
+  "rows": 3000,
+  "status": "opened_development_full_grouped_oof"
+}
