@@ -929,3 +929,42 @@ and proceed to P25-B data expansion. Result SHA256:
 `4075b312e0b30fa18dec6aa0a374948ce4644b745e70b0ab627fe77983908d26`.
 No API spend was added; conservative cumulative spend remains
 `$34.052445 / $500`.
+
+## P31--P32: frozen copied-transform control and prospective result
+
+P31 separated representation from fitting capacity by copying the checkpoint's
+L31 transformer block, freezing every copied parameter, and training only a
+4,097-parameter `C=3e-4` logistic readout over the transformed L30 causal
+8-token window. The base model and copied block both have zero trainable
+parameters. Five-fold source-family OOF on the 3,000-row standalone set passed
+all six development gates: macro/pooled routing gains `+.00675/+.00444` and
+macro/pooled native-failure AUC gains `+.02468/+.01416`.
+
+The unchanged candidate then exactly replayed the 1,300 historical P15--P17
+rows. Aggregate eight-pool macro AUC improved `+.01984`; every historical gate
+passed, including the frozen `-.010` pool floor (SNLI `-.00593`, SST-2
+`-.00616`). This authorized one new prospective standalone purchase, not live
+activation.
+
+P32 froze 538 source-disjoint rows before any TTS, native, causal, or judge
+output: PIQA 150, COPA 90, OpenBookQA 148, and Social IQa 150. Native and causal
+replays covered all 538 IDs with zero errors, missing onsets, or missing EOTs;
+the causal run produced finite `(4,8,4096)` windows of exact length 8 and
+matched seed, onset, answer text, EOT, and error fields exactly. The judge
+produced 128 failures (23.79%) with zero errors.
+
+The candidate is directionally positive but fails three pre-registered gates.
+Pooled native-failure AUC changes `.74874→.75724` (`+.00850`), below the
+`+.010` floor, and its source/pool-stratified 95% bootstrap interval
+`[-.00907,+.02759]` crosses zero. Macro four-pool gain is `+.03273`, with every
+pool positive (`+.08721` COPA, `+.02481` OpenBookQA, `+.00990` PIQA, `+.00901`
+Social IQa), but exact 30%-budget failure precision falls
+`.46584→.44099` (`-.02484`). P32 therefore rejects packaging and activation;
+there is no post-opening tuning and the live gate remains unchanged. Result
+receipt SHA256:
+`161116d7e8acf2c633bf28681c8acabb09b96218b24fb654634906cead891eec`.
+
+P32 TTS cost was `$1.532025`; judge usage was 181,693 input and 38,264
+output tokens with zero cached input, costing `$0.30845775`. The P32 increment
+is `$1.84048275`; conservative cumulative OpenAI spend is
+`$92.37773275 / $500`.

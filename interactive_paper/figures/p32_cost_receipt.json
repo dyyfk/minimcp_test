@@ -1,0 +1,25 @@
+{
+  "tts": {
+    "model": "tts-1",
+    "characters": 102135,
+    "rate_usd_per_million_characters": 15.0,
+    "cost_usd": 1.532025,
+    "receipt_sha256": "ae9e48911812005be25c0800ae0c3af1f9b5acee23d19a4d678435dd01e33d48"
+  },
+  "judge": {
+    "model": "gpt-5.4-mini",
+    "prompt_tokens": 181693,
+    "cached_prompt_tokens": 0,
+    "completion_tokens": 38264,
+    "input_rate_usd_per_million_tokens": 0.75,
+    "cached_input_rate_usd_per_million_tokens": 0.075,
+    "output_rate_usd_per_million_tokens": 4.5,
+    "cost_usd": 0.30845775,
+    "pricing_checked_utc": "2026-09-02",
+    "judged_sha256": "8209499b9c0dedd67b95ac30d7b14350d73a0f14222e981899939057949a1c48"
+  },
+  "p32_incremental_cost_usd": 1.84048275,
+  "prior_conservative_cumulative_usd": 90.53725,
+  "conservative_cumulative_usd": 92.37773275,
+  "hard_cap_usd": 500.0
+}
