@@ -1,0 +1,239 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<title>NVDA manual native-duplex evaluation</title>
+<style>
+:root { --page:#f9f9f7; --surface:#fcfcfb; --ink:#0b0b0b; --ink2:#52514e; --muted:#898781; --hair:rgba(11,11,11,.10);
+        --blue:#2a78d6; --green:#1baf7a; --orange:#f28e2b; --red:#d62728; --warnbg:#fff8ec; --warnbd:#e8d9b5; }
+body { background:var(--page); color:var(--ink); font:14px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif; margin:0; padding:32px 20px 60px; }
+.wrap { max-width:960px; margin:0 auto; }
+h1 { font-size:22px; font-weight:650; margin:0 0 4px; } .meta { color:var(--ink2); font-size:13px; margin-bottom:14px; }
+.badges { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:20px; }
+.badge { font-size:12px; padding:3px 10px; border-radius:999px; border:1px solid var(--hair); background:var(--surface); color:var(--ink2); }
+.badge b { color:var(--ink); } .badge.warn { background:var(--warnbg); border-color:var(--warnbd); }
+.card { background:var(--surface); border:1px solid var(--hair); border-radius:10px; padding:18px 20px; margin-bottom:18px; }
+.row { display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+button { font:inherit; padding:8px 14px; border-radius:8px; border:1px solid var(--hair); background:#fff; cursor:pointer; }
+button.primary { background:var(--blue); color:#fff; border-color:var(--blue); } button.rec { background:var(--red); color:#fff; border-color:var(--red); }
+button:disabled { opacity:.5; cursor:default; }
+select { font:inherit; padding:7px 10px; border-radius:8px; border:1px solid var(--hair); background:#fff; }
+.probes { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:14px; }
+.probe { border:1px solid var(--hair); border-radius:8px; padding:12px 14px; }
+.probe h3 { margin:0 0 2px; font-size:14px; } .probe .desc { color:var(--muted); font-size:11.5px; min-height:30px; }
+.gauge { position:relative; height:14px; background:#eee; border-radius:7px; margin:10px 0 4px; overflow:visible; }
+.gauge .fill { height:100%; border-radius:7px; } .gauge .thr { position:absolute; top:-4px; width:2px; height:22px; background:var(--ink); }
+.val { font-size:22px; font-weight:650; font-variant-numeric:tabular-nums; } .sub { color:var(--ink2); font-size:12px; }
+.fire { display:inline-block; font-size:12px; padding:2px 8px; border-radius:999px; margin-top:6px; }
+.fire.yes { background:#fde2e2; color:#8a0000; } .fire.no { background:#e3f6ec; color:#0a5a2a; } .fire.floor { background:#eee; color:#444; }
+.timeline { display:flex; gap:1px; height:26px; margin:8px 0 2px; align-items:flex-end; }
+.timeline span { flex:1; background:#cfe3fb; height:60%; } .timeline span.speak { background:var(--green); height:100%; }
+.timeline span.end { background:var(--ink); width:2px; flex:none; height:100%; }
+.transcript { font-size:15px; margin:6px 0; } .muted { color:var(--muted); font-size:12px; }
+pre { white-space:pre-wrap; font-size:12px; color:var(--ink2); }
+table { border-collapse:collapse; width:100%; font-size:12.5px; } th,td { text-align:left; padding:4px 8px; border-bottom:1px solid var(--hair); } th { color:var(--muted); font-weight:600; }
+.expert { border-left:3px solid var(--blue); padding:8px 12px; background:#f3f7fd; margin-top:10px; border-radius:4px; }
+#status { color:var(--ink2); font-size:13px; min-height:18px; }
+</style></head><body><div class="wrap">
+<h1>NVDA manual native-duplex evaluation</h1>
+<div class="meta">NemotronLabs-VoiceChat-11B, frozen. The UI replays your audio through NVIDIA's native 80 ms duplex streaming wrapper. It uses the wrapper's stateful codec and TTS tail controls; compute happens after recording because this NeMo release cannot sustain real-time inference.</div>
+<div class="badges">
+  <span class="badge"><b>native duplex</b> — no ASR front-end, no turn template, nothing forces the turn</span>
+  <span class="badge"><b>model frozen</b> — probes are linear heads on hidden states</span>
+  <span class="badge warn"><b>exact replay</b> — valid model timing, results arrive after computation</span>
+  <span class="badge warn" id="expertbadge"><b>expert</b> — …</span>
+</div>
+
+<div class="card">
+  <div class="muted" style="margin-bottom:10px"><b>1.</b> Record a short question. <b>2.</b> Run it to inspect the deployed, v2, and causal probes. <b>3.</b> Below, record your own interruption or select a prepared one and place it at an exact time during the answer.</div>
+  <div class="row">
+    <button id="rec" class="rec">● Record</button>
+    <button id="stop" disabled>■ Stop</button>
+    <span class="muted">or</span>
+    <input type="file" id="file" accept="audio/*">
+    <label class="muted">tier <select id="tier"><option value="conservative">conservative (15 %)</option><option value="balanced" selected>balanced (30 %)</option><option value="aggressive">aggressive (50 %)</option></select></label>
+    <button id="send" class="primary" disabled>Run + hear baseline</button>
+  </div>
+  <div id="status" style="margin-top:8px"></div>
+  <audio id="inaudio" controls style="display:none;margin-top:8px;width:100%"></audio>
+</div>
+
+<div class="card" id="result" style="display:none">
+  <div class="muted">what the model heard (its own transcription channel; may be empty)</div>
+  <div class="transcript" id="src">—</div>
+  <div class="muted">what the model answered (agent text channel; greedy decoding)</div>
+  <div class="transcript" id="ans">—</div>
+  <audio id="outaudio" controls style="display:none;width:100%;margin:6px 0"></audio>
+  <div class="muted" id="timing"></div>
+  <div class="timeline" id="tl"></div>
+  <div class="muted">agent channel per 80 ms frame — grey = listening (PAD), green = speaking; black tick = end of your audio. The probes read at the first green run.</div>
+  <div class="probes" id="probes"></div>
+  <div id="expert"></div>
+</div>
+
+<div class="card">
+  <h2 style="font-size:16px;margin:0 0 4px">Interruption test — does the model stop when you say "stop"?</h2>
+  <div class="muted" style="margin-bottom:10px">Timing-controlled native-duplex replay: the baseline finds where the model starts speaking; the interrupted pass places your recorded or selected interruption during active baseline speech and compares the following 6 s. Run the baseline above first so this test can reuse it. Recorder silence is trimmed automatically. If the requested offset falls after the answer, it is moved to the nearest valid speaking frame and reported.</div>
+  <div class="row">
+    <span class="muted">question: the last recording/file above</span>
+    <label class="muted">interrupt with <select id="stim"></select></label>
+    <button id="recstim">● record my own</button><button id="stopstim" disabled>■</button>
+    <label class="muted">requested at <input id="offset" type="number" value="1.0" step="0.5" min="0" max="8" style="width:60px"> s into the answer</label>
+    <button id="runint" class="primary" disabled>Compute interruption replay</button>
+  </div>
+  <div id="istatus" class="muted" style="margin-top:8px"></div>
+  <div id="iresult" style="display:none;margin-top:10px">
+    <div class="muted">baseline (question alone) — agent channel per 80 ms frame; black tick = end of your audio</div>
+    <div class="timeline" id="tl0"></div>
+    <div class="muted">interrupted — orange tick = your interruption starts</div>
+    <div class="timeline" id="tl1"></div>
+    <div id="iverdict" style="margin-top:10px;font-size:15px"></div>
+    <div class="muted" id="idetail" style="margin-top:6px"></div>
+    <div id="iaudiolabel" class="muted" style="display:none;margin-top:8px"><b>Interrupted agent output — press ▶ to listen</b></div>
+    <audio id="iaudio" controls style="display:none;width:100%;margin-top:4px"></audio>
+    <div id="istim" class="muted" style="margin-top:8px"></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="muted" style="margin-bottom:6px">the three probes (calibration n=2,258; external AUC cold on 4 pools)</div>
+  <table id="arttab"></table>
+</div>
+</div>
+
+<script>
+const ARTINFO = __ARTINFO__;
+const $ = id => document.getElementById(id);
+let blob = null, rec = null, chunks = [];
+$('expertbadge').innerHTML = '<b>expert</b> — set by server';
+
+function setStatus(s){ $('status').textContent = s; }
+const progressTimers = new Map();
+function startProgress(el, suffix) {
+  stopProgress(el);
+  const update = async () => {
+    try {
+      const d = await (await fetch('/health')).json();
+      if (d.busy) el.textContent = `${d.phase} · ${Math.round(d.elapsed_s || 0)} s elapsed${suffix}`;
+    } catch (_) {}
+  };
+  update();
+  progressTimers.set(el, setInterval(update, 1000));
+}
+function stopProgress(el) {
+  if (progressTimers.has(el)) clearInterval(progressTimers.get(el));
+  progressTimers.delete(el);
+}
+$('rec').onclick = async () => {
+  const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+  rec = new MediaRecorder(stream); chunks = [];
+  rec.ondataavailable = e => chunks.push(e.data);
+  rec.onstop = () => { blob = new Blob(chunks, {type: rec.mimeType}); $('inaudio').src = URL.createObjectURL(blob); $('inaudio').style.display='block'; $('send').disabled = false; enableInt(); setStatus(`recorded ${(blob.size/1024).toFixed(0)} kB (${rec.mimeType})`); stream.getTracks().forEach(t=>t.stop()); };
+  rec.start(); $('rec').disabled = true; $('stop').disabled = false; setStatus('recording… ask a question, then Stop');
+};
+$('stop').onclick = () => { rec.stop(); $('rec').disabled = false; $('stop').disabled = true; };
+$('file').onchange = e => { blob = e.target.files[0]; if (blob) { $('inaudio').src = URL.createObjectURL(blob); $('inaudio').style.display='block'; $('send').disabled = false; enableInt(); setStatus(`file ${blob.name} (${(blob.size/1024).toFixed(0)} kB)`); } };
+
+const DESC = {
+  deployed: ['deployed (last night)', 'L30 · onset_last | onset_mean8 | user_mean · reads commit + 8 frames · + act head (floor-turn filter)', 'var(--blue)'],
+  v2:       ['v2 (review round)', 'L26/L30/L34 averaged · + commit frame · same read window', 'var(--green)'],
+  causal:   ['strictly causal', 'L34 · commit frame | mean of 8 frames before | running mean to commit · nothing after the commit', 'var(--orange)'],
+};
+function gauge(p, thr, color){ return `<div class="gauge"><div class="fill" style="width:${(100*p).toFixed(1)}%;background:${color}"></div><div class="thr" style="left:${(100*thr).toFixed(1)}%"></div></div>`; }
+
+$('send').onclick = async () => {
+  if (!blob) return;
+  $('send').disabled = true; setStatus('running the duplex model… typically 20–60 s; long audio takes longer');
+  startProgress($('status'), '');
+  const t0 = performance.now();
+  try {
+    const r = await fetch(`/turn?tier=${$('tier').value}`, {method:'POST', body: blob});
+    if (!r.ok) throw new Error(await r.text());
+    const d = await r.json();
+    $('result').style.display = 'block';
+    $('src').textContent = d.src_text || '(empty — the offline path returned no self-transcript)';
+    $('ans').textContent = d.answer || '(no text)';
+    if (d.audio_b64) { $('outaudio').src = 'data:audio/wav;base64,' + d.audio_b64; $('outaudio').style.display='block'; } else { $('outaudio').style.display='none'; }
+    const tl = $('tl'); tl.innerHTML = '';
+    const nq = d.n_frames_query, T = d.timeline.length;
+    d.timeline.forEach((v,i) => { if (i === nq) { const e = document.createElement('span'); e.className='end'; tl.appendChild(e); } const s = document.createElement('span'); if (v) s.className='speak'; tl.appendChild(s); });
+    $('timing').textContent = d.no_commit ? `the model never committed to speak (no gate read); inference ${d.infer_s} s`
+      : `commit at frame ${d.onset_frame} (${(d.onset_frame*0.08).toFixed(2)} s), your audio ended at frame ${nq} → commit gap ${d.commit_gap_s>=0?'+':''}${d.commit_gap_s} s · ${T} frames · inference ${d.infer_s} s · round trip ${((performance.now()-t0)/1000).toFixed(1)} s`;
+    const P = $('probes'); P.innerHTML = '';
+    if (!d.no_commit) for (const k of ['deployed','v2','causal']) {
+      const p = d.probes[k], [name, desc, color] = DESC[k];
+      let fire = p.fired ? `<span class="fire yes">ESCALATE → gpt-5.5</span>` : `<span class="fire no">answer locally</span>`;
+      if (k==='deployed' && p.floor_turn) fire = `<span class="fire floor">floor turn (act ${p.p_act.toFixed(3)} &lt; τ ${p.tau.toFixed(3)}) — gate bypassed</span>`;
+      P.innerHTML += `<div class="probe"><h3 style="color:${color}">${name}</h3><div class="desc">${desc}</div>${gauge(p.p_fail, p.threshold, color)}<div class="val">${p.p_fail.toFixed(3)}</div><div class="sub">P(fail) · ${d.tier} threshold ${p.threshold.toFixed(3)}${k==='deployed'?` · P(info) ${p.p_act.toFixed(3)}`:''}</div>${fire}</div>`;
+    }
+    const E = $('expert');
+    if (d.expert_answer) E.innerHTML = `<div class="expert"><b>gpt-5.5 expert</b> (query: ${d.src_text||'?'}${d.uplink_asr?` via ${d.uplink_asr}`:''})<br>${d.expert_answer}</div>`;
+    else if (!d.expert_enabled && !d.no_commit && d.probes.deployed.fired) E.innerHTML = `<div class="expert muted">deployed gate fired, but the expert step is disabled on this server (no OPENAI_API_KEY at launch)</div>`;
+    else E.innerHTML = '';
+    $('expertbadge').innerHTML = d.expert_enabled ? '<b>expert</b> — gpt-5.5 enabled for fired turns' : '<b>expert</b> — disabled (no key); probes only';
+    setStatus(d.audio_b64 ? 'done — press ▶ on the model output above' : 'done — the model returned no audio');
+  } catch (e) { setStatus('error: ' + e.message); }
+  stopProgress($('status'));
+  $('send').disabled = false;
+};
+
+// ---- interruption test ----
+const STIMS = __STIMS__;
+(function(){ const s = $('stim'); for (const [id, txt] of STIMS) { const o = document.createElement('option'); o.value = id; o.textContent = `"${txt}" (TTS)`; s.appendChild(o); } const o = document.createElement('option'); o.value='custom'; o.textContent='my own recording'; s.appendChild(o); })();
+let stimRec = null, stimChunks = [], haveCustom = false;
+$('recstim').onclick = async () => {
+  const stream = await navigator.mediaDevices.getUserMedia({audio:true}); stimRec = new MediaRecorder(stream); stimChunks = [];
+  stimRec.ondataavailable = e => stimChunks.push(e.data);
+  stimRec.onstop = async () => { const b = new Blob(stimChunks, {type: stimRec.mimeType}); stream.getTracks().forEach(t=>t.stop());
+    const r = await fetch('/stim', {method:'POST', body:b}); const text = await r.text(); let d = {}; try { d = JSON.parse(text); } catch (_) {}
+    haveCustom = r.ok; $('stim').value = 'custom'; $('istatus').textContent = haveCustom ? `custom interruption recorded and trimmed to ${d.duration_s} s` : `upload failed: ${d.error || text}`; };
+  stimRec.start(); $('recstim').disabled = true; $('stopstim').disabled = false; $('istatus').textContent = 'recording the interruption… say "stop" then ■';
+};
+$('stopstim').onclick = () => { stimRec.stop(); $('recstim').disabled = false; $('stopstim').disabled = true; };
+const enableInt = () => { $('runint').disabled = !blob; };
+$('file').addEventListener('change', enableInt); document.addEventListener('click', enableInt);
+function drawTL(el, tl, nq, stimFrame) {
+  el.innerHTML = '';
+  tl.forEach((v,i) => { if (i === nq) { const e = document.createElement('span'); e.className='end'; el.appendChild(e); }
+    if (stimFrame !== undefined && i === stimFrame) { const e = document.createElement('span'); e.className='end'; e.style.background='var(--orange)'; el.appendChild(e); }
+    const s = document.createElement('span'); if (v) s.className='speak'; el.appendChild(s); });
+}
+$('runint').onclick = async () => {
+  if (!blob) return; const stim = $('stim').value; if (stim === 'custom' && !haveCustom) { $('istatus').textContent = 'record an interruption first'; return; }
+  $('runint').disabled = true; $('istatus').textContent = 'computing the timed replay… the cached baseline is reused when available';
+  startProgress($('istatus'), '');
+  try {
+    const r = await fetch(`/interrupt?tier=${$('tier').value}&stim=${stim}&offset=${$('offset').value}`, {method:'POST', body: blob});
+    if (!r.ok) throw new Error(await r.text()); const d = await r.json();
+    if (d.error) { $('istatus').textContent = d.error; $('runint').disabled = false; return; }
+    $('iresult').style.display = 'block';
+    drawTL($('tl0'), d.baseline_timeline, d.n_frames_query); drawTL($('tl1'), d.interrupted_timeline, d.n_frames_query, d.stim_frame);
+    const s = d.stats;
+    let verdict;
+    if (s.stopped) verdict = `<b style="color:var(--green)">stopped</b> — spoke ${s.speak_s_after_stim} s in the ${s.window_s} s after "${d.stim_text}" (baseline: ${s.baseline_speak_s_same_window} s)` + (s.yield_latency_s !== null ? `; went quiet ${s.yield_latency_s} s after the interruption began` : '');
+    else if (s.speaking_at_stim) verdict = `<b style="color:var(--red)">did not stop</b> — kept speaking ${s.speak_s_after_stim} s of the next ${s.window_s} s (baseline ${s.baseline_speak_s_same_window} s)` + (s.yield_latency_s !== null ? `; first pause ${s.yield_latency_s} s later` : '');
+    else verdict = s.resumed_after_stim ? `<b style="color:var(--red)">ignored it</b> — was silent when "${d.stim_text}" arrived, then started/resumed speaking anyway (${s.speak_s_after_stim} s of the next ${s.window_s} s; baseline ${s.baseline_speak_s_same_window} s)`
+                                        : `<b style="color:var(--green)">stayed quiet</b> — was silent when "${d.stim_text}" arrived and did not resume in the next ${s.window_s} s (baseline ${s.baseline_speak_s_same_window} s)`;
+    $('iverdict').innerHTML = verdict;
+    $('idetail').textContent = `your audio ended at ${d.question_end_s} s; the model committed at ${d.commit_s} s${d.commit_s < d.question_end_s ? ' (before you finished — a barge-in)' : ''}; requested interruption at ${d.requested_stim_at_s} s and placed at ${d.stim_at_s} s (${d.actual_offset_s} s after ${d.anchor_s === d.commit_s ? 'the commit' : 'the end of your audio'}${d.timing_adjusted ? '; adjusted to active baseline speech' : ''}; utterance ${s.stim_s} s). Answer alone: “${d.question_answer}” · interrupted: “${d.interrupted_answer}” · this request ${d.compute_s} s${d.baseline_cached ? ' (baseline cached)' : ''}`;
+    if (d.audio_b64) {
+      $('iaudio').src = 'data:audio/wav;base64,' + d.audio_b64;
+      $('iaudiolabel').style.display = 'block';
+      $('iaudio').style.display = 'block';
+    } else {
+      $('iaudiolabel').style.display = 'none';
+      $('iaudio').style.display = 'none';
+    }
+    $('istim').textContent = `Completed in ${d.compute_s} s${d.baseline_cached ? ' using the cached baseline' : ''}. Audio uses NVIDIA's stateful streaming codec rather than its broken bulk offline decoder.`;
+    $('istatus').textContent = d.audio_b64 ? 'done — press ▶ on the interrupted agent output below' : 'done — inspect the interrupted text and timeline';
+    $('iresult').scrollIntoView({behavior:'smooth', block:'start'});
+  } catch (e) { $('istatus').textContent = 'error: ' + e.message; }
+  stopProgress($('istatus'));
+  $('runint').disabled = false;
+};
+
+// artifact table
+(function(){
+  const t = $('arttab'); let h = '<tr><th>probe</th><th>read</th><th>calib OOF</th><th>TriviaQA</th><th>WebQ</th><th>Llama-Q</th><th>SD-QA</th><th>mean</th></tr>';
+  for (const k of ['deployed','v2','causal']) { const a = ARTINFO[k]; const e = a.external_auc_cold || {}; const f = x => x===undefined?'—':x.toFixed(3);
+    h += `<tr><td><b>${DESC[k][0]}</b></td><td class="muted">${a.read || 'L30 onset: last | mean8 | user_mean'}</td><td>${f(a.calib_oof_auc)}</td><td>${f(e.striviaqa)}</td><td>${f(e.swebq)}</td><td>${f(e.sllama)}</td><td>${f(e.sdqa)}</td><td><b>${f(e.mean)}</b></td></tr>`; }
+  t.innerHTML = h;
+})();
+</script></body></html>

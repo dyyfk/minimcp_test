@@ -1,5 +1,20 @@
 figures/_voldata/
-data/gate_pull/
+# NVDA replay data (npz shards, labels, wavs) stays out; scripts, docs, small
+# results and the exported probe artifacts under gate_pull/new/ are tracked.
+data/gate_pull/*
+!data/gate_pull/new/
+data/gate_pull/new/*
+!data/gate_pull/new/demo/
+data/gate_pull/new/demo/*
+!data/gate_pull/new/demo/fit_demo_artifacts.py
+!data/gate_pull/new/demo/gate_demo_nvda.json
+!data/gate_pull/new/demo/nvda_replay.py
+!data/gate_pull/new/demo/nvda_replay_v2.py
+!data/gate_pull/new/demo/probe_compare_server.py
+!data/gate_pull/new/demo/probe_compare_page.html
+!data/gate_pull/new/probe_doc/
+data/gate_pull/new/probe_doc/__pycache__/
+data/gate_pull/new/probe_doc/scripts/__pycache__/
 
 # issue #8 export bundle (246MB zip; published on HF dyyfk/minicpm-o45-native-gate-data)
 export/

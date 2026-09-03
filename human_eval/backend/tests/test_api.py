@@ -49,16 +49,34 @@ class ApiTests(unittest.TestCase):
         for task in assignment["tasks"]:
             for conversation in task["conversations"]:
                 conversation_id = conversation["conversation_id"]
-                rating = self.client.put(
-                    f"/api/conversations/{conversation_id}/rating",
-                    json={"metrics": {"overall": 4}, "feedback": "Clear response"},
-                )
-                self.assertEqual(rating.status_code, 200)
+                for index in range(conversation["target_turns"]):
+                    app_module.store.mutate_conversation(
+                        conversation_id,
+                        lambda _task, target, index=index: target["turns"].append(
+                            {
+                                "turn_id": f"turn_{conversation_id}_{index}",
+                                "gate": {},
+                                "user": {"transcript": f"Prompt {index + 1}"},
+                                "anomalies": {},
+                                "routing_review": {},
+                            }
+                        ),
+                    )
                 finalized = self.client.post(
                     f"/api/conversations/{conversation_id}/finalize",
                     json={"end_reason": "user_finished"},
                 )
                 self.assertEqual(finalized.status_code, 200)
+                interaction = app_module.store.find_conversation(conversation_id)[2]
+                self.assertEqual(interaction["status"], "interaction_completed")
+                self.assertEqual(interaction["evaluation_status"], "pending")
+                rating = self.client.put(
+                    f"/api/conversations/{conversation_id}/rating",
+                    json={"metrics": {"overall": 4}, "feedback": "Clear response"},
+                )
+                self.assertEqual(rating.status_code, 200)
+                evaluated = app_module.store.find_conversation(conversation_id)[2]
+                self.assertEqual(evaluated["evaluation_status"], "completed")
             comparison = self.client.put(
                 f"/api/tasks/{task['task_id']}/comparison",
                 json={
@@ -98,6 +116,61 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(len(conversation_export.text.strip().splitlines()), 8)
         self.assertIn('"rating_metrics"', conversation_export.text)
 
+    def test_interaction_lifecycle_and_quality_review(self) -> None:
+        assignment = self.client.post(
+            "/api/study-sessions", json={"user_id": "completion-gate"}
+        ).json()
+        conversation = assignment["tasks"][0]["conversations"][0]
+        conversation_id = conversation["conversation_id"]
+
+        early_rating = self.client.put(
+            f"/api/conversations/{conversation_id}/rating",
+            json={"metrics": {"overall": 4}, "feedback": ""},
+        )
+        self.assertEqual(early_rating.status_code, 409)
+        early_finish = self.client.post(
+            f"/api/conversations/{conversation_id}/finalize",
+            json={"end_reason": "user_finished"},
+        )
+        self.assertEqual(early_finish.status_code, 200)
+        private = app_module.store.find_conversation(conversation_id)[2]
+        self.assertEqual(private["status"], "interaction_completed")
+        self.assertEqual(private["evaluation_status"], "pending")
+        self.assertEqual(private["quality_review"]["status"], "needs_review")
+        self.assertIn(
+            "fewer_than_target_turns",
+            private["quality_review"]["automatic_flags"],
+        )
+
+        reviewed = self.client.put(
+            f"/api/admin/conversations/{conversation_id}/quality-review",
+            json={
+                "status": "valid",
+                "reviewer": "researcher-1",
+                "reason": "followed_task",
+                "note": "All required prompts were used.",
+            },
+        )
+        self.assertEqual(reviewed.status_code, 200)
+        self.assertEqual(reviewed.json()["status"], "valid")
+
+    def test_expired_session_is_not_resumed(self) -> None:
+        first = self.client.post(
+            "/api/study-sessions", json={"user_id": "returning-user"}
+        ).json()
+        private = app_module.store.get(first["session_id"])
+        private["assignment"]["reservation_expires_at"] = (
+            "2000-01-01T00:00:00+00:00"
+        )
+        app_module.store.save(private, renew_reservation=False)
+
+        second = self.client.post(
+            "/api/study-sessions", json={"user_id": "returning-user"}
+        ).json()
+        self.assertNotEqual(second["session_id"], first["session_id"])
+        expired = app_module.store.get(first["session_id"])
+        self.assertEqual(expired["status"], "expired")
+
     def test_participant_stream_events_hide_gate_telemetry(self) -> None:
         self.assertEqual(
             app_module._participant_model_event(
@@ -114,6 +187,22 @@ class ApiTests(unittest.TestCase):
         self.assertIsNone(
             app_module._participant_model_event({"type": "score", "v": 0.9})
         )
+
+    def test_temporary_debug_flag_exposes_model_config(self) -> None:
+        with patch.dict(
+            "os.environ", {"HUMAN_EVAL_DEBUG_MODEL_LOGS": "1"}, clear=False
+        ):
+            event = app_module._participant_model_event(
+                {
+                    "type": "hello",
+                    "protocol": "duplex_v1",
+                    "probe_on": True,
+                    "tier": "aggressive",
+                    "mode": "native duplex",
+                }
+            )
+        self.assertEqual(event["debug"]["model"], "minicpm_plus")
+        self.assertEqual(event["debug"]["tier"], "aggressive")
 
     def test_concurrent_readiness_requests_share_one_warmup(self) -> None:
         class FakeGateway:
@@ -142,10 +231,13 @@ class ApiTests(unittest.TestCase):
             app_module.model_gateway = original_gateway
             app_module.model_warm_task = None
 
-    def test_required_transcripts_block_readiness_without_asr(self) -> None:
+    def test_required_transcripts_block_legacy_upstream_without_asr(self) -> None:
         with patch.dict(
             "os.environ",
-            {"HUMAN_EVAL_REQUIRE_TRANSCRIPTS": "1"},
+            {
+                "HUMAN_EVAL_REQUIRE_TRANSCRIPTS": "1",
+                "MINICPM_DEMO_URL": "https://example.invalid/legacy",
+            },
             clear=False,
         ):
             with patch.dict("os.environ", {}, clear=False):
@@ -158,7 +250,21 @@ class ApiTests(unittest.TestCase):
                     if old_key is not None:
                         os.environ["OPENAI_API_KEY"] = old_key
         self.assertEqual(response.status_code, 503)
-        self.assertIn("OPENAI_API_KEY", response.json()["detail"])
+        self.assertIn("post-hoc ASR", response.json()["detail"])
+
+    def test_public_admin_routes_require_bearer_token(self) -> None:
+        with patch.dict(
+            "os.environ",
+            {"HUMAN_EVAL_PUBLIC": "1", "HUMAN_EVAL_ADMIN_TOKEN": "test-secret"},
+            clear=False,
+        ):
+            denied = self.client.get("/api/admin/export.jsonl")
+            allowed = self.client.get(
+                "/api/admin/export.jsonl",
+                headers={"Authorization": "Bearer test-secret"},
+            )
+        self.assertEqual(denied.status_code, 401)
+        self.assertEqual(allowed.status_code, 200)
 
     def test_routing_review_uses_turn_level_expected_action(self) -> None:
         assignment = self.client.post(

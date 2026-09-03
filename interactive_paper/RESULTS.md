@@ -5498,3 +5498,470 @@ P(fail) sometimes under-fires (failure-probe calibration is
 standalone-question only; the same in-context coverage gap 8bj fixed
 for the ACT probe exists for the FAILURE probe). Next calibration
 pass: add reqqx-style in-context rows to the failure-probe mix.
+
+## Phase 8bq — the label is now the deployed answer: native-judged training labels, per-language operating points, receipt on the deployed manifest (~$10 API, $0 GPU, 2026-09-01)
+
+**Trigger:** an external review of the 8bp gate made four points, all
+verified against the repo: (1) training labels were turn-based
+`sampling=False` outcomes while features came from native duplex
+sampling (`streaming_generate` defaults `do_sample=True, T=0.7`,
+official `top_k=20`) — and the internal test label (guard1) was the
+v3-harness `heard_ok`, not native either; (2) the receipt
+(`scripts/27`) read the default-config tags → n=5252 ≠ deployed 5228;
+(3) Reasoning-zh is an operating-point failure first (global balanced
+threshold fires 1%), AUC second; (4) the +.02/doubling curve is six
+historical points across changing families/configs, not a fixed-set
+subsampling — it says "coverage helps", not "another random doubling
+pays +.02".
+
+**Labels re-made from the deployed behaviour (no GPU).** The official
+native dumps kept `answer_text`; `judge_native` (gpt-5.4-mini, same
+JUDGE_SYSTEM) over caliboff/expoff/exp2off/exp3off/exp3zhoff/freshoff
+= 5,528 rows for ~$10. Lesson: five parallel judge apps trip the org
+TPM/RPM 429 limits (5,000+ rows came back as ERROR); `judge_native`
+now retries ERROR rows only (real verdicts are never re-judged) with
+60 s backoff, and `judge_all` runs tags sequentially in ONE detached
+app. Result: 0 unjudged rows.
+
+**Turn-based vs native labels on the same 5,228 rows:** agreement
+.808; fail rate .463 (tb) → .541 (native). Asymmetric: 702 rows
+tb-correct/native-wrong vs 290 the other way. Native answers that
+never reached end_of_turn (2.6%) are .946 fail. Families that disagree
+most: hard-knowledge .656, trap-truthful .673, easy-chat .712;
+least: trap .977, know-arc .890, know-longtail .879. Disagreements are
+plain hallucinations under sampling (Lamarck "army officer", Bednarik
+"hockey") — questions the deterministic decode got right and the probe
+was therefore being taught NOT to escalate.
+
+**Three-way refit on official features (`scripts/30`, nested-CV C
+selection, family GroupKFold, bootstrap CI; `figures/label_source_refit.json`):**
+
+| source | n | strat OOF | family-GroupKFold OOF | test (v3 lbl) | test (native lbl) | TriviaQA | WebQ | Llama | SD-QA | zh | En-4 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| turn-based (8bp deployed) | 5228 | .855 | .827 | .844 | .878 | .767 | .772 | .815 | .728 | .606 | .771 |
+| **native (deployed now)** | 5228 | .848 | .822 | .843 | .876 | .802 | .777 | .807 | .700 | .621 | .771 |
+| agree-only | 4224 | .911 | .879 | .842 | .883 | .788 | .764 | .825 | .703 | .619 | .770 |
+
+Paired bootstrap native−tb (`scripts/30b`): test −.001 [−.024,+.022],
+TriviaQA **+.035 [+.006,+.065]**, WebQ +.005, Llama −.008, SD-QA −.028
+[−.068,+.010], zh +.016 [−.039,+.070]. **Verdict: label source is a
+wash for ranking; it is a definitional fix, not a lever.** Nested CV
+picks C=3e-4 in every fold for both sources, so the old "select C on
+the reported OOF" was not inflating anything. The family-GroupKFold
+OOF (.82) is the honest cross-family number; the stratified .85 leaks
+family identity. "Agree-only" .91 OOF is the easy-subset illusion —
+external does not move.
+
+**Deployed (`scripts/31`, guards pass):** native labels, C=3e-4, OOF
+.848; guard1 testoff .844→.843 (v3 labels) / .878→.876 (native
+labels), tie; guard2 fresh-heldout fire fast .35/.67/.89, never
+.00/.00/.43. Artifact now carries `label_source`, `manifest` (sha1 of
+query ids / features / labels), `eot_thresholds_lang`. Previous gate
+backed up as `gate_native_pre8bq.json`.
+
+**Per-language operating point, from the TRAINING set only.** Tier
+thresholds quantiled on the core-mix OOF per language: en
+.906/.797/.553, zh .485/.386/.279 (global .897/.775/.514). On
+Reasoning-zh the global thresholds fire .00/.02/.15; the zh thresholds
+fire .17/.34/.55 (nominal .15/.30/.50) — matching what the label-free
+per-pool oracle (8bn) achieved, without touching the eval pool. Demo
+(`demo_duplex.py`) takes `?lang=en|zh` (UI selector) and picks the
+language's thresholds; falls back to global for a pre-8bq artifact.
+`scripts/23` mirrors this (sreason = zh).
+
+**Validity under the deployed gate + language thresholds
+(`figures/native_validity_official.json`):** frozen bal .565@27%
+(p=.0005) / **agg .669@49% = the always-escalate ceiling** (p<1e-4);
+TriviaQA .684/.852, WebQ .527 (p=.045)/.680 (p=.020), Llama .792/.841,
+SD-QA .605/.775 — all five en pools significant at both tiers.
+**Reasoning-zh: .525 → .609@17% (p=.0065) / .658@34% (p=.023) /
+.713@55% (p=.066)** — the first time the zh pool beats matched random
+under a DEPLOYABLE threshold (8bn's per-pool oracle needed the eval
+pool's own scores).
+
+**Receipt on the deployed manifest (`scripts/27`, off tags, manifest
+check → exits if it disagrees with the artifact):** n=5228, esc .541,
+OOF .848 / logloss .480 / acc .767 (majority .541); test-239 AUC .876
+(native-judged labels) / logloss .456 / acc .799; budget acc
+.536/.707/.795 at realized .105/.310/.523; externals .802/.777/.807/
+.700/.621.
+
+**Not done (deliberately):** (a) soft `P(fail)` from 2–3 native
+samples per query — that is a GPU re-dump (~15 H100h ≈ $60–75 per
+pass), not a judge cost; defer until the single-sample native labels
+show a gap, which they do not. (b) zh targeted expansion to 1–2k rows
+(CMMLU/C-Eval knowledge, Chinese SimpleQA long-tail, DuReader/WebQA
+open QA, C3 commonsense; sample to 40–60% fail) — next data spend, ~$40–60.
+(c) a fresh blind holdout — the five external pools have been used for
+decisions since 8be and are a dev set in practice. (d) `no_speak` rows
+(14/2300 in exp3off) still dropped from training; deployment should
+escalate them by timeout, not by probe. (e) multi-turn/in-context
+calibration rows for the failure probe (8bn residual) still absent.
+
+### 8bq addendum — targeted zh expansion (1,500 rows, ~$45): the zh axis is a TASK-TYPE axis, not a language axis (2026-09-02)
+
+**What was built:** `modal_train3.py::build_expansion4zh` — public
+benchmarks only, deduped against every pool incl. expansion3zh and
+sreason: zh-longtail = Chinese SimpleQA 600, zh-ceval = C-Eval val 300,
+zh-cmmlu = CMMLU test 300, zh-causal = XCOPA-zh remainder 300 (C3 /
+DuReader skipped: reading-comprehension questions are not self-contained
+when spoken). tts-1/alloy → official native dump (8 H100 workers, 1,500
+traces, 0 no_speak) → `judge_native` (native labels only; no turn-based
+pass). Native fail .578 (longtail .825 / ceval .520 / cmmlu .513 /
+causal .207). Side finding: 34% of zh-causal answers come back in
+ENGLISH (language switch) yet are judged adequate — a UX defect the
+adequacy label does not see.
+
+**Ablation (`scripts/32`, official feats, native labels, C=3e-4,
+paired bootstrap vs the 5,228 base):**
+
+| train | n | test (native lbl) | En-4 | SD-QA | Reasoning-zh |
+|---|---:|---:|---:|---:|---:|
+| base (8bq deployed) | 5228 | .876 | .771 | .700 | .621 |
+| +zh4 | 6728 | .866 (−.010 [−.024,+.005]) | .777 | .727 (+.027 [−.003,+.059]) | **.627 (+.006 [−.026,+.040])** |
+| zh-only | 1900 | .758 (−.118) | .700 | .663 | .591 (−.030) |
+
+**Reasoning-zh does not move.** And the flip side, the deployed 5,228
+gate scored on exp4zh as a HELD-OUT pool: **AUC .811 [.789,.833]**
+(longtail .719, ceval .730, cmmlu .642, causal .693). The probe reads
+Chinese long-tail facts, knowledge MC and causal commonsense about as
+well as the English pools (.77–.82); what it cannot read is
+OpenAudioBench Reasoning-QA (multi-step logic/arithmetic word
+problems). The "zh .605" number in the paper was a task-type gap
+wearing a language label. zh-only training is worse everywhere
+(en mass helps zh).
+
+**Operating point is composition-dependent (`scripts/33`).** With the
+zh slice at 1,900 rows, the "per-language quantile" moves from the
+exp3zh mix (balanced .386) to .749 (all-zh) — on sreason that fires 5%
+instead of 34%. Per-family balanced quantiles fire .13/.24/.38 (cons
+p=.003, bal p=.062); the exp3zh-only rule now over-fires (61% at
+balanced) because the +zh4 model shifted sreason's scores. A static
+per-language threshold is only as good as the match between the
+language slice's family mix and the deployment stream; the
+composition-free answer remains the online windowed quantile (8bn),
+which the demo still does not implement.
+
+**Decision: NOT deployed.** No ranking gain on the target pool, a
+−.010 internal test drift, and a destabilized zh operating point.
+`gate_native.json` stays the 8bq 5,228 native-label gate (backup copy
+`gate_native_8bq_5228.json` is identical). exp4zh (feats + native
+labels on the volume and locally) becomes the second zh eval pool
+(AUC only — no expert arm was run).
+
+**Cost:** TTS ~$3, native dump ~8 H100h ≈ $35, judge ~$3.
+
+**Lesson for the next data dollar:** stop buying "more Chinese". Buy
+multi-step reasoning coverage in BOTH languages (GSM8K-style word
+problems are already .10–.31 fail = few positives; harder: MATH-500
+tail, LogiQA-zh/en, BBH-style, CLUE/C3-free logic sets), and multi-turn
+/ in-context rows. And implement the windowed tracker in the demo.
+
+
+## Phase 8bs — NVDA-recipe cross-check: ceiling test, re-run stability, pre-answer read cost (~$4 GPU + ~$0.5 API, 2026-09-02)
+
+**Context.** The coauthor's probe report on NVIDIA-NemotronLabs-VoiceChat-11B
+(v1 19 Aug / v2 / v3) was checked against the deployed MiniCPM recipe.
+Their three v2 levers are already in ours: 4× calibration data (ours
+600→5,228), the read at the model's own commit-to-speak moment (our
+onset-chunk read, 8be), and the act head (`gate_act.json`, 8bh). Their
+v3-arch (average of three layers + the commit frame) raised every
+calibration metric but gave the *same accuracy at fixed escalation
+budgets* (±.005), so it is not replicated here — it would cost a full
+native re-dump (~15 H100h) for a change they themselves would not swap
+the demo for. Their "not worth repeating" list (hyper-parameter and
+head-family sweeps, label re-judging) retires receipt §5-2.
+What transfers is the v3 **diagnostics**; three were run.
+
+**1. Ceiling test on the deployed gate (`scripts/33_ceiling_native.py`, $0).**
+Same loader/CV as `scripts/31` (native labels, C=3e-4, 18 pools). A
+pool-prior scorer (each row scored by its pool's fold-train failure
+rate) vs the probe; "within" = AUC over same-pool pairs only.
+
+| | prior | probe | gap | within (pooled) | within (macro) | recall@15/30/50% probe | prior | random |
+|---|---:|---:|---:|---:|---:|---|---|---|
+| train OOF (5,228) | .786 | .848 | +.062 | .743 | .731 | .265/.506/.749 | .245/.475/.713 | .149/.299/.496 |
+| frozen test (239, deployed w/b) | .767 | .876 | +.109 | .820 | .812 | .265/.500/.765 | .257/.471/.699 | .140/.272/.493 |
+
+Same shape as the n=600 audit (Phase 5b: prior .678 / probe .822 /
+within .742) and as NVDA (+.07 of .820 per-question). In distribution
+the type prior does most of the budget-level work (recall@30% .475 vs
+.506); the per-question component is what the single-source external
+pools measure directly (.70–.81). Strongest within-pool signal:
+know-longtail .863 (n=741) — the "knows it doesn't know long-tail
+facts" finding again; weakest: know-commonsense .622, trap .635.
+
+**2. Re-run stability (`scripts/34_rerun_stability.py`; `testoff2` =
+second official-config native dump of frozen test, deployed sampling
+T=0.7, own gpt-5.4-mini label; ~$3 GPU).** 238 queries spoke in both
+runs (1 no_speak each).
+
+| | value |
+|---|---:|
+| answer text identical (exact / normalized) | .017 / .088 |
+| native label flip run1→run2 | **.143** (fail .567 → .584) |
+| onset chunk identical / mean abs diff | .836 / 2.1 chunks |
+| feature cosine run1·run2 (p05) | .950 (.886) — parts: eot_last .957, eot_mean8 .895, user_mean .996 |
+| score Pearson / Spearman | .949 / .942 |
+| tier decision agreement (en thr) cons/bal/agg | .941 / .912 / .941 |
+| AUC run1 feats vs lab1 / lab2 | .876 / .848 |
+| AUC run2 feats vs lab1 / lab2 | .887 / .872 |
+| AUC vs the 204 agree-only labels (run1 / run2) | .909 / .927 |
+
+Reading: sampling rewrites 98% of answer texts and flips 14% of
+outcomes, but the commit-chunk read moves little (score r .95,
+91–94% same decisions; NVDA reported 99%). Each run's features
+predict the *other* run's outcome about as well as their own — the
+probe reads a property of the question-in-context, not the fate of
+one sampled answer. The agree-only AUC (.91–.93) bounds how much of
+the reported .876 is single-sample label noise (~.04); it is the
+cheap version of the soft-P(fail) item in 8bq §7.3(a).
+
+**3. Pre-answer ("causal") read cost.** `modal_native_dump.py` now
+also saves `X_pre` = the same L22 read taken *before* the onset
+chunk's generate (no answer tokens in the tail; byte-identical `X`).
+Scored with the deployed head, **no refit**: AUC .861 / .837 (lab1 /
+lab2) vs the deployed read's .876 / .848 → −.011 to −.015; rank
+correlation with the deployed score .91. NVDA measured −.03 with a
+refit; ours is a lower bound on the cost since the head was fit on
+post-generate features. The pre-answer variant needs its own
+thresholds (deployed quantiles fire 0/1/20%): the first ≈8 answer
+tokens shift the score distribution more than they change the ranking.
+
+**Not done / notes.** (a) Multi-layer average (their v3-arch): skip
+per their fixed-budget result. (b) A refit causal probe needs `X_pre`
+for all 5,228 training rows = full re-dump; only worth it if a
+pre-answer gate becomes a deployment target. (c) `exp4zhoff` (1,500
+rows, dumped + judged) is present locally but not in the deployed
+gate (paper: held-out Mandarin pool) — untouched by this phase.
+Files: `figures/ceiling_native.json`, `figures/rerun_stability.json`,
+`data/frozen_native_testoff2_*`, paper appendix native section
+(new paragraph) + one sentence in `signal.tex`.
+
+## Phase 8bq-2 — reasoning coverage + in-context rows + the windowed tracker: the probe is saturated at this read point (~$65 GPU+API, 2026-09-02)
+
+**Three things were bought/built after the zh negative:** (1) a
+bilingual MULTI-STEP REASONING pool, `build_expansion5rs` (1,319 rows:
+en LogiQA 69 / MATH L4-5 no-LaTeX 200 / StrategyQA 150 / BBH 150;
+zh LogiQA-zh 300 / CMATH gr4-6 250 / Ape210K 200; public only, deduped;
+tts-1 → official native dump, 1 no_speak → judge_native; native fail
+.595, per family: en-logiqa .710, mathhard .690, strategyqa .567, bbh
+.487, zh-logiqa .743, ape210k .580, cmath .404); (2) IN-CONTEXT rows —
+the frozen calib split (358) and expansion3zh (399) re-dumped with
+`--carrier /data/audio_pool/q0400.wav` ("Why do people travel to
+islands for a holiday?"), i.e. each query arrives as the SECOND turn
+after a carrier Q&A, judged on the in-context native answer; (3) the
+online windowed quantile tracker in `demo_duplex.py` (per-process,
+per-language deque of the last 100 onset scores; threshold = its
+(1-rate) quantile once ≥20 scores exist, static per-language
+threshold before that; `?tracker=0` disables; gate messages now carry
+thr_mode/thr_static/n_window). Deployed.
+
+**Reasoning coverage does nothing for Reasoning-zh (`scripts/34`,
+paired vs the 5,228 base):**
+
+| train | n | test (native) | En-4 | SD-QA | Reasoning-zh | exp4zh held-out |
+|---|---:|---:|---:|---:|---:|---:|
+| base (deployed) | 5228 | .876 | .771 | .700 | .621 | .811 |
+| +rs | 6546 | .867 (−.009 [−.023,+.004]) | .773 | .713 | **.620 (−.002 [−.039,+.038])** | .810 |
+| +ctx | 5985 | .880 (+.004) | .772 | .713 | .627 (+.006 [−.013,+.025]) | .815 (+.004 [+.001,+.007]) |
+| +rs+ctx | 7303 | .877 (+.001) | .774 | .722 (+.022 [−.001,+.044]) | .621 (+.000) | .814 |
+
+**Why: the reasoning families are only moderately readable AT ALL.**
+5-fold OOF AUC inside the reasoning pool (trained on base+rs): en-bbh
+.606, strategyqa .629, mathhard .683, zh-logiqa .679, en-logiqa .750,
+ape210k .753, cmath .764; all .736 [.708,.762]. Compare facts / MC /
+causal families at .77–.82 (En-4, exp4zh). Whether a multi-step chain
+will come out right is weakly encoded in the listen→speak commit
+state — the read point precedes the reasoning. Reasoning-zh .62 is
+that ceiling, not a coverage gap. (Consistent with the review's
+"English ranking is at the plateau of the current read point/recipe".)
+
+**In-context is an operating-point problem, quantified (8bn residual
+closed):** same calib questions, second turn after a carrier Q&A →
+native fail .517→.620 (label flips on 26% of rows), yet the deployed
+gate's score shifts DOWN by .097 on average; balanced fire .252→.115,
+conservative .104→.028, aggressive .459→.327. Ranking holds
+(in-context AUC .861 [.815,.896]). Adding in-context rows to training
+is a wash on AUC (table above). The fix is the operating point — the
+windowed tracker follows the session's own score stream — plus, if a
+static point is wanted, quantiling the core OOF with in-context rows
+included.
+
+**Decision: weights NOT redeployed** (no significant gain on any target
+pool; internal test −.009 with +rs; zh threshold composition drifts
+again, zh balanced .386→.752 under the full mix). `gate_native.json`
+stays the 8bq 5,228 native-label gate. All three new sets (exp5rsoff,
+calibctx, exp3zhctx: feats + native labels, local + volume) are kept
+as eval/diagnostic pools; `scripts/31`/`27` accept them as optional
+parts if a future refit wants them.
+
+**Where this leaves the method.** Three targeted expansions (zh 1,500;
+reasoning 1,319; in-context 757; ≈$110) and one label-definition fix
+later, external ranking sits where 8bp left it (En-4 .77, zh
+reasoning .62, zh facts/MC .81). The remaining headroom is not in the
+12,288→1 linear read on L22 at the commit chunk; it is in (a) reading
+LATER (a few answer tokens in — the tail features already do this for
+~8 tokens; a mid-answer re-score would see the chain start), (b) a
+richer head (feature standardization / elastic net were never tried —
+cheap CPU), (c) fusion with p(True) on reasoning pools (8bl showed
++.026 internal). The next dollar should go to (a)/(c) experiments on
+the existing dumps, not to more labels of the same shape.
+
+**Cost:** TTS ~$3, dumps ~12 H100h ≈ $55, judge ~$6.
+
+## Phase 8bq-3 — is the plateau in the head or in the features? Head form, non-linear capacity, three heads + router ($0, 2026-09-02)
+
+`scripts/35_head_capacity.py`, deployed 5,228-row manifest, native
+labels, stratified 5-fold OOF + the eval pools (`figures/head_capacity.json`).
+
+**A. Head form / capacity on the same 12,288-d features:**
+
+| head | OOF | test (native) | En-4 | SD-QA | Reasoning-zh | exp4zh |
+|---|---:|---:|---:|---:|---:|---:|
+| LR C=3e-4, raw (deployed) | **.848** | .876 | **.771** | .700 | .621 | **.811** |
+| LR + StandardScaler | .818 | .838 | .705 | .689 | .613 | .750 |
+| elastic net (saga, l1 .5, std) | .843 | .884 | .764 | .723 | .606 | .806 |
+| MLP 256 relu, early stop, std | .815 | .819 | .702 | .660 | .627 | .734 |
+| PCA-256 → HistGradientBoosting | .825 | .845 | .715 | .647 | .595 | .774 |
+
+Non-linear heads are WORSE by .05–.07 external, not marginally. Per-
+dimension standardization alone costs .07 En-4: the raw activation
+scale carries signal (high-variance directions are the informative
+ones; whitening promotes noise dimensions). Elastic net is a wash
+(internal +.008, external −.007). Single configs, untuned — but the
+gaps are far outside what tuning recovers.
+
+**B. Three heads + router** (facts 4,054 / reason 940 / chat 234
+training rows; heads = one LR each; router = 3-way LR on the same
+features): router OOF accuracy **.973** — the commit-state knows the
+task type — yet no head beats the single head on its own group
+(facts .846 vs .847, reason .761 vs .766, chat .672 vs .720: small
+groups lose more to data size than they gain from specialization).
+On eval: soft-routed mix vs single, paired: test +.001, TriviaQA
+−.003, WebQ −.014, Llama −.005, SD-QA **−.033 [−.060,−.007]**,
+Reasoning-zh −.016 (oracle routing to the reason head would give
+.644, +.023, but the learned router does not realize it), exp4zh
+−.008. Verdict: multi-head is a wash-to-negative at this data size.
+
+**Conclusion.** With label definition fixed, four data expansions
+flat, head capacity flat-to-negative, and specialization flat, the
+plateau is in the FEATURES: what the L22 state at the listen→speak
+commit chunk encodes about the coming answer is ~fully extracted by
+one linear read. Remaining levers all change what is read, not how:
+(a) a later read point (mid-answer re-score, needs a dump, ~$60),
+(b) other layers / multi-layer at 5k rows (needs a dump), (c) fusion
+with a second signal family (p(True), 8bl +.026 internal). Not: more
+labels of the same shape, bigger heads, more heads.
+
+## Phase 8bt — the collaborator's shadow candidates on our bench: ranking moves, routing barely ($0, 2026-09-02)
+
+`scripts/36_shadow_compare.py` → `figures/shadow_compare.json`. Live 8bq
+(`0e6494c2…`, master 669c40d) vs ChangyiYang's two shadow artifacts from
+`codex/probe-performance-audit` (issue #8, P2–P17): **P9** distilled student
+(eot_mean8 + user_mean, 8,192-d, teacher = .5 z(two-sample semantic
+entropy) + .5 z(RTJ p(True)), ridge α=100, blend .25) and **P16** alpha-1
+ensemble (z(live) + 1.0 z(P9), folded to one 12,288-d dot product). Same six
+official-native pools, same cached expert arms as scripts/23; exact
+per-pool 15/30/50% budgets so all three scorers escalate the same count.
+
+| scorer | ext-5 native AUC | ext-5 benefit AUC | casc @15/30/50 (exact) |
+|---|---:|---:|---:|
+| live 8bq | .7429 | .6767 | .620 / .691 / .764 |
+| P9 distilled | .7642 (+.0213) | .6918 (+.0151) | .629 / .699 / .771 |
+| P16 alpha-1 | .7580 (+.0151) | .6872 (+.0105) | .623 / .695 / .767 |
+
+Per pool, native-AUC delta [95% paired bootstrap]: P9 — test +.003,
+TriviaQA +.014, WebQ +.021, Llama +.009, **SD-QA +.035 [+.002,+.068]**,
+Reasoning-zh +.028 [−.006,+.064]; P16 — test +.006, TriviaQA +.011,
+**WebQ +.016 [+.003,+.030]**, Llama +.006, **SD-QA +.023 [+.005,+.042]**,
+**Reasoning-zh +.019 [+.001,+.039]**. Reproduces his posted numbers to
+the fourth decimal.
+
+**Reading.** (1) Both candidates rank better than live on all five
+external pools; P9 is the larger move, P16 the more uniform one. (2)
+Cascade accuracy moves far less than AUC: +0.8 pt (P9) / +0.3 pt (P16)
+at the balanced budget against 5–18 pt of oracle headroom — ranking gains
+are not converting into routing gains yet. (3) SD-QA (real speech) is the
+only pool where both are individually reliable, consistent with the
+semantic-entropy teacher helping where ASR-like noise dominates. (4) Does
+not change the deployment call: his prospective sets P15–P17 (text
+benchmarks through TTS, robustness evidence only) show the gain is
+source-sensitive; next evidence = live shadow traffic (P11 wiring, PR
+pending), not more offline rescoring. Consistent with 8bq-3: the lever is
+a second signal family, and its distilled form is worth ~+.02 ranking.
+Artifact page: "Shadow Gate Bench" (claude.ai artifact, 2026-09-02).
+
+## Phase 8bu — the whole result set re-run as native full-duplex sessions; the relay was the bottleneck, not the gate (~$190 GPU + ~$25 API, 2026-09-02)
+
+**User call:** every gallery/paper curve must come from native
+full-duplex sessions; the turn-based/harness figures (1–14, 17–20) are
+retired. `modal_native_bench.py` = the old conclive protocol on the
+deployed stack: one fresh `MiniCPMODuplex` session per query, official
+serving config (top_k=20, force_listen_count=3, friendly-assistant
+prompt), the 8bq gate read at the listen→speak commit (per-language
+thresholds + 8bh act gate), raw-audio gpt-transcribe uplink, gpt-5.5
+web/low, wait paced 1 chunk/wall-second, real relay. Seven pools × five
+arms, every arm a separate live run (no branching). Judges as in the old
+figures (OAB gpt-4o / VoiceBench gpt-4o-mini / ours). Onset features
+(float16) + shadow P9/P16 scores logged per row for issue #8.
+
+**Finding 1 — the relay lost most of the routing gain.** The
+talker-steering relay (RELAY_TMPL + nudge, i.e. what the demo shipped)
+on TriviaQA always: expert text .960 → delivered .728 (never .628); on
+the 47 balanced-tier fired turns local .28 / expert .92 / delivered .53.
+99% of relays needed the nudge, 64/250 were cut under 40 chars, some
+turns answered on their own ("Snow" → "frost"). WebQ always: expert .824
+→ delivered .564. A/B on the same 60 TriviaQA ids (always arm): steer
+.733 vs TTS relay .933 (+.20 [+.10,+.32]); TTS relay = cleaned expert
+text spoken verbatim in the talker's own voice via the teacher-forcing
+path the canned stall already used, plus a context note. Deployed
+(demo_duplex.py `RELAY_MODE=tts`, `_synth_pcm`), all fired arms re-run.
+Cleaner v2 after WebQ lists were truncated (.756 → .796 with lists kept;
+no sentence cap, abbreviation-aware, 400 chars).
+
+**Finding 2 — native curves (TTS relay), delivered accuracy @ realized
+escalation rate; expert-text bound in brackets:**
+
+| pool | never | conservative | balanced | aggressive | always [bound] |
+|---|---:|---:|---:|---:|---:|
+| our pool (240) | .408 | .467 @8% | .542 @25% | .629 @52% | .704 [.765] |
+| TriviaQA (250) | .628 | .604 @4% | .700 @18% | .884 @56% | .960 [.964] |
+| WebQ (250) | .528 | .592 @5% | .624 @22% | .752 @60% | .796 [.823] |
+| Llama Q (250) | .824 | .788 @0% | .824 @4% | .856 @19% | .916 [.932] |
+| SD-QA (200) | .480 | .540 @7% | .650 @27% | .825 @66% | .870 [.885] |
+| Reasoning-zh (202) | .510 | .624 @20% | .663 @33% | .728 @50% | .837 [.861] |
+| AlpacaEval (199, 1–5) | 3.68 | 3.63 @2% | 3.77 @5% | 4.01 @44% | 4.20 [4.96] |
+
+Old steering relay for reference: TriviaQA bal .644@19% / agg .740@57%
+/ always .728; WebQ always .564.
+
+**Reading.** (1) Native local floors are 1–8 pts below the harness
+(Reasoning-zh worst, our pool +2.5) — regime cost, consistent with
+8be/8bq remix. (2) Routing gain is larger than on the harness once the
+relay is lossless: aggressive − never = +3 (Llama) to +34 (SD-QA); the
+zh pool now fires 20/33/50% under the per-language thresholds. (3) The
+"selective > always" reversal on Llama (harness .948 > .928) does NOT
+reproduce natively (.856@19% vs .916) — native floor lower, relay now
+lossless, both favour always. (4) Local answers are stochastic
+(top_k=20): a 0%-fire re-run moves the floor by up to 3.6 pts (Llama
+conservative .788 vs never .824), so <5-pt differences are noise. (5)
+AlpacaEval: always 4.20 vs expert text 4.96 — the 400-char spoken cap
+removes half the open-ended content; method boundary + medium.
+(6) Latency (P50, end of user speech → answer complete, incl. spoken
+relay): TriviaQA 1.8/2.6/6.4/10.2 s, SD-QA 2.4/3.3/12.9/18.7 s,
+Reasoning-zh 5.1/6.2/11.9/26.9 s, AlpacaEval always 39 s.
+
+**Judge caveat:** OAB gpt-4o judge under concurrency leaves ~5–8% of
+rows verdict-less (429s); `judge_pool` now re-tries verdict-less rows
+and a final `_judge_sweep.sh` pass filled them. Expert-column merge bug
+(wiped earlier verdicts) fixed with combine_first.
+
+Files: modal_native_bench.py, `_run_native_bench_{A,B}.sh`,
+`_judge_sweep.sh`, scripts/pull_native_bench.sh, data/native_bench/
+(judged parquets), figures/native_bench_figures.py (+ native_floors.py),
+figures/native_{pool}_{dualview,pareto}.png, figures/native_bench_summary.json,
+gallery_app.py (harness figures retired; 26 entries). Demo:
+demo_duplex.py RELAY_MODE=tts + clean_expert + `_synth_pcm`, deployed
+15:20. Old-cleaner WebQ always run archived on the volume as
+`old_cleaner_*`.

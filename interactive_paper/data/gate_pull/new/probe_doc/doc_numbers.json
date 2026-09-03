@@ -1,0 +1,205 @@
+{
+ "pooled_oof_auc": 0.820062430877238,
+ "within_pool": [
+  {
+   "pool": "trap",
+   "n": 150,
+   "fail": 0.9866666666666667,
+   "auc": 0.16554054054054054
+  },
+  {
+   "pool": "know-commonsense",
+   "n": 146,
+   "fail": 0.5547945205479452,
+   "auc": 0.5956315289648623
+  },
+  {
+   "pool": "hard-multihop",
+   "n": 200,
+   "fail": 0.92,
+   "auc": 0.6263586956521738
+  },
+  {
+   "pool": "know-arc",
+   "n": 93,
+   "fail": 0.26881720430107525,
+   "auc": 0.638235294117647
+  },
+  {
+   "pool": "know-mmlu",
+   "n": 186,
+   "fail": 0.5053763440860215,
+   "auc": 0.6395698427382054
+  },
+  {
+   "pool": "know-openbook",
+   "n": 99,
+   "fail": 0.36363636363636365,
+   "auc": 0.6525573192239859
+  },
+  {
+   "pool": "trap-truthful",
+   "n": 149,
+   "fail": 0.7718120805369127,
+   "auc": 0.678772378516624
+  },
+  {
+   "pool": "hard-knowledge",
+   "n": 110,
+   "fail": 0.8454545454545455,
+   "auc": 0.6824794433902593
+  },
+  {
+   "pool": "hard-math",
+   "n": 300,
+   "fail": 0.8233333333333334,
+   "auc": 0.7178214040180277
+  },
+  {
+   "pool": "easy-fact",
+   "n": 249,
+   "fail": 0.6626506024096386,
+   "auc": 0.720923520923521
+  },
+  {
+   "pool": "know-longtail",
+   "n": 250,
+   "fail": 0.9,
+   "auc": 0.7736888888888889
+  },
+  {
+   "pool": "easy-mathword",
+   "n": 100,
+   "fail": 0.63,
+   "auc": 0.7953667953667953
+  },
+  {
+   "pool": "know-open",
+   "n": 150,
+   "fail": 0.82,
+   "auc": 0.8675097862089731
+  },
+  {
+   "pool": "easy-chat",
+   "n": 299,
+   "fail": 0.6053511705685619,
+   "auc": 0.8829010206948216
+  }
+ ],
+ "commit_gap": {
+  "median_s": 0.24,
+  "frac_before_end": 0.4429665457476824,
+  "frac_within_1s": 0.8903667875856509,
+  "no_commit": 69
+ },
+ "calib_composition": [
+  {
+   "tag": "frozen",
+   "pool": "easy-chat",
+   "n": 150,
+   "fail": 0.7333333333333333
+  },
+  {
+   "tag": "frozen",
+   "pool": "easy-fact",
+   "n": 100,
+   "fail": 0.66
+  },
+  {
+   "tag": "frozen",
+   "pool": "hard-knowledge",
+   "n": 110,
+   "fail": 0.8454545454545455
+  },
+  {
+   "tag": "frozen",
+   "pool": "hard-math",
+   "n": 150,
+   "fail": 0.8466666666666667
+  },
+  {
+   "tag": "frozen",
+   "pool": "trap",
+   "n": 50,
+   "fail": 1.0
+  },
+  {
+   "tag": "expansion",
+   "pool": "easy-chat",
+   "n": 149,
+   "fail": 0.47651006711409394
+  },
+  {
+   "tag": "expansion",
+   "pool": "easy-fact",
+   "n": 149,
+   "fail": 0.6644295302013423
+  },
+  {
+   "tag": "expansion",
+   "pool": "hard-math",
+   "n": 150,
+   "fail": 0.8
+  },
+  {
+   "tag": "expansion",
+   "pool": "know-arc",
+   "n": 93,
+   "fail": 0.26881720430107525
+  },
+  {
+   "tag": "expansion",
+   "pool": "know-open",
+   "n": 150,
+   "fail": 0.82
+  },
+  {
+   "tag": "expansion",
+   "pool": "trap",
+   "n": 100,
+   "fail": 0.98
+  },
+  {
+   "tag": "expansion2",
+   "pool": "easy-mathword",
+   "n": 100,
+   "fail": 0.63
+  },
+  {
+   "tag": "expansion2",
+   "pool": "hard-multihop",
+   "n": 200,
+   "fail": 0.92
+  },
+  {
+   "tag": "expansion2",
+   "pool": "know-commonsense",
+   "n": 146,
+   "fail": 0.5547945205479452
+  },
+  {
+   "tag": "expansion2",
+   "pool": "know-longtail",
+   "n": 250,
+   "fail": 0.9
+  },
+  {
+   "tag": "expansion2",
+   "pool": "know-mmlu",
+   "n": 186,
+   "fail": 0.5053763440860215
+  },
+  {
+   "tag": "expansion2",
+   "pool": "know-openbook",
+   "n": 99,
+   "fail": 0.36363636363636365
+  },
+  {
+   "tag": "expansion2",
+   "pool": "trap-truthful",
+   "n": 149,
+   "fail": 0.7718120805369127
+  }
+ ]
+}

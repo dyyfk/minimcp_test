@@ -1,5 +1,5 @@
 {
-  "version": "2026-08-31.human-eval.3",
+  "version": "2026-09-02.human-eval.5",
   "ratingQuestions": [
     {
       "id": "helpfulness",
@@ -49,35 +49,37 @@
       "scenarios": [
         {
           "id": "simple_guardrail_x",
-          "participantTitle": "Simple Fact and Follow-up",
-          "goal": "Ask two simple factual questions about one topic. Make each question understandable on its own. Do not ask for current information, multi-step reasoning, or memory of an earlier answer.",
+          "participantTitle": "Simple Fact Questions",
+          "goal": "Have a short conversation about related facts that do not change over time.",
+          "targetTurns": 2,
           "prompts": [
             {
-              "label": "Example turn 1",
+              "label": "Example question",
               "text": "What is the capital of Australia?"
             },
             {
-              "label": "Example turn 2",
+              "label": "Related question",
               "text": "Which state or territory is Canberra in?"
             }
           ],
-          "doNotRepeatInstruction": "You may use this example or ask similar questions in your own words. Keep both turns simple and make the second question clear by itself."
+          "doNotRepeatInstruction": "Use these examples or ask similar questions in your own words. Stay with simple facts and avoid current information or complicated decisions."
         },
         {
           "id": "simple_guardrail_y",
-          "participantTitle": "Simple Fact and Follow-up",
-          "goal": "Ask two simple factual questions about one topic. Make each question understandable on its own. Do not ask for current information, multi-step reasoning, or memory of an earlier answer.",
+          "participantTitle": "Simple Fact Questions",
+          "goal": "Have a short conversation about related facts that do not change over time.",
+          "targetTurns": 2,
           "prompts": [
             {
-              "label": "Example turn 1",
+              "label": "Example question",
               "text": "What is the largest ocean on Earth?"
             },
             {
-              "label": "Example turn 2",
+              "label": "Related question",
               "text": "Name one continent that borders the Pacific Ocean."
             }
           ],
-          "doNotRepeatInstruction": "You may use this example or ask similar questions in your own words. Keep both turns simple and make the second question clear by itself."
+          "doNotRepeatInstruction": "Use these examples or ask similar questions in your own words. Stay with simple facts and avoid current information or complicated decisions."
         }
       ]
     },
@@ -87,81 +89,85 @@
       "scenarios": [
         {
           "id": "realtime_x",
-          "participantTitle": "Current Information and Follow-up",
-          "goal": "Ask two related questions whose answers can change today or right now. Name the company, place, or event in each question so each turn is clear by itself.",
+          "participantTitle": "Real-time Information",
+          "goal": "Have a short conversation about information that may have changed today.",
+          "targetTurns": 2,
           "prompts": [
             {
-              "label": "Example",
+              "label": "Example question",
               "text": "What is Apple's stock price today?"
             },
             {
-              "label": "Follow-up example",
+              "label": "Related question",
               "text": "How much has Apple's stock changed since the market opened today?"
             }
           ],
-          "doNotRepeatInstruction": "You may use this example or ask similar current-information questions. Keep the two turns related, but make the second question clear by itself."
+          "doNotRepeatInstruction": "Use these examples or choose a similar company. Keep both questions about the same topic and make sure the answer could change today."
         },
         {
           "id": "realtime_y",
-          "participantTitle": "Current Information and Follow-up",
-          "goal": "Ask two related questions whose answers can change today or right now. Name the company, place, or event in each question so each turn is clear by itself.",
+          "participantTitle": "Real-time Information",
+          "goal": "Have a short conversation about information that may have changed today.",
+          "targetTurns": 2,
           "prompts": [
             {
-              "label": "Example",
+              "label": "Example question",
               "text": "What is the weather in Seattle right now?"
             },
             {
-              "label": "Follow-up example",
-              "text": "Will it rain there in the next three hours?"
+              "label": "Related question",
+              "text": "Will it rain in Seattle in the next three hours?"
             }
           ],
-          "doNotRepeatInstruction": "You may use this example or ask similar current-information questions. Keep the two turns related, but make the second question clear by itself."
+          "doNotRepeatInstruction": "Use these examples or choose a similar place. Keep both questions about the same topic and make sure the answer could change right now."
         }
       ]
     },
     {
       "key": "context_reasoning",
-      "participantTitle": "Complex Reasoning and Multi-turn Context",
+      "participantTitle": "Complex Conversation",
       "scenarios": [
         {
           "id": "context_reasoning_x",
-          "participantTitle": "Update a Decision Across Three Turns",
-          "goal": "Give the assistant three options in turn 1, your requirements in turn 2, and one important update in turn 3. Then ask for the single option that meets every requirement. Do not repeat all earlier details in the final turn.",
+          "participantTitle": "Complex Conversation",
+          "goal": "Compare a few options, add a change, and see whether the assistant updates its choice using the details you already shared.",
+          "targetTurns": 3,
           "prompts": [
             {
-              "label": "Example turn 1",
-              "text": "I have three train options. A costs $80, takes five hours, and includes a checked bag. B costs $105, takes three hours, but does not include a bag. C costs $100, takes four hours, and includes a bag."
+              "label": "Options",
+              "text": "I am choosing a venue for 12 people. Venue A seats 14, costs $180, includes a projector, and is 40 minutes away. Venue B seats 16, costs $150, has a projector rental for $35, and is 55 minutes away. Venue C seats 20, costs $200, includes a projector, and is 25 minutes away."
             },
             {
-              "label": "Example turn 2",
-              "text": "I need the total cost to be at most $110, the trip to take no more than four hours, and a checked bag. Which option currently works?"
+              "label": "Requirements",
+              "text": "I need space for all 12 people, a projector, a total cost of no more than $200, and travel time under 45 minutes. Which venues meet every requirement, and which is the cheapest?"
             },
             {
-              "label": "Example turn 3",
-              "text": "Update: C is sold out, and I can add a bag to B for $5. Considering everything we discussed, which remaining option works, and why?"
+              "label": "New information",
+              "text": "Venue A is no longer available. Venue B can now provide the projector for $20, and the trip there will take 40 minutes. Using all my earlier requirements, which venue should I choose now, and why?"
             }
           ],
-          "doNotRepeatInstruction": "Follow the same three-step structure. You may use these exact details or create a similar problem, but give the information across at least three turns."
+          "doNotRepeatInstruction": "Use this example or a similar everyday decision. Let the details build naturally, then add a change without restating every earlier requirement."
         },
         {
           "id": "context_reasoning_y",
-          "participantTitle": "Update a Decision Across Three Turns",
-          "goal": "Give the assistant three options in turn 1, your requirements in turn 2, and one important update in turn 3. Then ask for the single option that meets every requirement. Do not repeat all earlier details in the final turn.",
+          "participantTitle": "Complex Conversation",
+          "goal": "Compare a few options, add a change, and see whether the assistant updates its choice using the details you already shared.",
+          "targetTurns": 3,
           "prompts": [
             {
-              "label": "Example turn 1",
-              "text": "I have three phone plans. A costs $55 per month, includes 50 GB, and supports hotspot use. B costs $65, includes 100 GB, but has no hotspot. C costs $70, includes 100 GB, and supports hotspot use."
+              "label": "Options",
+              "text": "I am comparing three delivery services. Service A costs $45, arrives in two days, and includes insurance. Service B costs $30, arrives in one day, and charges $20 for insurance. Service C costs $40, arrives in three days, and includes insurance."
             },
             {
-              "label": "Example turn 2",
-              "text": "I need the total monthly cost to be at most $70, at least 100 GB, and hotspot support. Which plan currently works?"
+              "label": "Requirements",
+              "text": "I need the package insured, delivered within two days, and the total cost must be no more than $50. Which services meet every requirement, and which is the cheapest?"
             },
             {
-              "label": "Example turn 3",
-              "text": "Update: C is unavailable, and I can add hotspot service to B for $5 per month. Considering everything we discussed, which remaining plan works, and why?"
+              "label": "New information",
+              "text": "Service A is sold out. Service B is offering insurance for $10, but delivery will now take two days. Using all my earlier requirements, which service should I choose now, and why?"
             }
           ],
-          "doNotRepeatInstruction": "Follow the same three-step structure. You may use these exact details or create a similar problem, but give the information across at least three turns."
+          "doNotRepeatInstruction": "Use this example or a similar everyday decision. Let the details build naturally, then add a change without restating every earlier requirement."
         }
       ]
     }

@@ -1,7 +1,7 @@
-"""Adapter for the two blinded arms exposed by interactive_paper/demo_app.py.
+"""Adapter for the two blinded arms exposed by interactive_paper/demo_duplex.py.
 
 Both arms use the same deployed Voice service. The baseline disables the probe;
-MiniCPM+ enables the balanced escalation gate. This module also converts the
+MiniCPM+ enables the aggressive escalation gate. This module also converts the
 demo's WebSocket events into one analysis-friendly turn record.
 """
 
@@ -27,7 +27,7 @@ from .core import (
 )
 
 
-DEFAULT_DEMO_URL = "https://rhe9527--gate-demo-voice.modal.run"
+DEFAULT_DEMO_URL = "https://rhe9527--gate-duplex-voice.modal.run"
 DEFAULT_DEMO_TOKEN = "62dc5cd9"
 
 
@@ -126,8 +126,15 @@ async def transcribe_wav(path: Path) -> tuple[str | None, str, int | None]:
 
 def transcript_collection_settings() -> dict[str, bool]:
     """Expose configuration state without ever exposing the API key."""
+    upstream_full_transcripts = "gate-duplex" in os.getenv(
+        "MINICPM_DEMO_URL", DEFAULT_DEMO_URL
+    )
     return {
         "posthoc_asr_configured": bool(os.getenv("OPENAI_API_KEY")),
+        "upstream_full_transcripts": upstream_full_transcripts,
+        "transcript_collection_configured": (
+            upstream_full_transcripts or bool(os.getenv("OPENAI_API_KEY"))
+        ),
         "transcripts_required": os.getenv(
             "HUMAN_EVAL_REQUIRE_TRANSCRIPTS", "0"
         ).lower()
@@ -149,6 +156,7 @@ class ConversationRecorder:
         self.conversation_id = conversation_id
         self.model = model
         self.capability = capability
+        self.event_log_path = store.event_log_path(conversation_id)
         self.user_pcm = bytearray()
         self.pre_speech_pcm = bytearray()
         self.capturing_speech = False
@@ -166,6 +174,27 @@ class ConversationRecorder:
         self.silence_before_eot_s: float | None = None
         self.speech_detected = False
 
+    def record_backend_event(
+        self, event_type: str, payload: dict[str, Any] | None = None
+    ) -> None:
+        """Persist useful lifecycle/telemetry events without duplicating audio."""
+        safe_payload = {
+            key: value
+            for key, value in (payload or {}).items()
+            if key not in {"pcm", "user_pcm16"}
+        }
+        self.store.append_event_log(
+            self.event_log_path,
+            {
+                "timestamp": utc_now(),
+                "event": event_type,
+                "conversation_id": self.conversation_id,
+                "model": self.model,
+                "capability": self.capability,
+                "payload": safe_payload,
+            },
+        )
+
     def record_client_audio(self, chunk: bytes) -> None:
         if not self.first_input_at:
             self.first_input_at = utc_now()
@@ -182,6 +211,8 @@ class ConversationRecorder:
     def record_server_event(self, payload: dict[str, Any]) -> None:
         event_type = payload.get("type")
         now = utc_now()
+        if event_type in {"hello", "gate", "turn", "error", "bye"}:
+            self.record_backend_event(f"upstream_{event_type}", payload)
         if event_type == "hello":
             self.store.mutate_conversation(
                 self.conversation_id,
@@ -189,7 +220,15 @@ class ConversationRecorder:
                     {
                         "status": "in_progress",
                         "started_at": conversation.get("started_at") or now,
+                        "threshold_tier": (
+                            payload.get("tier")
+                            if self.model == MODEL_MINICPM_PLUS
+                            else None
+                        ),
                         "model_runtime": {
+                            "protocol": payload.get("protocol", "duplex_v1"),
+                            "mode": payload.get("mode"),
+                            "event_log_path": str(self.event_log_path),
                             "threshold_tier": payload.get("tier"),
                             "threshold": payload.get("thr"),
                             "probe_on": payload.get("probe_on"),
@@ -222,7 +261,7 @@ class ConversationRecorder:
             if isinstance(payload.get("sil"), (int, float)):
                 self.silence_before_eot_s = float(payload["sil"])
             self.speech_detected = self.speech_detected or bool(payload.get("speech"))
-        elif event_type == "eot":
+        elif event_type in {"eot", "gate"}:
             self.speech_ended_at = self.speech_ended_at or now
             turn = self._ensure_turn()
             turn["timestamps"]["user_speech_ended_at"] = self.speech_ended_at
@@ -236,6 +275,9 @@ class ConversationRecorder:
                 "score": payload.get("score"),
                 "score_series": score_series,
                 "eot_read_ms": payload.get("ms"),
+                "act_score": payload.get("act"),
+                "is_information_request": payload.get("is_info"),
+                "probe_on": payload.get("probe_on"),
             }
         elif event_type == "score":
             turn = self.current_turn or self._ensure_turn()
@@ -251,8 +293,21 @@ class ConversationRecorder:
     async def finalize_turn(self, payload: dict[str, Any]) -> dict[str, Any]:
         turn = self._ensure_turn()
         response_completed_at = utc_now()
+        encoded_user_pcm = payload.get("user_pcm16")
+        if encoded_user_pcm:
+            try:
+                # Duplex v1 snapshots the committed utterance at the model.
+                # It is more complete than the browser-side rolling buffer.
+                self.user_pcm = bytearray(base64.b64decode(encoded_user_pcm))
+                self.speech_detected = bool(self.user_pcm)
+                self.speech_started_at = self.speech_started_at or self.first_input_at
+                self.speech_ended_at = self.speech_ended_at or response_completed_at
+            except (ValueError, TypeError):
+                turn["anomalies"]["input_audio_anomaly"] = True
         turn["timestamps"].update(
             {
+                "user_speech_started_at": self.speech_started_at,
+                "user_speech_ended_at": self.speech_ended_at,
                 "first_model_audio_at": self.first_model_audio_at,
                 "response_completed_at": response_completed_at,
             }
@@ -265,6 +320,11 @@ class ConversationRecorder:
                 "score": payload.get("eot_score", turn["gate"].get("score")),
                 "score_series": payload.get("scores", turn["gate"].get("score_series", [])),
                 "eot_read_ms": payload.get("eot_read_ms", turn["gate"].get("eot_read_ms")),
+                "act_score": payload.get("act_score", turn["gate"].get("act_score")),
+                "is_information_request": payload.get(
+                    "is_info", turn["gate"].get("is_information_request")
+                ),
+                "probe_on": payload.get("probe_on", turn["gate"].get("probe_on")),
             }
         )
 
@@ -277,9 +337,16 @@ class ConversationRecorder:
 
         user_transcript = payload.get("uplink_text")
         transcript_source = "upstream_asr" if user_transcript else None
-        transcript_status = "complete" if user_transcript else "missing"
+        upstream_asr_error = payload.get("asr_error")
+        transcript_status = (
+            "complete"
+            if user_transcript
+            else f"error:{upstream_asr_error}"
+            if upstream_asr_error
+            else "missing"
+        )
         posthoc_asr_ms = None
-        if not user_transcript and self.user_pcm:
+        if not user_transcript and self.user_pcm and os.getenv("OPENAI_API_KEY"):
             try:
                 user_transcript, transcript_status, posthoc_asr_ms = await transcribe_wav(
                     user_audio_path
@@ -355,7 +422,13 @@ class ConversationRecorder:
         }
         turn["anomalies"].update(
             {
-                "empty_response": not bool(model_transcript.strip()),
+                "empty_response": (
+                    not bool(model_transcript.strip())
+                    or (
+                        turn["gate"].get("escalated")
+                        and not bool(payload.get("expert_answer"))
+                    )
+                ),
                 "input_audio_anomaly": len(self.user_pcm) < 3200,
                 "output_audio_anomaly": len(self.model_pcm) < 2400,
                 "interrupted": bool(payload.get("interrupted")),
@@ -383,6 +456,13 @@ class ConversationRecorder:
                 "speech_out_s",
                 "asr_s",
                 "total_ms",
+                "protocol",
+                "turn_index",
+                "act_score",
+                "is_info",
+                "asr_error",
+                "expert_error",
+                "probe_on",
             )
             if payload.get(key) is not None
         }
@@ -423,6 +503,9 @@ class ConversationRecorder:
                 "score": None,
                 "score_series": [],
                 "eot_read_ms": None,
+                "act_score": None,
+                "is_information_request": None,
+                "probe_on": self.model == MODEL_MINICPM_PLUS,
             },
             "latency_ms": {},
             "audio_quality": {},

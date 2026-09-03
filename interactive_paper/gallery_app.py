@@ -39,141 +39,174 @@ FIGS = [
 修复：同一 L22 读点再加一个"信息型 vs 话轮管理"线性头（OOF AUC 1.000，完全线性可分），双条件才升级——损失 0.5% 真升级，误触发归零。
 <b>公平吗</b>：脚本化注入、固定偏移、in-process 与部署同一条 chunk 循环；stim 音频与 8ba 完全同一批。
 """),
-    ("fair_dualview", "图1 · 我们的数据集 — escalation vs acc（speakable 子集 n=218）", "win", """
-<b>看什么</b>：蓝线是部署实测（专家读小模型的转写），绿线是信道对照（专家读原文），灰虚线是随机升级。
-<b>数字</b>：never .436 → aggressive .670，绿线到 .771，全升级上限 .922。
-<b>为什么我们好</b>：三档全部在随机线之上（超额 +.027/+.048/+.083），说明探针挑的题确实更该挑。
-<b>为什么不够好</b>：蓝绿之间还有 .083 的差距，那是语音信道成本——小模型自己的转写把题目送坏了（§8r 已证明不是 TTS 的锅）。
-<b>公平吗</b>：内部完全公平（同一 loop、同一批题、逐题配对）。但这是我们自己造的题库，不能单独用来说服别人，所以才有后面五个公开集。
+    ("native_validity_official", "图N4 · 部署版 gate（8bq）— 官方 serving config + native 标签 + 分语言阈值，六池 validity（2026-09-02）", "win", """
+<b>这是什么</b>：图N2 的升级版，也是<b>现在线上真正跑的那份 gate</b>：5228 行校准（官方 serving config 下重采：top_k=20、force_listen_count=3、官方 system prompt），
+标签改为"模型在部署配置下自己的回答被 judge 判错"（不再是旧 turn-based 回答的标签），阈值按语言各自定标（en / zh 两套）。
+<b>数字</b>：六池全部在 balanced 和 aggressive 两档显著优于同率随机（* 标）——our pool .431→.565（27% 升级）、TriviaQA .568→.852（54%）、SD-QA .455→.775（61%）。
+<b>N2 里那格坏的修好了</b>：Reasoning-zh 之前"gate 完全不触发"，现在用 zh 阈值 conservative/balanced 档触发 17%/34%，两档都显著（.525→.609→.658）——这不是排序变好，是操作点终于落到中文分数的分布里。
+<b>没变好的</b>：标签源换成 native 对<b>排序</b>是平局（外部五池均值 .755 vs .743，无一池置信区间排除 0，合作者独立复核同一结论），所以 8bq 是"来源正确 + 校准正确"的修正，不是性能升级；En-4 均值 .771 与 turn-based 参考 .771 持平。
+<b>公平吗</b>：与 N2 同一套 remix 算术；expert 结果复用 always 臂缓存；local 结果是官方配置下 native 实测重判。数据与产物已公开在 HF dataset <code>dyyfk/minicpm-o45-native-gate-data</code>。
 """),
-    ("fair_pareto_latency", "图2 · 我们的数据集 — latency vs acc", "win", """
-<b>看什么</b>：横轴是端到端 P50 延迟，纵轴同上。
-<b>数字</b>：1.83s/.436 → 4.01s/.670，即 +23 分要多等 2.2 秒。
-<b>怎么读</b>：balanced（3.5 秒）是性价比拐点；aggressive 再快也快不过专家的往返时间。
-<b>注意</b>：这是中位数视角，长尾另算（P99 会被专家的推理尾巴拉到 30 秒以上，见 latency 表）。
-<b>公平吗</b>：延迟全部来自真实会话时间戳，不是模型估算；唯一未计入的是语音合成（我们的 loop 输出文本）。
+    ("shadow_compare", "图N5 · 合作者的两个 shadow 候选 vs 线上 gate：排序 +.02，级联只涨零点几（2026-09-02）", "mixed", """
+<b>背景</b>：issue #8 里合作者在同一份 5228×12288 冻结特征上系统扫了 16 个实验（换标签、换表示、非线性头、PCA、多头路由）——<b>全部失败</b>，结论与我们的 8bq-3 一致：同一份 hidden state 已被一次线性读榨干。
+真正有效的是<b>加一个独立信号</b>：让模型多采样两次回答算语义熵，再加 repeat-then-judge 的 p(True)，融合后外部均值 AUC +.033；但要多跑两三次生成，延迟中位 7 秒，不能同步上线。于是蒸馏成单次点积：<b>P9</b>（只用 eot_mean8+user_mean 两块，8192 维，老师=语义熵+RTJ）和 <b>P16</b>（线上分数 + P9 等权集成，折成一个 12288 维向量）。
+<b>左图</b>：两候选在五个外部池上排序全部优于线上；P9 幅度大（均值 +.021），P16 更均匀（+.015，WebQ / SD-QA / Reasoning-zh 单池置信区间排除 0）。SD-QA（真人语音）是唯一两者都单独可靠的池——语义熵老师在 ASR 噪声主导的地方最有用。
+<b>右图，也是保留的原因</b>：AUC 涨两分，级联准确率在 30% 预算只涨 +0.8 / +0.3 个点，而 oracle 空间有 5–18 个点——排序收益还没变成路由收益。
+<b>前瞻验证</b>：合作者又冻结了三批 source-disjoint 集（WinoGrande/SciQ、BoolQ/HellaSwag/QASC、SNLI/SST-2/WiC，文本 benchmark 经 TTS）：P16 在第二批宏平均 +.014（CI 排除 0）但差 .0008 没到 +.015 门槛，第三批 SST-2 显著回退。结论：<b>不上线，进 shadow</b>——demo 里并行打分只记日志，等真实流量说话。
+<b>公平吗</b>：三者用同一批行、同一份缓存 expert 结果、按池精确 15/30/50% 预算（候选没有阈值，只能这样比）；我们的复算与合作者贴出的数字逐位一致。
 """),
-    ("striviaqa_dualview", "图3 · Speech TriviaQA — escalation vs acc（含对比模型）", "win", """
-<b>⭐ 这是最有力的一张。</b> 我们 aggressive 档 <b>.860</b>（v3），而 3.3 倍参数的 Qwen3-Omni-30B 官方是 .629，MiniCPM 自己的官方离线数是 .755，Kimi-Audio 是 .419。
-<b>为什么我们好</b>：9B 小模型 + 路由，在实时流式条件下打赢了大三倍的单体模型 23 分——<b>路由的收益大于把语音模型放大</b>。相对随机的超额 +.033/+.062/+.080，三档全胜。
-<b>为什么 floor 低于官方</b>：我们的 never 臂 .664 vs 官方 .755，差距已完全拆解——其中 4.8 分是实时流式 loop 的代价（我们自己的离线 chat-mode 对照 = .712），另 4.3 分是 250 题子采样 + 协议细节。没有无法解释的残差。
-<b>公平吗</b>：<b>是</b>，而且是这批图里最严格的一张——全部分数（含官方线、Qwen3-Omni、Kimi）都在 OpenAudioBench 自己的判分器（gpt-4o + 官方 prompt）下。唯一要声明的是：对比模型的数字是<b>离线</b>的，我们的曲线是<b>实时</b>的，所以正确读法是拿它们和我们的 chat-mode 线比。
+    ("native_floors", "图N6 · 七池本地 floor：原生 full-duplex vs 已下架的 harness loop（2026-09-02）", "mixed", """
+<b>这是什么</b>：每个池 never 臂（不升级）的本地准确率，原生 duplex 会话 vs 旧 harness loop，同一判分器。
+<b>数字</b>：原生 floor 普遍低 1–8 分（Reasoning-zh 差最多 .589→.510），our pool 反而高 2.5 分。这是 regime 本身的代价——原生 duplex 下模型在流式 prefill 里边听边答，
+不是 harness 时代先听完再答——与 8be/8bq 的离线 remix 观察一致。
+<b>公平吗</b>：同题、同判分；原生这边带 bootstrap 95% 区间。旧 harness 的数字只在这张图上出现，作为"为什么整套图都换了"的交代。
 """),
-    ("striviaqa_pareto", "图4 · Speech TriviaQA — latency vs acc", "win", """
-<b>数字</b>：1.23s/.664 → 2.02s/.860，即 +20 分只多等 0.8 秒。
-<b>为什么这么便宜</b>：这个池的题很短，本地解码本身就快（P50 0.93 秒），而升级行的专家往返 P50 3.0 秒——但因为只有一半的题升级，中位数被拉动得很少。
-<b>公平吗</b>：延迟是实测；对比模型没有公开的延迟数据，所以这张图上没有它们的线（不能拿别人未测量的东西画上去）。
+    ("native_striviaqa_dualview", "图1 · Speech TriviaQA（OpenAudioBench，含对比模型） — escalation vs acc，原生 full-duplex（2026-09-02）", "win", """
+<b>这是什么</b>：图 3–14 那批曲线的原生 full-duplex 重跑：每题一个新的 duplex 会话，官方 serving config，部署中的 8bq gate 在 talker 决定开口的那个 chunk 读一次，
+触发则真 ASR 上行 + 真 gpt-5.5，等待按 1 chunk/秒真实计时，专家答案由 talker 用自己的声音<b>逐字念出</b>（TTS relay，2026-09-02 起线上默认）。五档各自实测（实心点）；数据未到齐时中间档按 never 臂的实测 onset 分数分支（空心点）。
+<b>判分</b>：与旧图同一把尺子（OpenAudioBench 官方 gpt-4o / VoiceBench gpt-4o-mini / 我们的 ref-anchored judge）。绿色虚线 = 专家原文直接判分，即 relay 无损时的上界。
+<b>橙色虚线（有的池才有）</b>：同一个 gate、换成旧的"prompt 引导 talker 转述"relay 的实测曲线——talker 会截断、自答、99% 需要 nudge，在 TriviaQA 上把 always 臂从 .960 压到 .728。这就是 relay 改成 TTS 直读的原因。
+<b>⭐ 仍是最有力的一张，而且现在是原生 full-duplex 的实测。</b> never .628 → balanced .700（18% 升级）→ aggressive <b>.884</b>（56%）→ always .960；专家原文上界 .964，即 relay 已无损。
+对比线：MiniCPM 官方离线 .755、Qwen3-Omni-30B .629、Kimi-Audio .419——9B + 路由在实时 duplex 下 aggressive 档比 30B 单体高 25 分。
+<b>橙色虚线</b>是同一个 gate 用旧 relay 的实测：always 只有 .728、aggressive .740——换 relay 前，路由收益的一大半都被 talker 转述吃掉了。
+<b>没那么好的</b>：conservative 档 .604 低于 never 的 .628，4% 的触发率下这是本地回答重采样的噪声（top_k=20），置信区间覆盖；balanced 档只比随机线高一点。
+<b>公平吗</b>：全部分数在 OpenAudioBench 官方判分器（gpt-4o + 官方 prompt）下；对比模型是离线数字，我们是实时流式。
 """),
-    ("swebq_dualview", "图5 · Speech Web Questions — escalation vs acc（含对比模型）", "mixed", """
-<b>数字</b>：never .568 → aggressive <b>.732</b>（v3），超过 MiniCPM 官方 .702，略低于 Qwen3-Omni-30B 的 .749。
-<b>为什么我们好</b>：同样是 9B 打到 30B 的水平线附近；超额 +.045/+.035/+.066。
-<b>为什么不如上一张漂亮</b>：这个池的天花板本身低（gpt-5.5 也只有 .856），因为 WebQ 的参考答案是 Freebase 实体列表，判分严格；而且 v1→v2 在 aggressive 档是<b>退步</b>的（超额 +.092 → +.066），是唯一一个旧探针挑得更好的臂，我没有换个档位讲。
-<b>公平吗</b>：是，同一把官方判分尺子。<b>但这里有个教训必须记住</b>：用我们自己的判分器时这个池只有 .464，比官方低 25 分——绝对分对判分协议极度敏感，跨来源比较必须先对齐判分器。
+    ("native_striviaqa_pareto", "图2 · Speech TriviaQA（OpenAudioBench，含对比模型） — latency vs acc，原生 full-duplex", "win", """
+<b>横轴</b>：用户说完到回答结束的 P50 时长（秒）。原生 duplex 里 talker 可能在用户说完前就开口，所以本地臂的时长可以很短；升级臂 = stall + 等待专家（真实计时）+ relay。
+<b>数字</b>：never 1.8 s → balanced 2.6 s → aggressive 6.4 s → always 10.2 s（含专家答案念完的时长）。+26 分（aggressive）多等 4.6 秒。
 """),
-    ("swebq_pareto", "图6 · Speech Web Questions — latency vs acc", "mixed", """
-<b>数字</b>：1.74s → 2.99s 换 +16 分。
-<b>怎么读</b>：这个池的本地答案较长（中位 406 字符），所以 never 臂的基准延迟就比 TriviaQA 高。
-<b>公平吗</b>：同上，延迟实测、无对比模型线。
+    ("native_swebq_dualview", "图3 · Speech Web Questions（OpenAudioBench，含对比模型） — escalation vs acc，原生 full-duplex（2026-09-02）", "win", """
+<b>这是什么</b>：图 3–14 那批曲线的原生 full-duplex 重跑：每题一个新的 duplex 会话，官方 serving config，部署中的 8bq gate 在 talker 决定开口的那个 chunk 读一次，
+触发则真 ASR 上行 + 真 gpt-5.5，等待按 1 chunk/秒真实计时，专家答案由 talker 用自己的声音<b>逐字念出</b>（TTS relay，2026-09-02 起线上默认）。五档各自实测（实心点）；数据未到齐时中间档按 never 臂的实测 onset 分数分支（空心点）。
+<b>判分</b>：与旧图同一把尺子（OpenAudioBench 官方 gpt-4o / VoiceBench gpt-4o-mini / 我们的 ref-anchored judge）。绿色虚线 = 专家原文直接判分，即 relay 无损时的上界。
+<b>橙色虚线（有的池才有）</b>：同一个 gate、换成旧的"prompt 引导 talker 转述"relay 的实测曲线——talker 会截断、自答、99% 需要 nudge，在 TriviaQA 上把 always 臂从 .960 压到 .728。这就是 relay 改成 TTS 直读的原因。
+<b>数字</b>：never .528 → balanced .624（22%）→ aggressive <b>.752</b>（60%）→ always .796；专家原文上界 .823。aggressive 档超过 MiniCPM 官方离线 .702，与 Qwen3-Omni-30B 的 .749 持平。
+<b>为什么天花板低</b>：WebQ 参考答案是 Freebase 实体列表、判分严格，gpt-5.5 自己也只有 .823；always 与上界的 3 分差是 400 字符念读上限截掉的长列表。
+<b>橙色虚线</b>：旧 relay 下 always 只有 .564——比 TriviaQA 丢得还多，因为列表型答案最容易被 talker 截断或自答。
+<b>公平吗</b>：同一把官方尺子；旧图里"我们自己的判分器只有 .464"的教训依然成立，跨来源比较必须先对齐判分器。
 """),
-    ("sllama_dualview", "图7 · Llama Questions — escalation vs acc ⭐⭐ 选择性升级 > 全部升级", "win", """
-<b>⭐⭐ 这是全项目最强的正面结果。</b> aggressive 档 <b>.948</b> 高于"全部升级"的 .928。
-<b>为什么会这样</b>：拆开 aggressive 档的 250 题——探针判定为简单、留在本地的 125 题，小模型自己得 <b>.976</b>，gpt-5.5 .968；判定为难、送上云的 125 题，小模型 .696，gpt-5.5 <b>.888</b>。
-<b>这意味着什么（2026-08-20 统计修正）</b>：探针把 .976 和 .696 两个子集干净分开，配对检验 <b>z=6.46</b>，这是真正的逐题判别力（单一题型池，不可能靠题型捷径）；专家的优势<b>全部集中在难的那一半</b>（.696→.888，McNemar p&lt;.0001）。但"小模型在简单题上<b>打败</b>专家"这句话不成立——.976 vs .968 配对检验 p=1.00，是<b>打平</b>。所以正确的说法是：<b>全部送云端要花两倍的专家调用，换不到可测量的收益</b>；.948&gt;.928 这个点估计本身 p=.125（两边都贴近天花板，功效不足）。
-<b>为什么超额数字反而不大</b>（+.027/+.047/+.054）：因为 floor 已经 .840、天花板 .924，总空间只有 8 分，任何策略的绝对增量都被压缩。
-<b>公平吗</b>：是，官方判分器。此池是全部池子里复现噪声最低的（同题同音频在两臂都留本地时判分翻转率仅 2.3%），所以这里的结论最可信；此池官方没有公布 MiniCPM 数字，所以没有官方线。
+    ("native_swebq_pareto", "图4 · Speech Web Questions（OpenAudioBench，含对比模型） — latency vs acc，原生 full-duplex", "win", """
+<b>横轴</b>：用户说完到回答结束的 P50 时长（秒）。原生 duplex 里 talker 可能在用户说完前就开口，所以本地臂的时长可以很短；升级臂 = stall + 等待专家（真实计时）+ relay。
+<b>数字</b>：never 3.1 s → aggressive 11.3 s → always 20.4 s。WebQ 的专家答案是列表，念读时间长，always 档的延迟一半是念读。
 """),
-    ("sllama_pareto", "图8 · Llama Questions — latency vs acc", "win", """
-<b>看点</b>：曲线在 conservative 档<b>向左拐</b>（1.52s → 1.19s）——升级反而更快。
-<b>为什么</b>：本地长答案的解码时间（长的能到几秒）有时比专家往返还慢；升级掉一部分长题反而降低了中位延迟。这说明<b>路由不总是"用延迟换准确率"，有时两者兼得</b>。
-<b>公平吗</b>：是，实测时间戳。
+    ("native_sllama_dualview", "图5 · Llama Questions（OpenAudioBench） — escalation vs acc，原生 full-duplex（2026-09-02）", "mixed", """
+<b>这是什么</b>：图 3–14 那批曲线的原生 full-duplex 重跑：每题一个新的 duplex 会话，官方 serving config，部署中的 8bq gate 在 talker 决定开口的那个 chunk 读一次，
+触发则真 ASR 上行 + 真 gpt-5.5，等待按 1 chunk/秒真实计时，专家答案由 talker 用自己的声音<b>逐字念出</b>（TTS relay，2026-09-02 起线上默认）。五档各自实测（实心点）；数据未到齐时中间档按 never 臂的实测 onset 分数分支（空心点）。
+<b>判分</b>：与旧图同一把尺子（OpenAudioBench 官方 gpt-4o / VoiceBench gpt-4o-mini / 我们的 ref-anchored judge）。绿色虚线 = 专家原文直接判分，即 relay 无损时的上界。
+<b>橙色虚线（有的池才有）</b>：同一个 gate、换成旧的"prompt 引导 talker 转述"relay 的实测曲线——talker 会截断、自答、99% 需要 nudge，在 TriviaQA 上把 always 臂从 .960 压到 .728。这就是 relay 改成 TTS 直读的原因。
+<b>数字</b>：never .824 → aggressive .856（19%）→ always .916；上界 .932。本地 floor 本来就高，gate 只在 19% 的题上触发，收益 3 分。
+<b>和旧图不同的地方</b>：旧 harness 图上这个池是"选择性升级 > 全部升级"（.948 vs .928）的明星；原生 regime 下 always .916 更高，这个反超没有复现——原生本地 floor 低了 1.2 分、专家 relay 没有损失，两头都对 always 有利。
+<b>噪声提醒</b>：conservative 档 0% 触发却是 .788，比 never 低 3.6 分——同一批题重跑一遍本地回答就有这么大的波动，读所有 5 分以内的差别都要带着这个前提。
+<b>公平吗</b>：OpenAudioBench 官方判分器；这个池没有官方对比线。
 """),
-    ("sreason_dualview", "图9 · Reasoning QA（中文，执行型失败）— escalation vs acc", "win", """
-<b>看什么</b>：这是我们唯一的<b>执行型失败</b>外部验证（推理算错，而不是不知道某个事实），而且是中文的。
-<b>数字</b>：never .584 → aggressive <b>.762</b>，天花板 .871，超额 +.000/+.027/+.059。
-<b>为什么重要</b>：探针几乎完全在英文上校准，却能在中文推理题上把准确率拉高 18 分——<b>跨语言迁移成立</b>。三种失败类型的外部验证到此齐了。<b>（2026-08-20 修正）</b>v2→v3 在这个池上的 live 增益（+.010~.030）落在我们自己的复现噪声里（该池同题判分翻转率 16.9%，配对 SE .028，McNemar p&gt;.4）——<b>跨语言的证据在离线 AUC（+.062）上成立，live 曲线只是方向一致，不构成独立确认</b>。
-<b>为什么 conservative 档没超额</b>：最保守档只升级 15%，在推理型任务上探针的排序能力还不足以在如此小的预算内选中真正会错的题。
-<b>公平吗</b>：内部公平。<b>但这张图不能和官方比</b>——官方没有公布这个子集的 MiniCPM 数字，而且它的官方评分用的是逐题 rubric（打分prompt 列），我们没有复制，所以分数是我们自己的判分器口径，图上不画官方线。
+    ("native_sllama_pareto", "图6 · Llama Questions（OpenAudioBench） — latency vs acc，原生 full-duplex", "win", """
+<b>横轴</b>：用户说完到回答结束的 P50 时长（秒）。原生 duplex 里 talker 可能在用户说完前就开口，所以本地臂的时长可以很短；升级臂 = stall + 等待专家（真实计时）+ relay。
+<b>数字</b>：never 2.8 s → aggressive 3.0 s → always 9.0 s。触发率低，中间档几乎不付延迟代价。
 """),
-    ("sreason_pareto", "图10 · Reasoning QA（中文）— latency vs acc", "mixed", """
-<b>数字</b>：3.17s → 3.84s 换 +18 分。
-<b>为什么基准延迟最高</b>：推理题的本地答案最长（要写推理过程），所以 never 臂就已经 3.2 秒。
-<b>公平吗</b>：延迟实测；语音合成未计入。
+    ("native_sreason_dualview", "图7 · Reasoning QA（中文） — escalation vs acc，原生 full-duplex（2026-09-02）", "win", """
+<b>这是什么</b>：图 3–14 那批曲线的原生 full-duplex 重跑：每题一个新的 duplex 会话，官方 serving config，部署中的 8bq gate 在 talker 决定开口的那个 chunk 读一次，
+触发则真 ASR 上行 + 真 gpt-5.5，等待按 1 chunk/秒真实计时，专家答案由 talker 用自己的声音<b>逐字念出</b>（TTS relay，2026-09-02 起线上默认）。五档各自实测（实心点）；数据未到齐时中间档按 never 臂的实测 onset 分数分支（空心点）。
+<b>判分</b>：与旧图同一把尺子（OpenAudioBench 官方 gpt-4o / VoiceBench gpt-4o-mini / 我们的 ref-anchored judge）。绿色虚线 = 专家原文直接判分，即 relay 无损时的上界。
+<b>橙色虚线（有的池才有）</b>：同一个 gate、换成旧的"prompt 引导 talker 转述"relay 的实测曲线——talker 会截断、自答、99% 需要 nudge，在 TriviaQA 上把 always 臂从 .960 压到 .728。这就是 relay 改成 TTS 直读的原因。
+<b>数字</b>：never .510 → conservative .624（20%）→ balanced .663（33%）→ aggressive .728（50%）→ always .837；上界 .861。
+<b>为什么这张图存在</b>：图N2 时代这个池"gate 完全不触发"（全英文阈值压住中文分数）。8bq 的分语言阈值后三档按预期触发 20/33/50%，每档都在随机线之上。
+<b>为什么不是最好的池</b>：中文推理题的本地 floor 最低、专家延迟最长（always 档 P50 27 秒，见下图），推理型失败仍是 gate 最难判的一类。
+<b>公平吗</b>：我们的 ref-anchored judge（gpt-5.4-mini），与 N4 同口径；无官方对比线。
 """),
-    ("sdqa_dualview", "图11 · SD-QA 真人语音 — escalation vs acc", "win", """
-<b>看什么</b>：唯一一个用<b>真人录音</b>（非合成语音）的池，直接堵掉"你们的结论只在 TTS 上成立"这个质疑。
-<b>数字</b>：never .510 → aggressive <b>.785</b>，天花板 .930。超额 +.052/<b>+.125</b>/+.100 是所有池里最高的。
-<b>为什么这里表现最好</b>：空间大（.42）、失败是典型的检索型、题目短且口语化——四个公平条件全部满足，探针最能发挥。
-<b>公平吗</b>：内部公平。官方没有公布 SD-QA 的 MiniCPM 数字，所以没有官方线；判分是我们自己的口径（全池一致）。
+    ("native_sreason_pareto", "图8 · Reasoning QA（中文） — latency vs acc，原生 full-duplex", "win", """
+<b>横轴</b>：用户说完到回答结束的 P50 时长（秒）。原生 duplex 里 talker 可能在用户说完前就开口，所以本地臂的时长可以很短；升级臂 = stall + 等待专家（真实计时）+ relay。
+<b>数字</b>：never 5.1 s → balanced 6.2 s → aggressive 11.9 s → always 26.9 s。中文推理答案长、专家慢，always 档最贵。
 """),
-    ("sdqa_pareto", "图12 · SD-QA 真人语音 — latency vs acc", "win", """
-<b>数字</b>：1.39s → 2.96s 换 +27.5 分——这是所有池里性价比最高的一条曲线。
-<b>公平吗</b>：是，实测。
+    ("native_sdqa_dualview", "图9 · SD-QA 真人语音（VoiceBench） — escalation vs acc，原生 full-duplex（2026-09-02）", "win", """
+<b>这是什么</b>：图 3–14 那批曲线的原生 full-duplex 重跑：每题一个新的 duplex 会话，官方 serving config，部署中的 8bq gate 在 talker 决定开口的那个 chunk 读一次，
+触发则真 ASR 上行 + 真 gpt-5.5，等待按 1 chunk/秒真实计时，专家答案由 talker 用自己的声音<b>逐字念出</b>（TTS relay，2026-09-02 起线上默认）。五档各自实测（实心点）；数据未到齐时中间档按 never 臂的实测 onset 分数分支（空心点）。
+<b>判分</b>：与旧图同一把尺子（OpenAudioBench 官方 gpt-4o / VoiceBench gpt-4o-mini / 我们的 ref-anchored judge）。绿色虚线 = 专家原文直接判分，即 relay 无损时的上界。
+<b>橙色虚线（有的池才有）</b>：同一个 gate、换成旧的"prompt 引导 talker 转述"relay 的实测曲线——talker 会截断、自答、99% 需要 nudge，在 TriviaQA 上把 always 臂从 .960 压到 .728。这就是 relay 改成 TTS 直读的原因。
+<b>数字</b>：never .480 → balanced .650（27%）→ aggressive <b>.825</b>（66%）→ always .870；上界 .885。真人语音上路由收益最大：aggressive 比 never 高 34 分。
+<b>为什么</b>：真人录音里 ASR 噪声主导本地失败，而 gate 在 L22 读到的正是这种"没听清"的状态；专家上行用的是原始音频 + gpt-transcribe，不吃小模型的转写。
+<b>公平吗</b>：我们的 judge；VoiceBench 官方没有 SD-QA 的可比离线数字，所以没画对比线。
 """),
-    ("valpaca_dualview", "图13 · VoiceBench AlpacaEval（官方浓缩表那一行）— escalation vs judge score", "loss", """
-<b>⚠️ 这是负面结果，我们如实报。</b> aggressive 4.26，低于同升级率的随机线（≈4.45），超额 +.026/<b>−.088</b>/<b>−.083</b>。
-<b>为什么我们差</b>：实测原因——探针挑中的题在 never 臂得分 3.90，没挑中的 3.98，<b>零区分度</b>。根因是开放式指令没有"我不知道这个事实"这种离散失败事件可读，每个回答都有部分分（分数区间被压到 1.0 分宽）。这正是我们三失败种类里的第三类（元认知型）盲区——训练再多也救不了，属于方法的边界。
-<b>那为什么曲线还是上升的</b>：因为升级行确实从 3.90 涨到 4.71——收益全部来自"gpt-5.5 长文写得好"，不来自"挑得准"，随机挑同样多的题收益一样。
-<b>公平吗</b>：判分是公平的（VoiceBench 自己的 gpt-4o-mini + 原文 prompt，我们逐字复制）。但<b>绝对分和官方 4.8 的比较不公平</b>：我们实时 loop 的 floor 是 3.94，而同样音频走离线 chat 模式是 <b>4.86</b>（超过官方 4.8）——0.9 分的差距全部是 loop 造成的，机制是回答长度（chat 模式中位 2186 字符 vs 实时 820），因为双工系统提示让模型给简短口语回答，而 AlpacaEval 奖励完整长文。
+    ("native_sdqa_pareto", "图10 · SD-QA 真人语音（VoiceBench） — latency vs acc，原生 full-duplex", "win", """
+<b>横轴</b>：用户说完到回答结束的 P50 时长（秒）。原生 duplex 里 talker 可能在用户说完前就开口，所以本地臂的时长可以很短；升级臂 = stall + 等待专家（真实计时）+ relay。
+<b>数字</b>：never 2.4 s → balanced 3.3 s → aggressive 12.9 s → always 18.7 s。+34 分（aggressive）多等 10.5 秒，balanced 档是性价比拐点。
 """),
-    ("valpaca_pareto", "图14 · VoiceBench AlpacaEval — latency vs judge score", "loss", """
-<b>数字</b>：4.59s → 9.69s，是所有池里延迟最高的。
-<b>为什么这么慢</b>：AlpacaEval 的回答是长篇论述，<b>本地解码</b>而非专家往返才是延迟主因——这也解释了为什么这张图的延迟随升级率上升得这么陡。
-<b>怎么用这张图</b>：它和图13 一起构成一个完整的负面案例——在开放式生成任务上，我们的方法既贵又不比随机好。诚实地画出来比藏起来强。
+    ("native_frozen_dualview", "图11 · our pool（内部 test 240） — escalation vs acc，原生 full-duplex（2026-09-02）", "win", """
+<b>这是什么</b>：图 3–14 那批曲线的原生 full-duplex 重跑：每题一个新的 duplex 会话，官方 serving config，部署中的 8bq gate 在 talker 决定开口的那个 chunk 读一次，
+触发则真 ASR 上行 + 真 gpt-5.5，等待按 1 chunk/秒真实计时，专家答案由 talker 用自己的声音<b>逐字念出</b>（TTS relay，2026-09-02 起线上默认）。五档各自实测（实心点）；数据未到齐时中间档按 never 臂的实测 onset 分数分支（空心点）。
+<b>判分</b>：与旧图同一把尺子（OpenAudioBench 官方 gpt-4o / VoiceBench gpt-4o-mini / 我们的 ref-anchored judge）。绿色虚线 = 专家原文直接判分，即 relay 无损时的上界。
+<b>橙色虚线（有的池才有）</b>：同一个 gate、换成旧的"prompt 引导 talker 转述"relay 的实测曲线——talker 会截断、自答、99% 需要 nudge，在 TriviaQA 上把 always 臂从 .960 压到 .728。这就是 relay 改成 TTS 直读的原因。
+<b>数字</b>：never .408 → balanced .542（25%）→ aggressive .629（52%）→ always .704；上界 .765。
+<b>怎么读</b>：这是我们自己造的内部池（对话式 speakable 子集），floor 最低，always 与上界的 6 分差是念读上限截掉的长答案。
+<b>公平吗</b>：内部完全配对，但它不是公开集，只作为"六个公开池之外的一致性检查"。
 """),
-    ("noise_audit", "图17 · 我们自己的复现噪声有多大（方法审计）", "mixed", """
-<b>为什么有这张图</b>：我们本来是去修 frozen 池的阈值超发（应该升 50% 实际升了 61%）。把同一批实测结果按 50% 重新混合，准确率只从 .596 变成 .600——<b>+.004，等于没有</b>。这说明超发是<b>成本 bug 不是准确率 bug</b>（修正后省 11.3% 的专家调用，准确率不变），也逼出了下一个问题：那我们一直在解读的那些零点零几，到底有多少是真的？
-<b>左图</b>：frozen 池的连续曲线，每一个点都是<b>实测结果重新混合</b>出来的（三个档位的升级集合完全嵌套 + 探针分数逐位相同，所以可以这么做，$0）。灰带是配对 bootstrap 95% 区间。v2 的 .621 和 v3 的 .596 都落在带子里。
-<b>右图</b>：18 个 v2→v3 的 live 差值全部跨过 0 线（McNemar p=.16~1.00）。
-<b>噪声地板</b>：同一道题、同一段音频、在两个臂里都留在本地，判分结果的翻转率是 <b>2.3%~18.8%</b>（frozen 15.5%）；换算成臂间差值的配对标准误是 .009~.028。<b>所以任何小于 3 个点的差异，单跑一次 live sweep 是测不出来的。</b>
-<b>什么活下来了</b>：离线 AUC 的提升（统计量紧得多）、探针的逐题判别力（sllama z=6.46）、以及升级对难题那一半的提升（p&lt;.0001）。
+    ("native_frozen_pareto", "图12 · our pool（内部 test 240） — latency vs acc，原生 full-duplex", "win", """
+<b>横轴</b>：用户说完到回答结束的 P50 时长（秒）。原生 duplex 里 talker 可能在用户说完前就开口，所以本地臂的时长可以很短；升级臂 = stall + 等待专家（真实计时）+ relay。
+<b>数字</b>：never 3.6 s → balanced 5.6 s → aggressive 10.9 s → always 20.8 s。
 """),
-    ("nvda_fold_test", "图23 · 预测验证:极简风格的模型没有拐弯(NVDA vs MiniCPM)", "win", """
-<b>看什么</b>:8ab 预注册的预测——"回答风格极简的模型不会有延迟左折"——现在是观测。同一套 top-r 重混算术:MiniCPM(蓝)在 sllama 上折出 −0.05s;NVDA(绿)两个池全程<b>严格单调</b>。口径:NVDA 是语音原生双工,部署延迟由帧钟决定(1 token = 80ms),本地延迟 = 回答 token 数 × 0.08s,免疫批量计时污染;专家路径 = 同题实测 gpt-5.5 RTT。机制:NVDA 本地 P90 仅 2.0s,连最慢的本地回答都快过专家(~4s),升级永远净加时。<b>这也反向确认了拐弯的机制论:拐弯需要"会错的题恰好慢",把慢(绕)拿掉,拐弯就消失。</b>
+    ("native_valpaca_dualview", "图13 · VoiceBench AlpacaEval（开放式生成，judge 1–5 分） — escalation vs acc，原生 full-duplex（2026-09-02）", "loss", """
+<b>这是什么</b>：图 3–14 那批曲线的原生 full-duplex 重跑：每题一个新的 duplex 会话，官方 serving config，部署中的 8bq gate 在 talker 决定开口的那个 chunk 读一次，
+触发则真 ASR 上行 + 真 gpt-5.5，等待按 1 chunk/秒真实计时，专家答案由 talker 用自己的声音<b>逐字念出</b>（TTS relay，2026-09-02 起线上默认）。五档各自实测（实心点）；数据未到齐时中间档按 never 臂的实测 onset 分数分支（空心点）。
+<b>判分</b>：与旧图同一把尺子（OpenAudioBench 官方 gpt-4o / VoiceBench gpt-4o-mini / 我们的 ref-anchored judge）。绿色虚线 = 专家原文直接判分，即 relay 无损时的上界。
+<b>橙色虚线（有的池才有）</b>：同一个 gate、换成旧的"prompt 引导 talker 转述"relay 的实测曲线——talker 会截断、自答、99% 需要 nudge，在 TriviaQA 上把 always 臂从 .960 压到 .728。这就是 relay 改成 TTS 直读的原因。
+<b>数字</b>（VoiceBench 1–5 分）：never 3.68 → balanced 3.77（5%）→ aggressive 4.01（44%）→ always 4.20；专家原文 4.96。
+<b>为什么标"不利"</b>：开放式生成任务上 gate 触发率低、收益小，而且 always 与专家原文差 0.76 分——AlpacaEval 奖励完整长回答，语音场景 400 字符念读上限直接截掉了一半内容。这是方法边界 + 语音介质的双重限制，如实报告。
+<b>公平吗</b>：VoiceBench 官方 gpt-4o-mini 判分器；没有官方离线对比线可画。
 """),
-    ("entropy_traj", "图22 · token 级机制:熵轨迹 + 停止意愿(hedging 的显微镜)", "win", """
-<b>看什么</b>:93 道 striviaqa 题按四种行为分组重放,逐 token 记录全词表熵和终止符概率。<b>左</b>:答对(蓝)全程低熵;hedged 错(红)开头 ×1.8 高熵、全程游走;自信错(黄)又短又低熵——<b>它的输出分布也被错误事实骗了</b>,这就是熵信号(AUC .70)到不了探针(.80)的微观原因。<b>右</b>:句号后一步终止符的概率,答对题 .083,hedged 错 <b>.0024(低 35 倍)</b>——"不肯停"在 token 层面直接可见。彩蛋:绕对组开头低熵但游走最久——早期熵=检索状态,后期熵=文风,两者在此分离。工程脚注:MiniCPM 真终止符 id=151704 不在 generation_config 里。
+    ("native_valpaca_pareto", "图14 · VoiceBench AlpacaEval（开放式生成，judge 1–5 分） — latency vs acc，原生 full-duplex", "win", """
+<b>横轴</b>：用户说完到回答结束的 P50 时长（秒）。原生 duplex 里 talker 可能在用户说完前就开口，所以本地臂的时长可以很短；升级臂 = stall + 等待专家（真实计时）+ relay。
+<b>数字</b>：never 6.5 s → aggressive 13.8 s → always 39.4 s。开放式长答案念读时间最长，是这个池不适合语音路由的另一半原因。
 """),
-    ("kink_case_study", "图21 · 案例走查:一道题的两个世界(拐弯怎么出现)", "win", """
-<b>用途</b>:用错题簿里的一道典型题(sllama0164「锡克教有几位祖师」)的<b>完整实测 trace</b> 讲拐弯:世界A(探针关)本地绕 487 字符、3.10 秒、答错;世界B(探针开)话音落下 21ms 读出 eot=0.631≥0.513 → 升级,gpt-5.5 1.68s + 转述 0.62s = 2.32 秒,答对——<b>同一道题快 0.78 秒且从错变对</b>。下半用三根条讲池效应:38 道这种慢题(P50 2.38s)离开本地队列后,留下 212 题 P50 掉到 0.94s,整臂中位 1.52→1.17s = 图8 的左折。含 Addendum 4 的边界修正(探针挑"会错"不挑"会绕")。
-"""),
-    ("swebq_annotated", "图18 · 讲解版:图5 每条线是什么、什么能比什么不能比", "win", """
-<b>用途</b>:自带解读的教学版——上图每条线挂圈号,图内直接印 ①-⑥ 的大白话注释:官方线是别的测法(离线 chat)、浅蓝虚线证明官方分我们测得出来、蓝曲线才是真系统、+.164 = 机制+挑得准的总和、随机对照在正式图5 的灰虚线上。开会投这张,不用口头解释坐标系。
-"""),
-    ("sllama_annotated", "图19 · 讲解版:会挑的路由,花一半的钱拿到全升级的分", "win", """
-<b>用途</b>:最强正面结果的教学版,含 §8ad 统计修正后的诚实表述:.948 vs .928 本身 p=.125 不单独下结论;铁的是探针的分割(.976/.696,z=6.5)和难半边的提升(.696→.888,p&lt;.0001);正确头条 = "全部送云不是上界,选择性路由省一半专家调用零代价"。
-"""),
-    ("noise_audit_annotated", "图20 · 讲解版:我们的测量精度有多高,哪些差别不该解读", "mixed", """
-<b>用途</b>:方法审计的教学版。左:重建曲线+复现噪声带(同题重测判分翻转 2.3%~18.8%);红方块 = 曾被我们叫"退步"的 v2 点,其实在带内(p=.44,已撤回);绿星 = 阈值超发修正,只救成本不救准确率。右:18 个 v2→v3 live 差值全部跨零 → 单次 live 分辨不了 &lt;3 分。规矩:比较用配对检验/AUC,别读臂准确率的小数点。
-"""),
-    ("nvda_layer_sweep", "图15 · NVDA VoiceChat-11B — 探针层扫（第二个全双工家族）", "win", """
+    ("nvda_layer_sweep", "图15 · NVDA VoiceChat-11B — 探针层扫（第二个全双工家族）", "nvda", """
 <b>看什么</b>：把我们的探针配方原样搬到 NVIDIA NemotronLabs-VoiceChat-11B（Nemotron Nano v2 9B 主干，56 层 Mamba2/attention 混合架构——和 MiniCPM 完全不同的架构家族）。
 <b>数字</b>：中段 L30-34 最强（OOF AUC .714），两端弱（L2 .693 / L54 .682）。
 <b>为什么重要</b>：这是论文 §9 预注册的"第二家族"测试。"中层语义带最可读"的结构在一个 Mamba 混合主干上复现了——探针读的不是 MiniCPM 的私有特征，是全双工语音模型的共性结构。
 <b>公平吗</b>：校准只用了我们冻结的 600 题池（vs MiniCPM v3 的 2310），判分器同一把（gpt-5.4-mini ref-anchored）；离线重放口径，非实时 loop。
 """),
-    ("nvda_transfer", "图16 · NVDA VoiceChat-11B — 冻结方法论迁移（AUC 对比 MiniCPM）", "win", """
+    ("nvda_transfer", "图16 · NVDA VoiceChat-11B — 冻结方法论迁移（AUC 对比 MiniCPM）", "nvda", """
 <b>看什么</b>：同样三个读数（eot_last / +窗口均值 / +user-audio 均值）、同样的 C=1e-4 逻辑回归，在 NVDA 模型上从零校准，然后直接测 4 个外部公开池。
 <b>数字</b>：OOF .790；striviaqa .781 / swebq .793 / sdqa .754 / sllama .701——绿线是 MiniCPM v3（.79-.81），600 条校准就摸到了同一水平带；特征叠加的增益模式也和 MiniCPM 完全一致（.714→.761→.790）。
 <b>边界（如实报）</b>：sreason（中文）在此模型上 fail rate = 1.000——NVDA VoiceChat 是英文单语模型，听中文音频直接幻觉英文答案，跨语言迁移在它身上没有对应物，该池无 AUC 可算。另外它的知识 floor 明显低于 MiniCPM（striviaqa 本地正确率 .32 vs .62，同判分器）——底座弱不妨碍探针读失败信号，反而 base-fail 高信号更足。
 <b>公平吗</b>：判分器与标签定义完全同口径；尚未跑实时 4 臂曲线（需要把 streaming loop 移植到 NeMo，是下一步的花钱决定）。
 """),
-    ("nvda_remix", "图24 · NVDA 五池重混：MiniCPM 上 flat 的三个池在第二家族全部跑赢随机", "win", """
+    ("nvda_remix", "图24 · NVDA 五池重混：MiniCPM 上 flat 的三个池在第二家族全部跑赢随机", "nvda", """
 <b>看什么</b>：把 tab:transfer 的格子在 NVDA 上补满——按 NVDA 探针分数 top-r 换成实测 gpt-5.5 结果、其余保留 NVDA 本地答案的离线重混（8ad 验证过的算术），逐池用官方判分器（OAB 三池 = 官方 gpt-4o judge、SD-QA = 我们的、AlpacaEval = VoiceBench 1-5）。
 <b>数字</b>：五个池全部跑赢 matched-rate random（置换检验 p≤.0003）。50% 档：striviaqa .356→.741（随机 .656）、swebq .376→.696（.602）、sllama .705→.876（.818）、sdqa .310→.675（.600）、AlpacaEval 3.55→4.46（4.23）。
 <b>为什么重要</b>：论文正文的两个 honest negative（WebQ/SD-QA flat、AlpacaEval 不赢随机）在第二家族<b>都不复现</b>——选择性没变（官方标签下 AUC .72-.78），变的是 headroom（NVDA floor .31-.38 vs MiniCPM .51-.66）和失败物种（NVDA 开放题是硬失败：被选中半边 VB 3.01 vs 留下 4.08）。negative 是"池×底座"的属性，不是信号的属性。
 <b>公平吗</b>：离线重混非实时 loop；expert 听的是 MiniCPM 的 heard transcript（NVDA 离线没有自己的 ASR relay），A 口径不含转述税——含实测转述结果的 B 口径档位点差 ≤.032。striviaqa 3 题、sllama 16 题因官方 judge 输出不可解析剔除。
 """),
+    ("nvda_probe_reads", "图25 · NVDA 读点体检：commit 后 8 帧读的是回答开头不是“偷看”，因果读只亏 .03 AUC / 1 个准确率点（PR #7，2026-09-02）", "nvda", """
+<b>这是什么</b>：合作者对 NVDA 部署探针（v2：校准 600→2,481 行、读点从"用户音频结束"改到模型自己的 commit-to-speak 后 8 帧）做的第三次独立 replay 复盘。回答审稿人必问的一句：读点落在模型开口后约 640 ms，这算不算已经看到了答案？
+<b>左图</b>：六种读法的冷外部四池均值 AUC（点=单池，Δ=与部署读点的配对 bootstrap 差）。<b>严格因果</b>读（只读 commit 帧之前：commit 帧 ‖ 前 8 帧均值 ‖ 到 commit 为止的运行均值）比部署读点低 .025–.030，每一层都一致，置信区间排除 0；而 commit 之前的窗口并不比老的"音频结束"窗口好（.781 vs .782）——所以多出来的信号就是模型开口的前几个 token 本身，不是 commit 前听到了什么。
+<b>右图</b>：换成固定升级预算下的准确率（官方判分器，四池均值），部署 probe 与 v2 probe 完全重合，都在 15/30/50% 三档显著跑赢同率随机（.552/.650/.756 vs .507/.577/.670）；严格因果读只低 0.5–1 个点（.546/.640/.749）。
+<b>为什么重要</b>：(1) 部署读点不是 pre-answer，但把"偷看"去掉代价很小，论文可以两种口径都报；(2) 两位独立 reviewer 提的 ~85 个配方变体（多层平均、LDA、PLS、重加权、逐帧特征……）外部 AUC 最多 +.013，且<b>没有一个</b>改变固定预算准确率——线性 probe 在这组特征上到顶了，以后不必再在配方上花时间；(3) 在线状态机的运行均值（不知道音频何时结束）和离线全句均值可互换（−.004 [−.009, +.001]），streaming 移植不用重新校准。
+<b>没修好的</b>：固定校准阈值在 Llama-Q 只触发 1/4/12%、SD-QA 触发 7/27/53%（名义 15/30/50）——和 MiniCPM 上见过四次的问题一样，NVDA 侧的 per-pool 分位数阈值还没移植，是下一个 PR。
+<b>公平吗</b>：校准、外部池、判分器与图16/图24 同口径；表内 AUC 来自 2,481 行分析拟合，导出的部署/v2/因果 artifact 是剔除 240 行冻结 test 后的 2,258 行独立重拟合，两者不混用。离线重放，非实时 loop。
+"""),
+    ("kink_case_study", "图21 · 案例走查:一道题的两个世界(拐弯怎么出现)", "aux", """
+<b>用途</b>:用错题簿里的一道典型题(sllama0164「锡克教有几位祖师」)的<b>完整实测 trace</b> 讲拐弯:世界A(探针关)本地绕 487 字符、3.10 秒、答错;世界B(探针开)话音落下 21ms 读出 eot=0.631≥0.513 → 升级,gpt-5.5 1.68s + 转述 0.62s = 2.32 秒,答对——<b>同一道题快 0.78 秒且从错变对</b>。下半用三根条讲池效应:38 道这种慢题(P50 2.38s)离开本地队列后,留下 212 题 P50 掉到 0.94s,整臂中位 1.52→1.17s = 图8 的左折。含 Addendum 4 的边界修正(探针挑"会错"不挑"会绕")。
+"""),
+    ("entropy_traj", "图22 · token 级机制:熵轨迹 + 停止意愿(hedging 的显微镜)", "aux", """
+<b>看什么</b>:93 道 striviaqa 题按四种行为分组重放,逐 token 记录全词表熵和终止符概率。<b>左</b>:答对(蓝)全程低熵;hedged 错(红)开头 ×1.8 高熵、全程游走;自信错(黄)又短又低熵——<b>它的输出分布也被错误事实骗了</b>,这就是熵信号(AUC .70)到不了探针(.80)的微观原因。<b>右</b>:句号后一步终止符的概率,答对题 .083,hedged 错 <b>.0024(低 35 倍)</b>——"不肯停"在 token 层面直接可见。彩蛋:绕对组开头低熵但游走最久——早期熵=检索状态,后期熵=文风,两者在此分离。工程脚注:MiniCPM 真终止符 id=151704 不在 generation_config 里。
+"""),
+    ("nvda_fold_test", "图23 · 预测验证:极简风格的模型没有拐弯(NVDA vs MiniCPM)", "nvda", """
+<b>看什么</b>:8ab 预注册的预测——"回答风格极简的模型不会有延迟左折"——现在是观测。同一套 top-r 重混算术:MiniCPM(蓝)在 sllama 上折出 −0.05s;NVDA(绿)两个池全程<b>严格单调</b>。口径:NVDA 是语音原生双工,部署延迟由帧钟决定(1 token = 80ms),本地延迟 = 回答 token 数 × 0.08s,免疫批量计时污染;专家路径 = 同题实测 gpt-5.5 RTT。机制:NVDA 本地 P90 仅 2.0s,连最慢的本地回答都快过专家(~4s),升级永远净加时。<b>这也反向确认了拐弯的机制论:拐弯需要"会错的题恰好慢",把慢(绕)拿掉,拐弯就消失。</b>
+"""),
+
 ]
 
 VERDICT = {"win": ("✓ 有利", "#1e9e50"), "mixed": ("~ 有保留", "#b8860b"),
+           "pending": ("… 跑批中", "#5a6270"), "aux": ("机制分析（MiniCPM，离线重放）", "#6b4e9e"),
+           "nvda": ("第二家族 · NVDA VoiceChat-11B 原生 duplex — 合作者在该模型上自训探针（离线重放）", "#0f6e8c"),
            "loss": ("✗ 不利（如实报告）", "#b00")}
 
 app = modal.App("figures-gallery")
 HERE = os.path.dirname(os.path.abspath(__file__))
 image = modal.Image.debian_slim().pip_install("fastapi[standard]")
 for name, _, _, _ in FIGS:
-    image = image.add_local_file(os.path.join(HERE, "figures", f"{name}.png"),
-                                 f"/root/figs/{name}.png")
+    _p = os.path.join(HERE, "figures", f"{name}.png")
+    if os.path.exists(_p):
+        image = image.add_local_file(_p, f"/root/figs/{name}.png")
 
 
 @app.function(image=image, timeout=60 * 5, min_containers=0)
@@ -186,10 +219,13 @@ def web():
     blocks = []
     for name, title, verdict, text in FIGS:
         label, color = VERDICT[verdict]
+        img = (f'<img src="/{TOKEN}/f/{name}.png" loading=lazy>'
+               if os.path.exists(f"/root/figs/{name}.png") else
+               '<div class=pend>图还在跑批中 — 数据到齐后自动补上</div>')
         blocks.append(
             f'<div class=fig><h3>{title}</h3>'
             f'<span class=badge style="background:{color}">{label}</span>'
-            f'<img src="/{TOKEN}/f/{name}.png" loading=lazy>'
+            + img +
             f'<div class=interp>{text}</div></div>')
     page = f"""<!doctype html><html lang=zh><head><meta charset=utf-8>
 <meta name=viewport content="width=device-width,initial-scale=1">
@@ -204,22 +240,19 @@ img{{width:100%;height:auto;border-radius:4px;margin:.5rem 0}}
 .interp{{font-size:.86rem;background:#fbfbfa;border-left:3px solid #ccc;
 padding:.6rem .7rem;border-radius:0 6px 6px 0}}
 .interp b{{color:#000}}
+.pend{{background:#eef1f4;color:#5a6270;padding:2rem;text-align:center;border-radius:4px;margin:.5rem 0;font-size:.9rem}}
 .note{{background:#fff;border-left:4px solid #333;padding:.7rem;
 font-size:.86rem}}</style></head><body>
-<h1>17 张图 + 逐图解读</h1>
-<div class=note><b>2026-09-01 重要更新</b>：系统已切换到 MiniCPM 的<b>原生 full-duplex</b>
-模式（图N1-N3）。图1-14 的结果测于此前的 turn-based/harness loop——gate 的结论在原生
-regime 下全部复验（AUC .830/.709、validity 5/6 池显著），但那批图的绝对数字属于旧 loop，
-读的时候请带上这个前提。<br><br>
-<b>怎么读这套图</b>：每张图下面写了三件事——我们在这张图上<b>为什么占优</b>、
-<b>为什么吃亏</b>、以及<b>这个比较公不公平</b>。<br><br>
-统一口径：五个外部集用<b>官方判分器</b>（OpenAudioBench 的 gpt-4o / VoiceBench 的
-gpt-4o-mini，均逐字复制官方 prompt）；对比模型（Qwen3-Omni-30B、Kimi-Audio、官方
-MiniCPM）的数字来自同一张官方表，全部是<b>离线 chat 模式</b>，而我们的曲线是<b>实时流式</b>的——
-所以图上还画了"我们自己的离线 chat-mode 线"作为同协议参照。<br><br>
-<b>一句话总结</b>：失败可观测的任务（事实型、检索型、推理型）上路由有效，
-最好的一张图上 9B+路由打赢 30B 单体模型、甚至打赢"全部升级"；
-开放式生成任务（AlpacaEval）上路由无效，这是方法的边界，如实报告。</div>
+<h1>原生 full-duplex 结果集 + 逐图解读</h1>
+<div class=note><b>2026-09-02 完成</b>：整套结果图已全部换成<b>原生 full-duplex 实测</b>——七个池 × 五档，每题一个真实 duplex 会话、官方 serving config、
+线上 8bq gate、真 ASR 上行 + 真 gpt-5.5 + TTS relay，五档各自实测（不再有分支估计）。此前 turn-based/harness loop 的图 1–14、17–20 已下架，只在图N6 保留 floor 对照。<br><br>
+<b>relay 已换</b>：旧 relay 让 talker 自己转述专家答案，TriviaQA always 臂专家原文 .960、用户听到只剩 .728（丢掉 27% 的正确答案）。
+2026-09-02 起 relay 改为 talker 用自己的声音逐字念专家文本（TTS 直读），同题 A/B：.733 → .933；线上 demo 已同步切换。旧 relay 的曲线在 TriviaQA / WebQ 以橙色虚线保留作对照。<br><br>
+<b>一句话总结</b>：原生 regime 下本地 floor 比 harness 低 1–8 分，但路由收益更大——六个 QA 池 aggressive 档比 never 高 3 到 34 分，真人语音（SD-QA）收益最大；
+开放式生成（AlpacaEval）仍是边界，且语音念读上限又砍掉一半专家内容。<br><br>
+<b>怎么读这套图</b>：每张图下面写三件事——<b>为什么占优</b>、<b>为什么吃亏</b>、<b>这个比较公不公平</b>。
+外部集用<b>官方判分器</b>（OpenAudioBench 的 gpt-4o / VoiceBench 的 gpt-4o-mini，逐字复制官方 prompt）；对比模型的数字来自官方表，全部是<b>离线 chat 模式</b>，我们的曲线是<b>实时流式</b>的。
+本地回答是随机解码（top_k=20），同一批题重跑一遍 floor 会动 ±3 分，5 分以内的差别请带着这个前提读。</div>
 {''.join(blocks)}</body></html>"""
 
     @api.get(f"/{TOKEN}", response_class=HTMLResponse)

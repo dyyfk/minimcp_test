@@ -1,72 +1,94 @@
-\section{Live End-of-Turn Escalation}
+\section{Results}
+\label{sec:results}
+
+% Main results table (tab:transfer) is declared in signal.tex so it
+% floats to an early page.
+
+\subsection{Live escalation}
 \label{sec:live}
 \label{sec:liveloop}
 \label{sec:livecurve}
 
-\paragraph{Primary protocol.}
-The protocol is turn-based: audio streams in 1\,s chunks, but the
-talker speaks only after the user's turn ends and the model's native
-listen/speak head is not engaged. This protocol isolates competence
-handoff from turn-taking; the native-head validation is reported
-separately below. Scores from intermediate chunks are weaker than the
-offline read (best summary AUC 0.764) and can miss information in the
-last chunk. We therefore make one \textbf{end-of-turn read}: after the
-final audio chunk, the system prefills the assistant turn and reads L22
-at its start. In the 360-query read-point study, the single-position
-probe reaches \textbf{AUC 0.887} in $\sim$30\,ms, compared with 0.843
-for the offline reference, and arrives before the first output token.
-This experiment establishes the read point. The accuracy sweeps below
-use the deployed three-position probe fit on the wider 2{,}310-query
-calibration mix (frozen-test AUC 0.879); tier thresholds are quantiles
-of its score.
+We ran the 240 frozen test queries through four escalation tiers,
+each a complete turn-based loop with audio input
+(\S\ref{sec:liveproto}). The primary sweep retains the model's output
+as text; a separate run of the balanced tier with speech synthesis
+enabled leaves all 84/240 gate decisions unchanged and measures
+speech onset. We score deployed-channel answer accuracy: the
+correctness of the relayed content after the full system path.
+Headline numbers use a pre-registered input filter that removes 21
+formula-LaTeX queries and one broken recording, because the speech
+rendering destroys the symbolic input before the model receives it.
+Accuracy rises monotonically,
+$\mathbf{42.2\% \to 52.8\% \to 59.2\% \to 63.3\%}$ at 0/14/31/57\%
+escalation, and every tier's gain is significant (paired bootstrap;
+Table~\ref{tab:transfer}, Figure~\ref{fig:dualview}). The gate also
+exceeds matched-rate random
+escalation at every tier: by 7.2--9.4 points on deployed-channel
+accuracy, and by 5.3--8.3 points when the relay channel is factored
+out (Figure~\ref{fig:dualview}).
 
-If the turn is escalated, the local talker first produces a short stall
-phrase. Its own transcription of the input is sent to
-\texttt{gpt-5.5}, and the returned answer is injected as context for
-the local model to relay. The expert request runs asynchronously.
-Partial-query prefetch, expert reasoning effort, and injection controls
-are reported in Appendix~\ref{app:livedetail}.
-\label{sec:inject}
+% fig:dualview is declared at the end of Section 4 so it floats
+% onto the page where these results are discussed.
 
-\paragraph{The live result.}
-We ran 240 frozen test queries $\times$ four escalation tiers, each a
-complete turn-based loop with audio input. The primary accuracy sweep
-retains the model's output as text; a separate TTS-on run of the
-balanced tier verifies that enabling speech synthesis leaves all
-84/240 gate decisions unchanged and measures speech onset. We score
-\emph{deployed-channel answer accuracy}: correctness of the relayed
-content after the system path. Headline numbers use a pre-registered
-input filter that removes 21 formula-LaTeX queries and one broken
-recording, because the speech rendering destroys the symbolic input
-before the model receives it. Accuracy rises monotonically,
-$\mathbf{42.2\% \to 52.8\% \to 59.2\% \to 63.3\%}$ at 0/14/31/57\% escalation,
-every tier's gain significant (paired bootstrap;
-Figure~\ref{fig:dualview}). More importantly, it exceeds the
-matched-rate random reference at every tier, by
-7.2--9.5 points in the deployed view and by 5.4--8.4 points in the
-channel-controlled view
-(Figure~\ref{fig:dualview}). A measured always-escalate arm reaches
-66.5\%. The small remaining gain from 57\% to 100\% escalation is not
-evidence that selection is perfect: the same sessions reach 92.2\%
-when the expert receives gold text, showing that the model's
-transcription uplink is the limiting channel at high escalation rates.
-Live accuracies have a replication floor of $\pm$2--3 points; no claim
-rests on a smaller difference. Full tables, latency profiles, and
-boundary cases are in Appendix~\ref{app:livedetail}.
+A measured always-escalate arm reaches 66.5\%. The gain from 57\% to
+100\% escalation is small because the expert sees the model's own
+transcription: the same sessions reach 92.2\% when the expert
+receives the reference transcript, so the transcription channel, not
+selection, is the limit at high escalation rates. Live accuracies
+have a replication floor of $\pm$2--3 points; no claim rests on a
+smaller difference. Full tables, latency profiles, and boundary cases
+are in Appendix~\ref{app:livedetail}.
 
 \paragraph{Serving-regime checks.}
-A talker-on replay leaves the frozen ranking nearly unchanged
-(AUC 0.871/0.856 versus 0.866 headless). A teacher-forced concurrent
-interleave is less stable and requires an in-regime refit; its external
-results remain exploratory (Appendix~\ref{app:duplexval}). Under the
-model's native full-duplex head, the read moves to the head's own
-listen$\to$speak commit point. Refitting the same features in that
-regime yields AUC 0.830 internally and 0.709 across the external QA
-pools. A native outcome re-mix beats matched-rate random on five of six
-pools. A full native live run on the internal 240 queries improves
-accuracy from 0.371 to 0.537 at 45\% escalation, below the 0.596 re-mix
-prediction because relaying the returned answer is lossy. These checks
-support the ranking beyond the primary turn-based loop, but they also
-show that read points, probe weights, and thresholds must be calibrated
-for the serving regime (Appendix~\ref{app:native}).
+Replaying the loop with the talker enabled leaves the frozen ranking
+nearly unchanged (AUC 0.871/0.856 versus 0.866 with the talker
+disabled). A teacher-forced concurrent-prefill variant is less stable
+and requires an in-regime refit; its external results remain
+exploratory (Appendix~\ref{app:duplexval}). Under the model's native
+full-duplex head, the read moves to the head's own listen$\to$speak
+commit point, and the probe is refit in regime on a widened
+5{,}228-row calibration merge under the official serving
+configuration, with labels judged on the native answers. The refit
+reads at AUC 0.876 internally and 0.771 on the four English external
+QA pools. The Mandarin reasoning pool is lower, at 0.621; a
+1{,}500-question held-out Mandarin set of facts, knowledge, and
+commonsense reads at 0.811, so the gap is multi-step reasoning
+rather than language (Appendix~\ref{app:native}). Re-mixing the
+native gate's decisions with cached expert outcomes beats
+matched-rate random on all five English pools at both deployed
+tiers; with per-language thresholds the Mandarin pool escalates at
+the nominal rates and beats matched-rate random at the two lower
+tiers. These checks support the ranking beyond the primary
+turn-based loop, but they also show that read points, probe weights,
+and thresholds must be calibrated for the serving regime
+(Appendix~\ref{app:native}).
 
+\paragraph{Native full-duplex live sweep.}
+We then re-ran the full five-arm live protocol as native full-duplex
+sessions on all seven pools (one fresh duplex session per query,
+official serving configuration, deployed gate, real transcription
+uplink and expert call, wait paced in wall time). The first pass
+exposed the relay, not the gate, as the bottleneck: on Speech
+TriviaQA the expert's returned text scored 0.960 under the official
+judge, but what the talker voiced after a steering prompt scored
+0.728 (never-escalate 0.628), because the head truncated, ignored, or
+re-answered the relayed text on about a quarter of turns. Speaking
+the cleaned expert text verbatim through the talker's own
+teacher-forced voice, with a context note in place of the steering
+prompt, closes that gap (same 60 queries: 0.733 versus 0.933) at
+about two seconds of added synthesis time, and is now the deployed
+relay. With it, native local floors sit 1--8 points below the
+turn-based loop, but the routing gain is larger: at the aggressive
+tier delivered accuracy rises from 0.628 to 0.884 (56\% escalation)
+on Speech TriviaQA, 0.528 to 0.752 (60\%) on Speech WebQ, 0.480 to
+0.825 (66\%) on SD-QA, and 0.510 to 0.728 (50\%) on the Mandarin
+reasoning pool, which now escalates at its nominal rates; Llama
+Questions gains 3 points at 19\% escalation, and the turn-based
+``selective beats always'' reversal on that pool does not reproduce
+natively. Local decoding is stochastic, and a zero-escalation re-run
+moves a floor by up to 3.6 points, so sub-5-point differences are
+within noise. Open-ended generation remains the boundary: on
+AlpacaEval the always-escalate arm scores 4.20 against 4.96 for the
+expert text, because a 400-character spoken cap removes half of the
+long answers.

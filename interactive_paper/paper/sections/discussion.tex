@@ -1,80 +1,75 @@
 \section{Discussion}
 \label{sec:discussion}
 
-\paragraph{What the experiments establish.}
-The three parts of the study answer different requirements of the same
-handoff decision. First, in-distribution probe accuracy is not enough:
-query type explains much of the apparent performance, and LOPO
-evaluation changes the preferred read from the final layer to the
-middle of the network. Second, this mid-layer read remains useful when
-text calibration is applied to speech-input states and is available
-before response commitment. Third, its ranking improves a live
-escalation loop over matched-rate random selection. External and native
-evaluations support the same conclusion, but also show that neither
-probe weights nor thresholds should be assumed to transfer across
-serving regimes without validation.
+\paragraph{Interpretation.}
+The competence signal this system runs on was already in the frozen
+weights. Nothing was trained into the speech model, and the read costs
+one dot product on states the forward pass computes anyway, so a
+deployed duplex model can gain selective escalation without new
+duplex data, a new control token, or a retrained policy. What matters
+is where the read is taken. The final layer is the default choice
+because it is the interface to the output, and on these duplex
+checkpoints it is the wrong one: the same linear read that inverts at
+the output holds up in the middle of the network. This also points
+back at duplex training itself. The matched comparisons show that the
+fine-tune, not the backbone, is what breaks the late-layer read, so a
+training recipe that adds interaction control may be degrading the
+model's own competence interface while leaving its answers intact. We
+do not know the mechanism, and a model that reads its own state
+before answering still cannot explain why it will fail.
 
-\paragraph{What the score represents.}
-The probe is strongest on retrieval-like failures, where the model's
-state reflects a missing answer before generation. It is weak on false
+\paragraph{Scope of the signal.}
+The probe is strongest on retrieval-like failures, where the state
+reflects a missing answer before generation. It is weak on false
 premises and complementary to signals that appear during decoding
-(Appendix~\ref{app:livedetail}). This construct boundary explains why
-failure AUC and system benefit are not identical. A correct ranking
-cannot help when the expert fails on the same turns, and an open-ended
-quality benchmark may not contain the factual-retrieval event the probe
-detects. The unstable Web Questions curve and the negative AlpacaEval
-result are therefore part of the finding, not exceptions to hide;
-SD-QA, by contrast, confirms selective gains on real human speech.
-Selective escalation depends on both readable local failure and expert
-headroom.
+(Appendix~\ref{app:livedetail}). This boundary explains why failure
+AUC and system benefit are not the same quantity. A correct ranking
+cannot help when the expert fails on the same turns, and an
+open-ended quality benchmark may not contain the factual-retrieval
+event the probe detects. The unstable Web Questions curve and the
+negative AlpacaEval result are part of that boundary rather than
+exceptions to it; SD-QA, by contrast, confirms selective gains on
+real human speech. Selective escalation needs both a readable local
+failure and expert headroom.
 
-\paragraph{Calibration is part of deployment.}
+\paragraph{Calibration.}
 The model weights stay frozen, but the gate is still a fitted
-component. Text-only calibration is sufficient for the controlled
-cross-modal result on end-to-end speech models. The deployed
-three-position probe uses a wider benchmark-disjoint calibration mix,
-and both concurrent and native read points require in-regime refits.
-The method avoids fine-tuning the talker and lets the operating budget
-move through a threshold, but it does not eliminate the need for
-representative calibration data.
+component. Text-only calibration is enough for the cross-modal result
+on end-to-end speech models, the deployed probe uses a wider
+benchmark-disjoint mix, and both the concurrent and native read
+points require refitting in their own regime. The method avoids
+fine-tuning the talker and moves the operating budget through a
+threshold, but it does not remove the need for representative
+calibration data.
 
 \paragraph{Limitations.}
-(i) One phrasing per $\ptrue$ variant; real-speech validation is
-scripted read speech in one dialect; formula-symbolic content is out of
-scope for the audio arm (any TTS render destroys it). (ii) The
-second-family replication covers mid-band readability and frozen-recipe
-transfer only --- not matched-pair attribution, the live loop, or the
-concurrent regime. (iii) Labels come from one judge family (a stronger
-re-judge bounds deltas at $\le$1 point), no human labels.
-(iv) One session per query per tier ($\pm$2--3 point floor); under
-concurrent prefill the frozen read degrades (AUC .87$\to$.76) and an
-in-regime refit recovers .82 --- calibration must follow the regime,
-and scale helps only partly (a full 2{,}310-row in-regime refit
-lifts external mean AUC .64$\to$.69, still short of turn-based .77);
-that concurrent loop is exploratory (teacher-forced carrier,
-random-clearance internal but spotty externally;
-Appendix~\ref{app:duplexval}). The deployed \emph{native} full-duplex
-regime lands strictly between the two (in-regime AUC .83 internal /
-.71 external mean; Appendix~\ref{app:native}); its internal full live
-run is limited by a lossy relay channel. (v) Layer and features were
-chosen on internal calibration-split
-cross-validation and confirmed on held-out pools, not by nested
-selection inside each held-out pool (Appendix~\ref{app:signal}).
-(vi) The mechanism behind the late-layer decay on text input is unresolved
-(Appendix~\ref{app:mech}). (vii) The primary evaluation uses scripted,
-single-turn questions. Disfluent correction, chained tool calls, and
-multi-turn grounding remain open
-\citep{lin2026fdbv3}; in the native test, a new question during the
-expert wait derails the pending relay in 7/10 trials, so production
-systems must cancel or replace an in-flight request when the user moves
-on.
+The internal study uses one phrasing per $\ptrue$ variant, and its
+real-speech validation is scripted read speech in a single dialect.
+Formula-symbolic content is out of scope for the audio arm, since any
+speech rendering destroys it. Labels come from one judge family, with
+no human labels; a stronger re-judge bounds the resulting shifts at
+about one point. Each query is run once per tier, which puts a
+replication floor of two to three points on every live accuracy, and
+no claim here rests on a smaller difference. The second-family
+replication covers mid-band readability and frozen-recipe transfer
+only, not matched-pair attribution, the live loop, or the concurrent
+regime. Layer and features were chosen by cross-validation on the
+internal calibration split and then confirmed on held-out pools,
+rather than by nested selection inside each held-out pool. The
+mechanism behind the late-layer decay on text input remains
+unresolved (Appendix~\ref{app:mech}).
 
-\paragraph{Conclusion.}
-In the duplex speech models studied here, the conventional final-layer
-read is not the most reliable place to estimate answer competence when
-text queries shift across pools. A mid-network read retains that
-query-pool transfer and remains usable when calibrated on text and
-scored on speech-input states. It also becomes available before response
-commitment and improves which turns a live system escalates. The result
-supports a practical handoff mechanism while leaving the cause of the
-text-input late-layer failure open.
+Serving regime is the sharpest practical limit. Calibration does not
+carry across regimes: under concurrent prefill the frozen read
+degrades and needs an in-regime refit, and the native read needs its
+own refit, wider calibration, and labels judged on native answers
+before it matches the turn-based loop
+(Appendices~\ref{app:duplexval},~\ref{app:native}). That native read
+also appears saturated, in that more labels of the same kind, larger
+heads, and a distilled second-signal student all leave it close to
+where it is. Finally, the evaluation is scripted and single-turn.
+Disfluent correction, chained tool calls, and multi-turn grounding
+remain open \citep{lin2026fdbv3}, and in native testing a new
+question asked during the expert wait usually derails the pending
+relay, so a production system has to cancel or replace an in-flight
+request when the user moves on.

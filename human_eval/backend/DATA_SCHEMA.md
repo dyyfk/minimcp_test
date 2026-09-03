@@ -1,12 +1,13 @@
 # Persisted Human-Evaluation Data
 
-Each `sessions/{session_id}.json` document is the complete audit record for one participant. Audio stays in `audio/{conversation_id}/`. Analysis should normally use the flattened `sessions`, `tasks`, `conversations`, and `turns` JSONL exports.
+Each `sessions/{session_id}.json` document is the complete audit record for one participant. Audio stays in `audio/{conversation_id}/`. Structured backend events use `logs/{UTC timestamp}_{conversation_id}.jsonl`; PCM/base64 audio is excluded from these logs. Analysis should normally use the flattened `sessions`, `tasks`, `conversations`, and `turns` JSONL exports.
 
 ## Session and assignment
 
 - `user_id`, `session_id`, `study_version`, `schema_version`
-- `status`, `created_at`, `started_at`, `completed_at`, `updated_at`
-- private `pair_cell`, assignment time, and reservation expiry
+- `status`, `created_at`, `started_at`, `completed_at`, `updated_at`; stale active reservations are persisted with session status `expired`
+- private `pair_cell`, assignment time, reservation expiry, and expiration audit timestamps/reason
+- exports derive `reservation_status` (`active`, `expired`, `completed`, or `not_applicable`) and `reservation_active`
 - task order, `task_id`, capability `S1`/`S2`/`S3`, scenario ID, and whether escalation is expected for that capability
 - conversation order, `conversation_id`, assigned `model`, `probe_on`, and `threshold_tier`
 
@@ -15,7 +16,9 @@ Each `sessions/{session_id}.json` document is the complete audit record for one 
 - Per-conversation rating metrics and free-form feedback
 - Pairwise preference (`first`, `second`, or `same`), selected reasons, and feedback
 - Rating/comparison submission timestamps
-- Completion status and completion code
+- Separate interaction and evaluation lifecycle: conversation `status` records how the voice interaction ended, while `evaluation_status` records whether its rating was submitted
+- `analysis_complete=true` and completion counts require a submitted rating; an ended interaction alone is not counted as complete analysis data
+- Session completion status and completion code
 - Task and scenario identity needed to compare matched X/Y prompts
 
 ## Interaction data
@@ -32,7 +35,7 @@ For every model turn:
 ## MiniCPM+ escalation data
 
 - Whether the turn was eligible for escalation and whether it escalated
-- Threshold tier, numerical threshold, final EOT score, per-chunk score series, and EOT read time
+- Threshold tier, numerical threshold, final EOT score, per-chunk score series, action score, information-request decision, and EOT read time
 - Total observed escalation and local-routing counts across MiniCPM+ turns
 - Per-turn routing review: expected action, actual action, correctness, reviewer, note, and timestamp
 - Reviewed/correct/incorrect/unreviewed routing counts
@@ -40,16 +43,20 @@ For every model turn:
 
 ## Guardrail and data-quality data
 
-- Conversation end reason and status
+- Conversation interaction status (`assigned`, `in_progress`, `interaction_completed`, `failed`, or `abandoned`) and evaluation status (`not_ready`, `pending`, `completed`, or `not_submitted`)
+- Manual `quality_review.status` (`needs_review`, `valid`, or `invalid`), reason, note, reviewer, timestamp, and automatic screening flags
+- Suggested task-flow length is not enforced. Fewer recorded turns than the task target adds `fewer_than_target_turns` for review but never blocks the participant or automatically invalidates data.
 - Timeout, model crash, disconnect, interruption, and empty-response flags
 - Input and output audio anomaly flags
 - Structured error timestamp/message
-- Completed conversation count, total turn count, MiniCPM+ turn count, and anomaly totals
+- Interaction-ended, evaluation-completed, analysis-complete, QC-status, total-turn, MiniCPM+-turn, and anomaly counts
 
 Null interpretation:
 
-- `user.transcript=null` with `transcript_status=not_configured` means post-hoc ASR was not configured; the WAV remains available.
+- `user.transcript=null` records an upstream ASR error or a missing transcript. The WAV remains available for correction or optional post-hoc ASR.
 - MiniCPM+ `routing_review.status=unreviewed` means correctness is intentionally unknown. Routing correctness is never inferred from the task capability alone.
+- `quality_review.status=needs_review` is likewise not an invalid label; it asks a reviewer to check task adherence and data quality.
+- Records from schema 1.3 and earlier are normalized on read. Legacy conversation `status=completed` becomes `interaction_completed`; rating presence determines evaluation completion.
 - Expert, stall, and relay fields do not apply to local turns and are omitted in new records.
 - Missing core speech timestamps or derived latency fields indicate a collection defect, not “not applicable.” For older affected records, the turn export estimates speech end from gate time minus EOT-read time and sets `speech_end_estimated=true`; raw files remain unchanged.
 

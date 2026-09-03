@@ -105,13 +105,19 @@ function mapServerSession(session) {
     const conversations = task.conversations.map(conversation => ({
       conversationId: conversation.conversation_id,
       scenarioId: conversation.scenario_id,
-      phase: conversation.rating ? "done" : conversation.status === "completed" ? "rating" : "idle",
+      scenario: conversation.scenario,
+      phase: conversation.rating || conversation.evaluation_status === "completed"
+        ? "done"
+        : ["interaction_completed", "completed", "failed", "abandoned"].includes(conversation.status)
+          ? "rating"
+          : "idle",
       liveStatus: "idle",
       startedAt: conversation.started_at,
       endedAt: conversation.ended_at,
       deadlineAt: null,
       endReason: conversation.end_reason,
       durationMs: null,
+      targetTurns: conversation.target_turns || conversation.scenario?.targetTurns || (task.capability === "S3" ? 3 : 2),
       ratings: conversation.rating?.metrics || {},
       feedback: conversation.rating?.feedback || ""
     }));
@@ -378,7 +384,7 @@ function renderTask(taskIndex) {
 
   if (task.substep < 2) {
     const conversation = task.conversations[task.substep];
-    const scenario = definition.scenarios.find(item => item.id === conversation.scenarioId);
+    const scenario = conversation.scenario || definition.scenarios.find(item => item.id === conversation.scenarioId);
     if (conversation.phase === "idle") renderConversationIdle(taskIndex, task, conversation, scenario);
     else if (conversation.phase === "running") renderConversationRunning(taskIndex, task, conversation, scenario);
     else renderConversationRating(taskIndex, task, conversation, scenario);
@@ -399,11 +405,11 @@ function renderConversationIdle(taskIndex, task, conversation, scenario) {
           <div>
             ${voiceOrb(false)}
             <div class="voice-title">Start to talk</div>
-            <p class="voice-copy">Speak naturally, as you would with any voice assistant. You do not need to read the prompts word for word.</p>
+            <p class="voice-copy">Use the numbered flow on the task card as your guide. Speak naturally, while keeping the same type of task and constraints.</p>
             <div class="voice-actions"><button id="startConversation" class="primary-button" type="button">Start conversation</button></div>
           </div>
         </div>
-        ${conversationRuleTip()}
+        ${conversationRuleTip(conversation.targetTurns)}
         <div id="conversationError" class="inline-error" role="alert" hidden></div>
       </section>
       ${renderTaskCard(scenario)}
@@ -419,7 +425,7 @@ function renderConversationRunning(taskIndex, task, conversation, scenario) {
       <section class="conversation-panel surface">
         <div class="status-row"><span class="status-pill live" id="livePill">Conversation in progress</span><span class="status-pill neutral">${ordinalConversation(task.substep)}</span></div>
         <h1>Conversation in progress</h1>
-        <p class="lede">You may add constraints, ask follow-up questions, or finish when you feel the task is complete.</p>
+        <p class="lede">Use the task card as a guide and keep the conversation focused on its goal. You may finish whenever you feel you have tested it.</p>
         <div class="voice-stage">
           <div>
             ${voiceOrb(true)}
@@ -430,7 +436,7 @@ function renderConversationRunning(taskIndex, task, conversation, scenario) {
             <div class="voice-actions"><button id="finishConversation" class="danger-button" type="button">Finish the conversation</button></div>
           </div>
         </div>
-        ${conversationRuleTip()}
+        ${conversationRuleTip(conversation.targetTurns)}
       </section>
       ${renderTaskCard(scenario)}
     </div>`;
@@ -445,7 +451,7 @@ function renderConversationRating(taskIndex, task, conversation, scenario) {
   const ratingQuestions = studyConfig.ratingQuestions;
   stage.innerHTML = `
     <section class="rating-panel surface">
-      <div class="status-row"><span class="status-pill">${ordinalConversation(task.substep)} complete</span><span class="status-pill neutral">${formatEndReason(conversation.endReason)}</span></div>
+      <div class="status-row"><span class="status-pill">Interaction ended · rating pending</span><span class="status-pill neutral">${formatEndReason(conversation.endReason)}</span></div>
       <h1>Rate this conversation</h1>
       <p class="lede">1 means a serious failure and 5 means fully satisfied. Base your answers only on the conversation you just completed.</p>
       <div class="rating-list">
@@ -613,6 +619,13 @@ function handleModelMessage(event, taskIndex, conversationIndex) {
   } catch {
     return;
   }
+  // HUMAN_EVAL_DEBUG_REMOVE_AFTER_PILOT_BEGIN
+  // Temporary model-arm visibility for pilot testing. Remove/disable before
+  // collecting blinded participant ratings.
+  if (message.type === "ready" && message.debug) {
+    console.log("[HUMAN_EVAL_DEBUG_REMOVE_AFTER_PILOT] Current model config:", message.debug);
+  }
+  // HUMAN_EVAL_DEBUG_REMOVE_AFTER_PILOT_END
   if (message.type === "phase") {
     const status = message.v === "listening" ? "listening" : message.v === "answering" || message.v === "relaying" ? "speaking" : "processing";
     updateLiveStatus(status);
@@ -783,11 +796,11 @@ function renderTaskCard(scenario) {
     <aside class="task-card surface">
       <div class="status-row"><span class="status-pill">Task card</span></div>
       <h2>${escapeHtml(scenario.participantTitle)}</h2>
-      <h3>Instruction</h3>
+      <h3>Your goal</h3>
       <p class="muted">${escapeHtml(scenario.goal)}</p>
-      <h3>Example conversation</h3>
+      <h3>Suggested conversation flow</h3>
       <ol>${scenario.prompts.map((prompt, index) => `<li><span>${index + 1}</span><div><strong>${escapeHtml(prompt.label)}</strong>${escapeHtml(prompt.text)}</div></li>`).join("")}</ol>
-      <div class="task-instruction">${escapeHtml(scenario.doNotRepeatInstruction)}</div>
+      <div class="task-instruction"><strong>Before you finish:</strong> ${escapeHtml(scenario.doNotRepeatInstruction)}</div>
     </aside>`;
 }
 
@@ -810,8 +823,8 @@ function voiceOrb(live) {
   return `<div class="voice-orb${live ? " is-live" : ""}" aria-hidden="true"><div class="orb-bars"><span></span><span></span><span></span><span></span><span></span></div></div>`;
 }
 
-function conversationRuleTip() {
-  return `<div class="rule-tip"><span class="tip-dot" aria-hidden="true"></span><span>Each conversation has a two-minute limit. At the limit, it will end automatically and move to the rating page. You may click “Finish the conversation” at any time once you feel the task is complete.</span></div>`;
+function conversationRuleTip(targetTurns = 2) {
+  return `<div class="rule-tip"><span class="tip-dot" aria-hidden="true"></span><span>Aim for about ${targetTurns} turns and wait for each answer before continuing. This is guidance, not a requirement—you may finish whenever the task feels complete. The conversation ends automatically after two minutes.</span></div>`;
 }
 
 function ordinalConversation(index) {

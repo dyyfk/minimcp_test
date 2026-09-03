@@ -9,20 +9,32 @@ from __future__ import annotations
 import asyncio
 import json
 import os
+import secrets
 import threading
 from pathlib import Path
 from typing import Any, Dict, Literal, Optional, Union
 
-from fastapi import FastAPI, HTTPException, Response, WebSocket, WebSocketDisconnect
+from fastapi import (
+    Depends,
+    FastAPI,
+    Header,
+    HTTPException,
+    Response,
+    WebSocket,
+    WebSocketDisconnect,
+)
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
 from .core import (
+    ACTIVE_SESSION_STATUSES,
+    TERMINAL_INTERACTION_STATUSES,
     JsonSessionStore,
     analysis_rows,
     create_assignment,
     public_session,
+    target_turns_for,
     utc_now,
 )
 from .model_gateway import (
@@ -80,8 +92,54 @@ class RoutingReviewRequest(BaseModel):
     note: str = Field(default="", max_length=2000)
 
 
+class QualityReviewRequest(BaseModel):
+    status: Literal["valid", "invalid", "needs_review"]
+    reviewer: str = Field(min_length=1, max_length=128)
+    reason: Optional[str] = Field(default=None, max_length=128)
+    note: str = Field(default="", max_length=2000)
+
+
 def _not_found(label: str, identifier: str) -> HTTPException:
     return HTTPException(status_code=404, detail=f"{label} not found: {identifier}")
+
+
+def _require_active_conversation(
+    conversation_id: str,
+) -> tuple[str, dict[str, Any], dict[str, Any]]:
+    """Reject participant writes after a reservation has expired."""
+    store.expire_stale_sessions()
+    try:
+        session_id, task, conversation = store.find_conversation(conversation_id)
+        session = store.get(session_id)
+    except (KeyError, ValueError):
+        raise _not_found("Conversation", conversation_id)
+    if session.get("status") not in ACTIVE_SESSION_STATUSES:
+        raise HTTPException(
+            status_code=409,
+            detail=f"Study session is no longer active ({session.get('status')})",
+        )
+    return session_id, task, conversation
+
+
+def require_admin(authorization: Optional[str] = Header(default=None)) -> None:
+    """Protect private exports on public deployments; keep local setup simple."""
+    token = os.getenv("HUMAN_EVAL_ADMIN_TOKEN")
+    public = os.getenv("HUMAN_EVAL_PUBLIC", "0").lower() in {"1", "true", "yes"}
+    if not token and not public:
+        return
+    if not token:
+        raise HTTPException(
+            status_code=503,
+            detail="HUMAN_EVAL_ADMIN_TOKEN is required for a public deployment",
+        )
+    supplied = authorization or ""
+    expected = f"Bearer {token}"
+    if not secrets.compare_digest(supplied, expected):
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid admin token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
 
 async def ensure_model_ready() -> dict[str, Any]:
@@ -111,13 +169,13 @@ async def model_readiness() -> dict[str, Any]:
     transcript_settings = transcript_collection_settings()
     if (
         transcript_settings["transcripts_required"]
-        and not transcript_settings["posthoc_asr_configured"]
+        and not transcript_settings["transcript_collection_configured"]
     ):
         raise HTTPException(
             status_code=503,
             detail=(
-                "Full transcript collection is required, but OPENAI_API_KEY "
-                "is not configured on the study backend"
+                "Full transcript collection is required, but neither the "
+                "upstream protocol nor post-hoc ASR provides it"
             ),
         )
     try:
@@ -134,7 +192,9 @@ async def model_readiness() -> dict[str, Any]:
 
 @app.put("/api/admin/turns/{turn_id}/routing-review")
 def save_routing_review(
-    turn_id: str, request: RoutingReviewRequest
+    turn_id: str,
+    request: RoutingReviewRequest,
+    _admin: None = Depends(require_admin),
 ) -> dict[str, Any]:
     """Save a transcript-informed routing label; never infer it from task alone."""
     result: dict[str, Any] = {}
@@ -173,16 +233,52 @@ def save_routing_review(
     return result
 
 
+@app.put("/api/admin/conversations/{conversation_id}/quality-review")
+def save_quality_review(
+    conversation_id: str,
+    request: QualityReviewRequest,
+    _admin: None = Depends(require_admin),
+) -> dict[str, Any]:
+    """Store a manual task-adherence/data-quality decision."""
+    result: dict[str, Any] = {}
+
+    def update(_task: dict[str, Any], conversation: dict[str, Any]) -> None:
+        if conversation.get("status") not in TERMINAL_INTERACTION_STATUSES:
+            raise ValueError("Quality review requires an ended interaction")
+        existing = conversation.get("quality_review", {})
+        review = {
+            "status": request.status,
+            "reason": request.reason,
+            "note": request.note,
+            "reviewer": request.reviewer,
+            "reviewed_at": utc_now(),
+            "automatic_flags": existing.get("automatic_flags", []),
+        }
+        conversation["quality_review"] = review
+        result.update(review)
+
+    try:
+        store.mutate_conversation(conversation_id, update)
+    except KeyError:
+        raise _not_found("Conversation", conversation_id)
+    except ValueError as error:
+        raise HTTPException(status_code=409, detail=str(error))
+    return result
+
+
 @app.post("/api/study-sessions")
 def create_or_resume_session(request: CreateSessionRequest) -> dict[str, Any]:
     with assignment_lock:
+        store.expire_stale_sessions()
         existing = store.list_sessions()
         if request.user_id and not request.force_new:
             for session in reversed(existing):
                 if session.get("user_id") == request.user_id:
-                    if session.get("status") != "completed":
+                    if session.get("status") in ACTIVE_SESSION_STATUSES:
                         store.save(session)  # renew the active reservation
-                    return public_session(session)
+                        return public_session(session)
+                    if session.get("status") == "completed":
+                        return public_session(session)
         session = create_assignment(SCENARIOS, existing, request.user_id)
         store.create(session)
     print(
@@ -209,6 +305,7 @@ def create_or_resume_session(request: CreateSessionRequest) -> dict[str, Any]:
 
 @app.get("/api/study-sessions/{session_id}")
 def get_session(session_id: str) -> dict[str, Any]:
+    store.expire_stale_sessions()
     try:
         return public_session(store.get(session_id))
     except (KeyError, ValueError):
@@ -217,21 +314,30 @@ def get_session(session_id: str) -> dict[str, Any]:
 
 @app.put("/api/conversations/{conversation_id}/rating")
 def save_rating(conversation_id: str, request: RatingRequest) -> dict[str, bool]:
-    try:
-        store.mutate_conversation(
-            conversation_id,
-            lambda _task, conversation: conversation.update(
-                {
-                    "rating": {
-                        "metrics": request.metrics,
-                        "feedback": request.feedback,
-                        "submitted_at": utc_now(),
-                    }
-                }
-            ),
+    _require_active_conversation(conversation_id)
+
+    def update(_task: dict[str, Any], conversation: dict[str, Any]) -> None:
+        if conversation.get("status") not in TERMINAL_INTERACTION_STATUSES:
+            raise ValueError("Finish the interaction before submitting its rating")
+        submitted_at = utc_now()
+        conversation.update(
+            {
+                "rating": {
+                    "metrics": request.metrics,
+                    "feedback": request.feedback,
+                    "submitted_at": submitted_at,
+                },
+                "evaluation_status": "completed",
+                "evaluation_completed_at": submitted_at,
+            }
         )
-    except (KeyError, ValueError):
+
+    try:
+        store.mutate_conversation(conversation_id, update)
+    except KeyError:
         raise _not_found("Conversation", conversation_id)
+    except ValueError as error:
+        raise HTTPException(status_code=409, detail=str(error))
     return {"saved": True}
 
 
@@ -240,6 +346,15 @@ def save_comparison(task_id: str, request: ComparisonRequest) -> dict[str, bool]
     if request.preference not in {"first", "second", "same"}:
         raise HTTPException(status_code=422, detail="Invalid preference")
     try:
+        store.expire_stale_sessions()
+        session_id, task = store.find_task(task_id)
+        if store.get(session_id).get("status") not in ACTIVE_SESSION_STATUSES:
+            raise ValueError("Study session is no longer active")
+        if not all(
+            conversation.get("evaluation_status") == "completed"
+            for conversation in task.get("conversations", [])
+        ):
+            raise ValueError("Rate both conversations before comparing them")
         store.mutate_task(
             task_id,
             lambda task: task.update(
@@ -253,8 +368,10 @@ def save_comparison(task_id: str, request: ComparisonRequest) -> dict[str, bool]
                 }
             ),
         )
-    except (KeyError, ValueError):
+    except KeyError:
         raise _not_found("Task", task_id)
+    except ValueError as error:
+        raise HTTPException(status_code=409, detail=str(error))
     return {"saved": True}
 
 
@@ -267,18 +384,42 @@ def _finish_conversation(
     disconnect: bool = False,
     error: Optional[str] = None,
 ) -> None:
-    def update(_task: dict[str, Any], conversation: dict[str, Any]) -> None:
+    def update(task: dict[str, Any], conversation: dict[str, Any]) -> None:
+        if conversation.get("status") in TERMINAL_INTERACTION_STATUSES:
+            return
+        turn_count = len(conversation.get("turns", []))
+        target_turns = target_turns_for(conversation, task.get("capability"))
         if crash:
             status = "failed"
         elif end_reason in {"user_finished", "time_limit"}:
-            status = "completed"
+            status = "interaction_completed"
         else:
             status = "abandoned"
+        automatic_flags: list[str] = []
+        if turn_count < target_turns:
+            automatic_flags.append("fewer_than_target_turns")
+        if end_reason not in {"user_finished", "time_limit"}:
+            automatic_flags.append("abnormal_end")
+        if any(
+            not turn.get("user", {}).get("transcript")
+            for turn in conversation.get("turns", [])
+        ):
+            automatic_flags.append("missing_transcript")
         conversation.update(
             {
                 "status": status,
                 "ended_at": utc_now(),
                 "end_reason": end_reason,
+                "evaluation_status": "pending",
+                "evaluation_completed_at": None,
+                "quality_review": {
+                    "status": "needs_review",
+                    "reason": None,
+                    "note": "",
+                    "reviewer": None,
+                    "reviewed_at": None,
+                    "automatic_flags": automatic_flags,
+                },
             }
         )
         if error:
@@ -297,7 +438,22 @@ def _participant_model_event(payload: dict[str, Any]) -> dict[str, Any] | None:
     """Keep routing/gate telemetry server-side while forwarding voice UX events."""
     event_type = payload.get("type")
     if event_type == "hello":
-        return {"type": "ready"}
+        ready: dict[str, Any] = {"type": "ready"}
+        # HUMAN_EVAL_DEBUG_REMOVE_AFTER_PILOT_BEGIN
+        # Temporary browser-console visibility for integration testing. This
+        # exposes the blinded arm and must be disabled before real recruitment.
+        if os.getenv("HUMAN_EVAL_DEBUG_MODEL_LOGS", "0") == "1":
+            ready["debug"] = {
+                "model": (
+                    "minicpm_plus" if payload.get("probe_on") else "minicpm"
+                ),
+                "probe_on": payload.get("probe_on"),
+                "tier": payload.get("tier"),
+                "runtime_mode": payload.get("mode"),
+                "protocol": payload.get("protocol"),
+            }
+        # HUMAN_EVAL_DEBUG_REMOVE_AFTER_PILOT_END
+        return ready
     if event_type == "turn":
         return {"type": "turn"}
     allowed_fields = {
@@ -320,6 +476,7 @@ def _participant_model_event(payload: dict[str, Any]) -> dict[str, Any] | None:
 def finalize_conversation(
     conversation_id: str, request: FinalizeConversationRequest
 ) -> dict[str, bool]:
+    _require_active_conversation(conversation_id)
     try:
         _finish_conversation(
             conversation_id,
@@ -329,13 +486,16 @@ def finalize_conversation(
             disconnect=request.disconnect,
             error=request.error,
         )
-    except (KeyError, ValueError):
+    except KeyError:
         raise _not_found("Conversation", conversation_id)
+    except ValueError as error:
+        raise HTTPException(status_code=409, detail=str(error))
     return {"saved": True}
 
 
 @app.post("/api/study-sessions/{session_id}/complete")
 def complete_session(session_id: str) -> dict[str, str]:
+    store.expire_stale_sessions()
     try:
         session = store.get(session_id)
     except (KeyError, ValueError):
@@ -345,9 +505,21 @@ def complete_session(session_id: str) -> dict[str, str]:
         for task in session["tasks"]
         for conversation in task["conversations"]
     ]
-    final_statuses = {"completed", "failed", "abandoned"}
-    if not all(item.get("status") in final_statuses and item.get("rating") for item in conversations):
-        raise HTTPException(status_code=409, detail="All conversations and ratings must be finalized")
+    if session.get("status") not in ACTIVE_SESSION_STATUSES:
+        raise HTTPException(
+            status_code=409,
+            detail=f"Study session is no longer active ({session.get('status')})",
+        )
+    if not all(
+        item.get("status") in TERMINAL_INTERACTION_STATUSES
+        and item.get("evaluation_status") == "completed"
+        and item.get("rating")
+        for item in conversations
+    ):
+        raise HTTPException(
+            status_code=409,
+            detail="All interactions must end and all ratings must be submitted",
+        )
     if not all(task.get("comparison") for task in session["tasks"]):
         raise HTTPException(status_code=409, detail="Both task comparisons must be complete")
 
@@ -367,17 +539,19 @@ def complete_session(session_id: str) -> dict[str, str]:
 
 
 @app.get("/api/admin/export.jsonl")
-def export_sessions() -> Response:
-    # TODO: require study-admin authentication before any non-local deployment.
+def export_sessions(_admin: None = Depends(require_admin)) -> Response:
+    store.expire_stale_sessions()
     body = "".join(json.dumps(row, ensure_ascii=False) + "\n" for row in store.list_sessions())
     return Response(content=body, media_type="application/x-ndjson")
 
 
 @app.get("/api/admin/export/{table}.jsonl")
-def export_analysis_table(table: str) -> Response:
-    # TODO: require study-admin authentication before any non-local deployment.
+def export_analysis_table(
+    table: str, _admin: None = Depends(require_admin)
+) -> Response:
     if table not in {"sessions", "tasks", "conversations", "turns"}:
         raise HTTPException(status_code=404, detail="Unknown analysis table")
+    store.expire_stale_sessions()
     body = "".join(
         json.dumps(row, ensure_ascii=False) + "\n"
         for row in analysis_rows(store.list_sessions(), table)
@@ -389,7 +563,11 @@ def export_analysis_table(table: str) -> Response:
 async def conversation_stream(client: WebSocket, conversation_id: str) -> None:
     await client.accept()
     try:
-        _, task, conversation = store.find_conversation(conversation_id)
+        store.expire_stale_sessions()
+        session_id, task, conversation = store.find_conversation(conversation_id)
+        if store.get(session_id).get("status") not in ACTIVE_SESSION_STATUSES:
+            await client.close(code=4409, reason="Study session is no longer active")
+            return
     except (KeyError, ValueError):
         await client.close(code=4404, reason="Conversation not found")
         return
@@ -425,6 +603,10 @@ async def conversation_stream(client: WebSocket, conversation_id: str) -> None:
                     except json.JSONDecodeError:
                         payload = {}
                     if payload.get("type") == "finish_conversation":
+                        recorder.record_backend_event(
+                            "participant_finish_request", payload
+                        )
+                        await upstream.send(json.dumps({"type": "stop"}))
                         return "user_finished"
                     recorder.record_client_event(payload)
                     await upstream.send(text)
@@ -440,11 +622,31 @@ async def conversation_stream(client: WebSocket, conversation_id: str) -> None:
                         await client.send_text(message)
                         continue
                     recorder.record_server_event(payload)
+                    # HUMAN_EVAL_DEBUG_REMOVE_AFTER_PILOT_BEGIN
+                    # Private server log; inspect with `modal app logs`.
+                    if payload.get("type") == "hello":
+                        print(
+                            "[HUMAN_EVAL_DEBUG_REMOVE_AFTER_PILOT]",
+                            json.dumps(
+                                {
+                                    "conversation_id": conversation_id,
+                                    "model": conversation["model"],
+                                    "probe_on": payload.get("probe_on"),
+                                    "tier": payload.get("tier"),
+                                    "runtime_mode": payload.get("mode"),
+                                    "protocol": payload.get("protocol"),
+                                }
+                            ),
+                            flush=True,
+                        )
+                    # HUMAN_EVAL_DEBUG_REMOVE_AFTER_PILOT_END
+                    if payload.get("type") == "turn":
+                        # Persist first: the browser may enable its Finish button
+                        # as soon as it receives this turn-complete event.
+                        await recorder.finalize_turn(payload)
                     participant_event = _participant_model_event(payload)
                     if participant_event:
                         await client.send_json(participant_event)
-                    if payload.get("type") == "turn":
-                        await recorder.finalize_turn(payload)
                 return "upstream_closed"
 
             async def time_limit() -> str:
@@ -466,6 +668,10 @@ async def conversation_stream(client: WebSocket, conversation_id: str) -> None:
         finish_reason = "disconnect"
     except Exception as error:
         finish_reason = "crash"
+        recorder.record_backend_event(
+            "backend_error",
+            {"error_type": type(error).__name__, "message": str(error)[:2000]},
+        )
         print(
             f"[model-error] {conversation_id}: {type(error).__name__}: {error}",
             flush=True,
@@ -484,6 +690,9 @@ async def conversation_stream(client: WebSocket, conversation_id: str) -> None:
     finally:
         if finish_reason != "crash":
             try:
+                recorder.record_backend_event(
+                    "conversation_finished", {"reason": finish_reason}
+                )
                 _finish_conversation(
                     conversation_id,
                     finish_reason,

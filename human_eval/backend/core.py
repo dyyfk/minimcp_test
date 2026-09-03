@@ -20,12 +20,19 @@ from pathlib import Path
 from typing import Any, Callable, Iterable
 
 
-SCHEMA_VERSION = "1.2"
+SCHEMA_VERSION = "1.4"
 MODEL_MINICPM = "minicpm"
 MODEL_MINICPM_PLUS = "minicpm_plus"
-DEFAULT_TIER = "balanced"
+DEFAULT_TIER = "aggressive"
 RESERVATION_MINUTES = 30
 SAFE_ID = re.compile(r"^[A-Za-z0-9_-]+$")
+ACTIVE_SESSION_STATUSES = {"assigned", "in_progress"}
+TERMINAL_INTERACTION_STATUSES = {
+    "interaction_completed",
+    "completed",  # Legacy schema <= 1.3.
+    "failed",
+    "abandoned",
+}
 
 CAPABILITIES = {
     "simple_guardrail": {"code": "S1", "expected_escalation": False},
@@ -49,22 +56,84 @@ def reservation_expires_at() -> str:
     return (datetime.now(timezone.utc) + timedelta(minutes=RESERVATION_MINUTES)).isoformat()
 
 
+def reservation_state(
+    session: dict[str, Any], now: datetime | None = None
+) -> str:
+    """Return an explicit reservation state for UI and analysis exports."""
+    status = session.get("status")
+    if status == "completed":
+        return "completed"
+    if status == "expired":
+        return "expired"
+    if status not in ACTIVE_SESSION_STATUSES:
+        return "not_applicable"
+    expires_at = session.get("assignment", {}).get("reservation_expires_at")
+    try:
+        expiry = datetime.fromisoformat(expires_at) if expires_at else None
+    except (TypeError, ValueError):
+        expiry = None
+    return "active" if expiry and expiry > (now or datetime.now(timezone.utc)) else "expired"
+
+
 def counts_toward_balance(
     session: dict[str, Any], now: datetime | None = None
 ) -> bool:
     """Count completed sessions and active reservations, but not dropouts."""
     if session.get("status") == "completed":
         return True
-    if session.get("status") not in {"assigned", "in_progress"}:
-        return False
-    expires_at = session.get("assignment", {}).get("reservation_expires_at")
-    if not expires_at:
-        return False
-    try:
-        expiry = datetime.fromisoformat(expires_at)
-    except (TypeError, ValueError):
-        return False
-    return expiry > (now or datetime.now(timezone.utc))
+    return reservation_state(session, now) == "active"
+
+
+def target_turns_for(conversation: dict[str, Any], capability: str | None = None) -> int:
+    """Read the suggested task flow length with a safe capability fallback."""
+    configured = conversation.get("scenario", {}).get("targetTurns")
+    if isinstance(configured, int) and configured > 0:
+        return configured
+    return 3 if capability == "S3" else 2
+
+
+def normalize_session(session: dict[str, Any]) -> dict[str, Any]:
+    """Populate lifecycle/QC fields when reading records from older schemas."""
+    session["schema_version"] = SCHEMA_VERSION
+    for task in session.get("tasks", []):
+        capability = task.get("capability")
+        for conversation in task.get("conversations", []):
+            if conversation.get("status") == "completed":
+                conversation["status"] = "interaction_completed"
+            rating = conversation.get("rating")
+            if "evaluation_status" not in conversation:
+                if rating:
+                    conversation["evaluation_status"] = "completed"
+                elif conversation.get("status") in TERMINAL_INTERACTION_STATUSES:
+                    conversation["evaluation_status"] = "pending"
+                else:
+                    conversation["evaluation_status"] = "not_ready"
+            if rating and not conversation.get("evaluation_completed_at"):
+                conversation["evaluation_completed_at"] = rating.get("submitted_at")
+            quality = conversation.setdefault(
+                "quality_review",
+                {
+                    "status": (
+                        "needs_review"
+                        if conversation.get("status") in TERMINAL_INTERACTION_STATUSES
+                        else "not_ready"
+                    ),
+                    "reason": None,
+                    "note": "",
+                    "reviewer": None,
+                    "reviewed_at": None,
+                    "automatic_flags": [],
+                },
+            )
+            quality.setdefault("automatic_flags", [])
+            if (
+                conversation.get("status") in TERMINAL_INTERACTION_STATUSES
+                and len(conversation.get("turns", []))
+                < target_turns_for(conversation, capability)
+                and "fewer_than_target_turns" not in quality["automatic_flags"]
+            ):
+                quality["automatic_flags"].append("fewer_than_target_turns")
+    return session
 
 
 def new_id(prefix: str) -> str:
@@ -157,6 +226,16 @@ def create_assignment(
                     "end_reason": None,
                     "turns": [],
                     "rating": None,
+                    "evaluation_status": "not_ready",
+                    "evaluation_completed_at": None,
+                    "quality_review": {
+                        "status": "not_ready",
+                        "reason": None,
+                        "note": "",
+                        "reviewer": None,
+                        "reviewed_at": None,
+                        "automatic_flags": [],
+                    },
                     "errors": [],
                     "anomalies": {key: False for key in ANOMALY_KEYS},
                 }
@@ -207,6 +286,10 @@ def public_session(session: dict[str, Any]) -> dict[str, Any]:
         task.pop("sequence_cell", None)
         task.pop("expected_escalation", None)
         for conversation in task.get("conversations", []):
+            conversation["turn_count"] = len(conversation.get("turns", []))
+            conversation["target_turns"] = target_turns_for(
+                conversation, task.get("capability")
+            )
             for private_key in (
                 "model",
                 "probe_on",
@@ -215,6 +298,7 @@ def public_session(session: dict[str, Any]) -> dict[str, Any]:
                 "errors",
                 "anomalies",
                 "model_runtime",
+                "quality_review",
             ):
                 conversation.pop(private_key, None)
     return public
@@ -233,10 +317,18 @@ ANOMALY_KEYS = (
 
 
 def recompute_summary(session: dict[str, Any]) -> None:
+    normalize_session(session)
     summary: dict[str, Any] = {
         "task_count": len(session.get("tasks", [])),
         "conversation_count": 0,
+        "interaction_ended_conversation_count": 0,
+        "evaluation_completed_conversation_count": 0,
+        "analysis_complete_conversation_count": 0,
+        # Backward-compatible alias. As of schema 1.4, completion requires a rating.
         "completed_conversation_count": 0,
+        "quality_valid_conversation_count": 0,
+        "quality_invalid_conversation_count": 0,
+        "quality_needs_review_conversation_count": 0,
         "turn_count": 0,
         "minicpm_plus_turn_count": 0,
         "escalation_count": 0,
@@ -253,8 +345,19 @@ def recompute_summary(session: dict[str, Any]) -> None:
     for task in session.get("tasks", []):
         for conversation in task.get("conversations", []):
             summary["conversation_count"] += 1
-            if conversation.get("status") == "completed":
+            if conversation.get("status") in TERMINAL_INTERACTION_STATUSES:
+                summary["interaction_ended_conversation_count"] += 1
+            if conversation.get("rating"):
+                summary["evaluation_completed_conversation_count"] += 1
+                summary["analysis_complete_conversation_count"] += 1
                 summary["completed_conversation_count"] += 1
+            quality_status = conversation.get("quality_review", {}).get("status")
+            if quality_status == "valid":
+                summary["quality_valid_conversation_count"] += 1
+            elif quality_status == "invalid":
+                summary["quality_invalid_conversation_count"] += 1
+            elif quality_status == "needs_review":
+                summary["quality_needs_review_conversation_count"] += 1
             conversation_escalations = 0
             for turn in conversation.get("turns", []):
                 summary["turn_count"] += 1
@@ -320,6 +423,7 @@ def analysis_rows(sessions: Iterable[dict[str, Any]], table: str) -> list[dict[s
     rows: list[dict[str, Any]] = []
     for session in sessions:
         session_fields = {
+            "schema_version": session.get("schema_version"),
             "study_version": session.get("study_version"),
             "session_id": session.get("session_id"),
             "user_id": session.get("user_id"),
@@ -329,7 +433,13 @@ def analysis_rows(sessions: Iterable[dict[str, Any]], table: str) -> list[dict[s
             row = {
                 **session_fields,
                 "status": session.get("status"),
+                "reservation_status": reservation_state(session),
+                "reservation_active": reservation_state(session) == "active",
                 "pair_cell": session.get("assignment", {}).get("pair_cell"),
+                "reservation_expires_at": session.get("assignment", {}).get(
+                    "reservation_expires_at"
+                ),
+                "expired_at": session.get("expired_at"),
                 "created_at": session.get("created_at"),
                 "started_at": session.get("started_at"),
                 "completed_at": session.get("completed_at"),
@@ -386,10 +496,27 @@ def analysis_rows(sessions: Iterable[dict[str, Any]], table: str) -> list[dict[s
                     rating = conversation.get("rating") or {}
                     turns = conversation.get("turns", [])
                     anomalies = conversation.get("anomalies", {})
+                    quality = conversation.get("quality_review", {})
                     rows.append(
                         {
                             **conversation_fields,
                             "status": conversation.get("status"),
+                            "interaction_status": conversation.get("status"),
+                            "evaluation_status": conversation.get(
+                                "evaluation_status"
+                            ),
+                            "evaluation_completed_at": conversation.get(
+                                "evaluation_completed_at"
+                            ),
+                            "analysis_complete": bool(rating),
+                            "quality_status": quality.get("status"),
+                            "quality_reason": quality.get("reason"),
+                            "quality_note": quality.get("note", ""),
+                            "quality_reviewer": quality.get("reviewer"),
+                            "quality_reviewed_at": quality.get("reviewed_at"),
+                            "quality_automatic_flags": quality.get(
+                                "automatic_flags", []
+                            ),
                             "started_at": conversation.get("started_at"),
                             "ended_at": conversation.get("ended_at"),
                             "duration_ms": _elapsed_ms(
@@ -397,6 +524,9 @@ def analysis_rows(sessions: Iterable[dict[str, Any]], table: str) -> list[dict[s
                                 conversation.get("ended_at"),
                             ),
                             "end_reason": conversation.get("end_reason"),
+                            "event_log_path": conversation.get(
+                                "model_runtime", {}
+                            ).get("event_log_path"),
                             "turn_count": len(turns),
                             "escalation_count": sum(
                                 bool(turn.get("gate", {}).get("escalated"))
@@ -422,7 +552,8 @@ def analysis_rows(sessions: Iterable[dict[str, Any]], table: str) -> list[dict[s
                             "rating_feedback": rating.get("feedback", ""),
                             "rating_submitted_at": rating.get("submitted_at"),
                             "completed_after_error": bool(
-                                conversation.get("status") == "completed"
+                                conversation.get("status")
+                                == "interaction_completed"
                                 and (anomalies.get("crash") or anomalies.get("disconnect"))
                             ),
                             "error_count": len(conversation.get("errors", [])),
@@ -490,6 +621,10 @@ def analysis_rows(sessions: Iterable[dict[str, Any]], table: str) -> list[dict[s
                         "eot_score": gate.get("score"),
                         "score_series": gate.get("score_series", []),
                         "eot_read_ms": gate.get("eot_read_ms"),
+                        "act_score": gate.get("act_score"),
+                        "is_information_request": gate.get(
+                            "is_information_request"
+                        ),
                         "routing_review_status": turn.get("routing_review", {}).get("status"),
                         "routing_expected_action": turn.get("routing_review", {}).get("expected_action"),
                         "routing_actual_action": turn.get("routing_review", {}).get("actual_action"),
@@ -524,13 +659,22 @@ def analysis_rows(sessions: Iterable[dict[str, Any]], table: str) -> list[dict[s
 class JsonSessionStore:
     """One atomic JSON document per session plus separate WAV files."""
 
-    def __init__(self, root: Path | str):
+    def __init__(
+        self, root: Path | str, after_save: Callable[[], None] | None = None
+    ):
         self.root = Path(root)
         self.sessions_dir = self.root / "sessions"
         self.audio_dir = self.root / "audio"
+        self.logs_dir = self.root / "logs"
         self.sessions_dir.mkdir(parents=True, exist_ok=True)
         self.audio_dir.mkdir(parents=True, exist_ok=True)
+        self.logs_dir.mkdir(parents=True, exist_ok=True)
         self._lock = threading.RLock()
+        self._after_save = after_save
+
+    def set_after_save(self, callback: Callable[[], None] | None) -> None:
+        """Register a persistence flush hook, such as Modal Volume.commit."""
+        self._after_save = callback
 
     def _safe(self, value: str) -> str:
         if not SAFE_ID.fullmatch(value):
@@ -545,7 +689,7 @@ class JsonSessionStore:
             rows = []
             for path in sorted(self.sessions_dir.glob("session_*.json")):
                 with path.open(encoding="utf-8") as handle:
-                    rows.append(json.load(handle))
+                    rows.append(normalize_session(json.load(handle)))
             return rows
 
     def get(self, session_id: str) -> dict[str, Any]:
@@ -554,11 +698,66 @@ class JsonSessionStore:
             if not path.exists():
                 raise KeyError(session_id)
             with path.open(encoding="utf-8") as handle:
-                return json.load(handle)
+                return normalize_session(json.load(handle))
 
-    def save(self, session: dict[str, Any]) -> None:
+    def expire_stale_sessions(
+        self, now: datetime | None = None
+    ) -> list[str]:
+        """Persist an explicit terminal state for reservations past their TTL."""
+        checked_at = now or datetime.now(timezone.utc)
+        expired_ids: list[str] = []
         with self._lock:
-            if session.get("status") in {"assigned", "in_progress"}:
+            for session in self.list_sessions():
+                if (
+                    session.get("status") not in ACTIVE_SESSION_STATUSES
+                    or reservation_state(session, checked_at) != "expired"
+                ):
+                    continue
+                expiry = session.get("assignment", {}).get(
+                    "reservation_expires_at"
+                )
+                session.update(
+                    {
+                        "status": "expired",
+                        "expired_at": expiry or checked_at.isoformat(),
+                        "expiration_recorded_at": checked_at.isoformat(),
+                        "expiration_reason": "reservation_timeout",
+                    }
+                )
+                for task in session.get("tasks", []):
+                    for conversation in task.get("conversations", []):
+                        status = conversation.get("status")
+                        if status == "in_progress":
+                            conversation.update(
+                                {
+                                    "status": "abandoned",
+                                    "ended_at": expiry or checked_at.isoformat(),
+                                    "end_reason": "reservation_expired",
+                                }
+                            )
+                            quality = conversation.setdefault(
+                                "quality_review", {}
+                            )
+                            quality["status"] = "needs_review"
+                            flags = quality.setdefault("automatic_flags", [])
+                            if "reservation_expired" not in flags:
+                                flags.append("reservation_expired")
+                        if (
+                            conversation.get("status")
+                            in TERMINAL_INTERACTION_STATUSES
+                            and not conversation.get("rating")
+                        ):
+                            conversation["evaluation_status"] = "not_submitted"
+                self.save(session)
+                expired_ids.append(session["session_id"])
+        return expired_ids
+
+    def save(
+        self, session: dict[str, Any], *, renew_reservation: bool = True
+    ) -> None:
+        with self._lock:
+            self.sessions_dir.mkdir(parents=True, exist_ok=True)
+            if renew_reservation and session.get("status") in ACTIVE_SESSION_STATUSES:
                 session.setdefault("assignment", {})[
                     "reservation_expires_at"
                 ] = reservation_expires_at()
@@ -570,6 +769,23 @@ class JsonSessionStore:
                 handle.flush()
                 os.fsync(handle.fileno())
             os.replace(temporary, path)
+            if self._after_save:
+                self._after_save()
+
+    def event_log_path(self, conversation_id: str) -> Path:
+        """Return one UTC-timestamped JSONL log path per conversation."""
+        self.logs_dir.mkdir(parents=True, exist_ok=True)
+        timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
+        return self.logs_dir / f"{timestamp}_{self._safe(conversation_id)}.jsonl"
+
+    def append_event_log(self, path: Path, event: dict[str, Any]) -> None:
+        """Append a small structured event; the next session save commits it."""
+        with self._lock:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            with path.open("a", encoding="utf-8") as handle:
+                handle.write(json.dumps(event, ensure_ascii=False) + "\n")
+                handle.flush()
+                os.fsync(handle.fileno())
 
     def create(self, session: dict[str, Any]) -> None:
         with self._lock:

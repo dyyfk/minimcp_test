@@ -97,7 +97,8 @@ class StoreTests(unittest.TestCase):
 
     def test_session_and_summary_are_persisted(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
-            store = JsonSessionStore(directory)
+            saves = []
+            store = JsonSessionStore(directory, after_save=lambda: saves.append(True))
             session = create_assignment(self.scenarios, [], "user-1", rng=random.Random(1))
             conversation = session["tasks"][0]["conversations"][0]
             conversation["model"] = "minicpm_plus"
@@ -117,14 +118,71 @@ class StoreTests(unittest.TestCase):
             self.assertNotIn(
                 "inappropriate_escalation_conversation_count", loaded["summary"]
             )
+            self.assertEqual(len(saves), 1)
+
+    def test_expired_reservation_is_persisted_as_terminal(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            store = JsonSessionStore(directory)
+            session = create_assignment(
+                self.scenarios, [], "expired-user", rng=random.Random(4)
+            )
+            conversation = session["tasks"][0]["conversations"][0]
+            session["status"] = "in_progress"
+            session["started_at"] = "1999-12-31T23:00:00+00:00"
+            session["assignment"]["reservation_expires_at"] = (
+                "2000-01-01T00:00:00+00:00"
+            )
+            conversation["status"] = "in_progress"
+            conversation["started_at"] = "1999-12-31T23:30:00+00:00"
+            store.save(session, renew_reservation=False)
+
+            self.assertEqual(store.expire_stale_sessions(), [session["session_id"]])
+            expired = store.get(session["session_id"])
+            self.assertEqual(expired["status"], "expired")
+            self.assertEqual(expired["expiration_reason"], "reservation_timeout")
+            saved_conversation = expired["tasks"][0]["conversations"][0]
+            self.assertEqual(saved_conversation["status"], "abandoned")
+            self.assertEqual(saved_conversation["end_reason"], "reservation_expired")
+            self.assertEqual(
+                saved_conversation["evaluation_status"], "not_submitted"
+            )
+            self.assertIn(
+                "reservation_expired",
+                saved_conversation["quality_review"]["automatic_flags"],
+            )
+            row = analysis_rows([expired], "sessions")[0]
+            self.assertEqual(row["reservation_status"], "expired")
+            self.assertFalse(row["reservation_active"])
+
+    def test_analysis_completion_requires_a_submitted_rating(self) -> None:
+        session = create_assignment(
+            self.scenarios, [], "rated-user", rng=random.Random(5)
+        )
+        conversation = session["tasks"][0]["conversations"][0]
+        conversation["status"] = "interaction_completed"
+        conversation["evaluation_status"] = "pending"
+        recompute_summary(session)
+        self.assertEqual(
+            session["summary"]["interaction_ended_conversation_count"], 1
+        )
+        self.assertEqual(session["summary"]["completed_conversation_count"], 0)
+
+        conversation["rating"] = {"metrics": {"overall": 4}, "submitted_at": "now"}
+        conversation["evaluation_status"] = "completed"
+        recompute_summary(session)
+        self.assertEqual(session["summary"]["completed_conversation_count"], 1)
+        self.assertEqual(
+            session["summary"]["analysis_complete_conversation_count"], 1
+        )
 
 
 class ModelGatewayTests(unittest.TestCase):
     def test_model_arms_map_to_demo_probe_switch(self) -> None:
         gateway = DemoModelGateway()
+        self.assertIn("gate-duplex-voice", gateway.base_url)
         self.assertIn("probe_on=0", gateway.websocket_url("minicpm"))
         self.assertIn("probe_on=1", gateway.websocket_url("minicpm_plus"))
-        self.assertIn("tier=balanced", gateway.websocket_url("minicpm_plus"))
+        self.assertIn("tier=aggressive", gateway.websocket_url("minicpm_plus"))
 
     def test_turn_telemetry_and_audio_are_persisted(self) -> None:
         scenarios = json.loads(SCENARIOS_PATH.read_text(encoding="utf-8"))
@@ -143,17 +201,26 @@ class ModelGatewayTests(unittest.TestCase):
                 task["capability"],
             )
             recorder.record_server_event(
-                {"type": "hello", "tier": "balanced", "thr": 0.62, "probe_on": True}
+                {
+                    "type": "hello",
+                    "protocol": "duplex_v1",
+                    "tier": "aggressive",
+                    "thr": 0.62,
+                    "probe_on": True,
+                }
             )
             recorder.record_client_audio(b"\x00\x00" * 2000)
-            recorder.record_server_event({"type": "speech", "on": True})
-            recorder.record_server_event(
-                {"type": "vu", "rms": 0.03, "thr": 0.01, "speech": True, "sil": 0.2}
-            )
-            recorder.record_server_event({"type": "speech", "on": False})
             recorder.record_server_event({"type": "score", "v": 0.41})
             recorder.record_server_event(
-                {"type": "eot", "score": 0.81, "thr": 0.62, "ms": 28, "fired": True}
+                {
+                    "type": "gate",
+                    "score": 0.81,
+                    "thr": 0.62,
+                    "fired": True,
+                    "act": 0.73,
+                    "is_info": True,
+                    "probe_on": True,
+                }
             )
             recorder.record_server_event(
                 {
@@ -161,23 +228,29 @@ class ModelGatewayTests(unittest.TestCase):
                     "pcm": base64.b64encode(b"\x00\x00" * 1600).decode(),
                 }
             )
-            asyncio.run(
-                recorder.finalize_turn(
-                    {
+            turn_payload = {
                         "type": "turn",
+                        "protocol": "duplex_v1",
+                        "turn_index": 1,
                         "fired": True,
                         "mode": "escalated",
                         "eot_score": 0.81,
                         "threshold": 0.62,
                         "scores": [0.41],
+                        "act_score": 0.73,
+                        "is_info": True,
+                        "probe_on": True,
+                        "user_pcm16": base64.b64encode(
+                            b"\x01\x00" * 5000
+                        ).decode(),
                         "uplink_text": "Test question",
                         "answer": "Test answer",
                         "expert_answer": "Verified answer",
                         "first_audio_ms": 300,
                         "expert_latency_s": 1.2,
                     }
-                )
-            )
+            recorder.record_server_event(turn_payload)
+            asyncio.run(recorder.finalize_turn(turn_payload))
             persisted = store.get(session["session_id"])
             saved_conversation = next(
                 item
@@ -186,8 +259,11 @@ class ModelGatewayTests(unittest.TestCase):
                 if item["conversation_id"] == conversation["conversation_id"]
             )
             turn = saved_conversation["turns"][0]
+            self.assertEqual(saved_conversation["threshold_tier"], "aggressive")
             self.assertTrue(turn["gate"]["escalated"])
             self.assertEqual(turn["gate"]["score"], 0.81)
+            self.assertEqual(turn["gate"]["act_score"], 0.73)
+            self.assertTrue(turn["gate"]["is_information_request"])
             self.assertEqual(turn["user"]["transcript"], "Test question")
             self.assertEqual(turn["user"]["transcript_source"], "upstream_asr")
             self.assertEqual(turn["routing_review"]["status"], "unreviewed")
@@ -196,10 +272,20 @@ class ModelGatewayTests(unittest.TestCase):
             self.assertIsNotNone(turn["timestamps"]["user_speech_ended_at"])
             self.assertIn("speech_end_to_gate", turn["latency_ms"])
             self.assertTrue(turn["audio_quality"]["speech_detected"])
-            self.assertEqual(turn["audio_quality"]["input_rms_mean"], 0.03)
-            self.assertEqual(turn["audio_quality"]["silence_before_eot_s"], 0.2)
+            self.assertEqual(turn["user"]["audio_bytes"], 10000)
             self.assertTrue(Path(turn["user"]["audio_path"]).exists())
             self.assertTrue(Path(turn["model_response"]["audio_path"]).exists())
+            log_files = list((Path(directory) / "logs").glob("*.jsonl"))
+            self.assertEqual(len(log_files), 1)
+            self.assertRegex(
+                log_files[0].name,
+                rf"^\d{{8}}T\d{{12}}Z_{conversation['conversation_id']}\.jsonl$",
+            )
+            log_text = log_files[0].read_text(encoding="utf-8")
+            self.assertIn('"event": "upstream_hello"', log_text)
+            self.assertIn('"event": "upstream_gate"', log_text)
+            self.assertIn('"event": "upstream_turn"', log_text)
+            self.assertNotIn("user_pcm16", log_text)
 
             turn_rows = analysis_rows([persisted], "turns")
             self.assertEqual(len(turn_rows), 1)
@@ -207,6 +293,7 @@ class ModelGatewayTests(unittest.TestCase):
             self.assertEqual(turn_rows[0]["user_transcript"], "Test question")
             self.assertEqual(turn_rows[0]["user_transcript_source"], "upstream_asr")
             self.assertEqual(turn_rows[0]["routing_review_status"], "unreviewed")
+            self.assertEqual(turn_rows[0]["model_act_score"], 0.73)
             self.assertIn("latency_speech_end_to_gate_ms", turn_rows[0])
 
 

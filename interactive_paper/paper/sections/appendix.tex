@@ -371,6 +371,88 @@ AlpacaEval (1--5)    & VB   & 199 & 3.55 & 3.83 & 4.13 & 4.46 & 4.92 \\
   \label{fig:nvda}
 \end{figure}
 
+\paragraph{Calibration expansion, read point, and the price of a causal
+read.} Expanding the NVDA calibration from 600 to 2{,}481 committed
+English queries (the same frozen/expansion/expansion2 mix as MiniCPM,
+no-commit turns dropped) and moving the read from the end of user audio
+to the model's own commit-to-speak moment --- the first run of three
+non-\textsc{pad} agent tokens, read over the following eight 80\,ms
+frames, the analogue of the MiniCPM native read (\S\ref{app:duplexval})
+--- lifts calibration OOF to 0.820 and cold external AUC to
+0.838/0.851/0.771/0.774 (mean 0.808; Table~\ref{tab:nvda-reads}). The
+reported metrics use the full 2{,}481-row analysis cohort. The exported
+deployed, v2, and causal artifacts are separate refits that exclude the
+frozen 240-row test split before dropping no-commit turns, leaving
+2{,}258 calibration rows; those artifacts therefore do not share the
+table fits. The layer choice is flat: L26--L34 are within 0.005 on
+every read. Two facts about this read point were established by a
+third, independent replay of every query
+(Figure~\ref{fig:nvda-reads}a). First, the read is not pre-answer: the
+deployed window covers the model's first
+$\approx$640\,ms of answer, and a \emph{strictly causal} probe that
+reads nothing after the commit frame (commit-frame state, the eight
+frames before it, and the running mean of the user audio up to the
+commit) costs 0.025--0.030 external AUC at every layer (0.781 at L34,
+0.785 at L30, paired bootstrap CIs exclude zero). The pre-commit window
+is no better than the end-of-audio window (0.782), so the extra signal
+is the answer onset itself, not anything heard before the commit.
+Second, the online readout's running user-audio mean (which cannot know
+where the audio will end) is interchangeable with the offline mean over
+the full utterance: cosine 0.996 median, $-0.004$ $[-0.009, +0.001]$
+external AUC. The recipe itself is at its ceiling: $\approx$85 variants
+proposed by two independent reviewers (alternative linear heads,
+shrinkage LDA, per-frame and multi-layer features, re-weighting, robust
+scaling, PLS/PCA) move external AUC by at most $+0.013$, and the best
+calibration-selected variant --- a three-layer (L26/L30/L34) average of
+linear heads with the commit frame added as a fourth block, $+0.004$ to
+$+0.007$ AUC, replicated on the third replay --- delivers the same
+accuracy as the deployed read recipe at every escalation budget
+(Figure~\ref{fig:nvda-reads}b; both beat matched-rate random on all
+four pools at 15/30/50\%, $p\le0.065$, $p\le0.002$, $p<0.001$). What
+does move: as on MiniCPM, fixed calibration thresholds do not deliver
+the nominal budget across pools (the 15/30/50\% tiers fire on
+1/4/12\% of Llama Questions and 7/27/53\% of SD-QA), so per-pool
+quantile thresholds are the deployable operating point.
+
+\begin{table}[h]
+\centering\footnotesize
+\setlength{\tabcolsep}{4pt}
+\caption{NVDA probe read points (linear head, L2-logistic $C{=}10^{-4}$ on
+standardized features, full 2{,}481-row analysis fits; externals cold,
+$n=249/250/249/200$). LOPO$_\text{pool}$ = mean within-held-pool AUC
+under leave-one-calibration-pool-out (13 eligible pools). $\Delta$ =
+paired-bootstrap difference in external mean vs.\ the deployed read on
+the same replay. The exported artifacts are separate 2{,}258-row refits
+that exclude the frozen test split.}
+\label{tab:nvda-reads}
+\begin{tabular}{llcccc}
+\toprule
+read & features & OOF & LOPO$_\text{pool}$ & external mean & $\Delta$ [95\% CI] \\
+\midrule
+end of user audio, L34 & last $\|$ mean$_8$ $\|$ user-mean & 0.810 & 0.680 & 0.782 & $-0.027$ $[-0.049,-0.006]$ \\
+strictly causal, L34 & commit frame $\|$ pre-mean$_8$ $\|$ running mean & 0.812 & 0.694 & 0.781 & $-0.029$ $[-0.048,-0.009]$ \\
+strictly causal, L30 & same & 0.805 & 0.678 & 0.785 & $-0.025$ $[-0.044,-0.006]$ \\
+\textbf{deployed read recipe}: commit $+$ 8 frames, L30 & onset-last $\|$ onset-mean$_8$ $\|$ user-mean & 0.816 & 0.685 & 0.809 & --- \\
+deployed read, causal user-mean & onset-last $\|$ onset-mean$_8$ $\|$ running mean & 0.814 & 0.684 & 0.805 & $-0.004$ $[-0.009,+0.001]$ \\
+v2: 3-layer average, L26/30/34 & $+$ commit frame, causal user-mean & 0.818 & 0.691 & 0.813 & $+0.004$ $[-0.005,+0.012]$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{nvda_probe_reads}
+  \caption{NVDA read points. (a) Cold external AUC by read on the
+  third replay: a strictly causal read (orange) costs $\approx$0.03 AUC
+  relative to the deployed commit$+$8-frame read (blue); the reviewed
+  v2 recipe (green) adds $+0.004$. Dots are the four pools; $\Delta$ is
+  the paired-bootstrap difference vs.\ deployed. (b) Accuracy at fixed
+  escalation budgets, four-pool mean under the official judges: the
+  deployed and v2 probes are indistinguishable, and both beat
+  matched-rate random at every budget.}
+  \label{fig:nvda-reads}
+\end{figure}
+
 \section{What breaks at the output: mechanism audit}
 \label{app:mech}
 

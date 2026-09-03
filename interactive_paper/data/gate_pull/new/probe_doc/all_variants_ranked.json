@@ -1,0 +1,618 @@
+{
+ "onset@L30 all8frames+umean": {
+  "oof": 0.8203136770905128,
+  "lopo": 0.7827629870650274,
+  "lopoM": 0.6992842476482466,
+  "ext": 0.8047499301764021,
+  "src": "results_batch2.json"
+ },
+ "D1 layer-avg LR \u00d75 4-block": {
+  "oof": 0.8238044099654319,
+  "lopo": 0.7917493468399879,
+  "lopoM": 0.6950202436731451,
+  "ext": 0.8152187174026984,
+  "src": "results_round3.json"
+ },
+ "score-ens dual onset@L30+eot@L34": {
+  "oof": 0.8218680376348395,
+  "lopo": 0.7711607815480293,
+  "lopoM": 0.6947144709113046,
+  "ext": 0.8052883538451675,
+  "src": "results_batch2.json"
+ },
+ "D2 layer-avg LR \u00d73 (26,30,34) 4-block": {
+  "oof": 0.8239996901163131,
+  "lopo": 0.7928937793521293,
+  "lopoM": 0.6943161092075777,
+  "ext": 0.8156118534838818,
+  "src": "results_round3.json"
+ },
+ "onset@L30 early4+late4+umean": {
+  "oof": 0.8234993348186379,
+  "lopo": 0.775717674590072,
+  "lopoM": 0.6940705831239703,
+  "ext": 0.804981276190645,
+  "src": "results_batch2.json"
+ },
+ "E2 layer-avg LDA \u03bb=30 \u00d73 (26,30,34) 4-block": {
+  "oof": 0.8224596216213329,
+  "lopo": 0.7850911218323743,
+  "lopoM": 0.6940134155069221,
+  "ext": 0.8193191968011537,
+  "src": "results_round3.json"
+ },
+ "E1 layer-avg LDA \u03bb=30 \u00d75 4-block  [Fable combo]": {
+  "oof": 0.8224139404916465,
+  "lopo": 0.7839266537370371,
+  "lopoM": 0.6930985778558405,
+  "ext": 0.8188137150829045,
+  "src": "results_round3.json"
+ },
+ "all8frames+umean pool+class balanced @L30": {
+  "oof": 0.7956162143967687,
+  "lopo": 0.7782629950792608,
+  "lopoM": 0.6925881827157334,
+  "ext": 0.7812167137442676,
+  "src": "results_batch2.json"
+ },
+ "onset@L30 first+mean8+umean (commit frame as last)": {
+  "oof": 0.8211271217682605,
+  "lopo": 0.7757657599897418,
+  "lopoM": 0.6918350517175624,
+  "ext": 0.8039989732897548,
+  "src": "results_batch2.json"
+ },
+ "onset@L30 first+last+mean8+umean": {
+  "oof": 0.8201325554184231,
+  "lopo": 0.7770280017310743,
+  "lopoM": 0.6917265483467664,
+  "ext": 0.8110463109272605,
+  "src": "results_batch2.json"
+ },
+ "B1 LR L30 4-block (+commit frame)": {
+  "oof": 0.8212740493783626,
+  "lopo": 0.7770280017310743,
+  "lopoM": 0.6917265483467664,
+  "ext": 0.8110463109272605,
+  "src": "results_round3.json"
+ },
+ "C1 LDA \u03bb=30 L30 4-block": {
+  "oof": 0.8194871424984105,
+  "lopo": 0.7808804436679543,
+  "lopoM": 0.691056496298117,
+  "ext": 0.812875156853279,
+  "src": "results_round3.json"
+ },
+ "onset@L34 stack": {
+  "oof": 0.8194761897129302,
+  "lopo": 0.77010971485358,
+  "lopoM": 0.6909421613966878,
+  "ext": 0.8079165817523477,
+  "src": "results_batch1.json"
+ },
+ "score-ens onset L22..L38 (5)": {
+  "oof": 0.8222707528570742,
+  "lopo": 0.7731795669108334,
+  "lopoM": 0.6905345602609265,
+  "ext": 0.8133268622128866,
+  "src": "results_batch2.json"
+ },
+ "score-ens per-block (last,mean8,umean)@L30": {
+  "oof": 0.8148070974049912,
+  "lopo": 0.7603936591386302,
+  "lopoM": 0.6897064923858156,
+  "ext": 0.7982721246251788,
+  "src": "results_batch2.json"
+ },
+ "score-ens onset L26,L30,L34": {
+  "oof": 0.8228710189296189,
+  "lopo": 0.7750360640497523,
+  "lopoM": 0.6893417670428309,
+  "ext": 0.8137056049046222,
+  "src": "results_batch2.json"
+ },
+ "onset@L26 all8frames+umean": {
+  "oof": 0.8224807257689657,
+  "lopo": 0.785739473304589,
+  "lopoM": 0.6879724692360926,
+  "ext": 0.8097996056446006,
+  "src": "results_batch2.json"
+ },
+ "onset@L30 mean8+umean (no last)": {
+  "oof": 0.8217329978041,
+  "lopo": 0.7673692477840646,
+  "lopoM": 0.6879252392849093,
+  "ext": 0.8005202413473395,
+  "src": "results_batch2.json"
+ },
+ "onset@L26 early4+late4+umean": {
+  "oof": 0.8273036913558479,
+  "lopo": 0.7833183734312139,
+  "lopoM": 0.6878681680421995,
+  "ext": 0.8158015590531607,
+  "src": "results_batch2.json"
+ },
+ "concat dual onset@L30+eot@L34": {
+  "oof": 0.8211207103816378,
+  "lopo": 0.7736812579140554,
+  "lopoM": 0.6876011614613576,
+  "ext": 0.8069099029899668,
+  "src": "results_batch2.json"
+ },
+ "E3 layer-avg LDA \u03bb=30 \u00d75 3-block": {
+  "oof": 0.8203035257283603,
+  "lopo": 0.7765399349244259,
+  "lopoM": 0.6875544901707408,
+  "ext": 0.8163766791207674,
+  "src": "results_round3.json"
+ },
+ "onset@L30 last+mean8+umean+(last-first)": {
+  "oof": 0.8183333600474443,
+  "lopo": 0.7715622946352723,
+  "lopoM": 0.6872248304681212,
+  "ext": 0.8087116206700544,
+  "src": "results_batch2.json"
+ },
+ "baseline onset@L30 C=1e-4": {
+  "oof": 0.820062430877238,
+  "lopo": 0.7698191988972415,
+  "lopoM": 0.6870089103417462,
+  "ext": 0.8083912888990653,
+  "src": "results_batch2.json"
+ },
+ "A0 deployed: onset@L30 last+mean8+umean": {
+  "oof": 0.820062430877238,
+  "lopo": 0.7698191988972415,
+  "lopoM": 0.6870089103417462,
+  "ext": 0.8083912888990653,
+  "src": "results_round2.json"
+ },
+ "A0 deployed LR L30 3-block": {
+  "oof": 0.8206638990847744,
+  "lopo": 0.7698191988972415,
+  "lopoM": 0.6870089103417462,
+  "ext": 0.8083912888990653,
+  "src": "results_round3.json"
+ },
+ "E4 layer-avg LDA \u03bb=30 \u00d73 (22,26,30) 4-block": {
+  "oof": 0.8223826849818613,
+  "lopo": 0.7831773229255157,
+  "lopoM": 0.6869031498640518,
+  "ext": 0.817929969709168,
+  "src": "results_round3.json"
+ },
+ "score-ens onset L22,L26,L30": {
+  "oof": 0.8227035214541025,
+  "lopo": 0.7741204378977062,
+  "lopoM": 0.6868739480960548,
+  "ext": 0.8144873308676092,
+  "src": "results_batch2.json"
+ },
+ "score-ens onset L26,L30": {
+  "oof": 0.823164339867605,
+  "lopo": 0.7757930083828879,
+  "lopoM": 0.686630555022896,
+  "ext": 0.8145130230056783,
+  "src": "results_batch2.json"
+ },
+ "onset@L30 robust-scaler": {
+  "oof": 0.8185016589462887,
+  "lopo": 0.7655283784000384,
+  "lopoM": 0.6856976974249215,
+  "ext": 0.8059298561251012,
+  "src": "results_batch2.json"
+ },
+ "onset@L30 ridge a=1e5": {
+  "oof": 0.8164596323069773,
+  "lopo": 0.7626087932167529,
+  "lopoM": 0.6855728745022188,
+  "ext": 0.8093019924446478,
+  "src": "results_batch2.json"
+ },
+ "lda \u03bb=30 L30 3-block": {
+  "oof": 0.8179871451698216,
+  "lopo": 0.7737509817435766,
+  "lopoM": 0.6855187453708889,
+  "ext": 0.811235483826598,
+  "src": "results_round3.json"
+ },
+ "concat onset L26+L30+L34": {
+  "oof": 0.8209884755325458,
+  "lopo": 0.7769610828832005,
+  "lopoM": 0.6851824346677126,
+  "ext": 0.812961452691759,
+  "src": "results_batch2.json"
+ },
+ "lda \u03bb=20 L30 3-block": {
+  "oof": 0.8174309573803074,
+  "lopo": 0.7739954158585648,
+  "lopoM": 0.6851058867552783,
+  "ext": 0.8130712000521928,
+  "src": "results_round3.json"
+ },
+ "lda \u03bb=50 L30 3-block": {
+  "oof": 0.8167200948885219,
+  "lopo": 0.771143150234817,
+  "lopoM": 0.6847831848671502,
+  "ext": 0.807268075741816,
+  "src": "results_round3.json"
+ },
+ "onset@L30 C=3e-05": {
+  "oof": 0.8138558079148567,
+  "lopo": 0.7553911747263139,
+  "lopoM": 0.6846738168001589,
+  "ext": 0.7983779252608283,
+  "src": "results_batch2.json"
+ },
+ "onset@L30 class balanced weights": {
+  "oof": 0.8196076231386944,
+  "lopo": 0.7706334449983171,
+  "lopoM": 0.6845910033685279,
+  "ext": 0.8086670626907854,
+  "src": "results_batch2.json"
+ },
+ "W L26 stack weights a=0.5 b=0": {
+  "oof": 0.8231410985910979,
+  "lopo": 0.7794667329176618,
+  "lopoM": 0.6844497275205786,
+  "ext": 0.8165561579725497,
+  "src": "results_round2.json"
+ },
+ "R L26 stack robust+clip5": {
+  "oof": 0.8214452868294091,
+  "lopo": 0.773555434451586,
+  "lopoM": 0.6836435268237396,
+  "ext": 0.8145200116646637,
+  "src": "results_round2.json"
+ },
+ "onset@L26 first+last+mean8+umean": {
+  "oof": 0.8224743143823432,
+  "lopo": 0.7822861401849684,
+  "lopoM": 0.6833687573842211,
+  "ext": 0.8116754781634328,
+  "src": "results_batch2.json"
+ },
+ "B2 LR L26 4-block": {
+  "oof": 0.8242192801081387,
+  "lopo": 0.7822861401849684,
+  "lopoM": 0.6833687573842211,
+  "ext": 0.8116754781634328,
+  "src": "results_round3.json"
+ },
+ "onset@L26 drop pass-flipped labels": {
+  "oof": 0.8234296109891168,
+  "lopo": 0.7779095673916877,
+  "lopoM": 0.683224658772401,
+  "ext": 0.8203574851913986,
+  "src": "results_batch3.json"
+ },
+ "W L26 stack weights a=0.25 b=0": {
+  "oof": 0.8234913205853596,
+  "lopo": 0.7791020853034991,
+  "lopoM": 0.6832132190647477,
+  "ext": 0.8168129975064224,
+  "src": "results_round2.json"
+ },
+ "C3 LDA \u03bb=30 L26 4-block": {
+  "oof": 0.8226321947779255,
+  "lopo": 0.7851808812450913,
+  "lopoM": 0.6829370535524468,
+  "ext": 0.817566550732293,
+  "src": "results_round3.json"
+ },
+ "R L26 stack winsor1%+std": {
+  "oof": 0.8235682572248313,
+  "lopo": 0.7783022648223245,
+  "lopoM": 0.6827123851812692,
+  "ext": 0.8181320083204745,
+  "src": "results_round2.json"
+ },
+ "S commit-frame@L34 + umean": {
+  "oof": 0.8100931253906939,
+  "lopo": 0.7618835051050666,
+  "lopoM": 0.6826508691135633,
+  "ext": 0.7778418406568364,
+  "src": "results_round2.json"
+ },
+ "W L26 stack weights a=0.25 b=0.25": {
+  "oof": 0.8218796582730931,
+  "lopo": 0.7835051050665982,
+  "lopoM": 0.682548469943305,
+  "ext": 0.8154231674944599,
+  "src": "results_round2.json"
+ },
+ "R L26 stack std+clip5": {
+  "oof": 0.823744570356954,
+  "lopo": 0.7785715430604754,
+  "lopoM": 0.6824396168793503,
+  "ext": 0.8175993162861005,
+  "src": "results_round2.json"
+ },
+ "onset@L26 stack": {
+  "oof": 0.8237341518536921,
+  "lopo": 0.778554312458927,
+  "lopoM": 0.6823603468026553,
+  "ext": 0.8176103906788065,
+  "src": "results_batch2.json"
+ },
+ "A1 onset@L26 last+mean8+umean": {
+  "oof": 0.8237341518536921,
+  "lopo": 0.778554312458927,
+  "lopoM": 0.6823603468026553,
+  "ext": 0.8176103906788065,
+  "src": "results_round2.json"
+ },
+ "A1 LR L26 3-block": {
+  "oof": 0.8243129130669402,
+  "lopo": 0.778554312458927,
+  "lopoM": 0.6823603468026553,
+  "ext": 0.8176103906788065,
+  "src": "results_round3.json"
+ },
+ "lda \u03bb=100 L30 3-block": {
+  "oof": 0.8115877798970973,
+  "lopo": 0.7632138678292648,
+  "lopoM": 0.6821559930490673,
+  "ext": 0.796881602666579,
+  "src": "results_round3.json"
+ },
+ "onset@L26 C=3e-5": {
+  "oof": 0.8163554472743592,
+  "lopo": 0.7634302521277789,
+  "lopoM": 0.6821008639372257,
+  "ext": 0.8071127796870201,
+  "src": "results_batch2.json"
+ },
+ "W L26 stack weights a=0.5 b=0.5": {
+  "oof": 0.8169020179839395,
+  "lopo": 0.785055057782622,
+  "lopoM": 0.6816564559977416,
+  "ext": 0.809205678241635,
+  "src": "results_round2.json"
+ },
+ "W L26 stack weights a=0 b=0.25": {
+  "oof": 0.8218131401368831,
+  "lopo": 0.7830482937697351,
+  "lopoM": 0.6816134344569902,
+  "ext": 0.8157634564094803,
+  "src": "results_round2.json"
+ },
+ "C2 LDA \u03bb=30 L26 3-block": {
+  "oof": 0.8224652315846276,
+  "lopo": 0.7816778598791454,
+  "lopoM": 0.6813366171721259,
+  "ext": 0.8212462849590534,
+  "src": "results_round3.json"
+ },
+ "onset@L38 stack": {
+  "oof": 0.8148856368911186,
+  "lopo": 0.7622673868790972,
+  "lopoM": 0.6808757544167885,
+  "ext": 0.8016286463653393,
+  "src": "results_batch1.json"
+ },
+ "onset@L22 stack": {
+  "oof": 0.818665149305166,
+  "lopo": 0.7666567824456234,
+  "lopoM": 0.6802933945637053,
+  "ext": 0.8098563666232484,
+  "src": "results_batch2.json"
+ },
+ "eot@L34 stack": {
+  "oof": 0.8119195691548189,
+  "lopo": 0.7560675760150026,
+  "lopoM": 0.6802006237679097,
+  "ext": 0.7810586452322945,
+  "src": "results_batch1.json"
+ },
+ "P L26 stack, remove 2 pool-centroid dirs": {
+  "oof": 0.7796053791533765,
+  "lopo": 0.7420707175944476,
+  "lopoM": 0.6797360249816625,
+  "ext": 0.8172879351727489,
+  "src": "results_round2.json"
+ },
+ "onset@L30 C=0.0003": {
+  "oof": 0.816276907788232,
+  "lopo": 0.7690546410424914,
+  "lopoM": 0.6795773503671624,
+  "ext": 0.806879125116387,
+  "src": "results_batch2.json"
+ },
+ "W L26 stack weights a=0 b=0.5": {
+  "oof": 0.8165726329962013,
+  "lopo": 0.7845389411594993,
+  "lopoM": 0.679555289631457,
+  "ext": 0.8110345496273457,
+  "src": "results_round2.json"
+ },
+ "P L26 stack, remove 1 pool-centroid dirs": {
+  "oof": 0.7883224606901857,
+  "lopo": 0.7541898411578963,
+  "lopoM": 0.6790448817727085,
+  "ext": 0.8145845836673111,
+  "src": "results_round2.json"
+ },
+ "lda \u03bb=10 L30 3-block": {
+  "oof": 0.8124853740242671,
+  "lopo": 0.7703048614339065,
+  "lopoM": 0.6783759005615966,
+  "ext": 0.8113344740009496,
+  "src": "results_round3.json"
+ },
+ "onset@L26 C=3e-4": {
+  "oof": 0.8210590007853948,
+  "lopo": 0.7792944269021782,
+  "lopoM": 0.6773200159490536,
+  "ext": 0.814154302148725,
+  "src": "results_batch2.json"
+ },
+ "onset@L30 C=1e-05": {
+  "oof": 0.8006459472022311,
+  "lopo": 0.7284361025180721,
+  "lopoM": 0.6765266852110774,
+  "ext": 0.7818404169241866,
+  "src": "results_batch2.json"
+ },
+ "S commit-frame@L30 + umean": {
+  "oof": 0.8080030133517127,
+  "lopo": 0.7560295084069307,
+  "lopoM": 0.6755756198071385,
+  "ext": 0.7794511937023407,
+  "src": "results_round2.json"
+ },
+ "S score-ens commit-frame+umean L22..L38": {
+  "oof": 0.8093077305294202,
+  "lopo": 0.7578395229928353,
+  "lopoM": 0.6741453388921441,
+  "ext": 0.7787200483947617,
+  "src": "results_round2.json"
+ },
+ "S commit-frame@L38 + umean": {
+  "oof": 0.8089791469650098,
+  "lopo": 0.7559641924057127,
+  "lopoM": 0.6738839534578352,
+  "ext": 0.7781672892687939,
+  "src": "results_round2.json"
+ },
+ "onset@L30 pool+class balanced weights": {
+  "oof": 0.7867572809309333,
+  "lopo": 0.7653560723845549,
+  "lopoM": 0.6726939260950667,
+  "ext": 0.7734762830122034,
+  "src": "results_batch2.json"
+ },
+ "onset@L26 pool+class balanced weights": {
+  "oof": 0.7909871932552213,
+  "lopo": 0.7732909647534021,
+  "lopoM": 0.67174987172089,
+  "ext": 0.7901085381254684,
+  "src": "results_batch2.json"
+ },
+ "P L26 stack, remove 4 pool-centroid dirs": {
+  "oof": 0.7450431967173701,
+  "lopo": 0.6990791645963231,
+  "lopoM": 0.6714765458102726,
+  "ext": 0.8100428054902271,
+  "src": "results_round2.json"
+ },
+ "onset@L30 PCA256+LR C=1e-2": {
+  "oof": 0.8071719373607527,
+  "lopo": 0.7591550593854686,
+  "lopoM": 0.6704827084839275,
+  "ext": 0.7762087975808678,
+  "src": "results_batch2.json"
+ },
+ "L L26 stack PLS n=4": {
+  "oof": 0.8076543942041066,
+  "lopo": 0.7668483226209749,
+  "lopoM": 0.6686934195907143,
+  "ext": 0.8120319445394774,
+  "src": "results_round2.json"
+ },
+ "onset@L30 PCA512+shrinkLDA": {
+  "oof": 0.8010105948163939,
+  "lopo": 0.7470491593069291,
+  "lopoM": 0.6683163461781467,
+  "ext": 0.785401954114192,
+  "src": "results_batch2.json"
+ },
+ "S commit-frame@L26 + umean + eot_last": {
+  "oof": 0.8061733638942762,
+  "lopo": 0.7565372100851112,
+  "lopoM": 0.6681444043462768,
+  "ext": 0.7771085154788873,
+  "src": "results_round2.json"
+ },
+ "onset@L30 PCA512+LR C=1e-2": {
+  "oof": 0.7934251230184808,
+  "lopo": 0.7481675455609161,
+  "lopoM": 0.6666047266475377,
+  "ext": 0.7733141822038262,
+  "src": "results_batch2.json"
+ },
+ "L L26 stack PCA64-whiten + LR C=1": {
+  "oof": 0.8100177915978778,
+  "lopo": 0.7717866931670646,
+  "lopoM": 0.6661606166474825,
+  "ext": 0.7813986625843503,
+  "src": "results_round2.json"
+ },
+ "onset@L30 ridge a=1e4": {
+  "oof": 0.8026583211784128,
+  "lopo": 0.7561485197711135,
+  "lopoM": 0.6646537365254621,
+  "ext": 0.803556596154584,
+  "src": "results_batch2.json"
+ },
+ "L L26 stack PCA128-whiten + LR C=1": {
+  "oof": 0.8164508166503711,
+  "lopo": 0.771166391511324,
+  "lopoM": 0.6645573173546198,
+  "ext": 0.8073598390831707,
+  "src": "results_round2.json"
+ },
+ "P commit@L26+umean, remove 2 dirs": {
+  "oof": 0.750717674590072,
+  "lopo": 0.7036048021285803,
+  "lopoM": 0.6621373557409085,
+  "ext": 0.7670486421492322,
+  "src": "results_round2.json"
+ },
+ "S commit-frame@L26 + umean": {
+  "oof": 0.8047340075974931,
+  "lopo": 0.7529941175527737,
+  "lopoM": 0.6618583662497906,
+  "ext": 0.7666890766928244,
+  "src": "results_round2.json"
+ },
+ "S commit-frame@L38 alone": {
+  "oof": 0.7937048197598935,
+  "lopo": 0.7484059690009457,
+  "lopoM": 0.6616306430231216,
+  "ext": 0.7667492764907778,
+  "src": "results_round2.json"
+ },
+ "P L26 stack, remove 8 pool-centroid dirs": {
+  "oof": 0.727332141883986,
+  "lopo": 0.6861281636185865,
+  "lopoM": 0.6585124470276802,
+  "ext": 0.8033941054455379,
+  "src": "results_round2.json"
+ },
+ "S commit-frame@L22 + umean": {
+  "oof": 0.8037153985478209,
+  "lopo": 0.7487686130567889,
+  "lopoM": 0.6561114464072773,
+  "ext": 0.7605338735864698,
+  "src": "results_round2.json"
+ },
+ "L L26 stack PLS n=8": {
+  "oof": 0.7758715478690155,
+  "lopo": 0.7398291365465066,
+  "lopoM": 0.6454331434615679,
+  "ext": 0.7758787288612372,
+  "src": "results_round2.json"
+ },
+ "L L26 stack PLS n=16": {
+  "oof": 0.7486351760727052,
+  "lopo": 0.7135031816506114,
+  "lopoM": 0.6222595494879345,
+  "ext": 0.728411329699481,
+  "src": "results_round2.json"
+ },
+ "L L26 stack PLS n=32": {
+  "oof": 0.737735818814214,
+  "lopo": 0.7010242190129671,
+  "lopoM": 0.6158048973125552,
+  "ext": 0.7039186370507575,
+  "src": "results_round2.json"
+ },
+ "onset@L26 elasticnet l1=0.5 C=1e-3": {
+  "oof": 0.4994293865905849,
+  "lopo": 0.44409591434387474,
+  "lopoM": 0.5,
+  "ext": 0.5,
+  "src": "results_batch3.json"
+ }
+}

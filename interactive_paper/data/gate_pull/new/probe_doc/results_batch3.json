@@ -1,0 +1,64 @@
+[
+ {
+  "name": "onset@L26 drop pass-flipped labels",
+  "dims": 13440,
+  "oof": 0.8234296109891168,
+  "lopo": 0.7779095673916877,
+  "oof_within_mean": 0.6760795496005804,
+  "lopo_within": {
+   "easy-chat": 0.8647345257046539,
+   "easy-fact": 0.7284992784992785,
+   "easy-mathword": 0.7481767481767482,
+   "hard-knowledge": 0.6603415559772295,
+   "hard-math": 0.6800091666030097,
+   "hard-multihop": 0.4283288043478261,
+   "know-arc": 0.6941176470588235,
+   "know-commonsense": 0.596011396011396,
+   "know-longtail": 0.6933333333333332,
+   "know-mmlu": 0.6467391304347827,
+   "know-open": 0.8750376392652817,
+   "know-openbook": 0.6208112874779541,
+   "trap": 0.38175675675675674,
+   "trap-truthful": 0.6457800511508952
+  },
+  "ext": {
+   "striviaqa": 0.8486198335037243,
+   "swebq": 0.8528401997503121,
+   "sllama": 0.7787777616490057,
+   "sdqa": 0.8011921458625527,
+   "mean": 0.8203574851913986
+  },
+  "secs": 5.0
+ },
+ {
+  "name": "onset@L26 elasticnet l1=0.5 C=1e-3",
+  "dims": 13440,
+  "oof": 0.4994293865905849,
+  "lopo": 0.44409591434387474,
+  "oof_within_mean": 0.5173737888852756,
+  "lopo_within": {
+   "easy-chat": 0.5,
+   "easy-fact": 0.5,
+   "easy-mathword": 0.5,
+   "hard-knowledge": 0.5,
+   "hard-math": 0.5,
+   "hard-multihop": 0.5,
+   "know-arc": 0.5,
+   "know-commonsense": 0.5,
+   "know-longtail": 0.5,
+   "know-mmlu": 0.5,
+   "know-open": 0.5,
+   "know-openbook": 0.5,
+   "trap": 0.5,
+   "trap-truthful": 0.5
+  },
+  "ext": {
+   "striviaqa": 0.5,
+   "swebq": 0.5,
+   "sllama": 0.5,
+   "sdqa": 0.5,
+   "mean": 0.5
+  },
+  "secs": 13.1
+ }
+]

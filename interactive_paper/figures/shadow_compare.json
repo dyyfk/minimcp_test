@@ -1,0 +1,439 @@
+{
+ "frozen": {
+  "n": 239,
+  "local_floor": 0.431,
+  "expert_ceiling": 0.669,
+  "scorers": {
+   "live_8bq": {
+    "native_auc": 0.8761,
+    "benefit_auc": 0.7121,
+    "cascade_exact": {
+     "conservative": 0.5105,
+     "balanced": 0.5774,
+     "aggressive": 0.6736
+    },
+    "cascade_deployed": {
+     "conservative": {
+      "esc_rate": 0.079,
+      "acc": 0.4686
+     },
+     "balanced": {
+      "esc_rate": 0.272,
+      "acc": 0.5649
+     },
+     "aggressive": {
+      "esc_rate": 0.494,
+      "acc": 0.6695
+     }
+    }
+   },
+   "P9_distilled": {
+    "native_auc": 0.8792,
+    "benefit_auc": 0.7059,
+    "cascade_exact": {
+     "conservative": 0.4937,
+     "balanced": 0.569,
+     "aggressive": 0.682
+    },
+    "delta_native_auc": 0.0031,
+    "delta_native_ci": [
+     -0.0136,
+     0.0197
+    ],
+    "delta_benefit_auc": -0.0062,
+    "delta_benefit_ci": [
+     -0.0256,
+     0.0126
+    ]
+   },
+   "P16_alpha1": {
+    "native_auc": 0.8816,
+    "benefit_auc": 0.7081,
+    "cascade_exact": {
+     "conservative": 0.4979,
+     "balanced": 0.5816,
+     "aggressive": 0.6736
+    },
+    "delta_native_auc": 0.0055,
+    "delta_native_ci": [
+     -0.0042,
+     0.0147
+    ],
+    "delta_benefit_auc": -0.004,
+    "delta_benefit_ci": [
+     -0.0153,
+     0.007
+    ]
+   }
+  }
+ },
+ "striviaqa": {
+  "n": 250,
+  "local_floor": 0.568,
+  "expert_ceiling": 0.916,
+  "scorers": {
+   "live_8bq": {
+    "native_auc": 0.8113,
+    "benefit_auc": 0.7472,
+    "cascade_exact": {
+     "conservative": 0.656,
+     "balanced": 0.74,
+     "aggressive": 0.832
+    },
+    "cascade_deployed": {
+     "conservative": {
+      "esc_rate": 0.036,
+      "acc": 0.58
+     },
+     "balanced": {
+      "esc_rate": 0.196,
+      "acc": 0.684
+     },
+     "aggressive": {
+      "esc_rate": 0.544,
+      "acc": 0.852
+     }
+    }
+   },
+   "P9_distilled": {
+    "native_auc": 0.8249,
+    "benefit_auc": 0.7622,
+    "cascade_exact": {
+     "conservative": 0.672,
+     "balanced": 0.764,
+     "aggressive": 0.844
+    },
+    "delta_native_auc": 0.0136,
+    "delta_native_ci": [
+     -0.0071,
+     0.0357
+    ],
+    "delta_benefit_auc": 0.015,
+    "delta_benefit_ci": [
+     -0.0058,
+     0.0368
+    ]
+   },
+   "P16_alpha1": {
+    "native_auc": 0.8226,
+    "benefit_auc": 0.7581,
+    "cascade_exact": {
+     "conservative": 0.66,
+     "balanced": 0.756,
+     "aggressive": 0.836
+    },
+    "delta_native_auc": 0.0113,
+    "delta_native_ci": [
+     -0.0013,
+     0.0231
+    ],
+    "delta_benefit_auc": 0.0109,
+    "delta_benefit_ci": [
+     -0.002,
+     0.0235
+    ]
+   }
+  }
+ },
+ "swebq": {
+  "n": 241,
+  "local_floor": 0.411,
+  "expert_ceiling": 0.809,
+  "scorers": {
+   "live_8bq": {
+    "native_auc": 0.7719,
+    "benefit_auc": 0.6039,
+    "cascade_exact": {
+     "conservative": 0.473,
+     "balanced": 0.556,
+     "aggressive": 0.6598
+    },
+    "cascade_deployed": {
+     "conservative": {
+      "esc_rate": 0.058,
+      "acc": 0.4315
+     },
+     "balanced": {
+      "esc_rate": 0.224,
+      "acc": 0.527
+     },
+     "aggressive": {
+      "esc_rate": 0.581,
+      "acc": 0.6805
+     }
+    }
+   },
+   "P9_distilled": {
+    "native_auc": 0.7928,
+    "benefit_auc": 0.6216,
+    "cascade_exact": {
+     "conservative": 0.4772,
+     "balanced": 0.5643,
+     "aggressive": 0.6598
+    },
+    "delta_native_auc": 0.0209,
+    "delta_native_ci": [
+     -0.0031,
+     0.0449
+    ],
+    "delta_benefit_auc": 0.0177,
+    "delta_benefit_ci": [
+     -0.01,
+     0.0448
+    ]
+   },
+   "P16_alpha1": {
+    "native_auc": 0.788,
+    "benefit_auc": 0.6155,
+    "cascade_exact": {
+     "conservative": 0.4772,
+     "balanced": 0.5602,
+     "aggressive": 0.6639
+    },
+    "delta_native_auc": 0.0161,
+    "delta_native_ci": [
+     0.0029,
+     0.0297
+    ],
+    "delta_benefit_auc": 0.0116,
+    "delta_benefit_ci": [
+     -0.0032,
+     0.0262
+    ]
+   }
+  }
+ },
+ "sllama": {
+  "n": 245,
+  "local_floor": 0.767,
+  "expert_ceiling": 0.91,
+  "scorers": {
+   "live_8bq": {
+    "native_auc": 0.7427,
+    "benefit_auc": 0.7555,
+    "cascade_exact": {
+     "conservative": 0.8286,
+     "balanced": 0.8776,
+     "aggressive": 0.8898
+    },
+    "cascade_deployed": {
+     "conservative": {
+      "esc_rate": 0.004,
+      "acc": 0.7714
+     },
+     "balanced": {
+      "esc_rate": 0.041,
+      "acc": 0.7918
+     },
+     "aggressive": {
+      "esc_rate": 0.163,
+      "acc": 0.8408
+     }
+    }
+   },
+   "P9_distilled": {
+    "native_auc": 0.7518,
+    "benefit_auc": 0.7569,
+    "cascade_exact": {
+     "conservative": 0.8327,
+     "balanced": 0.8653,
+     "aggressive": 0.8939
+    },
+    "delta_native_auc": 0.0091,
+    "delta_native_ci": [
+     -0.0134,
+     0.0312
+    ],
+    "delta_benefit_auc": 0.0014,
+    "delta_benefit_ci": [
+     -0.0259,
+     0.03
+    ]
+   },
+   "P16_alpha1": {
+    "native_auc": 0.7486,
+    "benefit_auc": 0.7572,
+    "cascade_exact": {
+     "conservative": 0.8367,
+     "balanced": 0.8735,
+     "aggressive": 0.8898
+    },
+    "delta_native_auc": 0.0059,
+    "delta_native_ci": [
+     -0.006,
+     0.0183
+    ],
+    "delta_benefit_auc": 0.0017,
+    "delta_benefit_ci": [
+     -0.0129,
+     0.0177
+    ]
+   }
+  }
+ },
+ "sdqa": {
+  "n": 200,
+  "local_floor": 0.455,
+  "expert_ceiling": 0.895,
+  "scorers": {
+   "live_8bq": {
+    "native_auc": 0.7261,
+    "benefit_auc": 0.678,
+    "cascade_exact": {
+     "conservative": 0.55,
+     "balanced": 0.64,
+     "aggressive": 0.74
+    },
+    "cascade_deployed": {
+     "conservative": {
+      "esc_rate": 0.07,
+      "acc": 0.495
+     },
+     "balanced": {
+      "esc_rate": 0.24,
+      "acc": 0.605
+     },
+     "aggressive": {
+      "esc_rate": 0.61,
+      "acc": 0.775
+     }
+    }
+   },
+   "P9_distilled": {
+    "native_auc": 0.7608,
+    "benefit_auc": 0.7077,
+    "cascade_exact": {
+     "conservative": 0.57,
+     "balanced": 0.64,
+     "aggressive": 0.75
+    },
+    "delta_native_auc": 0.0347,
+    "delta_native_ci": [
+     0.0022,
+     0.0676
+    ],
+    "delta_benefit_auc": 0.0297,
+    "delta_benefit_ci": [
+     -0.0037,
+     0.0643
+    ]
+   },
+   "P16_alpha1": {
+    "native_auc": 0.7494,
+    "benefit_auc": 0.6984,
+    "cascade_exact": {
+     "conservative": 0.54,
+     "balanced": 0.635,
+     "aggressive": 0.745
+    },
+    "delta_native_auc": 0.0233,
+    "delta_native_ci": [
+     0.0049,
+     0.0417
+    ],
+    "delta_benefit_auc": 0.0204,
+    "delta_benefit_ci": [
+     0.0016,
+     0.04
+    ]
+   }
+  }
+ },
+ "sreason": {
+  "n": 202,
+  "local_floor": 0.525,
+  "expert_ceiling": 0.807,
+  "scorers": {
+   "live_8bq": {
+    "native_auc": 0.6626,
+    "benefit_auc": 0.599,
+    "cascade_exact": {
+     "conservative": 0.5941,
+     "balanced": 0.6436,
+     "aggressive": 0.698
+    },
+    "cascade_deployed": {
+     "conservative": {
+      "esc_rate": 0.173,
+      "acc": 0.6089
+     },
+     "balanced": {
+      "esc_rate": 0.342,
+      "acc": 0.6584
+     },
+     "aggressive": {
+      "esc_rate": 0.554,
+      "acc": 0.7129
+     }
+    }
+   },
+   "P9_distilled": {
+    "native_auc": 0.6909,
+    "benefit_auc": 0.6106,
+    "cascade_exact": {
+     "conservative": 0.5941,
+     "balanced": 0.6634,
+     "aggressive": 0.7079
+    },
+    "delta_native_auc": 0.0283,
+    "delta_native_ci": [
+     -0.0058,
+     0.064
+    ],
+    "delta_benefit_auc": 0.0116,
+    "delta_benefit_ci": [
+     -0.0256,
+     0.0487
+    ]
+   },
+   "P16_alpha1": {
+    "native_auc": 0.6815,
+    "benefit_auc": 0.6066,
+    "cascade_exact": {
+     "conservative": 0.599,
+     "balanced": 0.6485,
+     "aggressive": 0.698
+    },
+    "delta_native_auc": 0.0189,
+    "delta_native_ci": [
+     0.001,
+     0.0391
+    ],
+    "delta_benefit_auc": 0.0076,
+    "delta_benefit_ci": [
+     -0.0121,
+     0.0279
+    ]
+   }
+  }
+ },
+ "_external_mean": {
+  "live_8bq": {
+   "native_auc": 0.7429,
+   "benefit_auc": 0.6767,
+   "cascade_exact": {
+    "conservative": 0.6203,
+    "balanced": 0.6914,
+    "aggressive": 0.7639
+   }
+  },
+  "P9_distilled": {
+   "native_auc": 0.7642,
+   "benefit_auc": 0.6918,
+   "cascade_exact": {
+    "conservative": 0.6292,
+    "balanced": 0.6994,
+    "aggressive": 0.7711
+   }
+  },
+  "P16_alpha1": {
+   "native_auc": 0.758,
+   "benefit_auc": 0.6872,
+   "cascade_exact": {
+    "conservative": 0.6226,
+    "balanced": 0.6946,
+    "aggressive": 0.7665
+   }
+  }
+ }
+}
