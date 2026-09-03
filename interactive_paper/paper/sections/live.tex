@@ -91,4 +91,10 @@ moves a floor by up to 3.6 points, so sub-5-point differences are
 within noise. Open-ended generation remains the boundary: on
 AlpacaEval the always-escalate arm scores 4.20 against 4.96 for the
 expert text, because a 400-character spoken cap removes half of the
-long answers.
+long answers. Classifying the 600 native failures by cause shows where
+the pre-answer read works: specific-but-wrong answers are 70\% of
+failures and are ranked at AUC 0.81 (79\% escalated at the aggressive
+tier against a 31\% false-fire rate on correct turns), misheard
+questions at 0.89, whereas execution slips in multi-step reasoning are
+at chance (0.47) --- the error has not happened yet when the gate
+reads, so only a later read point could recover them.

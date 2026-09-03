@@ -5965,3 +5965,44 @@ gallery_app.py (harness figures retired; 26 entries). Demo:
 demo_duplex.py RELAY_MODE=tts + clean_expert + `_synth_pcm`, deployed
 15:20. Old-cleaner WebQ always run archived on the volume as
 `old_cleaner_*`.
+
+## Phase 8bv — probe lift by failure type: the gate sees "confident wrong", it does not see "execution" ($2 API, 2026-09-03)
+
+`modal_failure_taxonomy.py` classified all 600 never-arm failures on the
+six native QA pools (1,392 rows) with gpt-5.4-mini (structured output;
+inputs: question text, gpt-transcribe transcript of the same audio,
+reference, local answer, judge note) into perception / knowledge_gap /
+confident_wrong / execution / quality_other; `scripts/37_failure_taxonomy_lift.py`
+scores each class with the never-arm onset score at the deployed
+per-language thresholds and the always-arm (TTS relay) expert outcome.
+
+| type | n (share) | AUC vs correct | recall @cons/bal/agg | expert fixes | pts recovered @bal/@agg | recoverable |
+|---|---:|---:|---:|---:|---:|---:|
+| perception (misheard) | 36 (6%) | **.889** | .28/.56/.86 | .39 | 0.65/0.86 | 1.0 |
+| knowledge gap (hedges) | 17 (3%) | .829 | .24/.65/.82 | .71 | 0.57/0.72 | 0.9 |
+| confident wrong | 418 (70%) | .813 | .10/.37/.79 | .76 | **8.3/18.6** | 22.9 |
+| execution (working slips) | 44 (7%) | **.469** | .18/.32/.57 | .59 | 0.65/1.15 | 1.9 |
+| quality / other | 81 (14%) | .631 | .22/.35/.52 | .68 | 1.1/1.8 | 4.0 |
+
+False-fire on correct rows: .02 / .08 / .31 at cons/bal/agg. Execution
+failures are 35/44 from Reasoning-zh; perception 14/36 from our pool,
+7 from SD-QA.
+
+**Reading.** (1) 70% of native failures are specific wrong answers that
+read as confident; the pre-answer state still ranks them at AUC .81 and
+the aggressive tier catches 79% of them at a 31% false-fire — the hidden
+state knows more than the surface text (cf. Orgad et al. 2024). 81% of
+the routing gain (18.6 of 22.9 recoverable points at aggressive) comes
+from this class. (2) Execution failures are invisible at the commit
+point: AUC .47. Their 57% escalation at aggressive is the zh threshold
+firing at its nominal rate, not discrimination. This is the one class a
+later read point (after the first answer tokens) could move; it caps at
+~1.9 points per 100 questions on these pools. (3) Perception failures
+are the best-ranked (.89) but least fixable (.39): the expert gets the
+raw audio through gpt-transcribe, which also mishears some of them.
+(4) Caveat: the classifier cannot see the model's internal state, so a
+misheard question answered fluently lands in "confident wrong"; class
+labels carry judge noise; knowledge_gap has n=17.
+Files: modal_failure_taxonomy.py, scripts/37_failure_taxonomy_lift.py,
+data/native_bench/failure_types.parquet, figures/failure_taxonomy_lift.{png,json};
+gallery 图N7.
