@@ -1,4 +1,4 @@
-# Paper draft — "When Does a Small Model Know to Hand Off?"
+# Paper draft — "When Does a Speech Model Know to Hand Off?"
 
 Draft v0.1, generated 2026-07-24 from `TECHNICAL_REPORT.md` v3 (Phases 0–7a).
 Numbers trace to `../RESULTS.md`; do not edit numbers here without a matching
