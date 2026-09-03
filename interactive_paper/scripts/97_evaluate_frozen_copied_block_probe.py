@@ -89,8 +89,8 @@ def routing(gain, score):
 
 
 def metrics(rows):
-    local = rows.local_ok.to_numpy()
-    expert = rows.expert_ok.to_numpy()
+    local = rows.local_ok.astype(int).to_numpy()
+    expert = rows.expert_ok.astype(int).to_numpy()
     failure, gain = 1 - local, expert - local
     live, candidate = rows.live.to_numpy(), rows.candidate.to_numpy()
     result = {
