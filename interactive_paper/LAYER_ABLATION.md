@@ -85,7 +85,7 @@ modal volume get gate-data layer_ablation_eoth3.json figures/
 modal volume get gate-data layer_ablation_eoth3.md figures/
 ```
 
-Local alternative once shards are pulled: `scripts/33_layer_ablation.py`.
+Local alternative once shards are pulled: `scripts/64_layer_ablation.py`.
 
 ## Cost
 

@@ -6,7 +6,7 @@ files are on disk, e.g.
     modal volume get gate-data 'eoth3_*.npz' data/eoth_pull/
     modal volume get gate-data features_minicpm-o45-audio.parquet data/eoth_pull/
     modal volume get gate-data midlayer_gate_audio_v3.json data/eoth_pull/
-    python scripts/33_layer_ablation.py --source eoth3 --pull data/eoth_pull
+    python scripts/64_layer_ablation.py --source eoth3 --pull data/eoth_pull
 
 Writes figures/layer_ablation_{source}.json, .md and (if matplotlib is
 installed) figures/layer_ablation_{source}.png: external AUC of the
