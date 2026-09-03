@@ -25,6 +25,8 @@ def main():
     parser.add_argument("--concurrency", type=int, default=8)
     parser.add_argument("--batch-size", type=int, default=40)
     parser.add_argument("--allow-skip-failed", action="store_true")
+    parser.add_argument("--allow-missing-traces", action="store_true",
+                        help="judge available traces now and resume later")
     args = parser.parse_args()
     sys.path.insert(0, str(args.source_dir.resolve()))
     import escalate
@@ -48,6 +50,8 @@ def main():
             continue
         trace = traces.get(row_id)
         if trace is None:
+            if args.allow_missing_traces:
+                continue
             raise RuntimeError(f"missing or failed trace for {row_id}")
         error = trace.get("error")
         if error and args.allow_skip_failed:
