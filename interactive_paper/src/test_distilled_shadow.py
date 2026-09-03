@@ -18,7 +18,7 @@ from gate import Probe  # noqa: E402
 
 
 artifact = json.loads((
-    PAPER / "data" / "gate_shadow_robust_ensemble.json").read_text())
+    PAPER / "data" / "shadow" / "gate_shadow_robust_ensemble.json").read_text())
 source_path = PAPER / "demo_duplex.py"
 source = source_path.read_text()
 tree = ast.parse(source)

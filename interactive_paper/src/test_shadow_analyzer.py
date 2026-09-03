@@ -32,7 +32,7 @@ with tempfile.TemporaryDirectory() as directory:
             "prior_escalations": 0 if index < 12 else 1,
         })
     log.write_text("".join(json.dumps(row) + "\n" for row in rows))
-    artifact = PAPER / "data" / "gate_shadow_robust_ensemble.json"
+    artifact = PAPER / "data" / "shadow" / "gate_shadow_robust_ensemble.json"
     result = module.analyze(log, artifact, min_rows=20)
     assert result["rows"] == 20
     assert result["native_auc_candidate"] == 1.0

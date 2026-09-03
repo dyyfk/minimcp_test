@@ -66,7 +66,7 @@ from modal_app import OPENAI  # noqa: E402
 _HERE = os.path.dirname(os.path.abspath(__file__))
 _APP_PY = os.path.join(_HERE, "modal_app.py")
 _SHADOW_ARTIFACT = os.path.join(
-    _HERE, "data", "gate_shadow_robust_ensemble.json")
+    _HERE, "data", "shadow", "gate_shadow_robust_ensemble.json")
 
 web_image = (modal.Image.debian_slim(python_version="3.11")
              .pip_install("fastapi[standard]")
