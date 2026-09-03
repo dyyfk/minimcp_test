@@ -968,3 +968,19 @@ P32 TTS cost was `$1.532025`; judge usage was 181,693 input and 38,264
 output tokens with zero cached input, costing `$0.30845775`. The P32 increment
 is `$1.84048275`; conservative cumulative OpenAI spend is
 `$92.37773275 / $500`.
+
+P33 tested whether P31's operational-budget miss came from fitting the copied
+feature independently of the live score. A single fixed `C=3e-4` logistic
+readout jointly received the fold-local standardized live score and the frozen
+4,096-dimensional copied-transform feature. Only 4,098 readout parameters
+trained; the base and copied block remained frozen.
+
+The joint readout is decisively worse. On the 3,000-row source-family OOF
+screen, macro source native AUC changes `-.00597` and macro routing only
+`+.00337`; all six OOF gates fail. The unchanged full fit also loses pooled AUC
+on P15 (`-.04817`) and P32 (`-.04444`). Although P16/P17 pooled deltas are
+positive, the aggregate 12-pool macro gate, worst-pool floor, dataset breadth,
+combined 30%-budget precision, and P32 30%-budget precision all fail. Reject
+joint fitting and do not open another prospective set. Receipt SHA256:
+`bbb2c816fa9b36fc89ae3546788431a6d2c2e77908a67408b6fad881cc4f1a78`.
+This cached experiment added no API spend; live behavior remains unchanged.
