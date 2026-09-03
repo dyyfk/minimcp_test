@@ -247,8 +247,8 @@ def _labels_pools():
 
 @app.function(image=util_st3, volumes={DATA: gate_data}, timeout=60 * 180,
               cpu=16, memory=65536)
-def layer_ablation3(source: str = "eoth3", layers: str = "", C: float = 1e-4,
-                    B: int = 2000, with_oof: bool = False,
+def layer_ablation3(source: str = "eoth3", layers: str = "", c: float = 1e-4,
+                    n_boot: int = 2000, with_oof: bool = False,
                     out: str = "") -> str:
     """Re-fit the deployed feature set at every captured layer and score
     the paper's evaluation pools. `source` = eoth3 (all layers, new
@@ -303,9 +303,9 @@ def layer_ablation3(source: str = "eoth3", layers: str = "", C: float = 1e-4,
     lay = ([int(x) for x in layers.split(",") if x.strip()]
            if layers else None)
     print(f">>> train n={len(y)} fail={y.mean():.2f}; layers="
-          f"{lay or list(train.layers)}; C={C}", flush=True)
-    res = la.run_ablation(train, y, pools, layers=lay, C=C, anchor=anchor,
-                          B=B, with_oof=with_oof)
+          f"{lay or list(train.layers)}; C={c}", flush=True)
+    res = la.run_ablation(train, y, pools, layers=lay, C=c, anchor=anchor,
+                          B=n_boot, with_oof=with_oof)
     res.notes.append(f"source={source}; labels: train = frozen calib + "
                      "expansion + expansion2 (v3 recipe); pools = never-arm "
                      "local failure (EXT_TRACES) + frozen test split")
