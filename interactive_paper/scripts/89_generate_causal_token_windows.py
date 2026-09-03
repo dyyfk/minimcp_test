@@ -1,0 +1,227 @@
+"""Capture pre-speech token windows for copied-decoder probe heads.
+
+For each tap layer, the last eight hidden vectors from target-side
+``streaming_prefill`` calls are retained immediately before the first speaking
+generate call.  Hooks do not observe generation, add no forward, and cannot
+change the frozen base model output.
+"""
+from __future__ import annotations
+
+import argparse
+import glob
+import hashlib
+import json
+import os
+import random
+import time
+from pathlib import Path
+
+import librosa
+import numpy as np
+import pandas as pd
+import torch
+from transformers import AutoModel, AutoTokenizer
+
+
+WINDOW = 8
+MAX_WAIT = 12
+MAX_ANSWER = 60
+
+
+def audio_chunks(audio):
+    values = [audio[i:i + 16000] for i in range(0, len(audio), 16000)]
+    return [np.pad(value, (0, 16000 - len(value))).astype(np.float32)
+            if len(value) < 16000 else value.astype(np.float32)
+            for value in values]
+
+
+def row_seed(namespace: str, row_id: str) -> int:
+    return int(hashlib.sha256(f"{namespace}:{row_id}".encode()).hexdigest()[:8],
+               16)
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--selection", type=Path, required=True)
+    parser.add_argument("--audio-dir", type=Path, required=True)
+    parser.add_argument("--model-dir", type=Path, required=True)
+    parser.add_argument("--output-dir", type=Path, required=True)
+    parser.add_argument("--tap-layers", default="10,18,22,30")
+    parser.add_argument("--seed-namespace", default="p15-native")
+    parser.add_argument("--limit", type=int, default=0)
+    args = parser.parse_args()
+
+    tap_layers = tuple(int(value) for value in args.tap_layers.split(","))
+    if len(set(tap_layers)) != len(tap_layers):
+        raise ValueError("tap layers must be unique")
+    rank = int(os.environ.get("LOCAL_RANK", "0"))
+    world = int(os.environ.get("WORLD_SIZE", "1"))
+    torch.cuda.set_device(rank)
+    args.output_dir.mkdir(parents=True, exist_ok=True)
+    feature_dir = args.output_dir / "features"
+    feature_dir.mkdir(exist_ok=True)
+    trace_path = args.output_dir / f"causal_windows.rank{rank}.jsonl"
+
+    frame = pd.read_parquet(args.selection)
+    if "mode" in frame:
+        frame = frame[frame["mode"] == "standalone"]
+    frame = frame.sort_values("id")
+    if args.limit:
+        frame = frame.head(args.limit)
+    owned = [row for index, row in enumerate(frame.itertuples())
+             if index % world == rank]
+    completed = {}
+    if trace_path.exists():
+        for line in trace_path.read_text().splitlines():
+            if line.strip():
+                record = json.loads(line)
+                completed[str(record["id"])] = record
+    pending = [row for row in owned
+               if str(row.id) not in completed
+               or not (feature_dir / f"{row.id}.npz").exists()]
+
+    cache = (Path.home() / ".cache/huggingface/modules/transformers_modules"
+             / args.model_dir.name)
+    cache.mkdir(parents=True, exist_ok=True)
+    for source in glob.glob(str(args.model_dir / "*.py")):
+        (cache / Path(source).name).write_bytes(Path(source).read_bytes())
+    model = AutoModel.from_pretrained(
+        args.model_dir, trust_remote_code=True, attn_implementation="sdpa",
+        torch_dtype=torch.bfloat16, init_vision=False, init_audio=True,
+        init_tts=True).eval().cuda(rank)
+    _ = AutoTokenizer.from_pretrained(args.model_dir, trust_remote_code=True)
+    duplex = model.as_duplex(generate_audio=False)
+    duplex.force_listen_count = 3
+    ref, _ = librosa.load(args.model_dir / "assets/system_ref_audio.wav",
+                          sr=16000, mono=True)
+    tails = {layer: None for layer in tap_layers}
+    capture = {"prefill": False}
+
+    def make_hook(layer):
+        def hook(_module, _inputs, output):
+            if not capture["prefill"]:
+                return
+            hidden = output[0] if isinstance(output, tuple) else output
+            hidden = hidden[0].detach().to(torch.float16).cpu()
+            tail = hidden[-WINDOW:]
+            tails[layer] = (tail if tails[layer] is None else
+                            torch.cat([tails[layer], tail])[-WINDOW:])
+        return hook
+
+    handles = [model.llm.model.layers[layer].register_forward_hook(
+        make_hook(layer)) for layer in tap_layers]
+
+    def snapshot():
+        lengths = []
+        values = []
+        for layer in tap_layers:
+            if tails[layer] is None:
+                raise RuntimeError(f"tap layer {layer} has no prefill state")
+            current = tails[layer]
+            lengths.append(len(current))
+            padded = torch.zeros((WINDOW, current.shape[1]), dtype=current.dtype)
+            padded[-len(current):] = current
+            values.append(padded.numpy())
+        if len(set(lengths)) != 1:
+            raise RuntimeError(f"inconsistent token-window lengths {lengths}")
+        return np.stack(values), lengths[0]
+
+    print(f"rank {rank}: {len(owned)} owned, {len(pending)} pending", flush=True)
+    try:
+        with trace_path.open("a", encoding="utf-8") as stream:
+            for index, row in enumerate(pending):
+                started = time.perf_counter()
+                row_id = str(row.id)
+                seed = row_seed(args.seed_namespace, row_id)
+                random.seed(seed)
+                np.random.seed(seed % (2**32 - 1))
+                torch.manual_seed(seed)
+                torch.cuda.manual_seed_all(seed)
+                noise_rng = np.random.default_rng(seed ^ 0x5A17)
+                for layer in tap_layers:
+                    tails[layer] = None
+                duplex.prepare(prefix_system_prompt="You are a friendly assistant.",
+                               ref_audio=ref, prompt_wav_path=None)
+                answer, onset, window, window_length = [], None, None, None
+                answer_chunks, eot_seen, error = 0, False, None
+                try:
+                    audio, _ = librosa.load(args.audio_dir / f"{row_id}.wav",
+                                            sr=16000, mono=True)
+                    chunks = audio_chunks(audio)
+                    feed = list(chunks) + [None] * (MAX_WAIT + MAX_ANSWER)
+                    with torch.inference_mode():
+                        for chunk_index, chunk in enumerate(feed):
+                            waveform = (noise_rng.normal(0, .003, 16000)
+                                        .astype(np.float32)
+                                        if chunk is None else chunk)
+                            capture["prefill"] = True
+                            ok = duplex.streaming_prefill(audio_waveform=waveform)
+                            capture["prefill"] = False
+                            if not ok.get("success"):
+                                continue
+                            before_generate = snapshot()
+                            result = duplex.streaming_generate(top_k=20)
+                            if result["is_listen"]:
+                                if onset is None and chunk_index >= (
+                                        len(chunks) + MAX_WAIT - 1):
+                                    break
+                                continue
+                            if onset is None:
+                                onset = chunk_index
+                                window, window_length = before_generate
+                            if result.get("text"):
+                                answer.append(result["text"])
+                            answer_chunks += 1
+                            if result.get("end_of_turn"):
+                                eot_seen = True
+                                break
+                            if answer_chunks >= MAX_ANSWER:
+                                break
+                    if window is None:
+                        raise RuntimeError("model never reached speak onset")
+                except Exception as exc:
+                    error = f"{type(exc).__name__}: {exc}"
+                finally:
+                    capture["prefill"] = False
+
+                if window is not None:
+                    destination = feature_dir / f"{row_id}.npz"
+                    temporary = feature_dir / f".{row_id}.rank{rank}.tmp"
+                    with temporary.open("wb") as handle:
+                        np.savez_compressed(handle, X=window,
+                                            length=np.int16(window_length),
+                                            tap_layers=np.asarray(tap_layers))
+                    temporary.replace(destination)
+                record = {
+                    "id": row_id, "rank": rank, "seed": seed,
+                    "tap_layers": tap_layers, "window": WINDOW,
+                    "read": "prefill_window_before_first_speak_generate",
+                    "pool": str(row.pool), "onset_chunk": onset,
+                    "answer_text": "".join(answer).strip(),
+                    "eot_seen": eot_seen, "n_answer_chunks": answer_chunks,
+                    "window_length": window_length,
+                    "elapsed_s": time.perf_counter() - started, "error": error,
+                }
+                stream.write(json.dumps(record, ensure_ascii=False) + "\n")
+                stream.flush()
+                if index < 2 or (index + 1) % 10 == 0:
+                    print(f"rank {rank}: {index + 1}/{len(pending)} {row_id} "
+                          f"error={error}", flush=True)
+    finally:
+        for handle in handles:
+            handle.remove()
+
+    ids = [str(row.id) for row in owned
+           if (feature_dir / f"{row.id}.npz").exists()]
+    if ids:
+        archives = [np.load(feature_dir / f"{row_id}.npz") for row_id in ids]
+        np.savez_compressed(
+            args.output_dir / f"causal_windows_feats.rank{rank}.npz",
+            ids=np.asarray(ids), X=np.stack([value["X"] for value in archives]),
+            lengths=np.asarray([value["length"] for value in archives]),
+            tap_layers=np.asarray(tap_layers))
+    print(f"rank {rank}: consolidated {len(ids)}/{len(owned)}", flush=True)
+
+
+if __name__ == "__main__":
+    main()
