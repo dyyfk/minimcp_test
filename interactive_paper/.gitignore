@@ -18,3 +18,7 @@ data/gate_pull/new/probe_doc/scripts/__pycache__/
 
 # issue #8 export bundle (246MB zip; published on HF dyyfk/minicpm-o45-native-gate-data)
 export/
+
+# pulled volume shards for local layer-ablation runs (scripts/33)
+data/eoth_pull/
+figures/layer_ablation_*.png
