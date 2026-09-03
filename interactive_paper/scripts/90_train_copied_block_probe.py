@@ -221,6 +221,7 @@ def main():
     parser.add_argument("--epochs", type=int, default=20)
     parser.add_argument("--patience", type=int, default=3)
     parser.add_argument("--batch-size", type=int, default=32)
+    parser.add_argument("--fold-index", type=int, default=0)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
 
@@ -259,9 +260,11 @@ def main():
     groups = frame.source_family.astype(str).to_numpy()
     strat = (gain + 1) * 2 + failure
     live = artifact_score(args.live_artifact, xo)
-    split = next(StratifiedGroupKFold(
+    splits = list(StratifiedGroupKFold(
         5, shuffle=True, random_state=42).split(x, strat, groups))
-    train, validation = split
+    if not 0 <= args.fold_index < len(splits):
+        raise ValueError("fold index must be in [0, 4]")
+    train, validation = splits[args.fold_index]
 
     config = AutoConfig.from_pretrained(args.model_dir, trust_remote_code=True)
     state, index_path, checkpoint_paths = load_block_weights(
@@ -334,10 +337,22 @@ def main():
             "trainable_parameters": int(sum(p.numel() for p in trainable)),
             "base_model_trainable_parameters": 0,
         },
-        "split": {"method": "first fold of 5-fold stratified source-family CV",
+        "split": {"method": "5-fold stratified source-family CV",
+                  "fold_index": args.fold_index,
                   "train_rows": len(train), "validation_rows": len(validation),
                   "validation_sources": sorted(set(groups[validation]))},
         "history": history, "result": result,
+        "predictions": [
+            {"id": str(frame.iloc[index].id),
+             "source_family": str(groups[index]),
+             "pool": str(frame.iloc[index].pool),
+             "language": str(frame.iloc[index].language),
+             "local_ok": int(local_ok[index]),
+             "expert_ok": int(expert_ok[index]),
+             "live": float(live[index]),
+             "branch_raw": float(raw), "candidate": float(score)}
+            for index, raw, score in zip(validation, validation_raw, candidate)
+        ],
         "claim_boundary": ("Screening only on opened development data; winners "
                            "require full grouped OOF and independent evidence."),
         "provenance": {
