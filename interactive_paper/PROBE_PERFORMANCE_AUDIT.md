@@ -984,3 +984,25 @@ combined 30%-budget precision, and P32 30%-budget precision all fail. Reject
 joint fitting and do not open another prospective set. Receipt SHA256:
 `bbb2c816fa9b36fc89ae3546788431a6d2c2e77908a67408b6fad881cc4f1a78`.
 This cached experiment added no API spend; live behavior remains unchanged.
+
+P34 tested a fixed mid-answer intervention motivated by the owner-side failure
+taxonomy: use the unchanged deployed L22 probe after answer chunk four to
+rerank the second half of an exact 30% routing budget. The first 15% remained
+the onset-live ranking, and the second 15% was chosen from still-active,
+not-yet-routed rows by the chunk-four score. The diagnostic added no forward,
+trained no parameters, and exactly replayed all 3,000 opened standalone rows.
+
+Capture QC passed: zero inference errors, exact seed/onset/answer/EOT/error
+parity, 2,744 finite `(12288,)` late features, and 91.47% late availability.
+The intervention nevertheless underperforms onset-only top-30% routing.
+Pooled routing gain changes `.21200→.20933` (`-.00267`), failure precision
+`.82111→.81556` (`-.00556`), and harmful-selection rate
+`.01222→.01556` (`+.00333`). On rows with a late read, failure AUC falls
+`.81137→.79935` (`-.01202`). English and Chinese routing deltas are both
+negative (`-.00600` and `-.00500`). The positive macro-source diagnostic
+(`+.00949`) does not rescue the failed pooled, precision, harm, and language
+gates. Reject P34 without historical recapture, tuning, packaging, or
+activation. Receipt SHA256:
+`7fd8ef20602f2135b28d75d388bb57422b730191cd75273f5b704fd9c8dff03c`.
+This experiment added no API spend; conservative cumulative spend remains
+`$92.37773275 / $500`, and live behavior remains unchanged.
