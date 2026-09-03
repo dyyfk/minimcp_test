@@ -175,7 +175,7 @@ def main():
 
     frame = pd.read_parquet(args.selection).drop_duplicates("id")
     if "mode" in frame:
-        frame = frame[frame.mode == "standalone"]
+        frame = frame[frame["mode"] == "standalone"]
     local = pd.read_parquet(args.local).drop_duplicates("id", keep="last")
     expert = pd.read_parquet(args.expert).drop_duplicates("id", keep="last")
     frame = frame.merge(local[["id", "adequate"]].rename(

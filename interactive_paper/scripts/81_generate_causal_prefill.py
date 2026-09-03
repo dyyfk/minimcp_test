@@ -65,7 +65,7 @@ def main():
 
     frame = pd.read_parquet(args.selection)
     if "mode" in frame:
-        frame = frame[frame.mode == "standalone"]
+        frame = frame[frame["mode"] == "standalone"]
     frame = frame.sort_values("id")
     if args.limit:
         frame = frame.head(args.limit)
