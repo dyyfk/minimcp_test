@@ -200,7 +200,9 @@ def predict(model, x, batch_size):
     model.eval()
     with torch.inference_mode():
         for (batch,) in loader:
-            output.append(model(batch.cuda().to(torch.bfloat16)).float().cpu().numpy())
+            with torch.autocast("cuda", dtype=torch.bfloat16):
+                logits = model(batch.cuda().float())
+            output.append(logits.float().cpu().numpy())
     return np.concatenate(output)
 
 
@@ -270,7 +272,7 @@ def main():
     state, index_path, checkpoint_paths = load_block_weights(
         args.model_dir, args.tap_layer + 1)
     model = CopiedBlockProbe(config, args.tap_layer + 1, state,
-                             args.train_mode).to(torch.bfloat16).cuda()
+                             args.train_mode).cuda()
     trainable = [parameter for parameter in model.parameters()
                  if parameter.requires_grad]
     optimizer = torch.optim.AdamW(trainable, lr=args.learning_rate,
@@ -287,12 +289,13 @@ def main():
         model.train()
         losses = []
         for batch_x, batch_y, batch_weight in loader:
-            batch_x = batch_x.cuda().to(torch.bfloat16)
+            batch_x = batch_x.cuda().float()
             batch_y, batch_weight = batch_y.cuda(), batch_weight.cuda()
             optimizer.zero_grad(set_to_none=True)
-            logits = model(batch_x)
-            loss = nn.functional.binary_cross_entropy_with_logits(
-                logits, batch_y, weight=batch_weight)
+            with torch.autocast("cuda", dtype=torch.bfloat16):
+                logits = model(batch_x)
+                loss = nn.functional.binary_cross_entropy_with_logits(
+                    logits, batch_y, weight=batch_weight)
             loss.backward()
             torch.nn.utils.clip_grad_norm_(trainable, 1.)
             optimizer.step()
