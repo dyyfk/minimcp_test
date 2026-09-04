@@ -43,11 +43,10 @@ def main():
     output = args.output_dir / f"p37_asr.rank{rank}.jsonl"
     done = set()
     if output.exists():
-        done = {
-            str(json.loads(line)["id"])
-            for line in output.read_text(encoding="utf-8").splitlines()
-            if line.strip()
-        }
+        old = [json.loads(line)
+               for line in output.read_text(encoding="utf-8").splitlines()
+               if line.strip()]
+        done = {str(row["id"]) for row in old if not row.get("error")}
 
     taxonomy = pd.read_parquet(args.taxonomy, columns=["id", "ftype"])
     ids = sorted(taxonomy.loc[taxonomy["ftype"].eq("perception"), "id"].astype(str))
