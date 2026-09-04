@@ -1,0 +1,15 @@
+{
+  "experiment": "P36 reasoning-only buffered k2 delivery",
+  "status": "accuracy_gate_opened",
+  "source": "figures/two_stage.json",
+  "source_sha256": "25a6cd774c1476cb7a374eed904af2f2a5f07da3ecc891e32544df631630ac0c",
+  "budget": 0.3,
+  "pool": "Reasoning-zh",
+  "onset_delivered_accuracy": 0.6683168316831684,
+  "k2_delivered_accuracy": 0.7128712871287128,
+  "delta": 0.04455445544554448,
+  "minimum_delta": 0.03,
+  "accuracy_gate_pass": true,
+  "latency_cost": "two post-onset answer-chunk intervals; three generated chunks buffered",
+  "activation": "not authorized"
+}
