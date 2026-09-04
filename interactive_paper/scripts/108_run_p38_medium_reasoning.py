@@ -20,6 +20,10 @@ EXPERT_MAX = 4096
 OURS_MAX = 2048
 OAB_MAX = 512
 COST_CAP = 25.0
+# One sequential request and at most four sharded requests were interrupted
+# during the execution-only repartitioning amendment.  They have no response
+# usage receipt, so the report prices all five at conservative token ceilings.
+KNOWN_INTERRUPTED_CALLS = 5
 PRICES = {
     EXPERT_MODEL: (5.0 / 1e6, 30.0 / 1e6),
     OURS_JUDGE_MODEL: (.75 / 1e6, 4.5 / 1e6),
@@ -267,6 +271,9 @@ def exact_mcnemar_one_sided(wins, losses):
 
 
 def report_phase(args, frame):
+    sys.path.insert(0, str(args.source_dir.resolve()))
+    import escalate
+
     candidate_rows = read_candidate_rows(args.output_dir)
     judge_rows = read_judge_rows(args.output_dir)
     candidates = {str(row["id"]): row for row in candidate_rows
@@ -309,7 +316,17 @@ def report_phase(args, frame):
     latency_ratio = (float(scored.candidate_latency_s.median()
                            / scored.baseline_latency_s.median())
                      if len(scored) else None)
-    api_cost = total_cost(candidate_rows, judge_rows)
+    measured_cost = total_cost(candidate_rows, judge_rows)
+    max_prompt_token_bound = max(
+        len((escalate.EXPERT_SYSTEM + row.transcript).encode("utf-8")) + 1000
+        for row in frame.itertuples(index=False)
+    )
+    unmetered_calls = sum(bool(row.get("error")) for row in candidate_rows)
+    unmetered_calls += KNOWN_INTERRUPTED_CALLS
+    max_unmetered_call_cost = usage_cost(
+        EXPERT_MODEL, max_prompt_token_bound, EXPERT_MAX
+    )
+    conservative_cost_upper = measured_cost + unmetered_calls * max_unmetered_call_cost
     p_value = exact_mcnemar_one_sided(wins, losses)
     gates = {
         "candidate_and_both_judges_292_of_292": (
@@ -323,7 +340,7 @@ def report_phase(args, frame):
             for value in pools.values()),
         "median_latency_ratio_at_most_2": (
             latency_ratio is not None and latency_ratio <= 2.0),
-        "cost_at_most_25": api_cost <= COST_CAP,
+        "cost_at_most_25": conservative_cost_upper <= COST_CAP,
         "live_unchanged": True,
     }
     result = {
@@ -339,7 +356,15 @@ def report_phase(args, frame):
         "coverage": {"population": len(frame),
                      "missing_candidates": missing_candidates,
                      "missing_judges": missing_judges},
-        "cost_usd": api_cost,
+        "cost_usd": {
+            "measured_successful_usage": measured_cost,
+            "unmetered_recorded_length_errors": sum(
+                bool(row.get("error")) for row in candidate_rows),
+            "unmetered_interrupted_calls_upper_bound": KNOWN_INTERRUPTED_CALLS,
+            "max_prompt_token_bound_per_unmetered_call": max_prompt_token_bound,
+            "max_completion_tokens_per_unmetered_call": EXPERT_MAX,
+            "conservative_upper_bound": conservative_cost_upper,
+        },
         "gates": gates,
         "activation": "not_authorized",
     }
