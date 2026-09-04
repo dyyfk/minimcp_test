@@ -73,6 +73,13 @@ def read_candidate_rows(output_dir: Path):
     return rows
 
 
+def read_judge_rows(output_dir: Path):
+    rows = []
+    for path in sorted(output_dir.glob("p38_judge*.jsonl")):
+        rows.extend(read_jsonl(path))
+    return rows
+
+
 def usage_cost(model, prompt_tokens, completion_tokens):
     input_price, output_price = PRICES[model]
     return prompt_tokens * input_price + completion_tokens * output_price
@@ -184,11 +191,15 @@ def judge_phase(args, frame):
         args.output_dir) if not row.get("error")}
     if len(candidates) != len(frame):
         raise SystemExit(f"candidate coverage {len(candidates)}/{len(frame)}")
-    output = args.output_dir / "p38_judge.jsonl"
-    old = read_jsonl(output)
+    output = args.output_dir / (
+        "p38_judge.jsonl" if args.shard_count == 1
+        else f"p38_judge.rank{args.shard_index}.jsonl"
+    )
+    old = read_judge_rows(args.output_dir)
     done = {(str(row["id"]), row["arm"]) for row in old if not row.get("error")}
     client = OpenAI()
-    for row, arm in _hash_order(frame):
+    judge_items = _hash_order(frame)[args.shard_index::args.shard_count]
+    for row, arm in judge_items:
         key = (row.id, arm)
         if key in done:
             continue
@@ -257,7 +268,7 @@ def exact_mcnemar_one_sided(wins, losses):
 
 def report_phase(args, frame):
     candidate_rows = read_candidate_rows(args.output_dir)
-    judge_rows = read_jsonl(args.output_dir / "p38_judge.jsonl")
+    judge_rows = read_judge_rows(args.output_dir)
     candidates = {str(row["id"]): row for row in candidate_rows
                   if not row.get("error")}
     judges = {(str(row["id"]), row["arm"]): row for row in judge_rows
