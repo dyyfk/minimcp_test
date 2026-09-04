@@ -1006,3 +1006,23 @@ activation. Receipt SHA256:
 `7fd8ef20602f2135b28d75d388bb57422b730191cd75273f5b704fd9c8dff03c`.
 This experiment added no API spend; conservative cumulative spend remains
 `$92.37773275 / $500`, and live behavior remains unchanged.
+
+P35 isolated the remaining judge/label-floor hypothesis without buying new
+labels. Of 2,886 P25-B rows with an explicit reference option, a pre-frozen
+high-confidence answer-cue parser extracted one unambiguous model choice from
+1,261 (43.69%). On this conservative subset, exact option correctness agrees
+with the existing judge on 96.67% of rows, so there is little label noise for
+the rule to remove. A fixed `C=3e-4` logistic readout trained on exact-choice
+failure under five-fold source-family-disjoint OOF is worse than the live head
+on both targets: exact-label pooled/macro-source AUC deltas
+`-.00584/-.00416`, judge-label deltas `-.01270/-.01020`, and realized
+routing deltas `-.00476/-.00375`.
+
+The regression is not uniform enough to suggest a safe source rule. ARC and
+Commonsense improve, but CEval routing falls `-.00815` and MMLU-Pro falls
+`-.01760`, violating the broad-pool floor; Chinese routing is also negative.
+All nine frozen gates fail, including the 80% extraction-coverage gate. Reject
+exact-choice relabeling, do not loosen the parser or tune source-specific
+heads after opening, and do not run historical transfer. Receipt SHA256:
+`33cd12cc4804aaaa33670c86db72b154bcebfe6f532870969ef15e72e03dbdbf`.
+This cached experiment added no API spend; live behavior remains unchanged.
