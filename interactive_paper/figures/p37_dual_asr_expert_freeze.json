@@ -1,0 +1,47 @@
+{
+  "experiment": "P37 dual-ASR expert repair for perception failures",
+  "status": "frozen_before_second_asr_completion_or_expert_calls",
+  "hypothesis": "When the local assistant failed because the spoken question was misheard, giving the existing expert two independently produced transcripts will repair enough ambiguous entities and formulas to improve the delivered expert answer without changing the routing probe.",
+  "population": {
+    "source": "data/native_bench/failure_types.parquet",
+    "rule": "all rows whose already-published owner taxonomy is perception",
+    "n": 36,
+    "id_set_sha256": "e6f55f59fa1f8b9dbe23a92d36834b15d8a9b0b5edf77a86b9a8976d3ccc0c24",
+    "pool_counts": {
+      "frozen": 14,
+      "striviaqa": 7,
+      "swebq": 6,
+      "sllama": 1,
+      "sdqa": 7,
+      "sreason": 1
+    }
+  },
+  "transcripts": {
+    "A": "the deployed hosted-ASR transcript already stored in failure_types.parquet",
+    "B": "MiniCPM-o-4_5 turn-based verbatim transcription of the identical wav, using the fixed prompt in modal_audio.py::ASR_INSTR",
+    "existing_B_coverage": 14,
+    "missing_B_policy": "generate only the 22 missing transcripts locally with the frozen base model; do not use the question text or reference during transcription"
+  },
+  "paired_intervention": {
+    "baseline": "gpt-5.5, low reasoning, transcript A only",
+    "candidate": "the same expert receives transcript A and transcript B in randomized A/B order, is told that either may contain errors, and must infer the most coherent spoken question before answering",
+    "expert_model": "gpt-5.5",
+    "judge_model": "gpt-5.4-mini",
+    "judge": "the existing strict reference-anchored judge, blinded to arm",
+    "web_search": false,
+    "new_audio_generation": false,
+    "probe_or_base_training": false
+  },
+  "acceptance_gates": [
+    "All 36 rows obtain a nonempty second transcript without using reference or ground-truth question text",
+    "Both expert arms and both blinded judge arms complete on the same 36 ids with zero errors",
+    "Candidate delivered accuracy improves by at least +0.10 absolute over baseline",
+    "The paired one-sided exact McNemar p-value is below 0.10",
+    "No more than one row changes from baseline-correct to candidate-wrong",
+    "Accuracy delta is nonnegative separately for frozen and external rows",
+    "Incremental OpenAI API cost is at most $10.00",
+    "No live gate, default relay, model weights, or deployed artifact changes"
+  ],
+  "decision_rule": "Any failed gate rejects dual-ASR expert repair. A pass authorizes only an opt-in expert-input candidate and a fresh native validation; it does not authorize activation.",
+  "cost_basis": "Official OpenAI documentation on 2026-09-04 lists gpt-5.5 at $5/M input and $30/M output tokens. The runner records actual usage and stops before the next pair if conservative experiment spend would exceed $10."
+}
