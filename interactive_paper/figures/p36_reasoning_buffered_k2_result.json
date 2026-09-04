@@ -1,6 +1,6 @@
 {
   "experiment": "P36 reasoning-only buffered k2 delivery",
-  "status": "accuracy_gate_opened",
+  "status": "mechanics_pass_accuracy_pending_row_level_replay",
   "source": "figures/two_stage.json",
   "source_sha256": "25a6cd774c1476cb7a374eed904af2f2a5f07da3ecc891e32544df631630ac0c",
   "budget": 0.3,
@@ -9,7 +9,16 @@
   "k2_delivered_accuracy": 0.7128712871287128,
   "delta": 0.04455445544554448,
   "minimum_delta": 0.03,
-  "accuracy_gate_pass": true,
+  "cached_k2_only_delta_gate_pass": true,
+  "p36_end_to_end_accuracy_gate": "not_evaluable_from_aggregate",
   "latency_cost": "two post-onset answer-chunk intervals; three generated chunks buffered",
+  "measurement_limit": "scripts/39_two_stage.py pads rows that ended before k2 with their last available state and still assigns the exact per-pool quota. P36 instead releases a pre-k2 short answer locally, so the aggregate k2-only number is a candidate upper bound, not an exact replay of P36.",
+  "required_replay_fields": [
+    "id",
+    "n_post",
+    "local_outcome",
+    "expert_outcome",
+    "k2_score"
+  ],
   "activation": "not authorized"
 }
