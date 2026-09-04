@@ -1,0 +1,37 @@
+{
+  "experiment": "P36 reasoning-only buffered k2 delivery",
+  "status": "frozen_before_validation",
+  "hypothesis": "For an explicitly opted-in reasoning workload, withholding the first two locally generated answer chunks and routing with the separately trained k2 probe preserves the previously observed Reasoning-zh fixed-budget gain while preventing a user from hearing a local answer that is later discarded for expert relay.",
+  "scope": {
+    "enabled": "explicit reasoning mode only",
+    "disabled": "default live traffic and automatic task-family inference",
+    "base_model_training": false,
+    "new_model_forward": false,
+    "external_api_calls": false
+  },
+  "policy": {
+    "read_point": "k2",
+    "budget": 0.3,
+    "buffered_answer_chunks": 2,
+    "local_decision": "release both buffered chunks in original order, then stream normally",
+    "expert_decision": "discard both buffered chunks before any client emission, then use the existing lossless TTS expert relay",
+    "short_answer_rule": "if end_of_turn arrives before k2, release the buffered local answer and do not escalate",
+    "interruption_rule": "discard the pending local buffer and return to listening; do not relay stale content"
+  },
+  "fixed_evidence": {
+    "accuracy_source": "figures/two_stage.json, exact per-pool 30% budget",
+    "baseline": "Reasoning-zh onset one-stage",
+    "candidate": "Reasoning-zh k2-only",
+    "mechanics_source": "deterministic buffer-controller unit tests"
+  },
+  "acceptance_gates": [
+    "Reasoning-zh delivered accuracy delta at the exact 30% budget is at least +0.030",
+    "No local audio or text is emitted before the k2 decision",
+    "The local path releases every buffered chunk exactly once and in order",
+    "The expert path releases no buffered local chunk",
+    "A pre-k2 end_of_turn cannot strand or silently drop a short local answer",
+    "An interruption clears buffered content and prevents stale delivery",
+    "The default/deployed onset gate and artifact remain unchanged"
+  ],
+  "decision_rule": "Any failed gate rejects P36. Passing authorizes an opt-in implementation candidate only; it does not authorize default activation. The latency cost is reported as two answer-chunk intervals and is not hidden inside the expert latency measurement."
+}
