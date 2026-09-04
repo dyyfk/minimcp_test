@@ -66,6 +66,13 @@ def append_jsonl(path: Path, row):
         handle.flush()
 
 
+def read_candidate_rows(output_dir: Path):
+    rows = []
+    for path in sorted(output_dir.glob("p38_candidate*.jsonl")):
+        rows.extend(read_jsonl(path))
+    return rows
+
+
 def usage_cost(model, prompt_tokens, completion_tokens):
     input_price, output_price = PRICES[model]
     return prompt_tokens * input_price + completion_tokens * output_price
@@ -119,11 +126,15 @@ def candidate_phase(args, frame):
     sys.path.insert(0, str(args.source_dir.resolve()))
     import escalate
 
-    output = args.output_dir / "p38_candidate.jsonl"
-    old = read_jsonl(output)
+    output = args.output_dir / (
+        "p38_candidate.jsonl" if args.shard_count == 1
+        else f"p38_candidate.rank{args.shard_index}.jsonl"
+    )
+    old = read_candidate_rows(args.output_dir)
     done = {str(row["id"]) for row in old if not row.get("error")}
     client = OpenAI()
-    for row in frame.itertuples(index=False):
+    shard_rows = frame.iloc[args.shard_index::args.shard_count]
+    for row in shard_rows.itertuples(index=False):
         if row.id in done:
             continue
         record = {"phase": "candidate", "id": row.id, "pool": row.pool,
@@ -169,8 +180,8 @@ def judge_phase(args, frame):
     sys.path.insert(0, str(args.source_dir.resolve()))
     import escalate
 
-    candidates = {str(row["id"]): row for row in read_jsonl(
-        args.output_dir / "p38_candidate.jsonl") if not row.get("error")}
+    candidates = {str(row["id"]): row for row in read_candidate_rows(
+        args.output_dir) if not row.get("error")}
     if len(candidates) != len(frame):
         raise SystemExit(f"candidate coverage {len(candidates)}/{len(frame)}")
     output = args.output_dir / "p38_judge.jsonl"
@@ -245,7 +256,7 @@ def exact_mcnemar_one_sided(wins, losses):
 
 
 def report_phase(args, frame):
-    candidate_rows = read_jsonl(args.output_dir / "p38_candidate.jsonl")
+    candidate_rows = read_candidate_rows(args.output_dir)
     judge_rows = read_jsonl(args.output_dir / "p38_judge.jsonl")
     candidates = {str(row["id"]): row for row in candidate_rows
                   if not row.get("error")}
@@ -335,11 +346,15 @@ def main():
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--population-sha", default=(
         "790b82563f3684189ea7592c1179eb88338d9bb089f65da8595fff3efccd08bf"))
+    parser.add_argument("--shard-count", type=int, default=1)
+    parser.add_argument("--shard-index", type=int, default=0)
     parser.add_argument("--result", type=Path,
                         default=Path("figures/p38_medium_reasoning_result.json"))
     parser.add_argument("--rows", type=Path,
                         default=Path("figures/p38_medium_reasoning_rows.parquet"))
     args = parser.parse_args()
+    if args.shard_count < 1 or not 0 <= args.shard_index < args.shard_count:
+        parser.error("require shard-count >= 1 and 0 <= shard-index < shard-count")
     args.output_dir.mkdir(parents=True, exist_ok=True)
     frame = population(args)
     if args.phase == "candidate":
