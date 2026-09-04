@@ -51,12 +51,14 @@ no human labels; a stronger re-judge bounds the resulting shifts at
 about one point. Each query is run once per tier, which puts a
 replication floor of two to three points on every live accuracy, and
 no claim here rests on a smaller difference. The second-family
-replication covers mid-band readability and frozen-recipe transfer
-only, not matched-pair attribution, the live loop, or the concurrent
-regime. Layer and features were chosen by cross-validation on the
-internal calibration split and then confirmed on held-out pools,
-rather than by nested selection inside each held-out pool. The
-mechanism behind the late-layer decay on text input remains
+NVDA result covers method transfer through the model's native frame
+protocol, not matched-pair attribution. Its external pools were
+inspected during the variant review and thus need fresh-pool
+confirmation; its layer and features were selected on calibration-only
+LOPO metrics. For the main MiniCPM probe, the layer and features were
+chosen by cross-validation on the internal calibration split and then
+confirmed on held-out pools, rather than by nested selection inside
+each held-out pool. The mechanism behind the late-layer decay on text input remains
 unresolved (Appendix~\ref{app:mech}).
 
 Serving regime is the sharpest practical limit. Calibration does not

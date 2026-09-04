@@ -23,7 +23,7 @@ varies from 2\% to 48\% (Appendix~\ref{app:fixedthr}). We use each benchmark's
 official judge when available and verify that the local-only controls
 are on the published scale.
 
-% Main results table lives in live.tex (top of Section 5) so it lands
+% Main results table lives in signal.tex so it lands
 % early in the paper; label tab:transfer unchanged.
 
 The frozen scores remain discriminative outside the calibration mix:
@@ -34,6 +34,13 @@ benchmark and at every budget; at 50\% escalation, mean accuracy rises
 from 63.4\% to 82.1\%. These gains establish system utility but do not
 by themselves establish selectivity, because random escalation also
 adds expert answers.
+
+The NVDA probe reaches 0.818 OOF AUC and 0.816 mean external AUC under
+each pool's assigned judge. It averages linear heads at L26/L30/L34
+on a pass-3 answer-onset capture from the model's native frame
+protocol. This tests method transfer without running a live loop. The
+full training protocol and read-point ablations are in
+Appendix~\ref{app:nvda}.
 
 Llama Questions provides the cleanest fixed-budget test. It contains a
 single query type, the kept-local subset scores 97.6\% while the
@@ -54,10 +61,13 @@ high budgets; in its top-scoring 15\%, many local failures are also
 missed by the expert
 (Appendix~\ref{app:fixedthr}). AlpacaEval is a clearer negative: its
 open-ended failures do not present the retrieval-failure pattern the
-probe reads. On the second duplex family, which has more expert
-headroom on these pools, the same recipe beats matched-rate random on
-all five evaluated pools, including AlpacaEval ($p\le.0003$). Thus
-external utility depends on both the quality of the competence ranking
-and whether the selected failures are repairable by the expert
+probe reads. On NVDA, the pass-3 probe beats matched-rate random on all
+four binary QA pools at 30\% and 50\% escalation ($p\le.0008$); at
+15\%, SD-QA is inconclusive ($p{=}0.063$). On AlpacaEval, the same
+pass-3 ranking reaches 4.51 versus 4.23 for random at 50\%
+($p<.001$). Thus the three MiniCPM negatives all separate at the
+30\% and 50\% budgets on the second family: external utility depends
+on both the competence ranking and whether the selected failures are
+repairable by the expert
 (Appendices~\ref{app:nvda},~\ref{app:fixedthr},
 and~\ref{app:transferdetail}).

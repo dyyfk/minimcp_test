@@ -1,0 +1,17 @@
+{
+ "probe": "pass-3 three-layer answer onset, L26/L30/L34",
+ "metric": "VoiceBench score (1--5)",
+ "protocol": "frozen local/expert outcomes; pass-3 probe ranking",
+ "n": 198,
+ "local": 3.5505050505050506,
+ "expert": 4.914141414141414,
+ "gate@0.15": 3.893939393939394,
+ "random@0.15": 3.755050505050505,
+ "p@0.15": 0.0,
+ "gate@0.3": 4.171717171717172,
+ "random@0.3": 3.9595959595959593,
+ "p@0.3": 0.0,
+ "gate@0.5": 4.51010101010101,
+ "random@0.5": 4.232323232323233,
+ "p@0.5": 0.0
+}
