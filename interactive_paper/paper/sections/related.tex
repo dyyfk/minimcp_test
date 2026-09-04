@@ -20,22 +20,24 @@ remains reliable after duplex speech training or whether a probe
 calibrated on text transfers to speech-input states.
 
 \paragraph{Selective routing.}
+Text routing splits into two families by where the decision lives.
+In the first, the decision is read from outside the generator:
 HybridLLM \citep{ding2024hybrid}, RouteLLM
 \citep{ong2024routellm}, and query-side routers
 \citep{hybridserve2025,hu2024routerbench,llmrouterbench2026} choose a
 model for a complete text query from query features or preference
-data. FrugalGPT organizes cascades that can score an earlier model's
+data; FrugalGPT organizes cascades that can score an earlier model's
 response \citep{chen2023frugalgpt}, while AutoMix verifies a drafted
 answer before escalating \citep{aggarwal2024automix}. Closest to our
 signal, recent methods read pre-generation activations or fit linear
 success probes on frozen states
 \citep{varshney2026llmrouter,lugoloobi2025difficulty,
-lugoloobi2026failures}. A second family trains the decision into the
-generator: Toolformer and Self-RAG learn tool or reflection tokens
-\citep{schick2023toolformer,asai2024selfrag}; Co-LLM and CITER learn
-token-level deferral \citep{shen2024collaborative,zheng2025citer}; and
-pause, thought, or think/no-think tokens allocate more internal
-computation
+lugoloobi2026failures}. In the second family, the decision is trained
+into the generator: Toolformer and Self-RAG learn tool or reflection
+tokens \citep{schick2023toolformer,asai2024selfrag}; Co-LLM and CITER
+learn token-level deferral
+\citep{shen2024collaborative,zheng2025citer}; and pause, thought, or
+think/no-think tokens allocate more internal computation
 \citep{goyal2024pause,zelikman2024quietstar,yang2025qwen3,
 guo2025deepseekr1}. Learning-to-defer and early-exit methods make
 related decisions within a model
@@ -50,24 +52,40 @@ End-to-end spoken dialogue includes native duplex models
 bayling2026duplex}, streaming omni models
 \citep{xu2025qwen25omni,openbmb2026minicpmo}, frozen-backbone adapters
 \citep{wang2024freezeomni}, and audio fine-tunes
-\citep{chu2024qwen2audio}. Their control interfaces decide when to
-listen or speak through state, idle, synchronization, or interruption
-tokens \citep{wang2024fsm,zhang2024duplex,veluri2024syncllm,
+\citep{chu2024qwen2audio}. Most control work in these systems concerns
+the floor: state, idle, synchronization, or interruption tokens
+\citep{wang2024fsm,zhang2024duplex,veluri2024syncllm,
 ma2024lslm,fu2024vita,yu2024salmonnomni}, structured action channels
-\citep{zhang2026duplexsla}, or small classifier heads
-\citep{liao2025flexduo,chen2025minmo}. MiniCPM-o~4.5 likewise predicts
-a listen/speak state before content generation
-\citep{openbmb2026minicpmo}. These policies answer \emph{when} the
-model should speak, not whether its content is likely to be correct.
+\citep{zhang2026duplexsla}, or classifier heads over a frozen or
+lightly adapted backbone
+\citep{wang2024freezeomni,chen2025minmo,liao2025flexduo}. Training
+this control is costly enough that reducing the cost is itself a
+research goal \citep{xu2024minimal}, and trained turn-taking remains
+unreliable across models \citep{lin2025fdb}. These mechanisms decide
+when the model may speak; even the most recent native design adds only
+a few turn tokens to the vocabulary and answers every turn locally,
+whatever the model's competence on that turn \citep{bayling2026duplex}.
 
-Recent systems also connect a duplex interface to a stronger resource.
-MoshiRAG triggers asynchronous retrieval from the model's emerging
-output and returns knowledge to the local model
-\citep{chien2026moshirag}. DuplexOmni uses a trained think-control
-token to hand work to a separate reasoning layer
-\citep{huang2026duplexomni}. These systems demonstrate that a live
-handoff is possible, but they do not evaluate a competence score read
-from a frozen duplex checkpoint before generation.
+The direct neighbors of our gate are trained think triggers.
+DuplexOmni emits a think-control token at the end of a user utterance
+to hand work to a separate reasoning layer \citep{huang2026duplexomni};
+chronological thinking interleaves reasoning with the speech stream
+\citep{chrono2026thinking}; MiniCPM-o~4.5 ships a built-in reasoning
+mode \citep{openbmb2026minicpmo}; MoshiRAG triggers asynchronous
+retrieval from the model's emerging output \citep{chien2026moshirag}.
+These systems show that a live handoff is possible. But the trigger is
+trained into the weights from purpose-built duplex data, so changing
+the policy or the downstream resource means retraining; it is a binary
+action with no calibrated score, so the escalation rate cannot be set
+to a call budget; and the trained policies are hard to reuse or
+compare, because released artifacts often include the training recipe
+but not the trained checkpoint \citep{huang2026duplexomni}. None of
+these works evaluates a competence score read from a frozen checkpoint
+before generation. Our probe replaces the trained trigger with such a
+read: it needs no training of the speech model, exposes a
+thresholdable score, and on our target model it dominates the built-in
+reasoning mode on both accuracy and latency
+(Appendix~\ref{app:gatedetail}).
 
 \paragraph{Positioning.}
 Prior work therefore establishes three ingredients separately:

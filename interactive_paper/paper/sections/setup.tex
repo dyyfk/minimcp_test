@@ -1,22 +1,26 @@
 \section{Experimental Setup}
 \label{sec:setup}
 
-\paragraph{Target model and matched-pair controls.}
-The system target is \textbf{MiniCPM-o~4.5} (9B; omni + full-duplex
-fine-tune of Qwen3-8B), bf16, greedy decoding, seed 42. To attribute
-effects to the \emph{kind} of fine-tune rather than the backbone, we
-assemble ten models spanning raw backbones, a second duplex generation
+\subsection{Models}
+\label{sec:models}
+The target model is MiniCPM-o~4.5 (9B; omni + full-duplex fine-tune of
+Qwen3-8B), run in bf16 with greedy decoding and seed 42. To attribute
+effects to the kind of fine-tune rather than the backbone, we assemble
+ten models spanning raw backbones, a second duplex generation
 (MiniCPM-o~2.6), a streaming-omni fine-tune (Qwen2.5-Omni-7B), an
 audio-only fine-tune (Qwen2-Audio-7B), and a frozen-backbone adapter
 model (Freeze-Omni, LLM weights byte-identical to its raw control);
 the full roster is Table~\ref{tab:models} (appendix). The comparison
-statistic is always the within-pair difference.
+statistic is always the within-pair difference. All model checkpoints
+remain frozen throughout; the escalation expert is \texttt{gpt-5.5} at
+low reasoning effort.
 
-\paragraph{Query pool, labels, and audio arm.}
-600 queries in five pools, frozen before any gate experiment (360
-calibration / 240 test): \emph{trap} = SimpleQA \citep{wei2024simpleqa}
-(the target fails 100\%), \emph{hard-knowledge} = MMLU-Pro
-\citep{wang2024mmlupro}, \emph{easy-fact} = TriviaQA
+\subsection{Dataset and labels}
+\label{sec:dataset}
+The internal dataset is 600 queries in five pools, frozen before any
+gate experiment (360 calibration / 240 test): \emph{trap} = SimpleQA
+\citep{wei2024simpleqa} (the target fails 100\%), \emph{hard-knowledge}
+= MMLU-Pro \citep{wang2024mmlupro}, \emph{easy-fact} = TriviaQA
 \citep{joshi2017triviaqa}, \emph{easy-chat} = Dolly/Alpaca
 \citep{conover2023dolly,taori2023alpaca}, \emph{hard-math} = GSM8K tail
 + MATH-500 \citep{cobbe2021gsm8k,hendrycks2021math,lightman2024lets};
@@ -24,22 +28,18 @@ public benchmarks only, no LLM-generated queries. Adequacy labels come
 from an LLM judge \citep{zheng2023judging} with structured outputs,
 blind to the gate and validated by a stronger re-judge (agreement 96.2\%
 text / 94.5\% audio; every headline number moves $\le$1 point under the
-stronger labels); the escalation expert is \texttt{gpt-5.5} at low
-reasoning effort. The audio arm renders the same frozen pool to speech
-(single-voice TTS, content unchanged --- only modality varies),
+stronger labels). The audio arm renders the same frozen pool to speech
+with single-voice TTS (content unchanged; only modality varies),
 following Spoken-SQuAD / VoiceBench practice
-\citep{li2018spokensquad,chen2024voicebench}; audio-side findings are
-additionally validated on real human recordings (SD-QA,
-\citealp{faisal2021sdqa}) and on the external benchmarks' official
-audio (\S\ref{sec:transfer}). Judge prompts, pins, and spend:
-Appendix~\ref{app:prompts}--\ref{app:repro}.
+\citep{li2018spokensquad,chen2024voicebench}. Judge prompts, pins, and
+spend: Appendix~\ref{app:prompts}--\ref{app:repro}.
 
-\paragraph{Candidate competence signals.}
-All model checkpoints remain frozen. We compare (i) decode scalars:
-max token entropy or margin over the first $k$ decode steps; (ii)
-linear probes: logistic regression on hidden states, with layer and
-position selected on calibration data; and (iii) verbalized
-self-evaluation
+\subsection{Probe training and baseline signals}
+\label{sec:signals}
+We compare three signal families: (i) decode scalars: max token
+entropy or margin over the first $k$ decode steps; (ii) linear probes:
+logistic regression on hidden states, with layer and position selected
+on calibration data; and (iii) verbalized self-evaluation
 \citep{kadavath2022language}: $\ptrue$-pre asks ``would you answer this
 correctly?'' before answering, $\ptrue$-post asks about a drafted
 answer; $P(\text{Yes})$ is read from the first token's distribution.
@@ -51,12 +51,53 @@ Concurrent and native serving change the read point, so those
 validations refit the same feature set in regime; Appendix
 \ref{app:signal} records the full calibration ledger.
 
-\paragraph{Evaluation logic.}
-In-distribution AUC is diagnostic, not the main robustness claim,
-because query-pool identity is predictive in the calibration mix. We
-therefore use LOPO AUC to test distribution transfer and
-text-trained/audio-scored AUC to test modality transfer. For the live
-system, the key comparison is against matched-rate random escalation:
-an improvement over always-local operation can come from the expert
-alone, while an improvement over random at the same call rate measures
-the value of the gate's ranking.
+\subsection{Benchmarks and evaluation protocol}
+\label{sec:evalproto}
+Audio-side findings are validated on real human recordings (SD-QA,
+\citealp{faisal2021sdqa}); the frozen gate is evaluated on external
+public speech benchmarks with their official audio
+(\S\ref{sec:transfer}). Following \S\ref{sec:audit}, we
+use LOPO AUC to test distribution transfer and
+text-trained/audio-scored AUC to test modality transfer.
+For the live system, the key comparison is against matched-rate random
+escalation: an improvement over always-local operation can come from
+the expert alone, while an improvement over random at the same call
+rate measures the value of the gate's ranking.
+
+\subsection{Live loop and escalation path}
+\label{sec:liveproto}
+\label{sec:inject}
+The live loop is the model's native full-duplex mode under its
+official serving configuration: audio streams in 1\,s chunks into the
+generating context, and the listen/speak head decides for itself when
+to answer. The gate reads the three-position probe of
+\S\ref{sec:signals} once, at that speak commit, on the
+5{,}228-row calibration merge refit in regime with labels judged on
+the model's own answers (frozen-test AUC 0.876). Escalation runs in
+three tiers from conservative to aggressive; each tier's threshold is
+a quantile of the probe's calibration score, set per language, so a
+tier sets the call budget without correctness labels; a second linear
+head on the same read exempts floor-management turns (``stop'',
+backchannels). If a turn escalates, a canned stall phrase in the
+talker's own voice plays, the raw question audio is transcribed and
+sent to \texttt{gpt-5.5}, and the returned answer is spoken verbatim
+through the talker's teacher-forced voice; the chunk loop keeps
+running, so the relay stays interruptible. Every session in
+\S\ref{sec:live} is one fresh duplex session with real transcription,
+expert, and relay, paced in wall time. The earlier turn-based
+harness loop, injection controls, and prefetch experiments are in
+Appendix~\ref{app:livedetail}.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\linewidth]{native_frozen_dualview}
+  \caption{Live escalation on the internal test set ($n{=}240$),
+  native full-duplex sessions. Blue: delivered accuracy at each tier's
+  realized escalation rate (filled points are separate live arms;
+  bars are bootstrap 95\% CIs). Dashed grey: the matched-rate random
+  reference between the never and always arms. Green dotted: the
+  expert's returned text scored directly, the relay-free bound.
+  Selection beats random by 6.0 and 6.8 points at the balanced and
+  aggressive tiers.}
+  \label{fig:dualview}
+\end{figure}

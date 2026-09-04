@@ -117,6 +117,8 @@ FEAT_POOLS = {
     "expansion2": (f"{DATA}/queries_expansion2.jsonl", f"{DATA}/audio_expansion2"),
     "expansion3": (f"{DATA}/queries_expansion3.jsonl", f"{DATA}/audio_expansion3"),
     "expansion3zh": (f"{DATA}/queries_expansion3zh.jsonl", f"{DATA}/audio_expansion3zh"),
+    "expansion4zh": (f"{DATA}/queries_expansion4zh.jsonl", f"{DATA}/audio_expansion4zh"),
+    "expansion5rs": (f"{DATA}/queries_expansion5rs.jsonl", f"{DATA}/audio_expansion5rs"),
     "striviaqa":  (f"{DATA}/queries_striviaqa.jsonl",  f"{DATA}/bench_audio"),
     "swebq":      (f"{DATA}/queries_swebq.jsonl",      f"{DATA}/bench_audio"),
     "sllama":     (f"{DATA}/queries_sllama.jsonl",     f"{DATA}/bench_audio"),
@@ -231,7 +233,9 @@ def native_shard(shard: list, shard_id: int = -1, tag: str = "",
         st3.update(sum=None, cnt=0)      # demo resets at end_of_turn
         return ended
 
-    traces, feat_ids, feat_X = [], [], []
+    traces, feat_ids, feat_X, feat_pre = [], [], [], []
+    feat_post = {1: [], 2: [], 3: []}   # 8bw: read again after k answer chunks
+    feat_npost = []
     try:
         for qi, q in enumerate(shard):
             wav_p = f"{audio_dir}/{q['id']}.wav"
@@ -249,6 +253,8 @@ def native_shard(shard: list, shard_id: int = -1, tag: str = "",
             car_ended = run_carrier() if car_chunks else None
 
             onset_chunk, onset_vec, onset_score = None, None, None
+            pre_vec, onset_pre = None, None   # 8br: pre-generate read
+            post_vecs = []                    # 8bw: L22 after each answer chunk
             texts, eot_seen, n_ans = [], False, 0
             feed = list(chunks) + [None] * (MAX_WAIT + MAX_ANS)
             for ci, ch in enumerate(feed):
@@ -259,6 +265,10 @@ def native_shard(shard: list, shard_id: int = -1, tag: str = "",
                 st3["accum"] = False
                 if not ok.get("success"):
                     continue
+                if onset_chunk is None:
+                    # 8br causal diagnostic: the same L22 read taken
+                    # BEFORE this chunk's generate (no answer tokens)
+                    pre_vec = feat_now()
                 r = (duplex.streaming_generate(temperature=temperature,
                                                 **GKW)
                      if temperature else duplex.streaming_generate(**GKW))
@@ -274,6 +284,13 @@ def native_shard(shard: list, shard_id: int = -1, tag: str = "",
                     # generate (demo_duplex.py semantics, verbatim)
                     onset_chunk = ci
                     onset_vec = feat_now()
+                    onset_pre = pre_vec
+                elif len(post_vecs) < 3:
+                    # 8bw later read points: the same 12,288-d read
+                    # after the 1st/2nd/3rd answer chunk following
+                    # onset (tail now holds answer tokens; user_mean
+                    # is unchanged since accum is off during generate)
+                    post_vecs.append(feat_now())
                 if r.get("text"):
                     texts.append(r["text"])
                 n_ans += 1
@@ -287,6 +304,12 @@ def native_shard(shard: list, shard_id: int = -1, tag: str = "",
             if not no_speak:
                 feat_ids.append(q["id"])
                 feat_X.append(onset_vec)
+                feat_pre.append(onset_pre)
+                feat_npost.append(len(post_vecs))
+                for k in (1, 2, 3):
+                    src = post_vecs[k - 1] if len(post_vecs) >= k else (
+                        post_vecs[-1] if post_vecs else onset_vec)
+                    feat_post[k].append(src)
             traces.append({
                 "id": q["id"], "pool": q.get("pool", tag or "?"),
                 "n_q_chunks": len(chunks),
@@ -307,7 +330,12 @@ def native_shard(shard: list, shard_id: int = -1, tag: str = "",
             fh.write(json.dumps(r, ensure_ascii=False) + "\n")
     if feat_ids:
         np.savez_compressed(f"{OUT}_{tag}_feats.{sfx}.npz",
-                            ids=np.array(feat_ids), X=np.stack(feat_X))
+                            ids=np.array(feat_ids), X=np.stack(feat_X),
+                            X_pre=np.stack(feat_pre),
+                            X_k1=np.stack(feat_post[1]),
+                            X_k2=np.stack(feat_post[2]),
+                            X_k3=np.stack(feat_post[3]),
+                            n_post=np.array(feat_npost))
     gate_data.commit()
     n_ns = sum(t["no_speak"] for t in traces)
     print(f">>> shard{shard_id}: {len(traces)} traces, "
@@ -348,6 +376,10 @@ def judge_native(tag: str, pool: str = "frozen"):
     out_p = f"{OUT}_{tag}_judged.parquet"
     old = (pd.read_parquet(out_p)
            if os.path.exists(out_p) else pd.DataFrame(columns=["id"]))
+    # rows whose earlier judge call ERRORed (429 etc.) are retried; a
+    # row with a real verdict is never re-judged
+    if "adequate" in old:
+        old = old[old["adequate"].notna()]
     have = set(old["id"])
     todo = []
     for r in rows.values():
@@ -362,7 +394,19 @@ def judge_native(tag: str, pool: str = "frozen"):
     print(f">>> judge_native[{tag}]: {len(rows)} traces, "
           f"{len(have)} already judged, {len(todo)} to judge")
     if todo:
-        judged = asyncio.run(escalate.judge_many(todo, concurrency=8))
+        import time as _time
+        judged = []
+        pending = todo
+        for attempt in range(6):          # 429 backoff passes
+            got = asyncio.run(escalate.judge_many(pending, concurrency=4))
+            judged += [r for r in got if r["adequate"] is not None]
+            pending = [r for r in got if r["adequate"] is None]
+            if not pending:
+                break
+            print(f"    pass {attempt}: {len(pending)} errored — "
+                  f"sleeping 60s then retrying", flush=True)
+            _time.sleep(60)
+        judged += pending                  # keep any final errors
         new = pd.concat([old, pd.DataFrame(judged)], ignore_index=True)
         new.to_parquet(out_p)
         gate_data.commit()
@@ -371,6 +415,18 @@ def judge_native(tag: str, pool: str = "frozen"):
               f"native local-correct rate "
               f"{sum(r['adequate'] for r in ok) / max(1, len(ok)):.3f}")
     return len(todo)
+
+
+@app.local_entrypoint()
+def judge_all(tags: str = "caliboff:frozen,expoff:expansion,"
+              "exp2off:expansion2,freshoff:fresh,exp3off:expansion3"):
+    """Sequential judge over several tags in ONE app (run with
+    --detach so a dying local client cannot kill the remote pass;
+    parallel judge apps trip the org 429 TPM/RPM limits)."""
+    for pair in tags.split(","):
+        tag, pool = pair.split(":")
+        n = judge_native.remote(tag, pool)
+        print(f">>> judge_all: {tag} done ({n} judged)", flush=True)
 
 
 @app.function(image=judge_img, volumes={DATA: gate_data},

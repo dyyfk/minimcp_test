@@ -1,55 +1,107 @@
-\section{A Transferable Competence Read Survives Mid-Network}
+\section{Reading Competence from Hidden States}
 \label{sec:signal}
 
-\subsection{In-distribution accuracy hides a query-type shortcut}
+This section establishes where and when a competence signal can be
+read from the frozen checkpoint. The analyses use the target model and
+matched controls introduced above: 600 public-benchmark queries in
+five frozen pools with judged failure labels, and logistic probes fit
+on stored hidden states. Full details of models, data, labels, and
+probe fitting are in \S\ref{sec:setup}.
+
+\begin{table}[t]
+\centering\scriptsize
+\setlength{\tabcolsep}{3.5pt}
+\renewcommand{\arraystretch}{0.92}
+\caption{Main results: selective escalation on the internal test set
+and five public speech-QA benchmarks (delivered answer accuracy, \%,
+native full-duplex sessions, one live arm per tier). The probe is
+fixed; tier thresholds are label-free calibration quantiles per
+language (the internal tiers realize 8/25/52\% escalation;
+realized rates per pool are in Appendix~\ref{app:transferdetail}).
+Matched-rate random mixes the always-local and measured
+always-escalate arms at each pool's realized rate. avg and $\Delta$
+(average gain over always-local) cover five external pools in the
+live block and four in the NVDA block. The relay-free bound scores the
+expert's returned text directly. The
+bottom block evaluates our latest three-layer
+NemotronLabs-VoiceChat-11B probe by re-mixing cached local and expert
+outcomes after replay through its native frame protocol
+(Appendix~\ref{app:nvda}). AlpacaEval, reported separately on its
+1--5 scale, changes from 3.68 to 4.01 at 44\% escalation on MiniCPM
+(matched random 3.91; always-escalate 4.20 against 4.95 for the
+expert text, a spoken-length cap); the pass-3 NVDA ranking changes
+from 3.55 to 4.51 versus 4.23 for random.}
+\label{tab:transfer}
+\begin{tabular}{lcccccccc}
+\toprule
+& Internal & TriviaQA & WebQ & Llama Q. & SD-QA & Reason.\ zh & avg & $\Delta$ \\
+\midrule
+\multicolumn{9}{l}{\emph{native full-duplex live sessions (delivered accuracy)}} \\
+always-local          & 40.8 & 62.8 & 52.8 & 82.4 & 48.0 & 51.0 & 59.4 & --- \\
+\;+ gate, conservative & 46.7 & 60.4 & 59.2 & 78.8 & 54.0 & 62.4 & 63.0 & +3.6 \\
+\;+ gate, balanced     & 54.2 & 70.0 & 62.4 & 82.4 & 65.0 & 66.3 & 69.2 & +9.8 \\
+\;\textbf{+ gate, aggressive} & \textbf{62.9} & \textbf{88.4} & \textbf{75.2} & \textbf{85.6} & \textbf{82.5} & \textbf{72.8} & \textbf{80.9} & \textbf{+21.5} \\
+\;matched random, aggressive & 56.1 & 81.5 & 68.9 & 84.1 & 73.7 & 67.5 & 75.2 & +15.8 \\
+always-escalate (measured) & 70.4 & 96.0 & 79.6 & 91.6 & 87.0 & 83.7 & 87.6 & +28.2 \\
+expert text as returned (relay-free bound) & 76.5 & 96.4 & 82.3 & 93.2 & 88.5 & 86.1 & 89.3 & +29.9 \\
+\midrule
+\multicolumn{9}{l}{\emph{NVDA three-layer answer-onset probe (pass-3 native-frame replay)}} \\
+always-local          & --- & 35.8 & 37.6 & 70.8 & 31.0 & --- & 43.8 & --- \\
+\;+ gate @15\%        & --- & 48.4 & 48.8 & 80.7 & 42.0 & --- & 55.0 & +11.2 \\
+\;+ gate @30\%        & --- & 61.0 & 59.2 & 85.8 & 54.0 & --- & 65.0 & +21.2 \\
+\;+ gate @50\%        & --- & 76.8 & 69.6 & 89.7 & 66.5 & --- & 75.7 & +31.9 \\
+\;matched random @50\% & --- & 65.7 & 60.2 & 82.0 & 60.0 & --- & 67.0 & +23.2 \\
+always-expert (ceiling) & --- & 95.5 & 82.8 & 93.1 & 89.0 & --- & 90.1 & +46.3 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Signal comparison under distribution shift}
 \label{sec:audit}
 
 Table~\ref{tab:signals} compares the candidate signals on
-MiniCPM-o~4.5. In distribution the final-layer probe looks healthy at
-AUC 0.822 --- but that number is mostly a \emph{query-type} shortcut.
-The same hidden state all but names which pool a query came from, a
-pool-identity oracle alone recovers most of the probe's
-in-distribution margin. Appending true pool labels to the probe's
-features adds nothing because pool identity is already encoded. We
+MiniCPM-o~4.5. In distribution the final-layer probe looks healthy
+(AUC 0.822), but most of that accuracy reflects query type rather
+than instance difficulty: the same hidden state predicts which pool a
+query came from, a classifier given only the pool identity recovers
+most of the probe's margin, and appending true pool labels to the
+probe's features adds nothing. The same decomposition holds at scale
+on the deployed calibration mix (Appendix~\ref{app:native}). We
 therefore treat leave-one-pool-out (LOPO) transfer as the primary
-metric. With text input, the final-layer read falls to AUC 0.372 on
-held-out math under LOPO. When the trap pool is held out, its mean failure score is 0.232
-even though the model fails every query in the pool. A query-surface
-router shows the same dependence on pool structure: it does not exceed
-the pool oracle in distribution and also degrades under LOPO, with
-little improvement from substantially more data
-(Appendices~\ref{app:signal},~\ref{app:router}). These results show why
-in-distribution routing accuracy alone cannot establish instance-level
+metric, and under it the picture reverses: with text input the
+final-layer read falls to AUC 0.372 on held-out math, and when the
+trap pool is held out the probe scores it on the confident side even
+though the model fails every query in it. A router built on query
+text shows the same dependence on pool structure and also degrades
+under LOPO, with little improvement from substantially more data
+(Appendices~\ref{app:signal},~\ref{app:router}). In-distribution
+routing accuracy alone therefore cannot establish instance-level
 transfer.
 
-Verbalized self-assessment transfers differently. Asked \emph{before}
-answering, $\ptrue$ catches exactly the trap pool the probe misses,
-scoring it 0.945. But timing is everything: asked \emph{after}
-drafting, the model endorses its own confident-wrong answer and the
-signal inverts. Post-draft $\ptrue$ is the strongest single readout in
-distribution, at 0.899, but it no longer provides a pre-answer routing
-signal.
+Verbalized self-assessment transfers differently. Asked before
+answering, $\ptrue$ catches exactly the trap pool the probe misses
+(0.945). Asked after drafting, the model endorses its own
+confident-wrong answers and the signal inverts: post-draft $\ptrue$
+is the strongest single readout in distribution but no longer
+provides a pre-answer routing signal.
 
-
-\subsection{Late-layer brittleness appears on text input in duplex checkpoints}
+\subsection{Layer and position sweep}
 \label{sec:duplex}
 
-The matched-pair pattern ties the failure to the duplex checkpoints
-rather than to the backbone alone. The raw Qwen backbone,
-subsampled to match MiniCPM-o~4.5's per-pool failure rates, holds LOPO
-math at 0.962--0.968 across five seeds where the duplex checkpoint
-scores 0.372. The Qwen2.5 family shows the same ordering: the raw
-backbone scores 0.809 (0.825 after failure-rate matching), the
-streaming-omni model scores 0.745, and the duplex MiniCPM-o~2.6 scores
-0.538. The Qwen2-Audio comparison is not attribution evidence because
-the audio fine-tune also changes task capability and the failure
-distribution substantially (Appendix~\ref{app:signal}). A layer
-$\times$ position sweep further localizes the difference
-(Figure~\ref{fig:layersweep}): it is concentrated at the last-token
-position in late layers on text input. Mean-pooled reads remain usable
-at the same depth but trail the mid-layer peak by 0.13--0.15. At L22,
-the last-token probe reaches \textbf{0.931} on the same LOPO math test,
-close to the raw backbone.
+Matched comparisons tie the failure to the duplex checkpoints rather
+than to the backbone alone. The raw Qwen backbone, subsampled to
+match MiniCPM-o~4.5's per-pool failure rates, holds LOPO math near
+0.96 where the duplex checkpoint scores 0.372, and the Qwen2.5 family
+shows the same ordering, raw above streaming-omni above duplex
+(Table~\ref{tab:lopo}, appendix). The Qwen2-Audio comparison is not
+attribution evidence because the audio fine-tune also changes task
+capability and the failure distribution substantially
+(Appendix~\ref{app:signal}). A layer $\times$ position sweep
+localizes the difference (Figure~\ref{fig:layersweep}): it is
+concentrated at the last-token position in late layers on text input,
+mean-pooled reads degrade far less, and at L22 the last-token probe
+reaches \textbf{0.931} on the same held-out math pool, close to the
+raw backbone.
 
 The failure is input-specific rather than universal: with audio
 calibration and audio input, the final-layer probe reaches 0.936 on
@@ -57,8 +109,8 @@ LOPO math. We use L22 because one read point must remain robust for
 shifted text queries and support text-to-speech transfer, not because
 the final-layer signal is absent on the model's native audio input.
 
-The sweep establishes \emph{where} the transferable read survives, not
-\emph{why} it weakens late. Direct tests do not support the simple
+The sweep establishes where the transferable read survives, not
+why it weakens late. Direct tests do not support the simple
 hypothesis that turn-control state takes over the last-token
 representation: the layer at which performance drops does not move in
 speak mode, and the inverting probe direction aligns with neither the
@@ -70,14 +122,14 @@ do not identify a training objective or causal mechanism; the full
 audit is in Appendix~\ref{app:mech}.
 
 The mid-network pattern also appears outside the MiniCPM family. On
-NemotronLabs-VoiceChat-11B, a hybrid-Mamba duplex model, the same
-recipe peaks at L30--34 of 56 and transfers to the external pools at
-AUC 0.70--0.79 with one quarter of the deployed probe's calibration
-data (Appendix~\ref{app:nvda}).
+NemotronLabs-VoiceChat-11B, a hybrid-Mamba duplex model, our latest
+three-layer probe reads L26/L30/L34 and reaches 0.818 OOF AUC and
+0.816 mean external AUC under pool-aligned judges in replay through
+the model's native frame protocol (Appendix~\ref{app:nvda}).
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=.72\linewidth]{layer_sweep}
+  \includegraphics[width=\linewidth]{layer_sweep}
   \caption{The core representational result: LOPO math AUC by layer and
   position. On the duplex model the standard (final-layer, last-token)
   read inverts on text input while mid-network layers hold $\ge$0.9; raw
@@ -85,28 +137,26 @@ data (Appendix~\ref{app:nvda}).
   \label{fig:layersweep}
 \end{figure}
 
-\subsection{Text-calibrated reads transfer to speech in end-to-end models}
+\subsection{Modality transfer}
 \label{sec:xmodal}
 
-Probes trained on text hidden states and scored on speech-input hidden
-states locate where the representation becomes modality-shared: early
-layers are modality-specific (0.54--0.60), and from $\sim$50\% depth
-text$\to$audio transfer plateaus at 0.82--0.87 (0.855 at the deployed
-L22). This replicates on MiniCPM-o~2.6 and cross-family on
-Qwen2.5-Omni. The decisive control is \textbf{Freeze-Omni}: identical
-frozen LLM weights with audio attached by an adapter --- and
-cross-modal transfer remains at 0.52--0.60. This comparison supports a
-narrow operational rule: text calibration transfers in the
-end-to-end speech models tested here, but not in the adapter-attached
-control. Verbalized introspection shows the complementary failure: on audio input,
-pre-answer $\ptrue$ collapses on both MiniCPM duplex generations while
-both non-duplex controls stay intact; controlled arms show the verbal
-self-check is sensitive to the text-token pathway --- duplicating the
-question as text restores it --- while a linear probe remains usable
-on the same forward pass (Appendix~\ref{app:signal}). The restored
-self-check is additive with the probe: stacking the two lifts the
-internal test AUC 0.836$\to$0.862 (CI excludes zero) at the cost of
-one short prefill per turn (Appendix Table~\ref{tab:rtjfusion}). The mid-layer
+Probes trained on text hidden states and scored on speech-input
+hidden states show where the representation becomes shared across
+modalities: early layers are modality-specific, and from about half
+depth the transfer plateaus (0.855 at the deployed L22). This
+replicates on MiniCPM-o~2.6 and cross-family on Qwen2.5-Omni. The
+decisive control is Freeze-Omni: identical frozen LLM weights with
+audio attached by an adapter, and cross-modal transfer stays far
+below the end-to-end models. Text calibration therefore transfers in
+the end-to-end speech models tested here, but not in the
+adapter-attached control. Verbalized introspection shows the
+complementary failure: on audio input, pre-answer $\ptrue$ collapses
+on both MiniCPM duplex generations while both non-duplex controls
+stay intact. Controlled arms show the verbal self-check depends on
+the text-token pathway (duplicating the question as text restores
+it), while a linear probe remains usable on the same forward pass,
+and the restored self-check is additive with the probe
+(Appendix~\ref{app:signal}, Table~\ref{tab:rtjfusion}). The mid-layer
 band also replicates on 200 real human recordings from SD-QA, so the
 result is not limited to the TTS rendering. The live system keeps L22
 and adds two pooled positions to form the deployed probe

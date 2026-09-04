@@ -3,105 +3,120 @@
 
 Real-time spoken interaction leaves only a few hundred milliseconds
 between turns \citep{stivers2009universals}. Systems that meet this
-deadline often rely on a compact interaction model, but no compact model
-can answer every long-tail factual, technical, or multi-step question.
-A stronger cloud model can handle some of these turns, provided the
-system knows when to call it. In a text interface, this is a standard
-routing problem. In a speech interface, the decision must also arrive
-before the local talker commits to a response; otherwise the system must
-delay the expert call or retract an answer already under way. We keep the
-local speech model as the talker so that the audio context and voice
-remain in one session. This setting raises the central question of this
-paper: \emph{does a duplex-trained speech model expose its own likely
-failure early enough to hand the turn to a stronger model?}
+deadline keep a local speech model as the talker, so that the audio
+context and the voice stay in one session, and call a stronger remote
+model on turns the local model cannot answer. In a text interface this
+is a standard routing problem. In a speech interface the decision must
+also arrive before the talker commits to a response; otherwise the
+system must delay the expert call or retract an answer already under
+way. The central question of this paper is whether a duplex-trained
+speech model exposes its own likely failure early enough to hand the
+turn to a stronger model.
 
-Two lines of work provide only part of the answer. Text-language-model
-studies estimate correctness from verbal self-assessment, output
-uncertainty, or hidden states
+Part of the answer exists on the text side. Correctness of a text
+language model can be estimated from verbalized self-assessment,
+output uncertainty, or hidden states
 \citep{kadavath2022language,azaria2023internal,burns2023discovering,
-kossen2024semantic}; text routers then use query-side or pre-generation
-features to choose a model
+kossen2024semantic}, and text routers use query-side or
+pre-generation features to choose a model
 \citep{ong2024routellm,varshney2026llmrouter,lugoloobi2026failures}.
-Speech-model research instead focuses on when a duplex model should
-listen, speak, or invoke a trained thinking policy
-\citep{wang2024fsm,bayling2026duplex,huang2026duplexomni}. These results
-do not establish whether a frozen duplex-trained checkpoint retains a
-competence read that survives both distribution shift and speech input,
-or whether such a read is available before response commitment.
+On the speech side, duplex models learn interaction control as a
+generation policy: special or synchronization tokens decide when the
+model should listen or speak
+\citep{wang2024fsm,zhang2024duplex,veluri2024syncllm,fu2024vita,
+yu2024salmonnomni}, and recent systems extend the same mechanism to
+hand work to a reasoning layer or a retrieval service
+\citep{huang2026duplexomni,chien2026moshirag}.
 
-Three linked conditions make this gap operational. First, a useful score
-must distinguish individual failures rather than memorize the type of
-query seen during calibration. Second, a score calibrated on inexpensive
-text data must remain meaningful when the same content arrives as audio.
-Third, it must be available early enough to launch the expert and must
-improve which turns are escalated at a fixed call budget. A signal that
-works only in distribution, only on text, or only after a full draft
-cannot support real-time handoff.
+The trained-control path does not close the gap, for two reasons.
+First, its cost: the policy is trained into the weights, which takes
+large amounts of duplex-specific data (hundreds of thousands of hours
+of synthetic dialogue for SyncLLM, millions of hours of audio for
+Moshi \citep{veluri2024syncllm,defossez2024moshi}) and risks eroding
+the backbone's language ability, which is the stated motivation for
+frozen-backbone designs \citep{wang2024freezeomni,yu2024salmonnomni}.
+Second, the interface is wrong for escalation: a speak token decides
+when the model may talk, not whether its answer will be right, and it
+arrives as a binary action at the moment of commitment. Even when the
+token triggers a reasoning step instead of speech
+\citep{huang2026duplexomni}, the decision is still a trained binary
+action: it offers no calibrated score to threshold at a fixed expert
+budget, and the policy cannot change without retraining. What remains unknown is whether the
+escalation decision needs training at all: whether a frozen
+duplex-trained checkpoint already carries a competence signal that can
+be read before response commitment. Text-probe results make this
+plausible, but they do not say where such a read stays reliable after
+duplex speech training, whether a probe calibrated on inexpensive text
+data still reads speech-input states, or whether the read arrives
+early enough to act on.
+
+These three conditions are exactly what a deployment needs: a score
+that separates individual failures rather than memorizing the query
+types seen in calibration, that survives the text-to-speech shift, and
+that improves which turns are escalated at a fixed call budget. If
+such a signal exists, any frozen duplex model gains selective
+escalation for the cost of a linear probe; if it does not, speech
+escalation inherits the training costs above.
 
 We test these conditions on MiniCPM-o~4.5
-\citep{openbmb2026minicpmo}, a 9B omni model with full-duplex training.
-We compare decode-time uncertainty, verbalized self-assessment
-($\ptrue$), and linear hidden-state probes across layers and positions.
-Matched controls span raw backbones, streaming-omni and audio-only
-fine-tunes, a frozen-backbone audio adapter, and a second duplex
-generation. The controlled study uses judged failure labels on 600
-public-benchmark queries in five frozen pools, with
-leave-one-pool-out (LOPO) transfer as the primary robustness test and
-matched text and speech inputs for modality transfer. We then measure
-when the score becomes available, insert it into a complete escalation
-loop, and freeze its layer and features for evaluation on public speech
-benchmarks. Model checkpoints remain frozen; only logistic probes are
-fit on stored activations. Throughout, \emph{duplex-trained} describes
-the weights. The primary live evaluation uses a turn-based,
-end-of-turn decision with audio input and text output. A TTS-on replay
-measures speech onset, while separate experiments test concurrent and
-native full-duplex regimes
+\citep{openbmb2026minicpmo}, a 9B omni model with full-duplex
+training, against matched controls: raw backbones, streaming-omni and
+audio-only fine-tunes, a frozen-backbone adapter, and a second duplex
+generation. The study uses judged failure labels on 600
+public-benchmark queries in five frozen pools, leave-one-pool-out
+(LOPO) transfer as the primary robustness test, matched text and
+speech inputs, and a complete live escalation loop. We compare
+decode-time uncertainty, verbalized self-assessment, and linear
+hidden-state probes across layers, then freeze the winning read for
+evaluation on public speech benchmarks. Model checkpoints stay frozen;
+only linear probes are fit on stored activations. Throughout,
+duplex-trained refers to the weights; the primary live evaluation is
+turn-based, with audio input and text output, and the concurrent and
+native full-duplex serving regimes are validated separately
 (Appendices~\ref{app:duplexval} and~\ref{app:native}).
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=.86\linewidth]{teaser_v2}
-  \caption{\textbf{Primary turn-based system.} \textbf{(1)} Speech
-  reaches a duplex-trained local model. \textbf{(2)} At the end of the
-  user turn, a mid-network (L22) linear read scores the turn in
-  $\sim$30\,ms, before the first output token. \textbf{(3)} Lower-risk
-  turns stay local; higher-risk turns are sent to a cloud expert.
-  \textbf{(4)} The local model remains the talker and relays the returned
-  answer. Deployed-channel accuracy rises from 42.2\% to 63.3\% at
-  57\% escalation in the audio-input/text-output sweep; a TTS-on replay
-  validates the speech path separately.}
+  \includegraphics[width=\linewidth]{teaser_v2}
+  \caption{\textbf{The deployed system.} \textbf{(1)} Speech streams in
+  1\,s chunks into a full-duplex local model that decides for itself
+  when to speak. \textbf{(2)} At that speak commit, a mid-network (L22)
+  linear read scores the turn in $\sim$30\,ms, before the answer is
+  produced. \textbf{(3)} Lower-risk turns stay local; higher-risk turns
+  are sent to a cloud expert while the talker stalls. \textbf{(4)} The
+  returned answer is spoken verbatim in the talker's own voice.
+  Delivered accuracy on the internal test set rises from 40.8\% to
+  62.9\% at 52\% escalation in native full-duplex sessions.}
   \label{fig:hero}
 \end{figure}
 
-The results form one evidence chain:
+This study makes three contributions:
 
 \begin{enumerate}
-\item \textbf{Transfer changes where competence can be read.}
-  The conventional final-layer probe scores AUC 0.822 in distribution
-  but falls to 0.372 on held-out math with text input. On the same LOPO
-  test, the last-token read at L22 reaches 0.931. Matched comparisons
-  localize the late-layer failure to the duplex checkpoints we test,
-  but direct controls do not identify its mechanism
+\item \textbf{Transfer moves the readable layer.} The conventional
+  final-layer probe holds in distribution but inverts on held-out math
+  (AUC 0.372); the same last-token read at a mid-network layer reaches
+  0.931. Matched comparisons tie the late-layer failure to the duplex
+  checkpoints we test; its mechanism remains open
   (Appendix~\ref{app:mech}).
-\item \textbf{The mid-layer read survives speech and arrives before
-  response commitment.} A text-calibrated L22 probe reads speech-input
-  states at AUC 0.855, with the same mid-layer band reproduced on real
-  human recordings. In a single-position read-point study, the
-  end-of-turn read reaches AUC 0.887 in $\sim$30\,ms, before the first
-  output token. A separate TTS-on replay leaves the gate decisions
-  unchanged and confirms that the read precedes synthesized speech.
-\item \textbf{The early read improves selective escalation.}
-  A separately calibrated three-position probe at the same layer drives
-  the primary audio-input/text-output live loop. Deployed-channel
-  accuracy rises from 42.2\% to 63.3\% at 57\% escalation and exceeds
-  matched-rate random escalation by 7.2--9.5 points. With its layer and
-  features frozen, the gate improves all five external speech-QA
-  benchmarks over always-local operation, although selectivity over
-  random is limited on some pools. The native duplex regime also works
-  after regime-specific recalibration.
+\item \textbf{The mid-layer read satisfies the deployment
+  conditions.} A text-calibrated probe at the same layer reads
+  speech-input states, reproduces on real human recordings, and is
+  available at the end of the user turn in $\sim$30\,ms, before the
+  first output token.
+\item \textbf{The read is sufficient to drive escalation.} In native
+  full-duplex sessions it raises delivered accuracy from 40.8\% to
+  62.9\% at 52\% escalation on the internal test set, beats
+  matched-rate random escalation at the two upper tiers, and dominates
+  the model's own built-in reasoning mode on both accuracy and latency
+  (Appendix~\ref{app:gatedetail}). With its layer and features frozen,
+  the gate improves all five external speech-QA benchmarks over
+  always-local operation, by 3 to 34 points at the aggressive tier,
+  although selectivity over random is limited where the local floor is
+  already high.
 \end{enumerate}
 
-The central result is therefore narrower than a mechanism claim: the
-model does not explain why it will fail, but its likely failure becomes
-more reliably readable mid-network than at the conventional output
+The claim is therefore about readout rather than mechanism: the model
+does not explain why it will fail, but its likely failure is more
+reliably readable mid-network than at the conventional output
 interface, early enough to support a live handoff.
