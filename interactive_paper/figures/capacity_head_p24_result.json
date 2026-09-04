@@ -1,0 +1,1302 @@
+{
+  "status": "capacity_head_nested_group_cv",
+  "inputs": {
+    "rows": 5228,
+    "dimension": 12288,
+    "source_groups": 37,
+    "blocks": [
+      {
+        "tag": "caliboff",
+        "n": 358
+      },
+      {
+        "tag": "expoff",
+        "n": 796
+      },
+      {
+        "tag": "exp2off",
+        "n": 1146
+      },
+      {
+        "tag": "exp3off",
+        "n": 2286
+      },
+      {
+        "tag": "exp3zhoff",
+        "n": 400
+      },
+      {
+        "tag": "freshoff",
+        "n": 242
+      }
+    ],
+    "live_artifact_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372"
+  },
+  "protocol": {
+    "outer_folds": 5,
+    "inner_folds": 3,
+    "selection_metric": "mean valid-source AUC in inner folds",
+    "early_stopping": "inner validation only; median inner epoch is fixed before outer scoring",
+    "preprocessing": "fold-local per-coordinate standardization clipped to [-10,10]",
+    "max_epochs": 60,
+    "patience": 8,
+    "batch_size": 256
+  },
+  "specs": [
+    {
+      "width": 0,
+      "dropout": 0.0,
+      "weight_decay": 0.001,
+      "learning_rate": 0.001,
+      "focal_gamma": 0.0,
+      "name": "resmlp_w0_d0_wd0.001_lr0.001_focal0",
+      "parameter_count": 12289
+    },
+    {
+      "width": 32,
+      "dropout": 0.2,
+      "weight_decay": 0.001,
+      "learning_rate": 0.001,
+      "focal_gamma": 0.0,
+      "name": "resmlp_w32_d0.2_wd0.001_lr0.001_focal0",
+      "parameter_count": 405537
+    },
+    {
+      "width": 128,
+      "dropout": 0.2,
+      "weight_decay": 0.001,
+      "learning_rate": 0.001,
+      "focal_gamma": 0.0,
+      "name": "resmlp_w128_d0.2_wd0.001_lr0.001_focal0",
+      "parameter_count": 1585281
+    },
+    {
+      "width": 128,
+      "dropout": 0.5,
+      "weight_decay": 0.001,
+      "learning_rate": 0.001,
+      "focal_gamma": 0.0,
+      "name": "resmlp_w128_d0.5_wd0.001_lr0.001_focal0",
+      "parameter_count": 1585281
+    },
+    {
+      "width": 128,
+      "dropout": 0.2,
+      "weight_decay": 0.01,
+      "learning_rate": 0.001,
+      "focal_gamma": 0.0,
+      "name": "resmlp_w128_d0.2_wd0.01_lr0.001_focal0",
+      "parameter_count": 1585281
+    },
+    {
+      "width": 128,
+      "dropout": 0.2,
+      "weight_decay": 0.001,
+      "learning_rate": 0.0003,
+      "focal_gamma": 0.0,
+      "name": "resmlp_w128_d0.2_wd0.001_lr0.0003_focal0",
+      "parameter_count": 1585281
+    },
+    {
+      "width": 128,
+      "dropout": 0.2,
+      "weight_decay": 0.001,
+      "learning_rate": 0.001,
+      "focal_gamma": 1.0,
+      "name": "resmlp_w128_d0.2_wd0.001_lr0.001_focal1",
+      "parameter_count": 1585281
+    },
+    {
+      "width": 512,
+      "dropout": 0.5,
+      "weight_decay": 0.001,
+      "learning_rate": 0.001,
+      "focal_gamma": 0.0,
+      "name": "resmlp_w512_d0.5_wd0.001_lr0.001_focal0",
+      "parameter_count": 6304257
+    }
+  ],
+  "outer_folds": [
+    {
+      "outer_fold": 0,
+      "train_rows": 4037,
+      "test_rows": 1191,
+      "test_groups": [
+        "alpaca-zh",
+        "easy-chat",
+        "know-arc",
+        "know-longtail",
+        "mmlu-pro/biology",
+        "mmlu-pro/economics",
+        "zh-causal"
+      ],
+      "valid_auc_groups": 7,
+      "winner": {
+        "name": "resmlp_w128_d0.2_wd0.01_lr0.001_focal0",
+        "spec": {
+          "width": 128,
+          "dropout": 0.2,
+          "weight_decay": 0.01,
+          "learning_rate": 0.001,
+          "focal_gamma": 0.0
+        },
+        "parameter_count": 1585281,
+        "inner_macro_auc_mean": 0.7116199778941464,
+        "inner_macro_auc_by_fold": [
+          0.6894515915371994,
+          0.7057673925090643,
+          0.7396409496361759
+        ],
+        "best_epoch_by_fold": [
+          2,
+          10,
+          9
+        ],
+        "selected_epoch": 9
+      },
+      "outer_macro_group_auc": 0.729317648962981,
+      "outer_pooled_auc": 0.8715893959569059,
+      "sweep": [
+        {
+          "name": "resmlp_w0_d0_wd0.001_lr0.001_focal0",
+          "spec": {
+            "width": 0,
+            "dropout": 0.0,
+            "weight_decay": 0.001,
+            "learning_rate": 0.001,
+            "focal_gamma": 0.0
+          },
+          "parameter_count": 12289,
+          "inner_macro_auc_mean": 0.7066296713936003,
+          "inner_macro_auc_by_fold": [
+            0.7085841765511137,
+            0.6975046540039669,
+            0.7138001836257204
+          ],
+          "best_epoch_by_fold": [
+            3,
+            18,
+            3
+          ],
+          "selected_epoch": 3
+        },
+        {
+          "name": "resmlp_w32_d0.2_wd0.001_lr0.001_focal0",
+          "spec": {
+            "width": 32,
+            "dropout": 0.2,
+            "weight_decay": 0.001,
+            "learning_rate": 0.001,
+            "focal_gamma": 0.0
+          },
+          "parameter_count": 405537,
+          "inner_macro_auc_mean": 0.7018422004014547,
+          "inner_macro_auc_by_fold": [
+            0.6814507170268346,
+            0.7104959893309114,
+            0.7135798948466184
+          ],
+          "best_epoch_by_fold": [
+            9,
+            8,
+            21
+          ],
+          "selected_epoch": 9
+        },
+        {
+          "name": "resmlp_w128_d0.2_wd0.001_lr0.001_focal0",
+          "spec": {
+            "width": 128,
+            "dropout": 0.2,
+            "weight_decay": 0.001,
+            "learning_rate": 0.001,
+            "focal_gamma": 0.0
+          },
+          "parameter_count": 1585281,
+          "inner_macro_auc_mean": 0.7020374334770478,
+          "inner_macro_auc_by_fold": [
+            0.6806572182882633,
+            0.7191621461788908,
+            0.7062929359639891
+          ],
+          "best_epoch_by_fold": [
+            9,
+            8,
+            2
+          ],
+          "selected_epoch": 8
+        },
+        {
+          "name": "resmlp_w128_d0.5_wd0.001_lr0.001_focal0",
+          "spec": {
+            "width": 128,
+            "dropout": 0.5,
+            "weight_decay": 0.001,
+            "learning_rate": 0.001,
+            "focal_gamma": 0.0
+          },
+          "parameter_count": 1585281,
+          "inner_macro_auc_mean": 0.7024775085093672,
+          "inner_macro_auc_by_fold": [
+            0.673602713146806,
+            0.7077627735610498,
+            0.7260670388202459
+          ],
+          "best_epoch_by_fold": [
+            2,
+            7,
+            10
+          ],
+          "selected_epoch": 7
+        },
+        {
+          "name": "resmlp_w128_d0.2_wd0.01_lr0.001_focal0",
+          "spec": {
+            "width": 128,
+            "dropout": 0.2,
+            "weight_decay": 0.01,
+            "learning_rate": 0.001,
+            "focal_gamma": 0.0
+          },
+          "parameter_count": 1585281,
+          "inner_macro_auc_mean": 0.7116199778941464,
+          "inner_macro_auc_by_fold": [
+            0.6894515915371994,
+            0.7057673925090643,
+            0.7396409496361759
+          ],
+          "best_epoch_by_fold": [
+            2,
+            10,
+            9
+          ],
+          "selected_epoch": 9
+        },
+        {
+          "name": "resmlp_w128_d0.2_wd0.001_lr0.0003_focal0",
+          "spec": {
+            "width": 128,
+            "dropout": 0.2,
+            "weight_decay": 0.001,
+            "learning_rate": 0.0003,
+            "focal_gamma": 0.0
+          },
+          "parameter_count": 1585281,
+          "inner_macro_auc_mean": 0.7094129192194375,
+          "inner_macro_auc_by_fold": [
+            0.6835270776533616,
+            0.7043281076471368,
+            0.7403835723578138
+          ],
+          "best_epoch_by_fold": [
+            4,
+            7,
+            11
+          ],
+          "selected_epoch": 7
+        },
+        {
+          "name": "resmlp_w128_d0.2_wd0.001_lr0.001_focal1",
+          "spec": {
+            "width": 128,
+            "dropout": 0.2,
+            "weight_decay": 0.001,
+            "learning_rate": 0.001,
+            "focal_gamma": 1.0
+          },
+          "parameter_count": 1585281,
+          "inner_macro_auc_mean": 0.7060691878366788,
+          "inner_macro_auc_by_fold": [
+            0.683039986549135,
+            0.7075543095113401,
+            0.7276132674495612
+          ],
+          "best_epoch_by_fold": [
+            2,
+            10,
+            12
+          ],
+          "selected_epoch": 10
+        },
+        {
+          "name": "resmlp_w512_d0.5_wd0.001_lr0.001_focal0",
+          "spec": {
+            "width": 512,
+            "dropout": 0.5,
+            "weight_decay": 0.001,
+            "learning_rate": 0.001,
+            "focal_gamma": 0.0
+          },
+          "parameter_count": 6304257,
+          "inner_macro_auc_mean": 0.7003541288551475,
+          "inner_macro_auc_by_fold": [
+            0.6790467869264375,
+            0.7078772626991459,
+            0.7141383369398593
+          ],
+          "best_epoch_by_fold": [
+            5,
+            10,
+            10
+          ],
+          "selected_epoch": 10
+        }
+      ]
+    },
+    {
+      "outer_fold": 1,
+      "train_rows": 4075,
+      "test_rows": 1153,
+      "test_groups": [
+        "dolly-15k",
+        "easy-fact",
+        "gsm8k",
+        "hard-multihop",
+        "know-openbook"
+      ],
+      "valid_auc_groups": 5,
+      "winner": {
+        "name": "resmlp_w128_d0.5_wd0.001_lr0.001_focal0",
+        "spec": {
+          "width": 128,
+          "dropout": 0.5,
+          "weight_decay": 0.001,
+          "learning_rate": 0.001,
+          "focal_gamma": 0.0
+        },
+        "parameter_count": 1585281,
+        "inner_macro_auc_mean": 0.7479361498947213,
+        "inner_macro_auc_by_fold": [
+          0.7244466961263117,
+          0.8254710497318436,
+          0.6938907038260089
+        ],
+        "best_epoch_by_fold": [
+          4,
+          5,
+          4
+        ],
+        "selected_epoch": 4
+      },
+      "outer_macro_group_auc": 0.6392587376671012,
+      "outer_pooled_auc": 0.7942265922557701,
+      "sweep": [
+        {
+          "name": "resmlp_w0_d0_wd0.001_lr0.001_focal0",
+          "spec": {
+            "width": 0,
+            "dropout": 0.0,
+            "weight_decay": 0.001,
+            "learning_rate": 0.001,
+            "focal_gamma": 0.0
+          },
+          "parameter_count": 12289,
+          "inner_macro_auc_mean": 0.7216075938065586,
+          "inner_macro_auc_by_fold": [
+            0.7092496857396616,
+            0.7505389259091695,
+            0.7050341697708447
+          ],
+          "best_epoch_by_fold": [
+            12,
+            10,
+            5
+          ],
+          "selected_epoch": 10
+        },
+        {
+          "name": "resmlp_w32_d0.2_wd0.001_lr0.001_focal0",
+          "spec": {
+            "width": 32,
+            "dropout": 0.2,
+            "weight_decay": 0.001,
+            "learning_rate": 0.001,
+            "focal_gamma": 0.0
+          },
+          "parameter_count": 405537,
+          "inner_macro_auc_mean": 0.7434192083932777,
+          "inner_macro_auc_by_fold": [
+            0.7151486328078445,
+            0.7852426222594717,
+            0.729866370112517
+          ],
+          "best_epoch_by_fold": [
+            11,
+            11,
+            1
+          ],
+          "selected_epoch": 11
+        },
+        {
+          "name": "resmlp_w128_d0.2_wd0.001_lr0.001_focal0",
+          "spec": {
+            "width": 128,
+            "dropout": 0.2,
+            "weight_decay": 0.001,
+            "learning_rate": 0.001,
+            "focal_gamma": 0.0
+          },
+          "parameter_count": 1585281,
+          "inner_macro_auc_mean": 0.7394787643755064,
+          "inner_macro_auc_by_fold": [
+            0.7105975032715044,
+            0.7944318938315765,
+            0.7134068960234379
+          ],
+          "best_epoch_by_fold": [
+            5,
+            11,
+            4
+          ],
+          "selected_epoch": 5
+        },
+        {
+          "name": "resmlp_w128_d0.5_wd0.001_lr0.001_focal0",
+          "spec": {
+            "width": 128,
+            "dropout": 0.5,
+            "weight_decay": 0.001,
+            "learning_rate": 0.001,
+            "focal_gamma": 0.0
+          },
+          "parameter_count": 1585281,
+          "inner_macro_auc_mean": 0.7479361498947213,
+          "inner_macro_auc_by_fold": [
+            0.7244466961263117,
+            0.8254710497318436,
+            0.6938907038260089
+          ],
+          "best_epoch_by_fold": [
+            4,
+            5,
+            4
+          ],
+          "selected_epoch": 4
+        },
+        {
+          "name": "resmlp_w128_d0.2_wd0.01_lr0.001_focal0",
+          "spec": {
+            "width": 128,
+            "dropout": 0.2,
+            "weight_decay": 0.01,
+            "learning_rate": 0.001,
+            "focal_gamma": 0.0
+          },
+          "parameter_count": 1585281,
+          "inner_macro_auc_mean": 0.7371278261306515,
+          "inner_macro_auc_by_fold": [
+            0.7136747698881595,
+            0.7882002021890723,
+            0.7095085063147228
+          ],
+          "best_epoch_by_fold": [
+            9,
+            19,
+            10
+          ],
+          "selected_epoch": 10
+        },
+        {
+          "name": "resmlp_w128_d0.2_wd0.001_lr0.0003_focal0",
+          "spec": {
+            "width": 128,
+            "dropout": 0.2,
+            "weight_decay": 0.001,
+            "learning_rate": 0.0003,
+            "focal_gamma": 0.0
+          },
+          "parameter_count": 1585281,
+          "inner_macro_auc_mean": 0.7385029052559592,
+          "inner_macro_auc_by_fold": [
+            0.726040946505845,
+            0.7837148888198406,
+            0.7057528804421918
+          ],
+          "best_epoch_by_fold": [
+            11,
+            5,
+            1
+          ],
+          "selected_epoch": 5
+        },
+        {
+          "name": "resmlp_w128_d0.2_wd0.001_lr0.001_focal1",
+          "spec": {
+            "width": 128,
+            "dropout": 0.2,
+            "weight_decay": 0.001,
+            "learning_rate": 0.001,
+            "focal_gamma": 1.0
+          },
+          "parameter_count": 1585281,
+          "inner_macro_auc_mean": 0.7350747771233633,
+          "inner_macro_auc_by_fold": [
+            0.7244323798106298,
+            0.7838687767735513,
+            0.6969231747859086
+          ],
+          "best_epoch_by_fold": [
+            1,
+            3,
+            10
+          ],
+          "selected_epoch": 3
+        },
+        {
+          "name": "resmlp_w512_d0.5_wd0.001_lr0.001_focal0",
+          "spec": {
+            "width": 512,
+            "dropout": 0.5,
+            "weight_decay": 0.001,
+            "learning_rate": 0.001,
+            "focal_gamma": 0.0
+          },
+          "parameter_count": 6304257,
+          "inner_macro_auc_mean": 0.7401175107239902,
+          "inner_macro_auc_by_fold": [
+            0.7190768993531877,
+            0.7805993062319054,
+            0.7206763265868774
+          ],
+          "best_epoch_by_fold": [
+            5,
+            1,
+            5
+          ],
+          "selected_epoch": 5
+        }
+      ]
+    },
+    {
+      "outer_fold": 2,
+      "train_rows": 4238,
+      "test_rows": 990,
+      "test_groups": [
+        "know-commonsense",
+        "mmlu-pro/chemistry",
+        "mmlu-pro/health",
+        "mmlu-pro/law",
+        "mmlu-pro/philosophy",
+        "mmlu-pro/psychology",
+        "trap-truthful",
+        "triviaqa"
+      ],
+      "valid_auc_groups": 8,
+      "winner": {
+        "name": "resmlp_w0_d0_wd0.001_lr0.001_focal0",
+        "spec": {
+          "width": 0,
+          "dropout": 0.0,
+          "weight_decay": 0.001,
+          "learning_rate": 0.001,
+          "focal_gamma": 0.0
+        },
+        "parameter_count": 12289,
+        "inner_macro_auc_mean": 0.7081128503751204,
+        "inner_macro_auc_by_fold": [
+          0.6727903909633582,
+          0.7005026890481317,
+          0.751045471113871
+        ],
+        "best_epoch_by_fold": [
+          6,
+          6,
+          3
+        ],
+        "selected_epoch": 6
+      },
+      "outer_macro_group_auc": 0.5703217184904454,
+      "outer_pooled_auc": 0.7173442977426858,
+      "sweep": [
+        {
+          "name": "resmlp_w0_d0_wd0.001_lr0.001_focal0",
+          "spec": {
+            "width": 0,
+            "dropout": 0.0,
+            "weight_decay": 0.001,
+            "learning_rate": 0.001,
+            "focal_gamma": 0.0
+          },
+          "parameter_count": 12289,
+          "inner_macro_auc_mean": 0.7081128503751204,
+          "inner_macro_auc_by_fold": [
+            0.6727903909633582,
+            0.7005026890481317,
+            0.751045471113871
+          ],
+          "best_epoch_by_fold": [
+            6,
+            6,
+            3
+          ],
+          "selected_epoch": 6
+        },
+        {
+          "name": "resmlp_w32_d0.2_wd0.001_lr0.001_focal0",
+          "spec": {
+            "width": 32,
+            "dropout": 0.2,
+            "weight_decay": 0.001,
+            "learning_rate": 0.001,
+            "focal_gamma": 0.0
+          },
+          "parameter_count": 405537,
+          "inner_macro_auc_mean": 0.6888740017444094,
+          "inner_macro_auc_by_fold": [
+            0.6871262385940542,
+            0.6448049728585213,
+            0.7346907937806529
+          ],
+          "best_epoch_by_fold": [
+            4,
+            1,
+            1
+          ],
+          "selected_epoch": 1
+        },
+        {
+          "name": "resmlp_w128_d0.2_wd0.001_lr0.001_focal0",
+          "spec": {
+            "width": 128,
+            "dropout": 0.2,
+            "weight_decay": 0.001,
+            "learning_rate": 0.001,
+            "focal_gamma": 0.0
+          },
+          "parameter_count": 1585281,
+          "inner_macro_auc_mean": 0.697858017339586,
+          "inner_macro_auc_by_fold": [
+            0.6721789483862606,
+            0.681796029924253,
+            0.7395990737082444
+          ],
+          "best_epoch_by_fold": [
+            5,
+            6,
+            2
+          ],
+          "selected_epoch": 5
+        },
+        {
+          "name": "resmlp_w128_d0.5_wd0.001_lr0.001_focal0",
+          "spec": {
+            "width": 128,
+            "dropout": 0.5,
+            "weight_decay": 0.001,
+            "learning_rate": 0.001,
+            "focal_gamma": 0.0
+          },
+          "parameter_count": 1585281,
+          "inner_macro_auc_mean": 0.694241647444743,
+          "inner_macro_auc_by_fold": [
+            0.6708667732539587,
+            0.6417924481166656,
+            0.7700657209636048
+          ],
+          "best_epoch_by_fold": [
+            4,
+            1,
+            1
+          ],
+          "selected_epoch": 1
+        },
+        {
+          "name": "resmlp_w128_d0.2_wd0.01_lr0.001_focal0",
+          "spec": {
+            "width": 128,
+            "dropout": 0.2,
+            "weight_decay": 0.01,
+            "learning_rate": 0.001,
+            "focal_gamma": 0.0
+          },
+          "parameter_count": 1585281,
+          "inner_macro_auc_mean": 0.6844584730923069,
+          "inner_macro_auc_by_fold": [
+            0.6767847819306627,
+            0.682348694322784,
+            0.6942419430234736
+          ],
+          "best_epoch_by_fold": [
+            4,
+            3,
+            4
+          ],
+          "selected_epoch": 4
+        },
+        {
+          "name": "resmlp_w128_d0.2_wd0.001_lr0.0003_focal0",
+          "spec": {
+            "width": 128,
+            "dropout": 0.2,
+            "weight_decay": 0.001,
+            "learning_rate": 0.0003,
+            "focal_gamma": 0.0
+          },
+          "parameter_count": 1585281,
+          "inner_macro_auc_mean": 0.6661777631546891,
+          "inner_macro_auc_by_fold": [
+            0.6640299735500801,
+            0.6358496301501538,
+            0.6986536857638334
+          ],
+          "best_epoch_by_fold": [
+            7,
+            2,
+            3
+          ],
+          "selected_epoch": 3
+        },
+        {
+          "name": "resmlp_w128_d0.2_wd0.001_lr0.001_focal1",
+          "spec": {
+            "width": 128,
+            "dropout": 0.2,
+            "weight_decay": 0.001,
+            "learning_rate": 0.001,
+            "focal_gamma": 1.0
+          },
+          "parameter_count": 1585281,
+          "inner_macro_auc_mean": 0.6767865655474129,
+          "inner_macro_auc_by_fold": [
+            0.6849232775546907,
+            0.6094762248076965,
+            0.7359601942798519
+          ],
+          "best_epoch_by_fold": [
+            3,
+            8,
+            1
+          ],
+          "selected_epoch": 3
+        },
+        {
+          "name": "resmlp_w512_d0.5_wd0.001_lr0.001_focal0",
+          "spec": {
+            "width": 512,
+            "dropout": 0.5,
+            "weight_decay": 0.001,
+            "learning_rate": 0.001,
+            "focal_gamma": 0.0
+          },
+          "parameter_count": 6304257,
+          "inner_macro_auc_mean": 0.6764730828162131,
+          "inner_macro_auc_by_fold": [
+            0.6769222893108536,
+            0.6099472275496912,
+            0.7425497315880947
+          ],
+          "best_epoch_by_fold": [
+            3,
+            5,
+            1
+          ],
+          "selected_epoch": 3
+        }
+      ]
+    },
+    {
+      "outer_fold": 3,
+      "train_rows": 4276,
+      "test_rows": 952,
+      "test_groups": [
+        "easy-mathword",
+        "fresh_fast",
+        "hard-math",
+        "mmlu-pro/business",
+        "mmlu-pro/computer science",
+        "mmlu-pro/engineering",
+        "mmlu-pro/history",
+        "mmlu-pro/math",
+        "mmlu-pro/other",
+        "trap",
+        "zh-mathword"
+      ],
+      "valid_auc_groups": 6,
+      "winner": {
+        "name": "resmlp_w0_d0_wd0.001_lr0.001_focal0",
+        "spec": {
+          "width": 0,
+          "dropout": 0.0,
+          "weight_decay": 0.001,
+          "learning_rate": 0.001,
+          "focal_gamma": 0.0
+        },
+        "parameter_count": 12289,
+        "inner_macro_auc_mean": 0.7101714484482429,
+        "inner_macro_auc_by_fold": [
+          0.674911835533133,
+          0.6928902991661576,
+          0.7627122106454383
+        ],
+        "best_epoch_by_fold": [
+          5,
+          1,
+          7
+        ],
+        "selected_epoch": 5
+      },
+      "outer_macro_group_auc": 0.7418672306463537,
+      "outer_pooled_auc": 0.7868483749377712,
+      "sweep": [
+        {
+          "name": "resmlp_w0_d0_wd0.001_lr0.001_focal0",
+          "spec": {
+            "width": 0,
+            "dropout": 0.0,
+            "weight_decay": 0.001,
+            "learning_rate": 0.001,
+            "focal_gamma": 0.0
+          },
+          "parameter_count": 12289,
+          "inner_macro_auc_mean": 0.7101714484482429,
+          "inner_macro_auc_by_fold": [
+            0.674911835533133,
+            0.6928902991661576,
+            0.7627122106454383
+          ],
+          "best_epoch_by_fold": [
+            5,
+            1,
+            7
+          ],
+          "selected_epoch": 5
+        },
+        {
+          "name": "resmlp_w32_d0.2_wd0.001_lr0.001_focal0",
+          "spec": {
+            "width": 32,
+            "dropout": 0.2,
+            "weight_decay": 0.001,
+            "learning_rate": 0.001,
+            "focal_gamma": 0.0
+          },
+          "parameter_count": 405537,
+          "inner_macro_auc_mean": 0.7100897533165663,
+          "inner_macro_auc_by_fold": [
+            0.6659560812903674,
+            0.7231259867671198,
+            0.7411871918922116
+          ],
+          "best_epoch_by_fold": [
+            2,
+            1,
+            5
+          ],
+          "selected_epoch": 2
+        },
+        {
+          "name": "resmlp_w128_d0.2_wd0.001_lr0.001_focal0",
+          "spec": {
+            "width": 128,
+            "dropout": 0.2,
+            "weight_decay": 0.001,
+            "learning_rate": 0.001,
+            "focal_gamma": 0.0
+          },
+          "parameter_count": 1585281,
+          "inner_macro_auc_mean": 0.7023360431357063,
+          "inner_macro_auc_by_fold": [
+            0.661639666721779,
+            0.6848998688653584,
+            0.7604685938199817
+          ],
+          "best_epoch_by_fold": [
+            4,
+            2,
+            6
+          ],
+          "selected_epoch": 4
+        },
+        {
+          "name": "resmlp_w128_d0.5_wd0.001_lr0.001_focal0",
+          "spec": {
+            "width": 128,
+            "dropout": 0.5,
+            "weight_decay": 0.001,
+            "learning_rate": 0.001,
+            "focal_gamma": 0.0
+          },
+          "parameter_count": 1585281,
+          "inner_macro_auc_mean": 0.7014799135078053,
+          "inner_macro_auc_by_fold": [
+            0.6738474127034038,
+            0.6809086751959883,
+            0.7496836526240235
+          ],
+          "best_epoch_by_fold": [
+            2,
+            12,
+            9
+          ],
+          "selected_epoch": 9
+        },
+        {
+          "name": "resmlp_w128_d0.2_wd0.01_lr0.001_focal0",
+          "spec": {
+            "width": 128,
+            "dropout": 0.2,
+            "weight_decay": 0.01,
+            "learning_rate": 0.001,
+            "focal_gamma": 0.0
+          },
+          "parameter_count": 1585281,
+          "inner_macro_auc_mean": 0.7095566349037196,
+          "inner_macro_auc_by_fold": [
+            0.6659457136065432,
+            0.7106314268401905,
+            0.7520927642644252
+          ],
+          "best_epoch_by_fold": [
+            2,
+            13,
+            7
+          ],
+          "selected_epoch": 7
+        },
+        {
+          "name": "resmlp_w128_d0.2_wd0.001_lr0.0003_focal0",
+          "spec": {
+            "width": 128,
+            "dropout": 0.2,
+            "weight_decay": 0.001,
+            "learning_rate": 0.0003,
+            "focal_gamma": 0.0
+          },
+          "parameter_count": 1585281,
+          "inner_macro_auc_mean": 0.7050165559587412,
+          "inner_macro_auc_by_fold": [
+            0.6715312467607021,
+            0.6983552366330605,
+            0.745163184482461
+          ],
+          "best_epoch_by_fold": [
+            5,
+            17,
+            9
+          ],
+          "selected_epoch": 9
+        },
+        {
+          "name": "resmlp_w128_d0.2_wd0.001_lr0.001_focal1",
+          "spec": {
+            "width": 128,
+            "dropout": 0.2,
+            "weight_decay": 0.001,
+            "learning_rate": 0.001,
+            "focal_gamma": 1.0
+          },
+          "parameter_count": 1585281,
+          "inner_macro_auc_mean": 0.7071012249862454,
+          "inner_macro_auc_by_fold": [
+            0.6678026103699346,
+            0.7050836967335681,
+            0.7484173678552334
+          ],
+          "best_epoch_by_fold": [
+            3,
+            1,
+            8
+          ],
+          "selected_epoch": 3
+        },
+        {
+          "name": "resmlp_w512_d0.5_wd0.001_lr0.001_focal0",
+          "spec": {
+            "width": 512,
+            "dropout": 0.5,
+            "weight_decay": 0.001,
+            "learning_rate": 0.001,
+            "focal_gamma": 0.0
+          },
+          "parameter_count": 6304257,
+          "inner_macro_auc_mean": 0.6981330134863516,
+          "inner_macro_auc_by_fold": [
+            0.6620103623685402,
+            0.6924004818168636,
+            0.7399881962736512
+          ],
+          "best_epoch_by_fold": [
+            11,
+            11,
+            5
+          ],
+          "selected_epoch": 11
+        }
+      ]
+    },
+    {
+      "outer_fold": 4,
+      "train_rows": 4286,
+      "test_rows": 942,
+      "test_groups": [
+        "fresh_never",
+        "know-mmlu",
+        "know-open",
+        "math500",
+        "mmlu-pro/physics",
+        "simpleqa"
+      ],
+      "valid_auc_groups": 5,
+      "winner": {
+        "name": "resmlp_w128_d0.2_wd0.001_lr0.0003_focal0",
+        "spec": {
+          "width": 128,
+          "dropout": 0.2,
+          "weight_decay": 0.001,
+          "learning_rate": 0.0003,
+          "focal_gamma": 0.0
+        },
+        "parameter_count": 1585281,
+        "inner_macro_auc_mean": 0.7069044403772945,
+        "inner_macro_auc_by_fold": [
+          0.7306705539229612,
+          0.6620605978202994,
+          0.727982169388623
+        ],
+        "best_epoch_by_fold": [
+          11,
+          2,
+          17
+        ],
+        "selected_epoch": 11
+      },
+      "outer_macro_group_auc": 0.7053180298425402,
+      "outer_pooled_auc": 0.7861768621522216,
+      "sweep": [
+        {
+          "name": "resmlp_w0_d0_wd0.001_lr0.001_focal0",
+          "spec": {
+            "width": 0,
+            "dropout": 0.0,
+            "weight_decay": 0.001,
+            "learning_rate": 0.001,
+            "focal_gamma": 0.0
+          },
+          "parameter_count": 12289,
+          "inner_macro_auc_mean": 0.6885202998346669,
+          "inner_macro_auc_by_fold": [
+            0.7259118371280713,
+            0.6476921119378095,
+            0.6919569504381199
+          ],
+          "best_epoch_by_fold": [
+            9,
+            2,
+            2
+          ],
+          "selected_epoch": 2
+        },
+        {
+          "name": "resmlp_w32_d0.2_wd0.001_lr0.001_focal0",
+          "spec": {
+            "width": 32,
+            "dropout": 0.2,
+            "weight_decay": 0.001,
+            "learning_rate": 0.001,
+            "focal_gamma": 0.0
+          },
+          "parameter_count": 405537,
+          "inner_macro_auc_mean": 0.6840054092441922,
+          "inner_macro_auc_by_fold": [
+            0.7225668021173943,
+            0.6369538658751881,
+            0.6924955597399939
+          ],
+          "best_epoch_by_fold": [
+            20,
+            2,
+            5
+          ],
+          "selected_epoch": 5
+        },
+        {
+          "name": "resmlp_w128_d0.2_wd0.001_lr0.001_focal0",
+          "spec": {
+            "width": 128,
+            "dropout": 0.2,
+            "weight_decay": 0.001,
+            "learning_rate": 0.001,
+            "focal_gamma": 0.0
+          },
+          "parameter_count": 1585281,
+          "inner_macro_auc_mean": 0.6889849722259637,
+          "inner_macro_auc_by_fold": [
+            0.7362720077388178,
+            0.645282864554756,
+            0.6854000443843171
+          ],
+          "best_epoch_by_fold": [
+            11,
+            2,
+            3
+          ],
+          "selected_epoch": 3
+        },
+        {
+          "name": "resmlp_w128_d0.5_wd0.001_lr0.001_focal0",
+          "spec": {
+            "width": 128,
+            "dropout": 0.5,
+            "weight_decay": 0.001,
+            "learning_rate": 0.001,
+            "focal_gamma": 0.0
+          },
+          "parameter_count": 1585281,
+          "inner_macro_auc_mean": 0.6827061544550008,
+          "inner_macro_auc_by_fold": [
+            0.7220042663704179,
+            0.6518470718814204,
+            0.6742671251131643
+          ],
+          "best_epoch_by_fold": [
+            5,
+            2,
+            2
+          ],
+          "selected_epoch": 2
+        },
+        {
+          "name": "resmlp_w128_d0.2_wd0.01_lr0.001_focal0",
+          "spec": {
+            "width": 128,
+            "dropout": 0.2,
+            "weight_decay": 0.01,
+            "learning_rate": 0.001,
+            "focal_gamma": 0.0
+          },
+          "parameter_count": 1585281,
+          "inner_macro_auc_mean": 0.682125414636785,
+          "inner_macro_auc_by_fold": [
+            0.7341563487547118,
+            0.6346203961206801,
+            0.6775994990349631
+          ],
+          "best_epoch_by_fold": [
+            15,
+            2,
+            4
+          ],
+          "selected_epoch": 4
+        },
+        {
+          "name": "resmlp_w128_d0.2_wd0.001_lr0.0003_focal0",
+          "spec": {
+            "width": 128,
+            "dropout": 0.2,
+            "weight_decay": 0.001,
+            "learning_rate": 0.0003,
+            "focal_gamma": 0.0
+          },
+          "parameter_count": 1585281,
+          "inner_macro_auc_mean": 0.7069044403772945,
+          "inner_macro_auc_by_fold": [
+            0.7306705539229612,
+            0.6620605978202994,
+            0.727982169388623
+          ],
+          "best_epoch_by_fold": [
+            11,
+            2,
+            17
+          ],
+          "selected_epoch": 11
+        },
+        {
+          "name": "resmlp_w128_d0.2_wd0.001_lr0.001_focal1",
+          "spec": {
+            "width": 128,
+            "dropout": 0.2,
+            "weight_decay": 0.001,
+            "learning_rate": 0.001,
+            "focal_gamma": 1.0
+          },
+          "parameter_count": 1585281,
+          "inner_macro_auc_mean": 0.6947169881233068,
+          "inner_macro_auc_by_fold": [
+            0.7433901021693997,
+            0.6283191293461009,
+            0.71244173285442
+          ],
+          "best_epoch_by_fold": [
+            12,
+            3,
+            8
+          ],
+          "selected_epoch": 8
+        },
+        {
+          "name": "resmlp_w512_d0.5_wd0.001_lr0.001_focal0",
+          "spec": {
+            "width": 512,
+            "dropout": 0.5,
+            "weight_decay": 0.001,
+            "learning_rate": 0.001,
+            "focal_gamma": 0.0
+          },
+          "parameter_count": 6304257,
+          "inner_macro_auc_mean": 0.6864931577203047,
+          "inner_macro_auc_by_fold": [
+            0.7368191252001767,
+            0.6395392517033456,
+            0.6831210962573917
+          ],
+          "best_epoch_by_fold": [
+            11,
+            3,
+            3
+          ],
+          "selected_epoch": 3
+        }
+      ]
+    }
+  ],
+  "selection_frequency": {
+    "resmlp_w128_d0.2_wd0.01_lr0.001_focal0": 1,
+    "resmlp_w128_d0.5_wd0.001_lr0.001_focal0": 1,
+    "resmlp_w0_d0_wd0.001_lr0.001_focal0": 2,
+    "resmlp_w128_d0.2_wd0.001_lr0.0003_focal0": 1
+  },
+  "global_winner": {
+    "name": "resmlp_w0_d0_wd0.001_lr0.001_focal0",
+    "mean_inner_macro_auc": 0.7070083727716379,
+    "inner_macro_auc_by_outer": [
+      0.7066296713936003,
+      0.7216075938065586,
+      0.7081128503751204,
+      0.7101714484482429,
+      0.6885202998346669
+    ],
+    "suggested_full_fit_epochs": 6
+  },
+  "summary": {
+    "live_in_sample_reference": {
+      "name": "live",
+      "pooled_auc": 0.9175240157944365,
+      "macro_source_auc": 0.8676571112710748,
+      "valid_source_groups": 31
+    },
+    "p3a_group_oof": {
+      "name": "p3a",
+      "pooled_auc": 0.812698609146629,
+      "macro_source_auc": 0.7048151206235284,
+      "valid_source_groups": 31
+    },
+    "nested_capacity_oof": {
+      "name": "nested_capacity",
+      "pooled_auc": 0.7902929042904292,
+      "macro_source_auc": 0.6723188552287341,
+      "valid_source_groups": 31
+    }
+  },
+  "graduation_rule": {
+    "macro_source_auc_gain_vs_p3a_min": 0.01,
+    "pooled_auc_nonnegative_vs_p3a": true,
+    "at_least_four_outer_folds_select_nonlinear": true
+  },
+  "decision": {
+    "macro_source_auc_gain_vs_p3a": -0.03249626539479422,
+    "pooled_auc_gain_vs_p3a": -0.02240570485619975,
+    "outer_folds_selecting_nonlinear": 3,
+    "graduate_to_prospective": false
+  }
+}

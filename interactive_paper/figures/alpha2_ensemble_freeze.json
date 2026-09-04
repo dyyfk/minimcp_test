@@ -1,0 +1,38 @@
+{
+  "status": "frozen_before_p17_selection_or_outputs",
+  "alpha": 2.0,
+  "p15_grid_row": {
+    "alpha": 2.0,
+    "external_auc_delta": {
+      "striviaqa": 0.01232394366197187,
+      "swebq": 0.017214397496087552,
+      "sllama": 0.008212019410227756,
+      "sdqa": 0.026918036092347997,
+      "sreason": 0.020341981132075415
+    },
+    "external_mean_auc_delta": 0.017002075558542117,
+    "p15_auc_delta": {
+      "p15_sciq": 0.0014539110206454042,
+      "p15_winogrande": 0.018390111546578214
+    },
+    "p15_both_positive": true
+  },
+  "p16_alpha1_result": {
+    "macro_source_auc_delta": {
+      "point": 0.014243729017236917,
+      "source_stratified_bootstrap_95ci": [
+        0.014380552344040148,
+        0.0028047353671390137,
+        0.026347500218267535
+      ]
+    }
+  },
+  "p16_alpha2_auc_delta": {
+    "p16_boolq": 0.008732309545317785,
+    "p16_hellaswag": 0.032535885167464085,
+    "p16_qasc": 0.011991279069767491
+  },
+  "p16_alpha2_macro_auc_delta": 0.017753157927516455,
+  "p16_note": "P16 is development-only for this new artifact; P17 is the independent test.",
+  "artifact_sha256": "a26829f06561e34cc957e437138ea9b03571c8a487e37ee22e91001ce5541be5"
+}

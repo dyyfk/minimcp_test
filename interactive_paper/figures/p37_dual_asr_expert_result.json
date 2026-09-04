@@ -1,0 +1,44 @@
+{
+  "experiment": "P37 dual-ASR expert repair for perception failures",
+  "status": "reject",
+  "metrics": {
+    "all": {
+      "n": 36,
+      "baseline": 0.3888888888888889,
+      "dual": 0.3888888888888889,
+      "delta": 0.0
+    },
+    "frozen": {
+      "n": 14,
+      "baseline": 0.21428571428571427,
+      "dual": 0.07142857142857142,
+      "delta": -0.14285714285714285
+    },
+    "external": {
+      "n": 22,
+      "baseline": 0.5,
+      "dual": 0.5909090909090909,
+      "delta": 0.09090909090909094
+    },
+    "wins": 4,
+    "losses": 4,
+    "mcnemar_one_sided_p": 0.63671875
+  },
+  "coverage": {
+    "second_transcripts": 36,
+    "missing_expert": [],
+    "missing_judge": []
+  },
+  "cost_usd": 0.8815264999999998,
+  "gates": {
+    "second_transcript_36_of_36": true,
+    "paired_expert_and_judge_36_of_36": true,
+    "accuracy_delta_at_least_0.10": false,
+    "mcnemar_one_sided_below_0.10": false,
+    "regressions_at_most_one": false,
+    "frozen_and_external_nonnegative": false,
+    "cost_at_most_10": true,
+    "live_unchanged": true
+  },
+  "activation": "not_authorized"
+}

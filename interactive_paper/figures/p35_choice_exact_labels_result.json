@@ -1,0 +1,265 @@
+{
+  "activation_recommended": false,
+  "all_gates_pass": false,
+  "baseline": {
+    "exact_auc_macro_source": 0.6431853578317803,
+    "exact_auc_pooled": 0.7527357140929091,
+    "exact_valid_sources": 65,
+    "judge_auc_macro_source": 0.6676224234822135,
+    "judge_auc_pooled": 0.7706981826243474,
+    "judge_valid_sources": 64,
+    "routing_macro_source": 0.16708873073855027,
+    "routing_pooled": 0.16494845360824742
+  },
+  "candidate_oof": {
+    "exact_auc_macro_source": 0.6390207994374629,
+    "exact_auc_pooled": 0.7468998839312224,
+    "exact_valid_sources": 65,
+    "judge_auc_macro_source": 0.6574198164748184,
+    "judge_auc_pooled": 0.7580008339975403,
+    "judge_valid_sources": 64,
+    "routing_macro_source": 0.1633354104153524,
+    "routing_pooled": 0.16019032513877876
+  },
+  "coverage": 0.4369369369369369,
+  "deltas": {
+    "exact_auc_macro_source": -0.004164558394317397,
+    "exact_auc_pooled": -0.00583583016168665,
+    "judge_auc_macro_source": -0.01020260700739506,
+    "judge_auc_pooled": -0.012697348626807159,
+    "routing_macro_source": -0.003753320323197862,
+    "routing_pooled": -0.004758128469468659
+  },
+  "exact_failure_rate": 0.3695479777954005,
+  "exact_judge_agreement": 0.9666931007137193,
+  "folds": [
+    {
+      "exact_failure_rate": 0.2579787234042553,
+      "fold": 0,
+      "test_rows": 376,
+      "test_sources": [
+        "ai2_arc_challenge",
+        "ceval:art_studies",
+        "ceval:chinese_language_and_literature",
+        "ceval:discrete_mathematics",
+        "ceval:fire_engineer",
+        "ceval:high_school_politics",
+        "ceval:law",
+        "ceval:physician",
+        "ceval:professional_tour_guide",
+        "ceval:urban_and_rural_planner",
+        "mmlu_pro:philosophy"
+      ]
+    },
+    {
+      "exact_failure_rate": 0.34962406015037595,
+      "fold": 1,
+      "test_rows": 266,
+      "test_sources": [
+        "ceval:high_school_chemistry",
+        "ceval:high_school_geography",
+        "ceval:high_school_mathematics",
+        "ceval:middle_school_history",
+        "ceval:middle_school_mathematics",
+        "ceval:modern_chinese_history",
+        "ceval:operating_system",
+        "commonsense_qa",
+        "mmlu_pro:engineering"
+      ]
+    },
+    {
+      "exact_failure_rate": 0.39473684210526316,
+      "fold": 2,
+      "test_rows": 228,
+      "test_sources": [
+        "ceval:accountant",
+        "ceval:basic_medicine",
+        "ceval:college_economics",
+        "ceval:computer_architecture",
+        "ceval:education_science",
+        "ceval:high_school_history",
+        "ceval:legal_professional",
+        "ceval:mao_zedong_thought",
+        "ceval:marxism",
+        "ceval:metrology_engineer",
+        "ceval:middle_school_biology",
+        "ceval:middle_school_geography",
+        "ceval:middle_school_physics",
+        "ceval:plant_protection",
+        "ceval:teacher_qualification",
+        "mmlu_pro:chemistry",
+        "mmlu_pro:economics",
+        "mmlu_pro:psychology"
+      ]
+    },
+    {
+      "exact_failure_rate": 0.4603960396039604,
+      "fold": 3,
+      "test_rows": 202,
+      "test_sources": [
+        "ceval:business_administration",
+        "ceval:college_chemistry",
+        "ceval:college_physics",
+        "ceval:college_programming",
+        "ceval:electrical_engineer",
+        "ceval:high_school_chinese",
+        "ceval:ideological_and_moral_cultivation",
+        "ceval:logic",
+        "ceval:middle_school_politics",
+        "ceval:sports_science",
+        "ceval:veterinary_medicine",
+        "mmlu_pro:biology",
+        "mmlu_pro:health",
+        "mmlu_pro:history",
+        "mmlu_pro:math"
+      ]
+    },
+    {
+      "exact_failure_rate": 0.49206349206349204,
+      "fold": 4,
+      "test_rows": 189,
+      "test_sources": [
+        "ceval:civil_servant",
+        "ceval:clinical_medicine",
+        "ceval:computer_network",
+        "ceval:environmental_impact_assessment_engineer",
+        "ceval:high_school_biology",
+        "ceval:high_school_physics",
+        "ceval:middle_school_chemistry",
+        "ceval:probability_and_statistics",
+        "ceval:tax_accountant",
+        "mmlu_pro:business",
+        "mmlu_pro:computer science",
+        "mmlu_pro:law",
+        "mmlu_pro:other",
+        "mmlu_pro:physics"
+      ]
+    }
+  ],
+  "gates": {
+    "broad_pool_routing_ge_minus_0.010": false,
+    "choice_answer_coverage_ge_0.80": false,
+    "exact_macro_auc_delta_ge_0.010": false,
+    "exact_pooled_auc_delta_ge_0.005": false,
+    "judge_macro_auc_nonnegative": false,
+    "judge_pooled_auc_nonnegative": false,
+    "language_routing_nonnegative": false,
+    "routing_macro_delta_ge_0.005": false,
+    "routing_pooled_nonnegative": false
+  },
+  "judge_failure_rate": 0.3917525773195876,
+  "live_unchanged": true,
+  "protocol": {
+    "base_trainable_parameters": 0,
+    "feature": "unchanged deployed L22 12288-d onset recipe",
+    "head": "single raw-feature logistic C=3e-4",
+    "new_readout_parameters": 12289,
+    "outer_cv": "5-fold source-family-disjoint OOF",
+    "pass_action": "unchanged historical P15/P16/P17/P32 exact-choice transfer only",
+    "selection": "none; regexes and C frozen before answer parsing",
+    "training_label": "unambiguous answer-cue choice mismatch",
+    "validation_labels": "existing judge adequacy and expert gain"
+  },
+  "provenance": {
+    "expert": {
+      "path": "../data_expand_p25b/expert_judged.parquet",
+      "sha256": "95109533dd3ce621aec7f5a39827da8f4f99b6be429793c81334e40d16144d12"
+    },
+    "features": [
+      {
+        "path": "../data_expand_p25b/native_single/prospective_native_feats.rank0.npz",
+        "sha256": "fdcde3005f7781920e6dfca634df06a5d76751a614600b281afa4e561e23cf24"
+      },
+      {
+        "path": "../data_expand_p25b/native_single/prospective_native_feats.rank1.npz",
+        "sha256": "7ac0f8fac336b6214c3a604a143c24652bd223928a2c01b00e47d855a72d9d3f"
+      },
+      {
+        "path": "../data_expand_p25b/native_single/prospective_native_feats.rank2.npz",
+        "sha256": "cedc53b3dac2cb03ef408ae426828530016db36c42046629494aff3943b96451"
+      },
+      {
+        "path": "../data_expand_p25b/native_single/prospective_native_feats.rank3.npz",
+        "sha256": "4fb0cb760bbbfa685150922e545bbf9f5274bae741ca3513814bb248f5d64a95"
+      },
+      {
+        "path": "../data_expand_p25b/native_single/prospective_native_feats.rank4.npz",
+        "sha256": "33410c7789169af75e3a077e122b75df938e8b81eeb6caf22c7f18667b84f756"
+      },
+      {
+        "path": "../data_expand_p25b/native_single/prospective_native_feats.rank5.npz",
+        "sha256": "dda97185e12a8692798586fcb022fe189da942a8009002725a4252415652b86c"
+      },
+      {
+        "path": "../data_expand_p25b/native_single/prospective_native_feats.rank6.npz",
+        "sha256": "a47f433aaed7a2be0e34bbf9b777f927cf3d7009f600f77ea431de8095e9f829"
+      },
+      {
+        "path": "../data_expand_p25b/native_single/prospective_native_feats.rank7.npz",
+        "sha256": "8253002b760ca3af43a1e0ac354cf99d2fa97eaa6c3ca776fdd4fb31b4bf9e09"
+      }
+    ],
+    "live_artifact": {
+      "path": "interactive_paper/data/gate_native.json",
+      "sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372"
+    },
+    "local": {
+      "path": "../data_expand_p25b/local_single_judged.parquet",
+      "sha256": "0a43f071ece88a728c56447b7195e0742d6c9e695f55403adaf51ceb633f5b4d"
+    },
+    "script": {
+      "path": "/home/changyi/.slock-liquid/agents/18185271-1b2c-4edb-8210-37b3b213c727/minimcp_test/interactive_paper/scripts/105_evaluate_choice_exact_labels.py",
+      "sha256": "cc49d79bd34f93dde320dd0eb5d4749b8995f5a4c157d3f7d3f3253a47744285"
+    },
+    "selection": {
+      "path": "../data_expand_p25b/selection.parquet",
+      "sha256": "defedcccd9cd5d0d85c8ab94e8c09e80cdd8594cb4fbe23385022d2cdd479d89"
+    }
+  },
+  "reference_choice_rows": 2886,
+  "rows": 1261,
+  "source_families": 67,
+  "status": "p35_exact_choice_label_development",
+  "strata": {
+    "language": {
+      "en": {
+        "exact_auc_delta": -0.0054538461538460314,
+        "judge_auc_delta": -0.01217166556470517,
+        "routing_delta": 0.0021645021645021467,
+        "rows": 770
+      },
+      "zh": {
+        "exact_auc_delta": -0.0039562289562291575,
+        "judge_auc_delta": -0.011383304486752732,
+        "routing_delta": -0.008146639511201648,
+        "rows": 491
+      }
+    },
+    "pool": {
+      "p25b_arc": {
+        "exact_auc_delta": 0.05907172995780585,
+        "judge_auc_delta": 0.058299240210403225,
+        "routing_delta": 0.010062893081760997,
+        "rows": 265
+      },
+      "p25b_ceval": {
+        "exact_auc_delta": -0.0039562289562291575,
+        "judge_auc_delta": -0.011383304486752732,
+        "routing_delta": -0.008146639511201648,
+        "rows": 491
+      },
+      "p25b_commonsense": {
+        "exact_auc_delta": 0.047333659491193614,
+        "judge_auc_delta": 0.03244731800766287,
+        "routing_delta": 0.028052805280528045,
+        "rows": 202
+      },
+      "p25b_mmlu_pro": {
+        "exact_auc_delta": -0.016445343417465508,
+        "judge_auc_delta": -0.02107142857142874,
+        "routing_delta": -0.01760176017601761,
+        "rows": 303
+      }
+    }
+  }
+}

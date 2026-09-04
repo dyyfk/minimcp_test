@@ -1,0 +1,58 @@
+{
+  "status": "p25b_expanded_data_accounting",
+  "native_generation": {
+    "standalone_requested": 3000,
+    "standalone_scoreable": 3000,
+    "multiturn_requested": 2400,
+    "multiturn_scoreable": 2195,
+    "multiturn_excluded": {
+      "carrier_did_not_reach_end_of_turn": 169,
+      "target_never_reached_speak_onset": 36
+    },
+    "multiturn_target_feature_dimension": 12288,
+    "multiturn_nonfinite_feature_rows": 0,
+    "multiturn_attrition_by_language": {
+      "en": {"requested": 1400, "scoreable": 1308},
+      "zh": {"requested": 1000, "scoreable": 887}
+    },
+    "multiturn_attrition_by_pool": {
+      "p25b_spoken_squad": {"requested": 400, "scoreable": 372},
+      "p25b_xnli_en": {"requested": 500, "scoreable": 472},
+      "p25b_xnli_zh": {"requested": 500, "scoreable": 481},
+      "p25b_xquad_en": {"requested": 500, "scoreable": 464},
+      "p25b_xquad_zh": {"requested": 500, "scoreable": 406}
+    }
+  },
+  "local_answer_judging": {
+    "standalone_rows": 3000,
+    "standalone_errors": 0,
+    "standalone_adequate_rate": 0.5083333333333333,
+    "standalone_prompt_tokens": 1241719,
+    "standalone_completion_tokens": 248322,
+    "standalone_cost_usd": 2.04873825,
+    "multiturn_rows": 2195,
+    "multiturn_errors": 0,
+    "multiturn_adequate_rate": 0.7289293849658315,
+    "multiturn_prompt_tokens": 643976,
+    "multiturn_completion_tokens": 200769,
+    "multiturn_cost_usd": 1.3864425
+  },
+  "api_accounting": {
+    "pre_p25b_exact_usd": 34.052445,
+    "tts_exact_usd": 18.85311,
+    "expert_answer_generation_exact_usd": 29.19651,
+    "standalone_local_judge_exact_usd": 2.04873825,
+    "multiturn_local_judge_exact_usd": 1.3864425,
+    "exact_known_cumulative_usd": 85.53724575,
+    "unmetered_expert_answer_judge_reserve_usd": 5.0,
+    "conservative_cap_accounting_usd": 90.53724575,
+    "p25b_incremental_conservative_usd": 56.48480075,
+    "p25b_incremental_stop_usd": 100.0,
+    "user_total_cap_usd": 500.0,
+    "note": "The expert-answer judge process loaded the pre-usage-recording code path. It was not rerun; a conservative $5 reserve is charged instead."
+  },
+  "decision": {
+    "graduate_to_new_prospective": false,
+    "live_unchanged": true
+  }
+}

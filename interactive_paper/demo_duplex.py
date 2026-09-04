@@ -65,6 +65,8 @@ from modal_app import OPENAI  # noqa: E402
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 _APP_PY = os.path.join(_HERE, "modal_app.py")
+_SHADOW_ARTIFACT = os.path.join(
+    _HERE, "data", "shadow", "gate_shadow_robust_ensemble.json")
 
 web_image = (modal.Image.debian_slim(python_version="3.11")
              .pip_install("fastapi[standard]")
@@ -96,6 +98,9 @@ gpu_image = (
     )
     .add_local_dir(os.path.join(_HERE, "src"), "/workspace/gate")
     .add_local_dir(os.path.join(_HERE, "_model_src"), "/workspace/model_src")
+    .add_local_file(
+        _SHADOW_ARTIFACT,
+        "/workspace/gate_shadow_robust_ensemble.json")
     .add_local_file(_APP_PY, "/root/modal_app.py"))
 
 # proven wording (first escalate smoke: relayed + self-corrected);
@@ -191,6 +196,16 @@ class DuplexVoice:
         # in-regime probe: 8be native-duplex refit (2310 rows, same
         # speak-onset read point as this app; scripts/22)
         self.art = json.load(open(f"{DATA}/gate_native.json"))
+        # Candidate scoring is observational only. Its artifact explicitly
+        # prohibits activation, and no threshold from it enters `fired`.
+        self.shadow_art = json.load(open(
+            "/workspace/gate_shadow_robust_ensemble.json"))
+        if (self.shadow_art.get("status") != "shadow_only" or
+                self.shadow_art.get("activation_prohibited") is not True):
+            raise RuntimeError("candidate is not shadow-safe")
+        self.shadow_probe = gate_mod.Probe(
+            self.shadow_art["w"], self.shadow_art["b"])
+        self.shadow_modes = self.shadow_art["feature_recipe"]["blocks"]
         self.score_wins = {}       # lang -> deque of recent onset scores
         # 8bh dialogue-act gate: stop words / backchannels hit the same
         # commit as questions and the failure probe is OOD on them —
@@ -201,6 +216,11 @@ class DuplexVoice:
             self.act = None
         self.probe = gate_mod.Probe(self.art["w"], self.art["b"])
         self.K3 = self.art.get("k_eot", 8)
+        shadow_tail = max([
+            int(mode.removeprefix("eot_mean"))
+            for mode in self.shadow_modes
+            if mode.startswith("eot_mean") and mode != "eot_mean"] or [1])
+        self.tail_k = max(self.K3, shadow_tail)
         self.st3 = {"accum": False, "tail": None, "sum": None, "cnt": 0}
 
         import torch as _t
@@ -208,10 +228,10 @@ class DuplexVoice:
         def hook(_m, _i, out):
             hs = out[0] if isinstance(out, tuple) else out
             h = hs[0].detach().float()
-            t = h[-self.K3:].cpu()
+            t = h[-self.tail_k:].cpu()
             self.st3["tail"] = (t if self.st3["tail"] is None
                                 else _t.cat([self.st3["tail"],
-                                             t])[-self.K3:])
+                                             t])[-self.tail_k:])
             if self.st3["accum"]:
                 sm = h.sum(0).cpu()
                 self.st3["sum"] = (sm if self.st3["sum"] is None
@@ -263,23 +283,34 @@ class DuplexVoice:
                 parts.append(wf.float().cpu().numpy().reshape(-1))
         return _np.concatenate(parts) if parts else None
 
-    def _feat_now(self):
+    def _feat_now(self, artifact=None):
         import torch
         if self.st3["tail"] is None or self.st3["cnt"] == 0:
             return None
+        artifact = self.art if artifact is None else artifact
+        modes = artifact.get("modes", artifact.get("feature_recipe", {}).get(
+            "blocks", []))
         parts = []
-        for m in self.art["modes"]:
+        for m in modes:
             if m == "eot_last":
                 parts.append(self.st3["tail"][-1])
-            elif m == "eot_mean":
-                parts.append(self.st3["tail"].mean(0))
+            elif m.startswith("eot_mean"):
+                suffix = m.removeprefix("eot_mean")
+                k = int(suffix) if suffix else artifact.get("k_eot", self.K3)
+                parts.append(self.st3["tail"][-k:].mean(0))
             elif m == "user_mean":
                 parts.append(self.st3["sum"] / max(1, self.st3["cnt"]))
+            else:
+                raise ValueError(f"unknown probe feature mode: {m}")
         return torch.cat(parts).numpy()
 
     def _score_now(self):
         v = self._feat_now()
         return None if v is None else float(self.probe.score(v))
+
+    def _shadow_score_now(self):
+        v = self._feat_now(self.shadow_art)
+        return None if v is None else float(self.shadow_probe.score(v))
 
     def _act_now(self):
         """P(info-seeking) from the same read; None = act gate off."""
@@ -321,7 +352,8 @@ class DuplexVoice:
         @wapp.get(f"/{TOKEN}/ready")
         def ready():
             return JSONResponse({"ready": True, "load_s": self.load_s,
-                                 "busy": self.lock.locked()})
+                                 "busy": self.lock.locked(),
+                                 "distilled_shadow": True})
 
         @wapp.websocket(f"/{TOKEN}/ws")
         async def ws(sock: WebSocket):
@@ -393,6 +425,8 @@ class DuplexVoice:
                 prev_listen = True
                 thinking = _th.Event()           # thinker in flight
                 n_chunk = 0
+                completed_turns = 0               # pre-answer context state
+                prior_escalations = 0             # completed/in-flight fires
                 history_lock = _th.Lock()
                 resolved_history = {}
                 next_history_index = 1
@@ -643,10 +677,13 @@ class DuplexVoice:
                             n_chunk += 1
 
                             score = self._score_now()
+                            shadow_score = self._shadow_score_now()
                             if score is not None:
                                 turn_scores.append(round(score, 4))
                                 emit({"type": "score", "i": n_chunk,
                                       "v": round(score, 4),
+                                      "shadow_v": (None if shadow_score is None
+                                                   else round(shadow_score, 4)),
                                       "listen": bool(r["is_listen"])})
 
                             fired_now = False
@@ -691,6 +728,9 @@ class DuplexVoice:
                                 emit({"type": "gate",
                                       "score": (None if score is None
                                                 else round(score, 4)),
+                                      "shadow_score": (
+                                          None if shadow_score is None
+                                          else round(shadow_score, 4)),
                                       "thr": round(thr_eff, 4),
                                       "thr_mode": thr_mode,
                                       "thr_static": round(thr, 4),
@@ -699,6 +739,9 @@ class DuplexVoice:
                                       "act": (None if act is None
                                               else round(act, 4)),
                                       "is_info": bool(is_info),
+                                      "turn_index": completed_turns + 1,
+                                      "has_context": completed_turns > 0,
+                                      "prior_escalations": prior_escalations,
                                       "probe_on": probe_on})
                                 if fired:
                                     thinking.set()
@@ -724,6 +767,7 @@ class DuplexVoice:
                                         r["text"])
                             if fired_now:
                                 turn_fired = True
+                                prior_escalations += 1
                                 if self.stall_pcm is not None:
                                     i16s = (np.clip(self.stall_pcm, -1, 1)
                                             * 32767).astype("<i2")
@@ -745,6 +789,7 @@ class DuplexVoice:
                                     top_k=GEN_TOP_K)
                                 _emit_gen(r, mute=True)
                             if r.get("end_of_turn"):
+                                completed_turns += 1
                                 if muted:
                                     emit({"type": "log",
                                           "msg": f"muted {muted - 1} chunks "

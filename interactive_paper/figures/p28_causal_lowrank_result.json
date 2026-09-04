@@ -1,0 +1,443 @@
+{
+  "advance": true,
+  "gates": {
+    "broad_pool_routing_ge_minus_0.010": true,
+    "language_routing_nonnegative": true,
+    "macro_native_auc_delta_ge_0.010": true,
+    "macro_routing_delta_ge_0.005": true,
+    "pooled_native_auc_nonnegative": true,
+    "pooled_routing_nonnegative": true
+  },
+  "inputs": {
+    "causal_npz": [
+      {
+        "path": "../causal_prefill_p26/causal_prefill_feats.rank0.npz",
+        "sha256": "04a544684f55528241b7309b452b839b7a58f0f712ccf71eef40ed9009050866"
+      },
+      {
+        "path": "../causal_prefill_p26/causal_prefill_feats.rank1.npz",
+        "sha256": "ddb35a945accd2db6477ee94908c285626308e34dbd549f5b46d1ec93a892631"
+      },
+      {
+        "path": "../causal_prefill_p26/causal_prefill_feats.rank2.npz",
+        "sha256": "b9eab752b04478ba68fc1956076f69eb5134e8baa55d013479817a2a588dfa93"
+      },
+      {
+        "path": "../causal_prefill_p26/causal_prefill_feats.rank3.npz",
+        "sha256": "229f106e7ff8faed1290dc081b81fd9c21c9a480ae5feeea3a4ef2ed790873e2"
+      },
+      {
+        "path": "../causal_prefill_p26/causal_prefill_feats.rank4.npz",
+        "sha256": "67a01b53f28ea840f4859fcafa96067943cd8898cbaabf110d9e93247ba4a27f"
+      },
+      {
+        "path": "../causal_prefill_p26/causal_prefill_feats.rank5.npz",
+        "sha256": "70d03a473081eb8c3d2f3908c499c545fd50dc541bd0d3ae2c508ca4f74be883"
+      },
+      {
+        "path": "../causal_prefill_p26/causal_prefill_feats.rank6.npz",
+        "sha256": "91a20a587c411e1cf5657fdf525637e61cc38c6870fca4e6e4aa0d7fc1cad54b"
+      },
+      {
+        "path": "../causal_prefill_p26/causal_prefill_feats.rank7.npz",
+        "sha256": "90c4d920415d2508d33475481e3b93a7855cc030c10f0f4b2943a537f12caa45"
+      }
+    ],
+    "expert": {
+      "path": "../data_expand_p25b/expert_judged.parquet",
+      "sha256": "95109533dd3ce621aec7f5a39827da8f4f99b6be429793c81334e40d16144d12"
+    },
+    "live_artifact": {
+      "path": "interactive_paper/data/gate_native.json",
+      "sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372"
+    },
+    "local": {
+      "path": "../data_expand_p25b/local_single_judged.parquet",
+      "sha256": "0a43f071ece88a728c56447b7195e0742d6c9e695f55403adaf51ceb633f5b4d"
+    },
+    "original_npz": [
+      {
+        "path": "../data_expand_p25b/native_single/prospective_native_feats.rank0.npz",
+        "sha256": "fdcde3005f7781920e6dfca634df06a5d76751a614600b281afa4e561e23cf24"
+      },
+      {
+        "path": "../data_expand_p25b/native_single/prospective_native_feats.rank1.npz",
+        "sha256": "7ac0f8fac336b6214c3a604a143c24652bd223928a2c01b00e47d855a72d9d3f"
+      },
+      {
+        "path": "../data_expand_p25b/native_single/prospective_native_feats.rank2.npz",
+        "sha256": "cedc53b3dac2cb03ef408ae426828530016db36c42046629494aff3943b96451"
+      },
+      {
+        "path": "../data_expand_p25b/native_single/prospective_native_feats.rank3.npz",
+        "sha256": "4fb0cb760bbbfa685150922e545bbf9f5274bae741ca3513814bb248f5d64a95"
+      },
+      {
+        "path": "../data_expand_p25b/native_single/prospective_native_feats.rank4.npz",
+        "sha256": "33410c7789169af75e3a077e122b75df938e8b81eeb6caf22c7f18667b84f756"
+      },
+      {
+        "path": "../data_expand_p25b/native_single/prospective_native_feats.rank5.npz",
+        "sha256": "dda97185e12a8692798586fcb022fe189da942a8009002725a4252415652b86c"
+      },
+      {
+        "path": "../data_expand_p25b/native_single/prospective_native_feats.rank6.npz",
+        "sha256": "a47f433aaed7a2be0e34bbf9b777f927cf3d7009f600f77ea431de8095e9f829"
+      },
+      {
+        "path": "../data_expand_p25b/native_single/prospective_native_feats.rank7.npz",
+        "sha256": "8253002b760ca3af43a1e0ac354cf99d2fa97eaa6c3ca776fdd4fb31b4bf9e09"
+      }
+    ],
+    "selection": {
+      "path": "../data_expand_p25b/selection.parquet",
+      "sha256": "defedcccd9cd5d0d85c8ab94e8c09e80cdd8594cb4fbe23385022d2cdd479d89"
+    }
+  },
+  "live_unchanged": true,
+  "outer_folds": [
+    {
+      "head_coef": [
+        -1.6112221479415894,
+        0.3693629503250122,
+        0.07208376377820969,
+        -0.650702178478241,
+        -0.48929500579833984,
+        0.06206226348876953,
+        0.0674261674284935,
+        0.14535479247570038
+      ],
+      "head_intercept": 0.3382282853126526,
+      "outer_fold": 0,
+      "primary_test": {
+        "native_failure_auc_macro_source": 0.7170990143012206,
+        "native_failure_auc_pooled": 0.8834132755686214,
+        "native_failure_valid_sources": 10,
+        "routing_objective_macro_source": 0.24417218973359323,
+        "routing_objective_pooled": 0.1973739940703092
+      },
+      "projection_rank": 8,
+      "projection_singular_values": [
+        2.1679552467563608,
+        1.111430941185722,
+        1.0588417940097783,
+        0.7785783427711027,
+        0.4856810104142152,
+        0.2682321365346183,
+        0.16532307522763726,
+        0.04684963514163733
+      ],
+      "test_groups": [
+        "ai2_arc_challenge",
+        "ceval:advanced_mathematics",
+        "ceval:basic_medicine",
+        "ceval:college_physics",
+        "ceval:high_school_chinese",
+        "ceval:high_school_history",
+        "ceval:high_school_mathematics",
+        "ceval:legal_professional",
+        "ceval:middle_school_history",
+        "ceval:professional_tour_guide",
+        "mmlu_pro:other",
+        "mmlu_pro:physics"
+      ]
+    },
+    {
+      "head_coef": [
+        -1.8655153512954712,
+        0.6411550045013428,
+        -0.9250150918960571,
+        -0.21720142662525177,
+        0.24579809606075287,
+        -0.5387260913848877,
+        -0.8341675996780396,
+        -0.32833048701286316
+      ],
+      "head_intercept": 0.16438141465187073,
+      "outer_fold": 1,
+      "primary_test": {
+        "native_failure_auc_macro_source": 0.7470575290231775,
+        "native_failure_auc_pooled": 0.7099752939321196,
+        "native_failure_valid_sources": 6,
+        "routing_objective_macro_source": 0.2536842105263158,
+        "routing_objective_pooled": 0.14251554280248685
+      },
+      "projection_rank": 8,
+      "projection_singular_values": [
+        2.1273856903624644,
+        1.3483311307981651,
+        0.9667123140170785,
+        0.7004458361490707,
+        0.38435052104841927,
+        0.2352478368428542,
+        0.1634198771405159,
+        0.036101173065240584
+      ],
+      "test_groups": [
+        "ceval:college_chemistry",
+        "ceval:fire_engineer",
+        "ceval:middle_school_mathematics",
+        "ceval:plant_protection",
+        "ceval:tax_accountant",
+        "commonsense_qa"
+      ]
+    },
+    {
+      "head_coef": [
+        -2.0198960304260254,
+        -0.035129282623529434,
+        -1.0469567775726318,
+        -0.21483725309371948,
+        -0.7211388349533081,
+        0.1706945300102234,
+        0.7570624947547913,
+        0.4766944944858551
+      ],
+      "head_intercept": -0.17882153391838074,
+      "outer_fold": 2,
+      "primary_test": {
+        "native_failure_auc_macro_source": 0.7126926622759956,
+        "native_failure_auc_pooled": 0.7993232820819028,
+        "native_failure_valid_sources": 15,
+        "routing_objective_macro_source": 0.19284772635612019,
+        "routing_objective_pooled": 0.2362204724409449
+      },
+      "projection_rank": 8,
+      "projection_singular_values": [
+        1.9937954167654997,
+        1.181476870888243,
+        1.1761544539784128,
+        0.8803208301348746,
+        0.5876484568388,
+        0.3112888119539175,
+        0.15989274689313987,
+        0.05283041052912441
+      ],
+      "test_groups": [
+        "ceval:accountant",
+        "ceval:art_studies",
+        "ceval:college_economics",
+        "ceval:electrical_engineer",
+        "ceval:high_school_biology",
+        "ceval:law",
+        "ceval:marxism",
+        "ceval:metrology_engineer",
+        "ceval:middle_school_biology",
+        "ceval:middle_school_chemistry",
+        "ceval:operating_system",
+        "ceval:physician",
+        "mbpp",
+        "mmlu_pro:biology",
+        "mmlu_pro:health",
+        "mmlu_pro:history"
+      ]
+    },
+    {
+      "head_coef": [
+        -1.6157563924789429,
+        -0.11586066335439682,
+        -0.28704774379730225,
+        0.10363954305648804,
+        0.03780403360724449,
+        0.2333241105079651,
+        0.2032678723335266,
+        -0.42369890213012695
+      ],
+      "head_intercept": -0.12092015892267227,
+      "outer_fold": 3,
+      "primary_test": {
+        "native_failure_auc_macro_source": 0.7836601356820994,
+        "native_failure_auc_pooled": 0.8065964824330535,
+        "native_failure_valid_sources": 15,
+        "routing_objective_macro_source": 0.22316327216508702,
+        "routing_objective_pooled": 0.23499638467100506
+      },
+      "projection_rank": 8,
+      "projection_singular_values": [
+        2.0880429079087723,
+        1.1949782453738953,
+        1.046919978215461,
+        0.8297216558101047,
+        0.5638722475705557,
+        0.29425103138831293,
+        0.14218684400019288,
+        0.053587883406597196
+      ],
+      "test_groups": [
+        "ceval:civil_servant",
+        "ceval:clinical_medicine",
+        "ceval:college_programming",
+        "ceval:high_school_chemistry",
+        "ceval:ideological_and_moral_cultivation",
+        "ceval:logic",
+        "ceval:mao_zedong_thought",
+        "ceval:middle_school_physics",
+        "ceval:probability_and_statistics",
+        "ceval:teacher_qualification",
+        "ceval:urban_and_rural_planner",
+        "ceval:veterinary_medicine",
+        "mmlu_pro:business",
+        "mmlu_pro:engineering",
+        "mmlu_pro:law",
+        "mmlu_pro:philosophy"
+      ]
+    },
+    {
+      "head_coef": [
+        -1.6433773040771484,
+        -0.7445660829544067,
+        0.7104916572570801,
+        -0.15910425782203674,
+        0.4371025860309601,
+        -0.017525067552924156,
+        -0.40761151909828186,
+        0.4053570032119751
+      ],
+      "head_intercept": -0.0141042061150074,
+      "outer_fold": 4,
+      "primary_test": {
+        "native_failure_auc_macro_source": 0.7010373053487796,
+        "native_failure_auc_pooled": 0.7359468059068288,
+        "native_failure_valid_sources": 19,
+        "routing_objective_macro_source": 0.19661049553708831,
+        "routing_objective_pooled": 0.21694088970140157
+      },
+      "projection_rank": 8,
+      "projection_singular_values": [
+        2.1770148247712764,
+        1.1148176481614795,
+        0.9918174336330173,
+        0.7998848756265986,
+        0.5326810201037375,
+        0.2844926174462851,
+        0.16445444040817225,
+        0.05039887527597281
+      ],
+      "test_groups": [
+        "ceval:business_administration",
+        "ceval:chinese_language_and_literature",
+        "ceval:computer_architecture",
+        "ceval:computer_network",
+        "ceval:discrete_mathematics",
+        "ceval:education_science",
+        "ceval:environmental_impact_assessment_engineer",
+        "ceval:high_school_geography",
+        "ceval:high_school_physics",
+        "ceval:high_school_politics",
+        "ceval:middle_school_geography",
+        "ceval:middle_school_politics",
+        "ceval:modern_chinese_history",
+        "ceval:sports_science",
+        "mmlu_pro:chemistry",
+        "mmlu_pro:computer science",
+        "mmlu_pro:economics",
+        "mmlu_pro:math",
+        "mmlu_pro:psychology"
+      ]
+    }
+  ],
+  "primary_deltas_vs_live": {
+    "native_failure_auc_macro_source": 0.02082667829684781,
+    "native_failure_auc_pooled": 0.007627007502083782,
+    "routing_objective_macro_source": 0.008314125588277932,
+    "routing_objective_pooled": 0.004555555555555535
+  },
+  "protocol": {
+    "diagnostic": "lowrank_only",
+    "grouping": "source_family",
+    "head": {
+      "C": 0.1,
+      "family": "logistic",
+      "harm_weight": 2.0
+    },
+    "outer_folds": 5,
+    "primary": {
+      "alpha": 0.5,
+      "formula": "z(live)+0.5*z(lowrank)"
+    },
+    "projection_max_rank": 8,
+    "projection_targets": [
+      "native_failure",
+      "positive_benefit",
+      "harmful_escalation",
+      "live_residual"
+    ],
+    "projection_weighting": [
+      "pooled",
+      "source_balanced"
+    ],
+    "rows": 3000
+  },
+  "status": "development_only",
+  "strata": {
+    "language": {
+      "en": {
+        "candidate_routing": 0.20350000000000001,
+        "delta": 0.0034999999999999754,
+        "live_routing": 0.20000000000000004,
+        "rows": 2000
+      },
+      "zh": {
+        "candidate_routing": 0.22866666666666666,
+        "delta": 0.0036666666666666514,
+        "live_routing": 0.225,
+        "rows": 1000
+      }
+    },
+    "pool": {
+      "p25b_arc": {
+        "candidate_routing": 0.08133333333333333,
+        "delta": 0.0040000000000000036,
+        "live_routing": 0.07733333333333332,
+        "rows": 500
+      },
+      "p25b_ceval": {
+        "candidate_routing": 0.22866666666666666,
+        "delta": 0.0036666666666666514,
+        "live_routing": 0.225,
+        "rows": 1000
+      },
+      "p25b_commonsense": {
+        "candidate_routing": 0.08,
+        "delta": 0.0011111111111111183,
+        "live_routing": 0.07888888888888888,
+        "rows": 600
+      },
+      "p25b_mbpp": {
+        "candidate_routing": 0.25666666666666665,
+        "delta": -0.00666666666666671,
+        "live_routing": 0.26333333333333336,
+        "rows": 100
+      },
+      "p25b_mmlu_pro": {
+        "candidate_routing": 0.23208333333333334,
+        "delta": -0.003333333333333355,
+        "live_routing": 0.2354166666666667,
+        "rows": 800
+      }
+    }
+  },
+  "summaries": {
+    "anchored_lowrank_alpha0.5": {
+      "native_failure_auc_macro_source": 0.7295128628946078,
+      "native_failure_auc_pooled": 0.8172301194776326,
+      "native_failure_valid_sources": 65,
+      "routing_objective_macro_source": 0.21512966567398562,
+      "routing_objective_pooled": 0.21455555555555553
+    },
+    "live": {
+      "native_failure_auc_macro_source": 0.70868618459776,
+      "native_failure_auc_pooled": 0.8096031119755488,
+      "native_failure_valid_sources": 65,
+      "routing_objective_macro_source": 0.20681554008570768,
+      "routing_objective_pooled": 0.21
+    },
+    "lowrank_only_diagnostic": {
+      "native_failure_auc_macro_source": 0.6868450965264287,
+      "native_failure_auc_pooled": 0.7431771047513197,
+      "native_failure_valid_sources": 65,
+      "routing_objective_macro_source": 0.21174650442809786,
+      "routing_objective_pooled": 0.20444444444444443
+    }
+  }
+}

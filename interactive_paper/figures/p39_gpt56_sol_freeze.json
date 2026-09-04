@@ -1,0 +1,35 @@
+{
+  "experiment": "P39 gpt-5.6-sol low-reasoning expert substitution",
+  "frozen_at_utc": "2026-09-04T10:12:00Z",
+  "parent_head": "f7af940",
+  "hypothesis": "The newer and cheaper gpt-5.6-sol low-reasoning expert improves accuracy over gpt-5.5 low on the exact balanced-tier fire population without material latency regression.",
+  "official_model_receipt": {
+    "url": "https://developers.openai.com/api/docs/models/gpt-5.6-sol",
+    "observed_2026_09_04": "Chat Completions supported; low reasoning supported; $4/M input and $20/M output; alias is the only listed snapshot."
+  },
+  "population": {
+    "source": "The committed P38 292-row paired parquet, preserving the exact P38 baseline answers, baseline verdicts, transcripts, pool assignments, and historical low-reasoning latencies.",
+    "n": 292,
+    "sorted_pool_id_sha256": "790b82563f3684189ea7592c1179eb88338d9bb089f65da8595fff3efccd08bf"
+  },
+  "arms": {
+    "baseline": "P38's locked, freshly judged gpt-5.5 low answer and verdict.",
+    "candidate": "Fresh gpt-5.6-sol low answer with the identical expert system prompt and hosted-ASR transcript; no query, reference, local answer, score, baseline answer, or baseline verdict is exposed."
+  },
+  "judging": "Candidate answers only are freshly judged, arm-blind, with the identical pool-specific P38 judge: gpt-5.4-mini strict-reference for frozen/SD-QA/Reasoning-zh and verbatim OpenAudioBench gpt-4o-2024-08-06 for TriviaQA/WebQ/Llama-Q.",
+  "gates_all_required": {
+    "candidate_and_judge": "292/292, zero terminal errors",
+    "overall_accuracy_delta": ">= +0.02",
+    "exact_one_sided_mcnemar_p": "< 0.05",
+    "direction": "wins > losses",
+    "pool_robustness": "candidate delta >= 0 in every one of the six pools",
+    "candidate_median_latency_ratio": "<= 1.25 versus P38's same-row published gpt-5.5 low latency",
+    "openai_api_cost_usd": "<= 15",
+    "live_policy": "unchanged"
+  },
+  "decision": "Any failed gate rejects gpt-5.6-sol as the default expert. A pass authorizes only a fresh opt-in native validation, not activation.",
+  "prohibitions": [
+    "No prompt retuning, row dropping, judge substitution, or pool-specific mining after outputs are opened.",
+    "No model, probe, threshold, routing, or live-default change in P39."
+  ]
+}

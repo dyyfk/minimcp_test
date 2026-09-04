@@ -1,0 +1,14 @@
+{
+  "status": "frozen_before_context_generation",
+  "seed": 69,
+  "rows": 120,
+  "counts_by_target_pool": {
+    "p17_snli": 40,
+    "p17_sst2": 40,
+    "p17_wic": 40
+  },
+  "selection_sha256": "f2e5bcfdbff82301faf15c2f75d5cbf1bea3b6f390c8f800278763b5c1f08f1e",
+  "canonical_content_sha256": "fa216f3ee92d8d581a34cfcc4b118431037a5ca64b1fd86ada3560c179d655e8",
+  "source_selection_sha256": "fe0b9de698be07a639d94a0171da2607e7fbacbb582de5bc7175a47eecd086f8",
+  "guard": "Pairs frozen before any two-turn model outputs."
+}

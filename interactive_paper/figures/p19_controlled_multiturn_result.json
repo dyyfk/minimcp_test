@@ -1,0 +1,246 @@
+{
+  "status": "controlled_multiturn_paired_evaluation",
+  "rows": 120,
+  "outcome_shift": {
+    "standalone_adequate_rate": 0.675,
+    "context_adequate_rate": 0.7166666666666667,
+    "adequate_rate_delta": 0.041666666666666685,
+    "adequate_rate_delta_bootstrap_95ci": [
+      0.04120333333333333,
+      -0.041666666666666664,
+      0.125
+    ],
+    "correct_to_wrong": 10,
+    "wrong_to_correct": 15,
+    "outcome_agreement": 0.7916666666666666
+  },
+  "matched_standalone": {
+    "rows": 120,
+    "failure_rate": 0.325,
+    "live_auc": 0.7094017094017093,
+    "candidate_auc": 0.720164609053498,
+    "budgets": {
+      "conservative": {
+        "rate": 0.15,
+        "live_precision": 0.7777777777777778,
+        "candidate_precision": 0.8888888888888888,
+        "precision_delta": 0.11111111111111105,
+        "live_recall": 0.358974358974359,
+        "candidate_recall": 0.41025641025641024,
+        "selection_agreement": 0.9666666666666667
+      },
+      "balanced": {
+        "rate": 0.3,
+        "live_precision": 0.5833333333333334,
+        "candidate_precision": 0.5833333333333334,
+        "precision_delta": 0.0,
+        "live_recall": 0.5384615384615384,
+        "candidate_recall": 0.5384615384615384,
+        "selection_agreement": 0.9666666666666667
+      },
+      "aggressive": {
+        "rate": 0.5,
+        "live_precision": 0.45,
+        "candidate_precision": 0.45,
+        "precision_delta": 0.0,
+        "live_recall": 0.6923076923076923,
+        "candidate_recall": 0.6923076923076923,
+        "selection_agreement": 0.95
+      }
+    },
+    "auc_delta": 0.010762899651788671
+  },
+  "contextual_target": {
+    "rows": 120,
+    "failure_rate": 0.2833333333333333,
+    "live_auc": 0.5954172366621067,
+    "candidate_auc": 0.6135430916552668,
+    "budgets": {
+      "conservative": {
+        "rate": 0.15,
+        "live_precision": 0.3888888888888889,
+        "candidate_precision": 0.3333333333333333,
+        "precision_delta": -0.05555555555555558,
+        "live_recall": 0.20588235294117646,
+        "candidate_recall": 0.17647058823529413,
+        "selection_agreement": 0.9333333333333333
+      },
+      "balanced": {
+        "rate": 0.3,
+        "live_precision": 0.3611111111111111,
+        "candidate_precision": 0.3611111111111111,
+        "precision_delta": 0.0,
+        "live_recall": 0.38235294117647056,
+        "candidate_recall": 0.38235294117647056,
+        "selection_agreement": 0.8666666666666667
+      },
+      "aggressive": {
+        "rate": 0.5,
+        "live_precision": 0.35,
+        "candidate_precision": 0.35,
+        "precision_delta": 0.0,
+        "live_recall": 0.6176470588235294,
+        "candidate_recall": 0.6176470588235294,
+        "selection_agreement": 0.8333333333333334
+      }
+    },
+    "auc_delta": 0.018125854993160107
+  },
+  "by_target_pool": {
+    "p16_boolq": {
+      "rows": 40,
+      "failure_rate": 0.175,
+      "live_auc": 0.5887445887445888,
+      "candidate_auc": 0.6147186147186148,
+      "budgets": {
+        "conservative": {
+          "rate": 0.15,
+          "live_precision": 0.16666666666666666,
+          "candidate_precision": 0.16666666666666666,
+          "precision_delta": 0.0,
+          "live_recall": 0.14285714285714285,
+          "candidate_recall": 0.14285714285714285,
+          "selection_agreement": 0.95
+        },
+        "balanced": {
+          "rate": 0.3,
+          "live_precision": 0.16666666666666666,
+          "candidate_precision": 0.08333333333333333,
+          "precision_delta": -0.08333333333333333,
+          "live_recall": 0.2857142857142857,
+          "candidate_recall": 0.14285714285714285,
+          "selection_agreement": 0.9
+        },
+        "aggressive": {
+          "rate": 0.5,
+          "live_precision": 0.25,
+          "candidate_precision": 0.25,
+          "precision_delta": 0.0,
+          "live_recall": 0.7142857142857143,
+          "candidate_recall": 0.7142857142857143,
+          "selection_agreement": 0.85
+        }
+      },
+      "auc_delta": 0.025974025974025983
+    },
+    "p16_hellaswag": {
+      "rows": 40,
+      "failure_rate": 0.225,
+      "live_auc": 0.6200716845878136,
+      "candidate_auc": 0.5985663082437276,
+      "budgets": {
+        "conservative": {
+          "rate": 0.15,
+          "live_precision": 0.3333333333333333,
+          "candidate_precision": 0.3333333333333333,
+          "precision_delta": 0.0,
+          "live_recall": 0.2222222222222222,
+          "candidate_recall": 0.2222222222222222,
+          "selection_agreement": 1.0
+        },
+        "balanced": {
+          "rate": 0.3,
+          "live_precision": 0.3333333333333333,
+          "candidate_precision": 0.3333333333333333,
+          "precision_delta": 0.0,
+          "live_recall": 0.4444444444444444,
+          "candidate_recall": 0.4444444444444444,
+          "selection_agreement": 0.9
+        },
+        "aggressive": {
+          "rate": 0.5,
+          "live_precision": 0.25,
+          "candidate_precision": 0.25,
+          "precision_delta": 0.0,
+          "live_recall": 0.5555555555555556,
+          "candidate_recall": 0.5555555555555556,
+          "selection_agreement": 0.85
+        }
+      },
+      "auc_delta": -0.021505376344086002
+    },
+    "p16_qasc": {
+      "rows": 40,
+      "failure_rate": 0.45,
+      "live_auc": 0.6464646464646464,
+      "candidate_auc": 0.6414141414141414,
+      "budgets": {
+        "conservative": {
+          "rate": 0.15,
+          "live_precision": 0.6666666666666666,
+          "candidate_precision": 0.5,
+          "precision_delta": -0.16666666666666663,
+          "live_recall": 0.2222222222222222,
+          "candidate_recall": 0.16666666666666666,
+          "selection_agreement": 0.9
+        },
+        "balanced": {
+          "rate": 0.3,
+          "live_precision": 0.5833333333333334,
+          "candidate_precision": 0.5833333333333334,
+          "precision_delta": 0.0,
+          "live_recall": 0.3888888888888889,
+          "candidate_recall": 0.3888888888888889,
+          "selection_agreement": 0.9
+        },
+        "aggressive": {
+          "rate": 0.5,
+          "live_precision": 0.55,
+          "candidate_precision": 0.55,
+          "precision_delta": 0.0,
+          "live_recall": 0.6111111111111112,
+          "candidate_recall": 0.6111111111111112,
+          "selection_agreement": 0.85
+        }
+      },
+      "auc_delta": -0.005050505050504972
+    }
+  },
+  "score_context_shift": {
+    "live_mean_delta": -0.42811920572395856,
+    "candidate_mean_delta": -0.40089755954928835,
+    "live_pair_correlation": 0.47254394674885886,
+    "candidate_pair_correlation": 0.494236734948343
+  },
+  "macro_context_auc_delta": {
+    "point": -0.00019395180685499724,
+    "source_stratified_bootstrap_95ci": [
+      0.00042650901323163296,
+      -0.05893517651439849,
+      0.06122546466503264
+    ]
+  },
+  "decision": {
+    "broad_support": false,
+    "statistical_support": false,
+    "activation_recommended": false,
+    "reason": "controlled context evidence is diagnostic, not organic; candidate must also improve every source without a material interval regression"
+  },
+  "execution": {
+    "errors": 0,
+    "carrier_eot_rate": 1.0,
+    "target_eot_rate": 0.9916666666666667,
+    "elapsed_s": {
+      "median": 7.93278597301105,
+      "mean": 8.533186222117122,
+      "p90": 12.855276209011208
+    }
+  },
+  "judge_usage": {
+    "prompt_tokens": 40655,
+    "completion_tokens": 8422,
+    "cached_prompt_tokens": 0,
+    "cost_usd_at_published_standard_rates": 0.06839025,
+    "pricing_checked_utc": "2026-09-02"
+  },
+  "provenance": {
+    "pairs_sha256": "fec072f1e014959401e42254abf35d66537f6fe3bb5db61146e5d68d456e2317",
+    "context_judged_sha256": "242c6bb116e481d99d35961f9a4bf36b0f352259b74340feae480a419eb0e6a7",
+    "standalone_judged_sha256": "d6ecf2a3ad37c8c4da4687ec75ce653626525f71c4e42396272178051fd9c079",
+    "context_feature_manifest_sha256": "4df4d88e9ce8bac9de95e40a7b846b36b645ddb3cbab6bae9ff2c00b72c95aca",
+    "context_trace_manifest_sha256": "d4c92b75cd8a19deca54b53eaca1447bb9164281859226c1e82f18061768a7c3",
+    "standalone_feature_manifest_sha256": "c444d2b88359eaabab2b92c8c437ff06cb9bb6a4627bf3e8dc72d4f55ae34b50",
+    "live_artifact_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
+    "candidate_artifact_sha256": "4d75a506a59e6206e4687a6b3630b1dae54034f902d9136112689c9091eeec15"
+  }
+}

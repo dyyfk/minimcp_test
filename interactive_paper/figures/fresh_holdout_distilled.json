@@ -1,0 +1,88 @@
+{
+  "status": "one_shot_frozen_holdout",
+  "rows": 60,
+  "pool_counts": {
+    "fresh_fast": 30,
+    "fresh_never": 30
+  },
+  "official_native_failure": {
+    "positive_rate": 0.75,
+    "live_auc": 0.8192592592592592,
+    "candidate_auc": 0.84,
+    "candidate_vs_live_delta_ci": [
+      0.02067654122334522,
+      -0.027823240589198057,
+      0.08020868512889794
+    ],
+    "budgets": {
+      "conservative": {
+        "target_rate": 0.15,
+        "live_precision": 0.8888888888888888,
+        "candidate_precision": 0.8888888888888888,
+        "live_recall": 0.17777777777777778,
+        "candidate_recall": 0.17777777777777778,
+        "selection_overlap": 0.9666666666666667
+      },
+      "balanced": {
+        "target_rate": 0.3,
+        "live_precision": 0.9444444444444444,
+        "candidate_precision": 0.9444444444444444,
+        "live_recall": 0.37777777777777777,
+        "candidate_recall": 0.37777777777777777,
+        "selection_overlap": 0.9333333333333333
+      },
+      "aggressive": {
+        "target_rate": 0.5,
+        "live_precision": 0.9666666666666667,
+        "candidate_precision": 0.9666666666666667,
+        "live_recall": 0.6444444444444445,
+        "candidate_recall": 0.6444444444444445,
+        "selection_overlap": 0.9333333333333333
+      }
+    }
+  },
+  "deployed_fresh_policy": {
+    "positive_rate": 0.7666666666666667,
+    "live_auc": 0.8726708074534162,
+    "candidate_auc": 0.8975155279503105,
+    "candidate_vs_live_delta_ci": [
+      0.02456521951758409,
+      -0.02291325695581004,
+      0.08523017161410029
+    ],
+    "budgets": {
+      "conservative": {
+        "target_rate": 0.15,
+        "live_precision": 1.0,
+        "candidate_precision": 1.0,
+        "live_recall": 0.1956521739130435,
+        "candidate_recall": 0.1956521739130435,
+        "selection_overlap": 0.9666666666666667
+      },
+      "balanced": {
+        "target_rate": 0.3,
+        "live_precision": 1.0,
+        "candidate_precision": 1.0,
+        "live_recall": 0.391304347826087,
+        "candidate_recall": 0.391304347826087,
+        "selection_overlap": 0.9333333333333333
+      },
+      "aggressive": {
+        "target_rate": 0.5,
+        "live_precision": 1.0,
+        "candidate_precision": 1.0,
+        "live_recall": 0.6521739130434783,
+        "candidate_recall": 0.6521739130434783,
+        "selection_overlap": 0.9333333333333333
+      }
+    }
+  },
+  "provenance": {
+    "live_artifact_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
+    "candidate_artifact_sha256": "c85e0697788b2f8ce819fc963aa68c5a5ef34e0ae59c4f58b7917ccbf848dbb0",
+    "metadata_sha256": "c0d7f1bd20c9dcba5b35d3797cf5fd831dba7f5cf5da881a199e7ebce129377e",
+    "judged_sha256": "e1e742cfa03b6f0c3e675b555761a84b47ae1220e6194ddaa3fe6fd08922481b",
+    "ordered_id_sha256": "9d003607e666255b2b3ccbea576e5a7f652779338d3b9833a69d42eaaad14561"
+  },
+  "note": "Candidate was frozen before this split was opened; no selection or retuning uses these rows."
+}

@@ -1,0 +1,35 @@
+{
+  "status": "frozen_pre_outcome",
+  "seed": 45,
+  "n": 400,
+  "counts_by_pool": {
+    "p15_sciq": 200,
+    "p15_winogrande": 200
+  },
+  "id_list_sha256": "301bdd18e3e03e54a2969f2eaecf3350e4c5102b5fcdc0fd423715cabeb52968",
+  "canonical_content_sha256": "9295e1a47bd493af7f14dfb35d4bf395ab3d58fafd17fd465b58efb3b2f61f9a",
+  "selection_parquet_sha256": "f84df6c71f02558403114a634a668bc420c6eafb3235addf5929362a84ad7454",
+  "raw_sources": {
+    "winogrande": {
+      "sha256": "f9d914d1818c0aba98cabdf8af2bc4bd943c462b9c5e7062647e05c2ce3315d1",
+      "revision": "01e74176c63542e6b0bcb004dcdea22d94fb67b5"
+    },
+    "sciq": {
+      "sha256": "455dd9f1d725cd3ecbce369799a2fbbdbbfecf51ab84a86d56ba3370dc847b8a",
+      "revision": "2c94ad3e1aafab77146f384e23536f97a4849815"
+    }
+  },
+  "rejected": {
+    "p15_winogrande": {
+      "existing_query_overlap": 0,
+      "within_source_duplicates": 0
+    },
+    "p15_sciq": {
+      "existing_query_overlap": 0,
+      "within_source_duplicates": 0
+    }
+  },
+  "characters": 60104,
+  "tts_1_usd_at_15_per_million_chars": 0.90156,
+  "guard": "IDs and content frozen before TTS, native generation, feature extraction, or judging."
+}

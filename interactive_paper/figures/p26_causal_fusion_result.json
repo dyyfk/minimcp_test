@@ -1,0 +1,899 @@
+{
+  "status": "p26_sparse_causal_score_fusion_development",
+  "inputs": {
+    "rows": 3000,
+    "source_families": 69,
+    "layers": [
+      18,
+      22,
+      26,
+      30
+    ],
+    "causal_dimension": 49152,
+    "selection_sha256": "defedcccd9cd5d0d85c8ab94e8c09e80cdd8594cb4fbe23385022d2cdd479d89",
+    "local_sha256": "0a43f071ece88a728c56447b7195e0742d6c9e695f55403adaf51ceb633f5b4d",
+    "expert_sha256": "95109533dd3ce621aec7f5a39827da8f4f99b6be429793c81334e40d16144d12",
+    "live_artifact_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
+    "causal_files": [
+      {
+        "path": "../causal_prefill_p26/causal_prefill_feats.rank0.npz",
+        "sha256": "04a544684f55528241b7309b452b839b7a58f0f712ccf71eef40ed9009050866"
+      },
+      {
+        "path": "../causal_prefill_p26/causal_prefill_feats.rank1.npz",
+        "sha256": "ddb35a945accd2db6477ee94908c285626308e34dbd549f5b46d1ec93a892631"
+      },
+      {
+        "path": "../causal_prefill_p26/causal_prefill_feats.rank2.npz",
+        "sha256": "b9eab752b04478ba68fc1956076f69eb5134e8baa55d013479817a2a588dfa93"
+      },
+      {
+        "path": "../causal_prefill_p26/causal_prefill_feats.rank3.npz",
+        "sha256": "229f106e7ff8faed1290dc081b81fd9c21c9a480ae5feeea3a4ef2ed790873e2"
+      },
+      {
+        "path": "../causal_prefill_p26/causal_prefill_feats.rank4.npz",
+        "sha256": "67a01b53f28ea840f4859fcafa96067943cd8898cbaabf110d9e93247ba4a27f"
+      },
+      {
+        "path": "../causal_prefill_p26/causal_prefill_feats.rank5.npz",
+        "sha256": "70d03a473081eb8c3d2f3908c499c545fd50dc541bd0d3ae2c508ca4f74be883"
+      },
+      {
+        "path": "../causal_prefill_p26/causal_prefill_feats.rank6.npz",
+        "sha256": "91a20a587c411e1cf5657fdf525637e61cc38c6870fca4e6e4aa0d7fc1cad54b"
+      },
+      {
+        "path": "../causal_prefill_p26/causal_prefill_feats.rank7.npz",
+        "sha256": "90c4d920415d2508d33475481e3b93a7855cc030c10f0f4b2943a537f12caa45"
+      }
+    ],
+    "original_files": [
+      {
+        "path": "../data_expand_p25b/native_single/prospective_native_feats.rank0.npz",
+        "sha256": "fdcde3005f7781920e6dfca634df06a5d76751a614600b281afa4e561e23cf24"
+      },
+      {
+        "path": "../data_expand_p25b/native_single/prospective_native_feats.rank1.npz",
+        "sha256": "7ac0f8fac336b6214c3a604a143c24652bd223928a2c01b00e47d855a72d9d3f"
+      },
+      {
+        "path": "../data_expand_p25b/native_single/prospective_native_feats.rank2.npz",
+        "sha256": "cedc53b3dac2cb03ef408ae426828530016db36c42046629494aff3943b96451"
+      },
+      {
+        "path": "../data_expand_p25b/native_single/prospective_native_feats.rank3.npz",
+        "sha256": "4fb0cb760bbbfa685150922e545bbf9f5274bae741ca3513814bb248f5d64a95"
+      },
+      {
+        "path": "../data_expand_p25b/native_single/prospective_native_feats.rank4.npz",
+        "sha256": "33410c7789169af75e3a077e122b75df938e8b81eeb6caf22c7f18667b84f756"
+      },
+      {
+        "path": "../data_expand_p25b/native_single/prospective_native_feats.rank5.npz",
+        "sha256": "dda97185e12a8692798586fcb022fe189da942a8009002725a4252415652b86c"
+      },
+      {
+        "path": "../data_expand_p25b/native_single/prospective_native_feats.rank6.npz",
+        "sha256": "a47f433aaed7a2be0e34bbf9b777f927cf3d7009f600f77ea431de8095e9f829"
+      },
+      {
+        "path": "../data_expand_p25b/native_single/prospective_native_feats.rank7.npz",
+        "sha256": "8253002b760ca3af43a1e0ac354cf99d2fa97eaa6c3ca776fdd4fb31b4bf9e09"
+      }
+    ]
+  },
+  "protocol": {
+    "outer_folds": 5,
+    "inner_folds": 3,
+    "grouping": "source_family",
+    "base_target": "native_failure",
+    "base_training_scores": "inner out-of-fold only",
+    "outer_test_scores": "base heads refit on complete outer train",
+    "meta_hyperparameters": "fixed before evaluation; no selection",
+    "primary_meta_head": "sparse_logistic_l1_c0.05",
+    "frozen_gates": {
+      "macro_routing_delta": ">= 0.005",
+      "pooled_routing_delta": ">= 0",
+      "macro_native_auc_delta": ">= 0.010",
+      "pooled_native_auc_delta": ">= 0",
+      "each_language_routing_delta": ">= 0",
+      "each_pool_routing_delta": ">= -0.010"
+    },
+    "development_only": true,
+    "pass_action": "causally recapture frozen P22 and P23 only"
+  },
+  "base_specs": [
+    {
+      "layer": 18,
+      "view": "full",
+      "c": 0.0001,
+      "name": "l18_full_c0.0001"
+    },
+    {
+      "layer": 18,
+      "view": "last_user",
+      "c": 0.0001,
+      "name": "l18_last_user_c0.0001"
+    },
+    {
+      "layer": 22,
+      "view": "full",
+      "c": 0.0001,
+      "name": "l22_full_c0.0001"
+    },
+    {
+      "layer": 22,
+      "view": "last_user",
+      "c": 0.0001,
+      "name": "l22_last_user_c0.0001"
+    },
+    {
+      "layer": 26,
+      "view": "full",
+      "c": 0.0001,
+      "name": "l26_full_c0.0001"
+    },
+    {
+      "layer": 26,
+      "view": "last_user",
+      "c": 0.0001,
+      "name": "l26_last_user_c0.0001"
+    },
+    {
+      "layer": 30,
+      "view": "full",
+      "c": 0.0001,
+      "name": "l30_full_c0.0001"
+    },
+    {
+      "layer": 30,
+      "view": "last_user",
+      "c": 0.0001,
+      "name": "l30_last_user_c0.0001"
+    }
+  ],
+  "meta_specs": [
+    {
+      "name": "sparse_logistic_l1_c0.05",
+      "family": "logistic_l1",
+      "regularization": 0.05
+    },
+    {
+      "name": "ridge_alpha100",
+      "family": "ridge",
+      "regularization": 100.0
+    }
+  ],
+  "outer_folds": [
+    {
+      "outer_fold": 0,
+      "test_groups": [
+        "ai2_arc_challenge",
+        "ceval:advanced_mathematics",
+        "ceval:basic_medicine",
+        "ceval:college_physics",
+        "ceval:high_school_chinese",
+        "ceval:high_school_history",
+        "ceval:high_school_mathematics",
+        "ceval:legal_professional",
+        "ceval:middle_school_history",
+        "ceval:professional_tour_guide",
+        "mmlu_pro:other",
+        "mmlu_pro:physics"
+      ],
+      "meta_heads": {
+        "sparse_logistic_l1_c0.05": {
+          "fit": {
+            "spec": {
+              "name": "sparse_logistic_l1_c0.05",
+              "family": "logistic_l1",
+              "regularization": 0.05
+            },
+            "intercept": 0.0925728685209648,
+            "standardization_mean": [
+              0.5820490047167288,
+              0.5827187400057043,
+              0.5884413285272669,
+              0.5888458981712749,
+              0.5899309435084132,
+              0.591590560928923,
+              0.5965998089702701,
+              0.5950232696274638
+            ],
+            "standardization_scale": [
+              0.1688209314034235,
+              0.15496520262895278,
+              0.17753560295956097,
+              0.16106598147592904,
+              0.168713566579417,
+              0.1525941617474121,
+              0.16308022979347345,
+              0.14779193299734095
+            ],
+            "coefficients": {
+              "l18_full_c0.0001": 0.0,
+              "l18_last_user_c0.0001": 0.0,
+              "l22_full_c0.0001": 0.9452234438551939,
+              "l22_last_user_c0.0001": 0.0,
+              "l26_full_c0.0001": 0.0,
+              "l26_last_user_c0.0001": -0.10395601494111836,
+              "l30_full_c0.0001": 0.0,
+              "l30_last_user_c0.0001": 0.0
+            },
+            "nonzero_coefficients": 2
+          },
+          "test": {
+            "routing_objective_pooled": 0.19822109275730623,
+            "routing_objective_macro_source": 0.2508895386614685,
+            "native_failure_auc_pooled": 0.8840321831966578,
+            "native_failure_auc_macro_source": 0.7509221387831706,
+            "native_failure_valid_sources": 10
+          }
+        },
+        "ridge_alpha100": {
+          "fit": {
+            "spec": {
+              "name": "ridge_alpha100",
+              "family": "ridge",
+              "regularization": 100.0
+            },
+            "intercept": 0.529074240322061,
+            "standardization_mean": [
+              0.5820490047167288,
+              0.5827187400057043,
+              0.5884413285272669,
+              0.5888458981712749,
+              0.5899309435084132,
+              0.591590560928923,
+              0.5965998089702701,
+              0.5950232696274638
+            ],
+            "standardization_scale": [
+              0.1688209314034235,
+              0.15496520262895278,
+              0.17753560295956097,
+              0.16106598147592904,
+              0.168713566579417,
+              0.1525941617474121,
+              0.16308022979347345,
+              0.14779193299734095
+            ],
+            "coefficients": {
+              "l18_full_c0.0001": 0.0495464851306373,
+              "l18_last_user_c0.0001": 0.004697327546689246,
+              "l22_full_c0.0001": 0.16510062526553726,
+              "l22_last_user_c0.0001": -0.001173589045811495,
+              "l26_full_c0.0001": 0.05659958744807698,
+              "l26_last_user_c0.0001": -0.10005945570786921,
+              "l30_full_c0.0001": 0.06790409726396694,
+              "l30_last_user_c0.0001": -0.05482733314759062
+            },
+            "nonzero_coefficients": 8
+          },
+          "test": {
+            "routing_objective_pooled": 0.19949174078780177,
+            "routing_objective_macro_source": 0.25069753086419755,
+            "native_failure_auc_pooled": 0.8862264920596965,
+            "native_failure_auc_macro_source": 0.7534216519326702,
+            "native_failure_valid_sources": 10
+          }
+        }
+      }
+    },
+    {
+      "outer_fold": 1,
+      "test_groups": [
+        "ceval:college_chemistry",
+        "ceval:fire_engineer",
+        "ceval:middle_school_mathematics",
+        "ceval:plant_protection",
+        "ceval:tax_accountant",
+        "commonsense_qa"
+      ],
+      "meta_heads": {
+        "sparse_logistic_l1_c0.05": {
+          "fit": {
+            "spec": {
+              "name": "sparse_logistic_l1_c0.05",
+              "family": "logistic_l1",
+              "regularization": 0.05
+            },
+            "intercept": 0.055147628934603836,
+            "standardization_mean": [
+              0.5826828864071869,
+              0.5854461570272381,
+              0.5837495161031984,
+              0.589966968992742,
+              0.5903567005493979,
+              0.5955238101524319,
+              0.5937798256802652,
+              0.5981231372976531
+            ],
+            "standardization_scale": [
+              0.195412551397608,
+              0.17825135830073457,
+              0.20230672413170386,
+              0.18239725677198565,
+              0.1880231919935667,
+              0.1711083533982894,
+              0.1785410206019069,
+              0.16398811248857437
+            ],
+            "coefficients": {
+              "l18_full_c0.0001": 0.0,
+              "l18_last_user_c0.0001": 0.0,
+              "l22_full_c0.0001": 1.4822961650367215,
+              "l22_last_user_c0.0001": 0.0,
+              "l26_full_c0.0001": 0.0,
+              "l26_last_user_c0.0001": 0.0,
+              "l30_full_c0.0001": 0.0,
+              "l30_last_user_c0.0001": -0.3159901695015825
+            },
+            "nonzero_coefficients": 2
+          },
+          "test": {
+            "routing_objective_pooled": 0.1367766618842659,
+            "routing_objective_macro_source": 0.2508674463937622,
+            "native_failure_auc_pooled": 0.7016523278022112,
+            "native_failure_auc_macro_source": 0.7397265708566921,
+            "native_failure_valid_sources": 6
+          }
+        },
+        "ridge_alpha100": {
+          "fit": {
+            "spec": {
+              "name": "ridge_alpha100",
+              "family": "ridge",
+              "regularization": 100.0
+            },
+            "intercept": 0.5198650157048181,
+            "standardization_mean": [
+              0.5826828864071869,
+              0.5854461570272381,
+              0.5837495161031984,
+              0.589966968992742,
+              0.5903567005493979,
+              0.5955238101524319,
+              0.5937798256802652,
+              0.5981231372976531
+            ],
+            "standardization_scale": [
+              0.195412551397608,
+              0.17825135830073457,
+              0.20230672413170386,
+              0.18239725677198565,
+              0.1880231919935667,
+              0.1711083533982894,
+              0.1785410206019069,
+              0.16398811248857437
+            ],
+            "coefficients": {
+              "l18_full_c0.0001": 0.08500452276551249,
+              "l18_last_user_c0.0001": 0.012293425386870489,
+              "l22_full_c0.0001": 0.20330623713030543,
+              "l22_last_user_c0.0001": -0.008855823387106337,
+              "l26_full_c0.0001": 0.0837821299418802,
+              "l26_last_user_c0.0001": -0.09472727944284909,
+              "l30_full_c0.0001": 0.06498744983315885,
+              "l30_last_user_c0.0001": -0.10806962926162553
+            },
+            "nonzero_coefficients": 8
+          },
+          "test": {
+            "routing_objective_pooled": 0.1406025824964132,
+            "routing_objective_macro_source": 0.2599171539961013,
+            "native_failure_auc_pooled": 0.7047449667957456,
+            "native_failure_auc_macro_source": 0.776673863500685,
+            "native_failure_valid_sources": 6
+          }
+        }
+      }
+    },
+    {
+      "outer_fold": 2,
+      "test_groups": [
+        "ceval:accountant",
+        "ceval:art_studies",
+        "ceval:college_economics",
+        "ceval:electrical_engineer",
+        "ceval:high_school_biology",
+        "ceval:law",
+        "ceval:marxism",
+        "ceval:metrology_engineer",
+        "ceval:middle_school_biology",
+        "ceval:middle_school_chemistry",
+        "ceval:operating_system",
+        "ceval:physician",
+        "mbpp",
+        "mmlu_pro:biology",
+        "mmlu_pro:health",
+        "mmlu_pro:history"
+      ],
+      "meta_heads": {
+        "sparse_logistic_l1_c0.05": {
+          "fit": {
+            "spec": {
+              "name": "sparse_logistic_l1_c0.05",
+              "family": "logistic_l1",
+              "regularization": 0.05
+            },
+            "intercept": -0.1556959197988519,
+            "standardization_mean": [
+              0.5056007272365053,
+              0.5018626257633704,
+              0.5063980436954127,
+              0.5054351147174548,
+              0.5064501260223396,
+              0.5066750735929461,
+              0.5070054696164248,
+              0.5070802617764301
+            ],
+            "standardization_scale": [
+              0.2090013507145689,
+              0.19956354642361965,
+              0.22158178253487865,
+              0.2069113313440993,
+              0.21008893189619465,
+              0.1943881463619082,
+              0.20231618825015849,
+              0.18887485791550457
+            ],
+            "coefficients": {
+              "l18_full_c0.0001": 0.0,
+              "l18_last_user_c0.0001": 0.0,
+              "l22_full_c0.0001": 0.9386712820178448,
+              "l22_last_user_c0.0001": 0.0,
+              "l26_full_c0.0001": 0.10305396673248388,
+              "l26_last_user_c0.0001": 0.0,
+              "l30_full_c0.0001": 0.13249372343319835,
+              "l30_last_user_c0.0001": 0.0
+            },
+            "nonzero_coefficients": 3
+          },
+          "test": {
+            "routing_objective_pooled": 0.23818897637795278,
+            "routing_objective_macro_source": 0.19295636721113127,
+            "native_failure_auc_pooled": 0.8097726028760511,
+            "native_failure_auc_macro_source": 0.7218757862507862,
+            "native_failure_valid_sources": 15
+          }
+        },
+        "ridge_alpha100": {
+          "fit": {
+            "spec": {
+              "name": "ridge_alpha100",
+              "family": "ridge",
+              "regularization": 100.0
+            },
+            "intercept": 0.45602939382994157,
+            "standardization_mean": [
+              0.5056007272365053,
+              0.5018626257633704,
+              0.5063980436954127,
+              0.5054351147174548,
+              0.5064501260223396,
+              0.5066750735929461,
+              0.5070054696164248,
+              0.5070802617764301
+            ],
+            "standardization_scale": [
+              0.2090013507145689,
+              0.19956354642361965,
+              0.22158178253487865,
+              0.2069113313440993,
+              0.21008893189619465,
+              0.1943881463619082,
+              0.20231618825015849,
+              0.18887485791550457
+            ],
+            "coefficients": {
+              "l18_full_c0.0001": 0.017638314540573734,
+              "l18_last_user_c0.0001": 0.0035471768399290785,
+              "l22_full_c0.0001": 0.16653574487884718,
+              "l22_last_user_c0.0001": -0.03484612795687199,
+              "l26_full_c0.0001": 0.09933984825633133,
+              "l26_last_user_c0.0001": -0.05172118939752848,
+              "l30_full_c0.0001": 0.0876915264139367,
+              "l30_last_user_c0.0001": -0.04496355756226079
+            },
+            "nonzero_coefficients": 8
+          },
+          "test": {
+            "routing_objective_pooled": 0.23753280839895016,
+            "routing_objective_macro_source": 0.19492841298648922,
+            "native_failure_auc_pooled": 0.8123268812923985,
+            "native_failure_auc_macro_source": 0.72407019677853,
+            "native_failure_valid_sources": 15
+          }
+        }
+      }
+    },
+    {
+      "outer_fold": 3,
+      "test_groups": [
+        "ceval:civil_servant",
+        "ceval:clinical_medicine",
+        "ceval:college_programming",
+        "ceval:high_school_chemistry",
+        "ceval:ideological_and_moral_cultivation",
+        "ceval:logic",
+        "ceval:mao_zedong_thought",
+        "ceval:middle_school_physics",
+        "ceval:probability_and_statistics",
+        "ceval:teacher_qualification",
+        "ceval:urban_and_rural_planner",
+        "ceval:veterinary_medicine",
+        "mmlu_pro:business",
+        "mmlu_pro:engineering",
+        "mmlu_pro:law",
+        "mmlu_pro:philosophy"
+      ],
+      "meta_heads": {
+        "sparse_logistic_l1_c0.05": {
+          "fit": {
+            "spec": {
+              "name": "sparse_logistic_l1_c0.05",
+              "family": "logistic_l1",
+              "regularization": 0.05
+            },
+            "intercept": -0.16437492123450478,
+            "standardization_mean": [
+              0.4770460343527578,
+              0.47344349246353273,
+              0.4763975040990802,
+              0.4763279464587352,
+              0.47629944063127394,
+              0.47845538638388374,
+              0.48184670654630607,
+              0.4835195600246998
+            ],
+            "standardization_scale": [
+              0.21163228346437804,
+              0.20087840608378796,
+              0.22088337584108514,
+              0.20814122146947056,
+              0.21490380485116128,
+              0.20087180356837317,
+              0.20607169371661888,
+              0.19455869661218808
+            ],
+            "coefficients": {
+              "l18_full_c0.0001": 0.0,
+              "l18_last_user_c0.0001": -0.0033804097799663454,
+              "l22_full_c0.0001": 0.7305657438877464,
+              "l22_last_user_c0.0001": 0.0,
+              "l26_full_c0.0001": 0.0,
+              "l26_last_user_c0.0001": -0.15901835272349246,
+              "l30_full_c0.0001": 0.6626385772411523,
+              "l30_last_user_c0.0001": -0.03335927505455734
+            },
+            "nonzero_coefficients": 5
+          },
+          "test": {
+            "routing_objective_pooled": 0.24222704266088213,
+            "routing_objective_macro_source": 0.2150567990858372,
+            "native_failure_auc_pooled": 0.7969670384759995,
+            "native_failure_auc_macro_source": 0.7634984149260635,
+            "native_failure_valid_sources": 15
+          }
+        },
+        "ridge_alpha100": {
+          "fit": {
+            "spec": {
+              "name": "ridge_alpha100",
+              "family": "ridge",
+              "regularization": 100.0
+            },
+            "intercept": 0.4537574522921678,
+            "standardization_mean": [
+              0.4770460343527578,
+              0.47344349246353273,
+              0.4763975040990802,
+              0.4763279464587352,
+              0.47629944063127394,
+              0.47845538638388374,
+              0.48184670654630607,
+              0.4835195600246998
+            ],
+            "standardization_scale": [
+              0.21163228346437804,
+              0.20087840608378796,
+              0.22088337584108514,
+              0.20814122146947056,
+              0.21490380485116128,
+              0.20087180356837317,
+              0.20607169371661888,
+              0.19455869661218808
+            ],
+            "coefficients": {
+              "l18_full_c0.0001": 0.016385129594915174,
+              "l18_last_user_c0.0001": -0.023460317245912486,
+              "l22_full_c0.0001": 0.16194019384742223,
+              "l22_last_user_c0.0001": -0.05487516535996035,
+              "l26_full_c0.0001": 0.1104141834397638,
+              "l26_last_user_c0.0001": -0.0704748347397519,
+              "l30_full_c0.0001": 0.15545979263194512,
+              "l30_last_user_c0.0001": -0.050101886186055385
+            },
+            "nonzero_coefficients": 8
+          },
+          "test": {
+            "routing_objective_pooled": 0.24078091106290675,
+            "routing_objective_macro_source": 0.21176102372790212,
+            "native_failure_auc_pooled": 0.7996824998955591,
+            "native_failure_auc_macro_source": 0.7628804965012976,
+            "native_failure_valid_sources": 15
+          }
+        }
+      }
+    },
+    {
+      "outer_fold": 4,
+      "test_groups": [
+        "ceval:business_administration",
+        "ceval:chinese_language_and_literature",
+        "ceval:computer_architecture",
+        "ceval:computer_network",
+        "ceval:discrete_mathematics",
+        "ceval:education_science",
+        "ceval:environmental_impact_assessment_engineer",
+        "ceval:high_school_geography",
+        "ceval:high_school_physics",
+        "ceval:high_school_politics",
+        "ceval:middle_school_geography",
+        "ceval:middle_school_politics",
+        "ceval:modern_chinese_history",
+        "ceval:sports_science",
+        "mmlu_pro:chemistry",
+        "mmlu_pro:computer science",
+        "mmlu_pro:economics",
+        "mmlu_pro:math",
+        "mmlu_pro:psychology"
+      ],
+      "meta_heads": {
+        "sparse_logistic_l1_c0.05": {
+          "fit": {
+            "spec": {
+              "name": "sparse_logistic_l1_c0.05",
+              "family": "logistic_l1",
+              "regularization": 0.05
+            },
+            "intercept": -0.07453338935350043,
+            "standardization_mean": [
+              0.5002159727467744,
+              0.497242710664352,
+              0.4990611467290255,
+              0.498959643672886,
+              0.49873536868006463,
+              0.5007850974494469,
+              0.5026246984024171,
+              0.5042841762207111
+            ],
+            "standardization_scale": [
+              0.22026540769297165,
+              0.20548216842208714,
+              0.22968199504581452,
+              0.2124480821683625,
+              0.2203992411977758,
+              0.2004053029287629,
+              0.21382542353080491,
+              0.19609237329505355
+            ],
+            "coefficients": {
+              "l18_full_c0.0001": 0.0,
+              "l18_last_user_c0.0001": 0.0,
+              "l22_full_c0.0001": 0.8218637931340945,
+              "l22_last_user_c0.0001": 0.0,
+              "l26_full_c0.0001": 0.0,
+              "l26_last_user_c0.0001": -0.007731430182878348,
+              "l30_full_c0.0001": 0.5832913508720536,
+              "l30_last_user_c0.0001": 0.0
+            },
+            "nonzero_coefficients": 3
+          },
+          "test": {
+            "routing_objective_pooled": 0.2157221206581353,
+            "routing_objective_macro_source": 0.19212834718374885,
+            "native_failure_auc_pooled": 0.7438742487286176,
+            "native_failure_auc_macro_source": 0.6875646198380486,
+            "native_failure_valid_sources": 19
+          }
+        },
+        "ridge_alpha100": {
+          "fit": {
+            "spec": {
+              "name": "ridge_alpha100",
+              "family": "ridge",
+              "regularization": 100.0
+            },
+            "intercept": 0.46742640334188956,
+            "standardization_mean": [
+              0.5002159727467744,
+              0.497242710664352,
+              0.4990611467290255,
+              0.498959643672886,
+              0.49873536868006463,
+              0.5007850974494469,
+              0.5026246984024171,
+              0.5042841762207111
+            ],
+            "standardization_scale": [
+              0.22026540769297165,
+              0.20548216842208714,
+              0.22968199504581452,
+              0.2124480821683625,
+              0.2203992411977758,
+              0.2004053029287629,
+              0.21382542353080491,
+              0.19609237329505355
+            ],
+            "coefficients": {
+              "l18_full_c0.0001": 0.012326735021425155,
+              "l18_last_user_c0.0001": -0.024230127128228737,
+              "l22_full_c0.0001": 0.16360035921773514,
+              "l22_last_user_c0.0001": -0.021168936460986502,
+              "l26_full_c0.0001": 0.12067899043011204,
+              "l26_last_user_c0.0001": -0.08753066323978499,
+              "l30_full_c0.0001": 0.1266021421438506,
+              "l30_last_user_c0.0001": -0.01922575799440546
+            },
+            "nonzero_coefficients": 8
+          },
+          "test": {
+            "routing_objective_pooled": 0.21389396709323583,
+            "routing_objective_macro_source": 0.19449830717143737,
+            "native_failure_auc_pooled": 0.742976802371434,
+            "native_failure_auc_macro_source": 0.6838645260655537,
+            "native_failure_valid_sources": 19
+          }
+        }
+      }
+    }
+  ],
+  "summaries": {
+    "live": {
+      "routing_objective_pooled": 0.21,
+      "routing_objective_macro_source": 0.20681554008570768,
+      "native_failure_auc_pooled": 0.8096031119755488,
+      "native_failure_auc_macro_source": 0.70868618459776,
+      "native_failure_valid_sources": 65
+    },
+    "sparse_logistic_l1_c0.05": {
+      "routing_objective_pooled": 0.21366666666666667,
+      "routing_objective_macro_source": 0.21296417970352058,
+      "native_failure_auc_pooled": 0.8058545151430954,
+      "native_failure_auc_macro_source": 0.7275680247315005,
+      "native_failure_valid_sources": 65
+    },
+    "ridge_alpha100": {
+      "routing_objective_pooled": 0.21466666666666667,
+      "routing_objective_macro_source": 0.21406336402948628,
+      "native_failure_auc_pooled": 0.8113693803834399,
+      "native_failure_auc_macro_source": 0.7306453245349807,
+      "native_failure_valid_sources": 65
+    }
+  },
+  "deltas_vs_live": {
+    "sparse_logistic_l1_c0.05": {
+      "routing_objective_pooled": 0.003666666666666679,
+      "routing_objective_macro_source": 0.0061486396178128955,
+      "native_failure_auc_pooled": -0.0037485968324534324,
+      "native_failure_auc_macro_source": 0.018881840133740502
+    },
+    "ridge_alpha100": {
+      "routing_objective_pooled": 0.00466666666666668,
+      "routing_objective_macro_source": 0.007247823943778597,
+      "native_failure_auc_pooled": 0.0017662684078910695,
+      "native_failure_auc_macro_source": 0.02195913993722065
+    }
+  },
+  "strata": {
+    "sparse_logistic_l1_c0.05": {
+      "language": {
+        "en": {
+          "rows": 2000,
+          "candidate_routing": 0.2001666666666667,
+          "live_routing": 0.20000000000000004,
+          "delta": 0.0001666666666666483
+        },
+        "zh": {
+          "rows": 1000,
+          "candidate_routing": 0.23466666666666666,
+          "live_routing": 0.225,
+          "delta": 0.009666666666666657
+        }
+      },
+      "pool": {
+        "p25b_arc": {
+          "rows": 500,
+          "candidate_routing": 0.08533333333333333,
+          "live_routing": 0.07733333333333332,
+          "delta": 0.008000000000000007
+        },
+        "p25b_ceval": {
+          "rows": 1000,
+          "candidate_routing": 0.23466666666666666,
+          "live_routing": 0.225,
+          "delta": 0.009666666666666657
+        },
+        "p25b_commonsense": {
+          "rows": 600,
+          "candidate_routing": 0.07888888888888888,
+          "live_routing": 0.07888888888888888,
+          "delta": 0.0
+        },
+        "p25b_mbpp": {
+          "rows": 100,
+          "candidate_routing": 0.27,
+          "live_routing": 0.26333333333333336,
+          "delta": 0.006666666666666654
+        },
+        "p25b_mmlu_pro": {
+          "rows": 800,
+          "candidate_routing": 0.22791666666666668,
+          "live_routing": 0.2354166666666667,
+          "delta": -0.007500000000000007
+        }
+      }
+    },
+    "ridge_alpha100": {
+      "language": {
+        "en": {
+          "rows": 2000,
+          "candidate_routing": 0.20033333333333334,
+          "live_routing": 0.20000000000000004,
+          "delta": 0.0003333333333332966
+        },
+        "zh": {
+          "rows": 1000,
+          "candidate_routing": 0.235,
+          "live_routing": 0.225,
+          "delta": 0.009999999999999981
+        }
+      },
+      "pool": {
+        "p25b_arc": {
+          "rows": 500,
+          "candidate_routing": 0.08800000000000001,
+          "live_routing": 0.07733333333333332,
+          "delta": 0.010666666666666685
+        },
+        "p25b_ceval": {
+          "rows": 1000,
+          "candidate_routing": 0.235,
+          "live_routing": 0.225,
+          "delta": 0.009999999999999981
+        },
+        "p25b_commonsense": {
+          "rows": 600,
+          "candidate_routing": 0.08055555555555556,
+          "live_routing": 0.07888888888888888,
+          "delta": 0.0016666666666666774
+        },
+        "p25b_mbpp": {
+          "rows": 100,
+          "candidate_routing": 0.26666666666666666,
+          "live_routing": 0.26333333333333336,
+          "delta": 0.0033333333333332993
+        },
+        "p25b_mmlu_pro": {
+          "rows": 800,
+          "candidate_routing": 0.22791666666666668,
+          "live_routing": 0.2354166666666667,
+          "delta": -0.007500000000000007
+        }
+      }
+    }
+  },
+  "primary_gates": {
+    "macro_routing_delta_ge_0.005": true,
+    "pooled_routing_nonnegative": true,
+    "macro_native_auc_delta_ge_0.010": true,
+    "pooled_native_auc_nonnegative": false,
+    "language_routing_nonnegative": true,
+    "broad_pool_routing_ge_minus_0.010": true
+  },
+  "advance_to_p22_p23_causal_recapture": false,
+  "live_unchanged": true
+}

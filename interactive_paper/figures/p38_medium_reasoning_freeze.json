@@ -1,0 +1,45 @@
+{
+  "experiment": "P38 medium-reasoning expert substitution on balanced-tier fires",
+  "frozen_at_utc": "2026-09-04T09:28:00Z",
+  "parent_head": "09adbea",
+  "hypothesis": "Changing only the gpt-5.5 expert reasoning effort from low to medium improves answer accuracy on the complete balanced-tier fire population enough to justify the added latency.",
+  "population": {
+    "definition": "Every row in the six published native QA never-arm parquets whose onset score meets the deployed language-specific balanced threshold, whose information gate is true, and whose published always-TTS low-reasoning expert answer is nonempty; joined by id to that answer.",
+    "n": 292,
+    "pool_counts": {
+      "frozen": 66,
+      "striviaqa": 46,
+      "swebq": 60,
+      "sllama": 10,
+      "sdqa": 49,
+      "sreason": 61
+    },
+    "sorted_pool_id_sha256": "790b82563f3684189ea7592c1179eb88338d9bb089f65da8595fff3efccd08bf",
+    "pre_output_exclusion": "swebq0001 is the sole balanced-fire row with an empty published baseline expert answer, so a paired low-vs-medium comparison is undefined for it. This exclusion was recorded before any P38 API call."
+  },
+  "arms": {
+    "baseline": "Already-published gpt-5.5 low-reasoning always-TTS expert answer for the same id.",
+    "candidate": "Fresh gpt-5.5 medium-reasoning answer, with the same expert system prompt and the same hosted-ASR transcript; no query, reference, local answer, score, or baseline answer is exposed."
+  },
+  "judging": {
+    "protocol": "Both arms are freshly judged, arm-blind and independently, in deterministic hash order.",
+    "frozen_sdqa_sreason": "Existing gpt-5.4-mini strict reference judge.",
+    "striviaqa_swebq_sllama": "OpenAudioBench's verbatim gpt-4o-2024-08-06 judge."
+  },
+  "gates_all_required": {
+    "candidate_and_both_judges": "292/292, zero terminal errors",
+    "overall_accuracy_delta": ">= +0.02",
+    "exact_one_sided_mcnemar_p": "< 0.05",
+    "direction": "wins > losses",
+    "pool_robustness": "candidate delta >= 0 in every one of the six pools",
+    "candidate_median_latency_ratio": "<= 2.0 versus the published low-reasoning expert latency on the same rows",
+    "openai_api_cost_usd": "<= 25",
+    "live_policy": "unchanged"
+  },
+  "decision": "Any failed gate rejects medium reasoning as the default expert substitution. A pass authorizes only a fresh opt-in native validation, not activation.",
+  "prohibitions": [
+    "No prompt retuning after candidate outputs are opened.",
+    "No row dropping or judge substitution after outputs are opened.",
+    "No model, probe, threshold, routing, or live-default change in P38."
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "status": "frozen_before_p20_outputs",
+  "candidate": {
+    "formula": "current_p16_score - 0.5 * prior_p16_score",
+    "beta": 0.5,
+    "extra_model_forwards": 0,
+    "first_turn_behavior": "unchanged"
+  },
+  "selection_rule": "beta chosen once on P19 to maximize macro target-source AUC over the fixed grid [-2, -1, -0.5, -0.25, 0, 0.25, 0.5, 1, 2]",
+  "development_evidence": {
+    "p19_rows": 120,
+    "macro_auc_delta_vs_live": 0.03424025198218742,
+    "source_stratified_bootstrap_95ci": [
+      0.03427835343910633,
+      -0.052859834401484264,
+      0.12307393540306494
+    ],
+    "broad_support": false,
+    "receipt_sha256": "7003c11635e2a0f0eba7218bb22e4e8a462660439a7e134c94072c117f2854b4"
+  },
+  "independent_acceptance_set": {
+    "name": "P20",
+    "rows": 120,
+    "target_sources": [
+      "p17_snli",
+      "p17_sst2",
+      "p17_wic"
+    ],
+    "selection_sha256": "f2e5bcfdbff82301faf15c2f75d5cbf1bea3b6f390c8f800278763b5c1f08f1e",
+    "canonical_content_sha256": "fa216f3ee92d8d581a34cfcc4b118431037a5ca64b1fd86ada3560c179d655e8",
+    "source_selection_sha256": "fe0b9de698be07a639d94a0171da2607e7fbacbb582de5bc7175a47eecd086f8"
+  },
+  "acceptance_gate": {
+    "macro_auc_delta_minimum": 0.015,
+    "require_all_source_deltas_positive": true,
+    "require_source_stratified_ci_lower_positive": true,
+    "activation_prohibited": true
+  },
+  "guard": "P20 pair IDs, candidate formula, beta, and acceptance gate were frozen before any P20 two-turn outputs."
+}

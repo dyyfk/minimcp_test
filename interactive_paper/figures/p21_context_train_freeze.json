@@ -1,0 +1,29 @@
+{
+  "status": "frozen_before_context_generation",
+  "seed": 70,
+  "rows": 1000,
+  "counts_by_target_pool": {
+    "easy-chat": 45,
+    "easy-fact": 40,
+    "easy-mathword": 57,
+    "fresh_fast": 24,
+    "fresh_never": 23,
+    "hard-knowledge": 17,
+    "hard-math": 45,
+    "hard-multihop": 115,
+    "know-arc": 20,
+    "know-commonsense": 86,
+    "know-longtail": 142,
+    "know-mmlu": 114,
+    "know-open": 29,
+    "know-openbook": 57,
+    "trap": 25,
+    "trap-truthful": 84,
+    "zh-causal": 29,
+    "zh-mathword": 48
+  },
+  "selection_sha256": "3911126da3945afbce096f700555cb4cae80e668b5c470cf369a6ee5e59280a3",
+  "canonical_content_sha256": "5500157487a58bdc0d66e58e54df7108b61eb770228afc733b66c11d453baa3c",
+  "source_selection_sha256": "c4a3581df4f8718886de0d404a80ed086881e8e9b2131c6e47e03e6ca11e8041",
+  "guard": "Pairs frozen before any two-turn model outputs."
+}

@@ -156,14 +156,26 @@ async def judge_many(rows: list[dict], concurrency: int = 8) -> list[dict]:
                 v = json.loads(_content(resp))
                 row["adequate"] = bool(v["adequate"])
                 row["judge_reason"] = v.get("reason", "")
+                usage = resp.usage
+                row["judge_prompt_tokens"] = int(usage.prompt_tokens)
+                row["judge_completion_tokens"] = int(usage.completion_tokens)
+                row["judge_cached_prompt_tokens"] = int(getattr(
+                    getattr(usage, "prompt_tokens_details", None),
+                    "cached_tokens", 0) or 0)
             except Exception as e:  # keep the row; mark unjudged
                 row["adequate"] = None
                 row["judge_reason"] = f"ERROR: {e}"
+                row["judge_prompt_tokens"] = None
+                row["judge_completion_tokens"] = None
+                row["judge_cached_prompt_tokens"] = None
             row["escalate_label"] = (None if row["adequate"] is None
                                      else int(not row["adequate"]))
             return row
 
-    return await asyncio.gather(*(one(r) for r in rows))
+    try:
+        return await asyncio.gather(*(one(r) for r in rows))
+    finally:
+        await client.close()
 
 
 # ============================ escalation target (gpt-5.5) ==================
@@ -303,4 +315,7 @@ async def ask_expert_many(queries: list[str], concurrency: int = 3,
             _cache_put(cache_dir, q, effort, out)
             return out
 
-    return await asyncio.gather(*(one(q) for q in queries))
+    try:
+        return await asyncio.gather(*(one(q) for q in queries))
+    finally:
+        await client.close()

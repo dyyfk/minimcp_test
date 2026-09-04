@@ -1,0 +1,93 @@
+{
+  "errors": 0,
+  "fixed_rows": 50,
+  "latency_seconds": {
+    "rtj_measured": {
+      "max": 5.861537609947845,
+      "mean": 1.5212990658730268,
+      "median": 0.7950599809992127,
+      "p90": 4.477117632178124,
+      "p95": 4.877541492303134
+    },
+    "semantic_plus_rtj_serial_estimate": {
+      "max": 35.63938717113342,
+      "mean": 11.774715603115038,
+      "median": 8.140654356509913,
+      "p90": 30.082803366857117,
+      "p95": 30.610451926861423
+    },
+    "semantic_two_sample_serial_measured": {
+      "max": 30.274281033081934,
+      "mean": 10.25341653724201,
+      "median": 7.208633572503459,
+      "p90": 25.51996860530926,
+      "p95": 27.51297973181353
+    },
+    "three_replica_parallel_estimate": {
+      "max": 24.492219252046198,
+      "mean": 7.313941622744315,
+      "median": 3.931866284518037,
+      "p90": 22.21776870357571,
+      "p95": 23.315974751824978
+    },
+    "two_semantic_replicas_then_rtj_estimate": {
+      "max": 29.14688096300233,
+      "mean": 8.830381182457787,
+      "median": 4.984341841540299,
+      "p90": 26.67629356062971,
+      "p95": 28.433941543498076
+    }
+  },
+  "notes": [
+    "Model loading is excluded.",
+    "The fixed set has 10 rows per pool and is not prevalence weighted.",
+    "Parallel figures are estimates from matched branch timings, not measured concurrent serving.",
+    "Embedding latency is excluded; the dominant cost is native answer generation."
+  ],
+  "rows_per_pool": {
+    "sdqa": 10,
+    "sllama": 10,
+    "sreason": 10,
+    "striviaqa": 10,
+    "swebq": 10
+  },
+  "rtj_stream_sha256": "8dac7a6646094d7d6a4748564ff96ab5c6011becf59dbc2e6440738d668caa1f",
+  "semantic_serial_by_pool": {
+    "sdqa": {
+      "max": 30.274281033081934,
+      "mean": 21.661848842399195,
+      "median": 25.016998775012325,
+      "p90": 28.88130320070777,
+      "p95": 29.57779211689485
+    },
+    "sllama": {
+      "max": 7.391944528906606,
+      "mean": 5.495553796098102,
+      "median": 5.457735650998075,
+      "p90": 7.329622480121907,
+      "p95": 7.360783504514257
+    },
+    "sreason": {
+      "max": 28.72721438703593,
+      "mean": 12.015616015903651,
+      "median": 10.293868811510038,
+      "p90": 23.70626843277132,
+      "p95": 26.21674140990362
+    },
+    "striviaqa": {
+      "max": 9.194143305066973,
+      "mean": 5.910553940490354,
+      "median": 5.979879797494505,
+      "p90": 8.453614013339392,
+      "p95": 8.823878659203181
+    },
+    "swebq": {
+      "max": 13.968490842031315,
+      "mean": 6.183510091318749,
+      "median": 5.105736513971351,
+      "p90": 9.926536246261092,
+      "p95": 11.947513544146199
+    }
+  },
+  "semantic_stream_sha256": "3eece7d4811a73e1152acf11e105f83cc59e8f4d68c5c3eb03d5a4224528d78c"
+}
