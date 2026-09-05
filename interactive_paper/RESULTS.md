@@ -6382,3 +6382,28 @@ wiring it is a one-line client change, deferred (study client is the
 user's to touch). Deploys: gate-demo-duplex v27 (paced) → v28 (energy
 cut + interrupt emit) → v29 (client stopPlayback). Files: demo_duplex.py,
 _ws_relay_barge.py (new).
+
+### 8ce addendum — post-barge deafness: the cut must end the turn like a sampled turn_eos (2026-09-05)
+
+User-reported: after a successful cut, the model went deaf to the
+follow-up (reproduced ~2/7). Root cause chain: the cut dropped relay
+state but left the muted babble's utterance HALF-OPEN in the decoder
+context — `current_turn_ended` stayed False, so the head's own
+mid-turn listen bids kept being suppressed (the exact 8bk suppression
+path), and even after unlocking the flag the dangling utterance
+dragged the head's commit probability down (same shape as the
+first-utterance listen-lock). Fix: `MiniCPMODuplex.end_turn_now()`
+(in our instrumented `_model_src`) mirrors the natural end_of_turn
+branch — feed `<|turn_eos|>` so the context truly closes, set the
+flag, reset per-turn TTS/token2wav. The cut path calls it. Verified:
+barge → cut → pause → fresh question, 5/5 PASS (v38); uninterrupted
+multi-turn unaffected (the path only runs on a cut). Paper note: this
+is the missing half of the 8ce design — dropping injected frames
+handles TRANSPORT, ending the turn hands the FLOOR back; both are
+needed for the interruption to be complete. Ops (important): the live
+`gate-demo-duplex` app was concurrently re-deployed to v31-v35 by
+ANOTHER checkout (client 1.2.6, commits dd9cb01/f2c0716/... not in
+our history — collaborator or scheduled agent), reverting the demo to
+pre-8cb code mid-testing; 8cb-8ce are now committed (b7da740,
+a5f87c1) and re-deployed (v36-v38), but deployment ownership needs
+coordination or the next foreign deploy clobbers live again.
