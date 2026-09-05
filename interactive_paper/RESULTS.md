@@ -6639,3 +6639,49 @@ The one FAIL is the head never committing post-cut at all (zero gate
 reads) — the intrinsic listen-lock residue (8ce investigation), the
 same ~1/6-1/3 variance no non-VAD lever moves. v50→v52 deploys.
 Files: demo_duplex.py, _ws_stop_follow.py (new).
+
+## 8cj — three-arm A/B falsifies "intrinsic listen-lock"; paced in-schema relay closes the gap ⭐ (2026-09-05)
+
+**User challenged the 8ce/8cf residual ("原版没有这个问题") and was
+right — third time the stock-control discipline pays.** Same
+stop-then-ask flow (NVDA → mid-answer "Stop." → 4s → Google), three
+arms, `_ws_stop_compare.py`:
+
+| arm | post-stop follow-up commit ≤15s | latency |
+|---|---|---|
+| vanilla (stock sources, official cfg) | **6/6** | 0.9-2.0s |
+| ours, probe OFF | **6/6** | 0.8-2.3s |
+| ours, probe ON (pre-8cj) | **3/6** | 2.7-4.9s / NEVER |
+
+probe-off ≡ vanilla (8bl discipline holds — the bare loop is
+innocent). The lock was OUR escalation path: during relay delivery
+the context showed the head silently force-listening (10+ listen
+units) through its own audible answer, then a dense text turn at
+close — no stock session produces that shape, and the head's
+turn-taking prior pays for it. 8ce's "intrinsic" verdict tested only
+decode-side levers and never ran this control.
+
+**Fix: put the relay INSIDE the audio units as the head's own
+speech, at speech rate.** `_speak_forced_unit()` completes each
+audio-prefilled unit with `<|speak|>` + the due relay tokens
+(budgeted ≈ tokens_left/seconds_left, ≤18) + chunk terminator —
+context now shows a normal speaking chunk for every second the user
+hears, the exact stock self-answer shape; `turn_eos` rides the last
+shipped unit. A barge cut just closes the half-open turn
+(`_force_end_turn`) — literally the stock yield — and the post-cut
+`force_listen=3` is DELETED (stock heads are free immediately and
+commit in ~1-2s). Thinking-window per-chunk force_listen stays
+(quiet listening IS the stock shape for silence).
+
+**Live (v53): probe-on 6/6** (2.0-7.4s; the slower commits are runs
+where the "stop" landed in the STALL phase, exercising the known
+in-flight-escalation-not-cancelled limitation — separate, already
+disclosed). Full regression green per the new rule: user script
+`_ws_stop_follow` 3/3, `_ws_context_smoke` PASS (NVDA→Apple),
+off-arm 3/3. Paper: Limitations rewritten — the "intrinsic residual"
+claim replaced by the three-arm attribution + the general lesson
+(any context shape a native session cannot produce is paid for in
+floor behavior; "intrinsic to the head" claims must survive a
+stock-serving control). NEW STANDING RULE (user): every change runs
+the regression suite; every "model-intrinsic" claim needs the
+vanilla arm first. Files: demo_duplex.py, _ws_stop_compare.py (new).

@@ -442,6 +442,54 @@ class DuplexVoice:
             except Exception:
                 pass
 
+    def _speak_forced_unit(self, token_ids, end_turn=False):
+        """8cj: complete the CURRENT audio-prefilled unit with teacher-
+        forced speak tokens. The context then shows a normal speaking
+        chunk — audio embed + <|speak|> + text — for every second of
+        relay audio the user actually hears, the exact shape of the
+        stock head answering by itself (the 8cj three-arm A/B showed
+        vanilla and probe-off recover 6/6 after a stop while the old
+        forced-listen relay window recovered 3/6: a context that
+        "listened silently" through its own audible answer tilts the
+        head toward listen). No sampling, no TTS.
+        """
+        d = self.duplex
+        d.pending_logits = None
+
+        def _feed(tid):
+            d.decoder.feed(d.decoder.embed_token(tid))
+            d.total_ids.append(tid)
+
+        _feed(d.speak_token_id)
+        d.current_turn_ended = False
+        gen = []
+        for tid in token_ids:
+            _feed(tid)
+            gen.append(tid)
+            d.res_ids.append(tid)
+            d.speak_count += 1
+        if end_turn:
+            _feed(d.turn_eos_token_id)
+            gen.append(d.turn_eos_token_id)
+            d.current_turn_ended = True
+            _feed(d.chunk_tts_eos_token_id)
+        else:
+            _feed(d.chunk_eos_token_id)
+        _feed(d.tokenizer.convert_tokens_to_ids("</unit>"))
+        d.decoder.register_unit_end(
+            input_type="audio", generated_tokens=gen, is_listen=False,
+            generated_text=d.tokenizer.decode(
+                gen, skip_special_tokens=True))
+        d.total_hidden.append([])
+        if end_turn:
+            d.tts_text_start_pos = 0
+            d.tts_past_key_values = None
+            d.tts_current_turn_start_time = None
+            try:
+                d._reset_token2wav_for_new_turn()
+            except Exception:
+                pass
+
     def _session_reset(self):
         import librosa
         ref, _ = librosa.load(PROMPT_WAV, sr=16000, mono=True)
@@ -543,9 +591,8 @@ class DuplexVoice:
                 relay_texts = []                  # 8ce: pieces not yet synth'd
                 relay_next_at = None              # 8ce: wall-clock pacer
                 relay_pause = 0                   # 8ce: head-yield seconds
-                relay_all_pieces = []             # 8cf: full piece list
-                relay_next_piece = 1              # 8cf: next piece index
-                relay_heard_upto = 0              # 8cf: pieces w/ audio shipped
+                relay_toks = []                   # 8cj: tokens to force-pace
+                relay_ctx_closed = False          # 8cj: relay turn eos fed
                 tts_relay = RELAY_MODE == "tts" and self.tts_ok
                 prev_listen = True
                 thinking = _th.Event()           # thinker in flight
@@ -781,12 +828,16 @@ class DuplexVoice:
                                                      + str(se)[:100]})
                                     relay_texts = pieces[1:]
                                     relay_frames = ([
-                                        (0, p0[i:i + 24000])
+                                        p0[i:i + 24000]
                                         for i in range(0, len(p0), 24000)]
                                         if p0 is not None else [])
-                                    relay_all_pieces = pieces
-                                    relay_next_piece = 1
-                                    relay_heard_upto = 0
+                                    # 8cj: pace these tokens into the
+                                    # audio units as the pcm ships
+                                    relay_toks = (self.tok.encode(
+                                        " " + pieces[0],
+                                        add_special_tokens=False)
+                                        if p0 is not None else [])
+                                    relay_ctx_closed = False
                                     emit({"type": "log",
                                           "msg": f"relay (tts, paced): "
                                                  f"{(len(p0) / 24000 if p0 is not None else 0):.1f}s"
@@ -834,22 +885,45 @@ class DuplexVoice:
                                       "msg": f"prefill skipped: "
                                              f"{ok.get('reason', '')[:80]}"})
                                 continue
-                            # 8cf: while the thinker is out or a tts
-                            # relay is being delivered, hold the head in
-                            # listen one chunk at a time (its turn was
-                            # already closed at fire; there is no muted
-                            # babble to occupy the floor). Self-releases
-                            # the moment the guards clear — thinker
-                            # failure clears `thinking` in its finally.
-                            # Steer mode keeps the head free: it must
-                            # voice the relay itself.
-                            if thinking.is_set() or (relay_guard
-                                                     and tts_relay):
-                                self.duplex._streaming_generate_count = 0
-                                self.duplex.force_listen_count = 1
-                            r = self.duplex.streaming_generate(
-                                prompt_wav_path=PROMPT_WAV,
-                                top_k=GEN_TOP_K)
+                            # 8cj: while relay audio ships, the context
+                            # must show the head SPEAKING those words
+                            # (paced teacher-forced speak units), not
+                            # silently listening — the three-arm A/B
+                            # (vanilla 6/6, probe-off 6/6, old probe-on
+                            # 3/6) pinned the post-stop lock on the
+                            # forced-listen relay window, not the head.
+                            # While the thinker is out (silence, before
+                            # any audio) a per-chunk force_listen is the
+                            # stock quiet-listening shape and stays.
+                            forced_chunk = (relay_guard and tts_relay
+                                            and not relay_ctx_closed)
+                            if forced_chunk:
+                                sec_left = max(1, len(relay_frames)
+                                               + 6 * len(relay_texts))
+                                k = (min(18, max(2, -(-len(relay_toks)
+                                                      // sec_left)))
+                                     if relay_toks else 0)
+                                toks, relay_toks = (relay_toks[:k],
+                                                    relay_toks[k:])
+                                end_now = (not relay_toks
+                                           and not relay_texts
+                                           and len(relay_frames) <= 1)
+                                self._speak_forced_unit(
+                                    toks, end_turn=end_now)
+                                if end_now:
+                                    relay_ctx_closed = True
+                                r = {"is_listen": False, "text": "",
+                                     "end_of_turn": False,
+                                     "cost_all": 0.0}
+                            else:
+                                if thinking.is_set() or (relay_guard
+                                                         and tts_relay):
+                                    self.duplex \
+                                        ._streaming_generate_count = 0
+                                    self.duplex.force_listen_count = 1
+                                r = self.duplex.streaming_generate(
+                                    prompt_wav_path=PROMPT_WAV,
+                                    top_k=GEN_TOP_K)
                             n_chunk += 1
 
                             score = self._score_now()
@@ -884,9 +958,11 @@ class DuplexVoice:
                                                  + str(se)[:100]})
                                 if _p is not None:
                                     relay_frames.extend(
-                                        (relay_next_piece, _p[i:i + 24000])
+                                        _p[i:i + 24000]
                                         for i in range(0, len(_p), 24000))
-                                relay_next_piece += 1
+                                    relay_toks += self.tok.encode(
+                                        " " + _sent,
+                                        add_special_tokens=False)
                             if relay_guard and relay_frames:
                                 # user speech over the last ~2s (silence
                                 # RMS ~0.003, speech ~0.03+); relay-onset
@@ -925,25 +1001,14 @@ class DuplexVoice:
                                                  time.time())) * 1000)
                                         finish_turn_async(relay_turn)
                                         relay_turn = None
-                                    # 8cf: close the relay turn in the
-                                    # context exactly like a natural
-                                    # mid-answer yield — teacher-force
-                                    # ONLY the pieces whose audio was
-                                    # actually shipped, then turn_eos.
-                                    # The post-cut context is then the
-                                    # same shape a stock self-yield
-                                    # leaves ("half-said answer + eos"),
-                                    # with no notes and no aborted
-                                    # babble — the delta that inflated
-                                    # the post-barge listen-lock (8ce).
-                                    if relay_heard_upto > 0:
-                                        self._speak_forced(
-                                            " " + " ".join(
-                                                relay_all_pieces[
-                                                    :relay_heard_upto]),
-                                            end_turn=True)
-                                    relay_all_pieces = []
-                                    relay_heard_upto = 0
+                                    # 8cj: the relay turn is already IN
+                                    # the context as paced speak units
+                                    # (≈ what shipped); the cut just
+                                    # closes it with turn_eos below —
+                                    # "half-said answer + self-shaped
+                                    # eos", the exact stock yield.
+                                    relay_toks = []
+                                    relay_ctx_closed = True
                                     active_turn = None
                                     user_win = []
                                     turn_text, turn_fired = [], False
@@ -953,24 +1018,17 @@ class DuplexVoice:
                                     relay_next_at = None
                                     relay_pause = 0
                                     self.st3.update(sum=None, cnt=0)
-                                    # 8cf: with the local turn already
-                                    # closed at fire there is no babble
-                                    # left to end; keep the hard-end as
-                                    # a safety net (no-op unless a turn
-                                    # is somehow open).
+                                    # 8cj: feed the turn_eos that closes
+                                    # the half-said relay turn. NO
+                                    # post-cut force_listen — the stock
+                                    # head is free immediately after a
+                                    # yield and commits on the follow-up
+                                    # in ~1-2s (vanilla arm A/B); the
+                                    # old 3-chunk forced listen only
+                                    # delayed and conditioned against
+                                    # that commit.
                                     self._force_end_turn()
-                                    # force_listen gates on
-                                    # _streaming_generate_count <
-                                    # force_listen_count, and that
-                                    # counter only resets at session
-                                    # prepare — mid-session it is large,
-                                    # so force_listen was a silent no-op.
-                                    # Reset it so the head is actually
-                                    # forced to listen and capture the
-                                    # follow-up utterance.
-                                    self.duplex._streaming_generate_count = 0
-                                    self.duplex.force_listen_count = \
-                                        FORCE_LISTEN
+                                    self.duplex.force_listen_count = 0
                                     prev_listen = True
                                     emit({"type": "phase",
                                           "v": "listening"})
@@ -979,9 +1037,7 @@ class DuplexVoice:
                                     while (relay_frames
                                            and time.time()
                                            >= relay_next_at - 1.2):
-                                        pi, fr = relay_frames.pop(0)
-                                        relay_heard_upto = max(
-                                            relay_heard_upto, pi + 1)
+                                        fr = relay_frames.pop(0)
                                         i16f = (np.clip(fr, -1, 1)
                                                 * 32767).astype("<i2")
                                         emit({"type": "audio",
@@ -1012,16 +1068,17 @@ class DuplexVoice:
                                     and time.time() > relay_deadline):
                                 emit({"type": "log",
                                       "msg": "relay playback done — "
-                                             "committing spoken turn to "
-                                             "context and closing"})
-                                if relay_heard_upto > 0:
-                                    self._speak_forced(
-                                        " " + " ".join(
-                                            relay_all_pieces[
-                                                :relay_heard_upto]),
-                                        end_turn=True)
-                                relay_all_pieces = []
-                                relay_heard_upto = 0
+                                             "closing relay turn"})
+                                # 8cj: the spoken turn is already in the
+                                # context (paced speak units); just make
+                                # sure it is closed (no-op if the last
+                                # forced unit carried the turn_eos), and
+                                # leave the head free — no forced listen
+                                # after a finished turn (stock parity).
+                                self._force_end_turn()
+                                self.duplex.force_listen_count = 0
+                                relay_toks = []
+                                relay_ctx_closed = False
                                 if relay_turn is not None:
                                     relay_turn["relay_ms"] = int(
                                         (time.time() - relay_turn.get(
@@ -1041,7 +1098,8 @@ class DuplexVoice:
                                 emit({"type": "phase", "v": "listening"})
 
                             fired_now = False
-                            if prev_listen and not r["is_listen"]:
+                            if (prev_listen and not r["is_listen"]
+                                    and not forced_chunk):
                                 # the talker just decided to answer — the
                                 # gate reads exactly here. 8bh: floor-
                                 # management commits (stop words,
