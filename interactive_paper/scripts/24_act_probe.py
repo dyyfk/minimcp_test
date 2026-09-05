@@ -42,8 +42,13 @@ def load_feats(tag):
 
 def main():
     parts = [load_feats(t)[1] for t in ("calib", "exp", "exp2")]
-    for t in ("reqq", "reqqx"):     # 8bj: request-phrased positives,
-        try:                        # standalone + in-context 2nd turn
+    # 8bj: reqq/reqqx request-phrased positives (standalone + in-
+    # context 2nd turn). 8ch: stopq/stopqpc stop-prefixed question
+    # compounds + reqqpc plain questions in the POST-BARGE-CUT context
+    # — the live gate ruled "Stop, stop. What is the stock price of
+    # Apple today?" a floor turn (P(info)=.336) and never escalated.
+    for t in ("reqq", "reqqx", "stopq", "stopqpc", "reqqpc"):
+        try:
             Xr = load_feats(t)[1]
             parts.append(Xr)
             print(f"{t} positives: {len(Xr)}")
@@ -54,6 +59,12 @@ def main():
     qs = {json.loads(l)["id"]: json.loads(l)
           for l in open(D / "queries_flooract.jsonl", encoding="utf-8")
           if l.strip()}
+    # 8ch: floorpc (stop commands dumped post-cut) is NOT in the fit:
+    # 71/72 never commit after a cut (no onset, no gate read), and the
+    # single one that does scores inseparably with the postcut question
+    # positives — an n=1 unfixable singleton that dragged the joint-gap
+    # threshold from ~.51 to .67, taxing live questions to guard a
+    # 1-in-72-commits exposure. Reported below instead.
     for t, sfx in (("flooract", ""), ("flooractx", "+ctx")):
         try:
             ids_t, Xt = load_feats(t)
@@ -126,6 +137,16 @@ def main():
         m = cats == c
         print(f"  {c:<8} act-pass {passed_floor[m].mean():.2%}  "
               f"residual-fire {residual[m].mean():.2%}")
+
+    # 8ch report-only: the excluded post-cut stop singleton
+    try:
+        _, Xpc = load_feats("floorpc")
+        s_pc = clf.predict_proba(Xpc)[:, 1]
+        print(f"floorpc (excluded, n={len(Xpc)}): act scores "
+              f"{np.round(s_pc, 3).tolist()} vs thr {act_thr:.3f} "
+              f"(71/72 post-cut stops never commit at all)")
+    except FileNotFoundError:
+        pass
 
     art = {"w": clf.coef_[0].tolist(), "b": float(clf.intercept_[0]),
            "layer": 22, "act_threshold": act_thr, "C": C,

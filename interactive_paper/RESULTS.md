@@ -6554,3 +6554,49 @@ first breath-like amplitude bump (~15.4s + latency), i.e. the head
 commits on the first marginally speech-like noise, then free-
 associates. Conclusion stands and is now n=3 on stock: commit-on-
 noise is 原版 MiniCPM-o 4.5 behavior, not ours.
+
+## 8ch — post-cut act-gate coverage: the barge follow-up was being ruled a floor turn (2026-09-05)
+
+**User report (live, post-8cf):** barge the relay, ask a new question,
+hear half a second of "Let me check the latest data for you." — then
+silence forever. Log: the follow-up "Stop, stop. What is the stock
+price of Apple today?" read P(fail)=.599 ✓ but P(info)=.336 < .512 →
+floor turn → gate bypassed → no thinker, and the head's promise (an
+in-context imitation of our own stall pattern) had nothing behind it.
+8cf UNCOVERED this: before it, the post-cut listen-lock usually
+prevented the commit entirely. Smoke tally agreed: 2/8 pre-fix barge
+runs had the follow-up act-blocked (is_info=False).
+
+**Root cause is the CONTEXT, not the prefix.** New stop-prefixed
+compound stims ("Stop, stop. <question>", 40) score median .988 on
+the OLD act head standalone — 0% blocked. The same act read after the
+8cf post-cut context (stall turn + partial relay + cut) is what
+collapses to ~.34. Fourth instance of the 8bj meta-lesson: every new
+REGIME re-opens calibration; the post-barge-cut context is a regime
+the act stims never covered.
+
+**Fix (8bj recipe + a new dump mode).** `modal_native_dump.py
+--postcut`: reproduce the exact 8cf post-cut context before the stim
+(carrier commit → stall teacher-forced onto the open turn → 4 forced-
+listen chunks → PARTIAL relay turn + eos → cut-path counter resets),
+then read at the stim's onset. Dumped official-config: stopq 40
+(standalone), stopqpc 37, reqqpc 38 (postcut positives), floorpc
+(postcut stop commands, negatives) — of which 71/72 NEVER COMMIT
+post-cut (no onset → no gate read), telling us the pure-stop
+exposure is tiny; the 1 that committed scores .76, inseparable from
+postcut questions, and is excluded from the fit as an n=1 singleton
+(it dragged the joint-gap threshold .51→.67, taxing live questions).
+Refit (scripts/24): n_pos 2505 / n_neg 263, OOF AUC .9999, thr
+.5507; postcut questions 0% blocked (stopqpc median .992, reqqpc
+.997); all floor categories still 0% residual false-fire at balanced
+(60% → 0% before/after act gate, unchanged protection).
+
+**Live (v49 + new gate_act.json):** barge → cut → follow-up, 4 runs:
+3 full PASS with the follow-up escalating and relaying the correct
+AAPL answer (act reads .70-.84 True); run 4 even shows the intended
+split within one session — "Stop, stop." remnant read is_info=False
+(held), Apple question read is_info=True (fired). The 4th run was the
+known ~1/6 first-utterance intrinsic lock (no commit at all, act not
+involved). NOTE for the study: this changes deployed gate behavior
+(act head + threshold) — the human-eval freeze question was raised
+and the user chose the refit (option A).

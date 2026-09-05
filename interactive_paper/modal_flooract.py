@@ -71,6 +71,70 @@ CATS = [("stopcmd", STOPS), ("backch", BCS), ("ack", ACKS),
         ("filler", FILLS)]
 VOICES = ["alloy", "echo"]
 
+# 8ch: STOP-PREFIXED question compounds — a live barge-in follow-up
+# usually arrives as "Stop, stop. <new question>" in one breath, and
+# the stop prefix (plus the post-cut context) drags the act read below
+# threshold: the gate ruled the user's real Apple question a floor
+# turn (P(info)=.336) and the escalation never launched. These are
+# POSITIVES (behavioral stims, 8ba protocol; question halves follow
+# the REQQ hand-inventory style, not an eval pool).
+STOPQ = ["Stop, stop. What is the stock price of Apple today?",
+         "Stop. What's the weather in Tokyo tomorrow?",
+         "Wait, stop. How tall is Mount Everest?",
+         "Okay stop. Who wrote The Old Man and the Sea?",
+         "Stop talking. What is the capital of Mongolia?",
+         "Hold on. What's 15 percent of 260?",
+         "Wait wait. When was the Eiffel Tower built?",
+         "Stop, stop. Can you check Nvidia's stock price right now?",
+         "Hang on. What is the population of Brazil?",
+         "That's enough. What's the boiling point of ethanol?",
+         "Never mind that. Who won the World Cup in 2018?",
+         "Okay okay stop. What is the largest moon of Saturn?",
+         "停停。今天苹果的股价是多少？",
+         "别说了。明天上海的天气怎么样？",
+         "等等。珠穆朗玛峰有多高？",
+         "先别说。英伟达现在的股价是多少？",
+         "打住。巴西有多少人口？",
+         "停一下。二〇一八年世界杯是谁夺冠的？",
+         "行了行了。乙醇的沸点是多少？",
+         "别讲了。《老人与海》是谁写的？"]
+
+
+@app.function(image=img, volumes={DATA: gate_data}, secrets=[OPENAI],
+              timeout=60 * 40)
+def make_stopq():
+    import sys
+    import librosa
+    import numpy as np
+    import soundfile as sf
+    sys.path.insert(0, "/workspace/gate")
+    import escalate
+
+    os.makedirs(f"{DATA}/stopq_audio", exist_ok=True)
+    rows, n = [], 0
+    cli = escalate._client()
+    for txt in STOPQ:
+        for voice in VOICES:
+            qid = f"sq{len(rows):04d}"
+            wav_p = f"{DATA}/stopq_audio/{qid}.wav"
+            if not os.path.exists(wav_p):
+                r = cli.audio.speech.create(
+                    model="tts-1", voice=voice, input=txt,
+                    response_format="wav")
+                open("/tmp/sq.wav", "wb").write(r.content)
+                au, _ = librosa.load("/tmp/sq.wav", sr=16000, mono=True)
+                sf.write(wav_p, au.astype(np.float32), 16000)
+                n += 1
+            rows.append({"id": qid, "pool": "stopq", "query": txt,
+                         "reference_answer": None, "split": ""})
+    with open(f"{DATA}/queries_stopq.jsonl", "w",
+              encoding="utf-8") as fh:
+        for r in rows:
+            fh.write(json.dumps(r, ensure_ascii=False) + "\n")
+    gate_data.commit()
+    print(f">>> {len(rows)} stop-prefixed question stims ({n} new)")
+    return len(rows)
+
 # 8bj: REQUEST-phrased questions — live speech phrases queries as
 # requests ("can you check…") and the benchmark-question-trained act
 # probe scores them lower; these are POSITIVES for the act refit.
