@@ -13,11 +13,14 @@ Each `sessions/{session_id}.json` document is the complete audit record for one 
 
 ## Primary outcome data
 
-- Per-conversation rating metrics and free-form feedback
+- Per-conversation 1–5 ratings (`correctness`, `helpfulness`, `context_consistency`, and `conversation_naturalness`) and free-form feedback
 - Pairwise preference (`first`, `second`, or `same`), selected reasons, and feedback
 - Rating/comparison submission timestamps
 - Separate interaction and evaluation lifecycle: conversation `status` records how the voice interaction ended, while `evaluation_status` records whether its rating was submitted
-- `analysis_complete=true` and completion counts require a submitted rating; an ended interaction alone is not counted as complete analysis data
+- A submitted rating is the primary per-conversation outcome, so conversation `analysis_complete=true` means the rating was saved. Turn telemetry is tracked separately with `telemetry_complete` and `response_record_status`.
+- `response_record_status` is `recorded` when a server turn exists, `client_observed` when the browser received model audio but the final turn record is missing, `unverified_legacy` for older ratings with neither signal, or `not_observed` before a rateable response.
+- Conversation ratings remain analysis-ready even if the participant does not finish the full session. At task level, `ratings_complete` means both model arms submitted ratings and `analysis_complete` additionally requires the pairwise comparison. `recorded_ratings_complete`/`telemetry_complete` show whether both model turns are also available. These fields do not depend on session status, so completed tasks inside expired sessions remain usable.
+- New ratings and comparisons have stable `rating_id`/`comparison_id` values. Comparison exports also resolve the blinded `first`/`second` choice to `preferred_model` for analysis.
 - Session completion status and completion code
 - Task and scenario identity needed to compare matched X/Y prompts
 
@@ -28,8 +31,8 @@ For every model turn:
 - User WAV path, byte count, sample rate, transcript, transcript status, and source (`upstream_asr` or `posthoc_asr`)
 - Model WAV path, byte count, sample rate, final transcript, and expert transcript when escalated
 - Input-stream start, user-speech start/end, gate decision, first model audio, and response-complete timestamps
-- Derived speech-end-to-gate, speech-end-to-first-audio, and speech-end-to-complete latency
-- Model-reported first-audio, expert, stall, relay, EOT-read, and optional post-hoc ASR latency
+- Upstream EOT-to-gate, EOT-to-first-audio, and EOT-to-response-complete latency, measured on one model-runtime clock
+- Model-reported expert, stall, relay, EOT score-read, and optional post-hoc ASR latency
 - Input/output duration, speech-detected flag, input RMS mean/max, mean VAD threshold, and silence before EOT
 
 ## MiniCPM+ escalation data
@@ -47,6 +50,10 @@ For every model turn:
 - Manual `quality_review.status` (`needs_review`, `valid`, or `invalid`), reason, note, reviewer, timestamp, and automatic screening flags
 - Suggested task-flow length is not enforced. Fewer recorded turns than the task target adds `fewer_than_target_turns` for review but never blocks the participant or automatically invalidates data.
 - Timeout, model crash, disconnect, interruption, and empty-response flags
+- The browser reports whether model audio was received, its approximate duration, and the number of completed-turn acknowledgements. This is supporting evidence only; model identity and authoritative turn telemetry remain server-side.
+- A conversation with neither a recorded turn nor browser-observed model audio is marked `abandoned` with `no_observed_response`; it cannot accept a rating and may be retried while the session reservation is active.
+- If audio was observed but the final turn is missing, the rating is preserved with `response_record_status=client_observed` and the conversation receives a `response_not_persisted` QC flag.
+- On Finish, the backend asks the upstream model to stop and briefly drains final `turn`/`bye` events before closing the socket. It sends `conversation_finished` only after persistence; the browser waits for this receipt before opening the rating screen.
 - Input and output audio anomaly flags
 - Structured error timestamp/message
 - Interaction-ended, evaluation-completed, analysis-complete, QC-status, total-turn, MiniCPM+-turn, and anomaly counts
@@ -58,11 +65,18 @@ Null interpretation:
 - `quality_review.status=needs_review` is likewise not an invalid label; it asks a reviewer to check task adherence and data quality.
 - Records from schema 1.3 and earlier are normalized on read. Legacy conversation `status=completed` becomes `interaction_completed`; rating presence determines evaluation completion.
 - Expert, stall, and relay fields do not apply to local turns and are omitted in new records.
-- Missing core speech timestamps or derived latency fields indicate a collection defect, not “not applicable.” For older affected records, the turn export estimates speech end from gate time minus EOT-read time and sets `speech_end_estimated=true`; raw files remain unchanged.
+- Missing EOT-derived latency fields indicate a collection defect, not “not applicable.” `eot_read_ms` measures only the cost of reading the gate score and must never be substituted for EOT-to-gate latency. Older affected records remain missing rather than being exported as a false `0ms` value.
+- Blank or whitespace-only transcripts are normalized to missing and receive `missing_transcript=true`.
 
 Analysis exports:
 
 - `sessions.jsonl`: one row per participant, assignment, duration, counts, and anomaly totals.
-- `tasks.jsonl`: one row per capability task and pairwise judgment.
-- `conversations.jsonl`: one row per model arm with rating metrics, end state, escalation count, and guardrails.
+- `tasks.jsonl`: one row per capability task and pairwise judgment, including rating count, `preferred_model`, rating/comparison readiness, telemetry readiness, and task-level QC readiness.
+- `conversations.jsonl`: one row per model arm with rating metrics, `response_record_status`, client receipt evidence, end state, escalation count, guardrails, and the enclosing task's paired-analysis readiness.
 - `turns.jsonl`: one row per user–assistant turn with transcripts, audio references, routing, latency, and audio quality.
+
+Recommended inclusion rule:
+
+- For per-model rating summaries, include every conversation row with `analysis_complete=true`, regardless of session status. Report or sensitivity-check `response_record_status`; do not silently discard `client_observed` ratings.
+- For MiniCPM versus MiniCPM+ paired comparisons, include task rows with `analysis_complete=true` and group by `capability`. Use `telemetry_complete=true` only when the analysis also needs transcripts, escalation, or latency.
+- Use task `quality_valid` or conversation `quality_status` as a separate task-adherence/QC filter; never discard data solely because its parent session expired.

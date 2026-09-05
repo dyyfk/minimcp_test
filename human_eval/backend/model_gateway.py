@@ -89,6 +89,19 @@ def _milliseconds(start: str | None, end: str | None) -> int | None:
     return max(0, int((datetime.fromisoformat(end) - datetime.fromisoformat(start)).total_seconds() * 1000))
 
 
+def _nonnegative_milliseconds(value: Any) -> float | int | None:
+    if isinstance(value, (int, float)) and not isinstance(value, bool) and value >= 0:
+        return value
+    return None
+
+
+def _reported_or_derived_milliseconds(
+    reported: Any, start: str | None, end: str | None
+) -> float | int | None:
+    measured = _nonnegative_milliseconds(reported)
+    return measured if measured is not None else _milliseconds(start, end)
+
+
 def _write_pcm_wav(path: Path, pcm: bytes, sample_rate: int) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_suffix(".wav.tmp")
@@ -216,25 +229,8 @@ class ConversationRecorder:
         if event_type == "hello":
             self.store.mutate_conversation(
                 self.conversation_id,
-                lambda _task, conversation: conversation.update(
-                    {
-                        "status": "in_progress",
-                        "started_at": conversation.get("started_at") or now,
-                        "threshold_tier": (
-                            payload.get("tier")
-                            if self.model == MODEL_MINICPM_PLUS
-                            else None
-                        ),
-                        "model_runtime": {
-                            "protocol": payload.get("protocol", "duplex_v1"),
-                            "mode": payload.get("mode"),
-                            "event_log_path": str(self.event_log_path),
-                            "threshold_tier": payload.get("tier"),
-                            "threshold": payload.get("thr"),
-                            "probe_on": payload.get("probe_on"),
-                            "connected_at": self.connected_at,
-                        },
-                    }
+                lambda _task, conversation: self._mark_started(
+                    conversation, payload, now
                 ),
             )
         elif event_type == "speech":
@@ -261,10 +257,12 @@ class ConversationRecorder:
             if isinstance(payload.get("sil"), (int, float)):
                 self.silence_before_eot_s = float(payload["sil"])
             self.speech_detected = self.speech_detected or bool(payload.get("speech"))
-        elif event_type in {"eot", "gate"}:
+        elif event_type == "eot":
             self.speech_ended_at = self.speech_ended_at or now
             turn = self._ensure_turn()
             turn["timestamps"]["user_speech_ended_at"] = self.speech_ended_at
+        elif event_type == "gate":
+            turn = self._ensure_turn()
             turn["timestamps"]["gate_decision_at"] = now
             score_series = turn["gate"].get("score_series", [])
             turn["gate"] = {
@@ -274,7 +272,7 @@ class ConversationRecorder:
                 "threshold": payload.get("thr"),
                 "score": payload.get("score"),
                 "score_series": score_series,
-                "eot_read_ms": payload.get("ms"),
+                "eot_read_ms": payload.get("eot_read_ms", payload.get("ms")),
                 "act_score": payload.get("act"),
                 "is_information_request": payload.get("is_info"),
                 "probe_on": payload.get("probe_on"),
@@ -301,7 +299,6 @@ class ConversationRecorder:
                 self.user_pcm = bytearray(base64.b64decode(encoded_user_pcm))
                 self.speech_detected = bool(self.user_pcm)
                 self.speech_started_at = self.speech_started_at or self.first_input_at
-                self.speech_ended_at = self.speech_ended_at or response_completed_at
             except (ValueError, TypeError):
                 turn["anomalies"]["input_audio_anomaly"] = True
         turn["timestamps"].update(
@@ -335,7 +332,7 @@ class ConversationRecorder:
         if self.model_pcm:
             _write_pcm_wav(model_audio_path, bytes(self.model_pcm), 24000)
 
-        user_transcript = payload.get("uplink_text")
+        user_transcript = (payload.get("uplink_text") or "").strip() or None
         transcript_source = "upstream_asr" if user_transcript else None
         upstream_asr_error = payload.get("asr_error")
         transcript_status = (
@@ -351,12 +348,15 @@ class ConversationRecorder:
                 user_transcript, transcript_status, posthoc_asr_ms = await transcribe_wav(
                     user_audio_path
                 )
+                user_transcript = (user_transcript or "").strip() or None
                 if user_transcript:
                     transcript_source = "posthoc_asr"
             except Exception as error:  # preserve the turn even if optional ASR fails
                 transcript_status = f"error:{type(error).__name__}"
 
-        model_transcript = payload.get("answer") or payload.get("relay") or ""
+        model_transcript = (
+            payload.get("answer") or payload.get("relay") or ""
+        ).strip()
         turn["user"] = {
             "audio_path": str(user_audio_path) if self.user_pcm else None,
             "audio_bytes": len(self.user_pcm),
@@ -394,16 +394,22 @@ class ConversationRecorder:
             audio_quality["silence_before_eot_s"] = self.silence_before_eot_s
         turn["audio_quality"] = audio_quality
 
+        # The duplex runtime reports these three durations from one clock,
+        # starting at its actual end-of-turn decision. Prefer them over
+        # timestamps observed after network transport at the eval backend.
         latency_candidates = {
-            "speech_end_to_gate": _milliseconds(
+            "speech_end_to_gate": _reported_or_derived_milliseconds(
+                payload.get("gate_latency_ms"),
                 turn["timestamps"].get("user_speech_ended_at"),
                 turn["timestamps"].get("gate_decision_at"),
             ),
-            "speech_end_to_first_audio": _milliseconds(
+            "speech_end_to_first_audio": _reported_or_derived_milliseconds(
+                payload.get("first_audio_ms"),
                 turn["timestamps"].get("user_speech_ended_at"),
                 self.first_model_audio_at,
             ),
-            "speech_end_to_response_complete": _milliseconds(
+            "speech_end_to_response_complete": _reported_or_derived_milliseconds(
+                payload.get("response_complete_ms"),
                 turn["timestamps"].get("user_speech_ended_at"),
                 response_completed_at,
             ),
@@ -456,6 +462,9 @@ class ConversationRecorder:
                 "speech_out_s",
                 "asr_s",
                 "total_ms",
+                "gate_latency_ms",
+                "first_audio_ms",
+                "response_complete_ms",
                 "protocol",
                 "turn_index",
                 "act_score",
@@ -521,6 +530,58 @@ class ConversationRecorder:
             },
             "raw_model_metrics": {},
         }
+
+    def _mark_started(
+        self,
+        conversation: dict[str, Any],
+        payload: dict[str, Any],
+        now: str,
+    ) -> None:
+        """Start, or safely retry, a conversation that produced no answer."""
+        retrying_empty_attempt = (
+            conversation.get("status") in {"failed", "abandoned"}
+            and not conversation.get("turns")
+            and not conversation.get("rating")
+        )
+        if retrying_empty_attempt:
+            conversation.update(
+                {
+                    "started_at": now,
+                    "ended_at": None,
+                    "end_reason": None,
+                    "evaluation_status": "not_ready",
+                    "evaluation_completed_at": None,
+                    "quality_review": {
+                        "status": "not_ready",
+                        "reason": None,
+                        "note": "",
+                        "reviewer": None,
+                        "reviewed_at": None,
+                        "automatic_flags": [],
+                    },
+                    "retry_count": int(conversation.get("retry_count", 0)) + 1,
+                }
+            )
+        conversation.update(
+            {
+                "status": "in_progress",
+                "started_at": conversation.get("started_at") or now,
+                "threshold_tier": (
+                    payload.get("tier")
+                    if self.model == MODEL_MINICPM_PLUS
+                    else None
+                ),
+                "model_runtime": {
+                    "protocol": payload.get("protocol", "duplex_v1"),
+                    "mode": payload.get("mode"),
+                    "event_log_path": str(self.event_log_path),
+                    "threshold_tier": payload.get("tier"),
+                    "threshold": payload.get("thr"),
+                    "probe_on": payload.get("probe_on"),
+                    "connected_at": self.connected_at,
+                },
+            }
+        )
 
     def _ensure_turn(self) -> dict[str, Any]:
         if self.current_turn is None:

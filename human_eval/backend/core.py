@@ -20,7 +20,7 @@ from pathlib import Path
 from typing import Any, Callable, Iterable
 
 
-SCHEMA_VERSION = "1.4"
+SCHEMA_VERSION = "1.7"
 MODEL_MINICPM = "minicpm"
 MODEL_MINICPM_PLUS = "minicpm_plus"
 DEFAULT_TIER = "aggressive"
@@ -92,15 +92,77 @@ def target_turns_for(conversation: dict[str, Any], capability: str | None = None
     return 3 if capability == "S3" else 2
 
 
+def meaningful_text(value: Any) -> bool:
+    """Return true only for text containing at least one non-whitespace character."""
+    return isinstance(value, str) and bool(value.strip())
+
+
+def response_was_observed(conversation: dict[str, Any]) -> bool:
+    """Return whether the participant had a response available to rate."""
+    observation = conversation.get("client_observation", {})
+    completed_turn_count = observation.get("completed_turn_count")
+    return (
+        bool(conversation.get("turns"))
+        or observation.get("received_model_audio") is True
+        or (
+            isinstance(completed_turn_count, (int, float))
+            and not isinstance(completed_turn_count, bool)
+            and completed_turn_count > 0
+        )
+    )
+
+
+def response_record_status(conversation: dict[str, Any]) -> str:
+    """Classify rating evidence without discarding the rating itself."""
+    if conversation.get("turns"):
+        return "recorded"
+    observation = conversation.get("client_observation", {})
+    completed_turn_count = observation.get("completed_turn_count")
+    if observation.get("received_model_audio") is True or (
+        isinstance(completed_turn_count, (int, float))
+        and not isinstance(completed_turn_count, bool)
+        and completed_turn_count > 0
+    ):
+        return "client_observed"
+    if conversation.get("rating"):
+        return "unverified_legacy"
+    return "not_observed"
+
+
 def normalize_session(session: dict[str, Any]) -> dict[str, Any]:
     """Populate lifecycle/QC fields when reading records from older schemas."""
     session["schema_version"] = SCHEMA_VERSION
     for task in session.get("tasks", []):
         capability = task.get("capability")
         for conversation in task.get("conversations", []):
+            turns = conversation.get("turns", [])
+            for turn in conversation.get("turns", []):
+                user = turn.setdefault("user", {})
+                if not meaningful_text(user.get("transcript")):
+                    user["transcript"] = None
+                    if user.get("transcript_status") == "complete":
+                        user["transcript_status"] = "missing"
+                    turn.setdefault("anomalies", {})["missing_transcript"] = True
             if conversation.get("status") == "completed":
                 conversation["status"] = "interaction_completed"
             rating = conversation.get("rating")
+            observation = conversation.setdefault("client_observation", {})
+            observation.setdefault(
+                "received_model_audio", True if turns else None if rating else False
+            )
+            observation.setdefault("completed_turn_count", len(turns))
+            observation.setdefault("model_audio_ms", None)
+            observation.setdefault("reported_at", None)
+            if rating:
+                rating.setdefault(
+                    "response_record_status",
+                    "recorded" if turns else "unverified_legacy",
+                )
+                rating.setdefault("turn_count_at_submission", len(turns))
+                rating.setdefault(
+                    "client_received_model_audio",
+                    observation.get("received_model_audio"),
+                )
             if "evaluation_status" not in conversation:
                 if rating:
                     conversation["evaluation_status"] = "completed"
@@ -226,6 +288,12 @@ def create_assignment(
                     "end_reason": None,
                     "turns": [],
                     "rating": None,
+                    "client_observation": {
+                        "received_model_audio": False,
+                        "completed_turn_count": 0,
+                        "model_audio_ms": 0,
+                        "reported_at": None,
+                    },
                     "evaluation_status": "not_ready",
                     "evaluation_completed_at": None,
                     "quality_review": {
@@ -304,6 +372,46 @@ def public_session(session: dict[str, Any]) -> dict[str, Any]:
     return public
 
 
+def task_analysis_state(task: dict[str, Any]) -> dict[str, Any]:
+    """Describe primary-rating and telemetry readiness independently."""
+    conversations = task.get("conversations", [])
+    rating_count = sum(bool(item.get("rating")) for item in conversations)
+    recorded_rating_count = sum(
+        bool(item.get("rating")) and bool(item.get("turns"))
+        for item in conversations
+    )
+    ratings_complete = bool(conversations) and rating_count == len(conversations)
+    recorded_ratings_complete = (
+        bool(conversations) and recorded_rating_count == len(conversations)
+    )
+    comparison_complete = bool(task.get("comparison"))
+    quality_statuses = [
+        item.get("quality_review", {}).get("status") for item in conversations
+    ]
+    quality_review_complete = bool(conversations) and all(
+        status in {"valid", "invalid"} for status in quality_statuses
+    )
+    quality_valid = bool(conversations) and all(
+        status == "valid" for status in quality_statuses
+    )
+    return {
+        "conversation_count": len(conversations),
+        "rating_count": rating_count,
+        # Ratings are the primary outcome. Missing telemetry is exported as a
+        # separate quality dimension instead of silently dropping feedback.
+        "analyzable_rating_count": rating_count,
+        "recorded_rating_count": recorded_rating_count,
+        "ratings_complete": ratings_complete,
+        "analyzable_ratings_complete": ratings_complete,
+        "recorded_ratings_complete": recorded_ratings_complete,
+        "comparison_complete": comparison_complete,
+        "analysis_complete": ratings_complete and comparison_complete,
+        "telemetry_complete": recorded_ratings_complete,
+        "quality_review_complete": quality_review_complete,
+        "quality_valid": quality_valid,
+    }
+
+
 ANOMALY_KEYS = (
     "timeout",
     "crash",
@@ -324,11 +432,16 @@ def recompute_summary(session: dict[str, Any]) -> None:
         "interaction_ended_conversation_count": 0,
         "evaluation_completed_conversation_count": 0,
         "analysis_complete_conversation_count": 0,
-        # Backward-compatible alias. As of schema 1.4, completion requires a rating.
+        "telemetry_complete_rated_conversation_count": 0,
+        # Backward-compatible alias. Completion means a submitted rating.
         "completed_conversation_count": 0,
         "quality_valid_conversation_count": 0,
         "quality_invalid_conversation_count": 0,
         "quality_needs_review_conversation_count": 0,
+        "ratings_complete_task_count": 0,
+        "comparison_completed_task_count": 0,
+        "analysis_complete_task_count": 0,
+        "telemetry_complete_task_count": 0,
         "turn_count": 0,
         "minicpm_plus_turn_count": 0,
         "escalation_count": 0,
@@ -343,14 +456,33 @@ def recompute_summary(session: dict[str, Any]) -> None:
         "anomalies": {key: 0 for key in ANOMALY_KEYS},
     }
     for task in session.get("tasks", []):
+        task_state = task_analysis_state(task)
+        summary["ratings_complete_task_count"] += int(
+            task_state["ratings_complete"]
+        )
+        summary["comparison_completed_task_count"] += int(
+            task_state["comparison_complete"]
+        )
+        summary["analysis_complete_task_count"] += int(
+            task_state["analysis_complete"]
+        )
+        summary["telemetry_complete_task_count"] += int(
+            task_state["telemetry_complete"]
+        )
         for conversation in task.get("conversations", []):
             summary["conversation_count"] += 1
             if conversation.get("status") in TERMINAL_INTERACTION_STATUSES:
                 summary["interaction_ended_conversation_count"] += 1
-            if conversation.get("rating"):
+            rating_submitted = bool(conversation.get("rating"))
+            analysis_complete = rating_submitted
+            telemetry_complete = rating_submitted and bool(conversation.get("turns"))
+            if rating_submitted:
                 summary["evaluation_completed_conversation_count"] += 1
+            if analysis_complete:
                 summary["analysis_complete_conversation_count"] += 1
                 summary["completed_conversation_count"] += 1
+            if telemetry_complete:
+                summary["telemetry_complete_rated_conversation_count"] += 1
             quality_status = conversation.get("quality_review", {}).get("status")
             if quality_status == "valid":
                 summary["quality_valid_conversation_count"] += 1
@@ -380,7 +512,7 @@ def recompute_summary(session: dict[str, Any]) -> None:
                             summary["routing_incorrect_turn_count"] += 1
                     else:
                         summary["routing_unreviewed_turn_count"] += 1
-                if not turn.get("user", {}).get("transcript"):
+                if not meaningful_text(turn.get("user", {}).get("transcript")):
                     summary["missing_user_transcript_count"] += 1
                 anomalies = turn.get("anomalies", {})
                 for key in (
@@ -416,6 +548,52 @@ def _elapsed_ms(start: str | None, end: str | None) -> int | None:
             * 1000
         ),
     )
+
+
+def _median_numeric(values: Iterable[Any]) -> float | int | None:
+    numeric = sorted(
+        float(value)
+        for value in values
+        if isinstance(value, (int, float)) and not isinstance(value, bool)
+    )
+    if not numeric:
+        return None
+    middle = len(numeric) // 2
+    median = (
+        numeric[middle]
+        if len(numeric) % 2
+        else (numeric[middle - 1] + numeric[middle]) / 2
+    )
+    return int(median) if median.is_integer() else median
+
+
+def _reliable_turn_latency(turn: dict[str, Any], key: str) -> float | int | None:
+    timestamps = turn.get("timestamps", {})
+    latency = turn.get("latency_ms", {})
+    value = latency.get(key)
+    if isinstance(value, (int, float)) and not isinstance(value, bool):
+        # Schema <=1.5 wrote a synthetic 0 without an EOT reference. New
+        # upstream measurements carry an explicit raw metric marker.
+        raw_key = {
+            "speech_end_to_gate": "gate_latency_ms",
+            "speech_end_to_first_audio": "first_audio_ms",
+            "speech_end_to_response_complete": "response_complete_ms",
+        }.get(key)
+        if value != 0 or timestamps.get("user_speech_ended_at") or (
+            raw_key and raw_key in turn.get("raw_model_metrics", {})
+        ):
+            return value
+    timestamp_end = {
+        "speech_end_to_gate": "gate_decision_at",
+        "speech_end_to_first_audio": "first_model_audio_at",
+        "speech_end_to_response_complete": "response_completed_at",
+    }.get(key)
+    if timestamp_end:
+        return _elapsed_ms(
+            timestamps.get("user_speech_ended_at"),
+            timestamps.get(timestamp_end),
+        )
+    return None
 
 
 def analysis_rows(sessions: Iterable[dict[str, Any]], table: str) -> list[dict[str, Any]]:
@@ -469,16 +647,68 @@ def analysis_rows(sessions: Iterable[dict[str, Any]], table: str) -> list[dict[s
             }
             if table == "tasks":
                 comparison = task.get("comparison") or {}
+                task_state = task_analysis_state(task)
+                ordered_conversations = sorted(
+                    task.get("conversations", []),
+                    key=lambda item: item.get("order", 0),
+                )
+                preferred_model = None
+                if comparison.get("preference") == "same":
+                    preferred_model = "same"
+                elif comparison.get("preference") in {"first", "second"}:
+                    preferred_index = (
+                        0 if comparison["preference"] == "first" else 1
+                    )
+                    if len(ordered_conversations) > preferred_index:
+                        preferred_model = ordered_conversations[
+                            preferred_index
+                        ].get("model")
                 rows.append(
                     {
                         **task_fields,
                         "task_title": task.get("title"),
                         "expected_escalation": task.get("expected_escalation"),
                         "sequence_cell": task.get("sequence_cell"),
+                        "first_model": (
+                            ordered_conversations[0].get("model")
+                            if ordered_conversations
+                            else None
+                        ),
+                        "second_model": (
+                            ordered_conversations[1].get("model")
+                            if len(ordered_conversations) > 1
+                            else None
+                        ),
                         "preference": comparison.get("preference"),
+                        "preferred_model": preferred_model,
+                        "comparison_id": comparison.get("comparison_id"),
                         "comparison_reasons": comparison.get("reasons", []),
                         "comparison_feedback": comparison.get("feedback", ""),
                         "comparison_submitted_at": comparison.get("submitted_at"),
+                        "conversation_count": task_state["conversation_count"],
+                        "rating_count": task_state["rating_count"],
+                        "analyzable_rating_count": task_state[
+                            "analyzable_rating_count"
+                        ],
+                        "recorded_rating_count": task_state[
+                            "recorded_rating_count"
+                        ],
+                        "ratings_complete": task_state["ratings_complete"],
+                        "analyzable_ratings_complete": task_state[
+                            "analyzable_ratings_complete"
+                        ],
+                        "recorded_ratings_complete": task_state[
+                            "recorded_ratings_complete"
+                        ],
+                        "comparison_complete": task_state[
+                            "comparison_complete"
+                        ],
+                        "analysis_complete": task_state["analysis_complete"],
+                        "telemetry_complete": task_state["telemetry_complete"],
+                        "quality_review_complete": task_state[
+                            "quality_review_complete"
+                        ],
+                        "quality_valid": task_state["quality_valid"],
                     }
                 )
                 continue
@@ -495,8 +725,14 @@ def analysis_rows(sessions: Iterable[dict[str, Any]], table: str) -> list[dict[s
                 if table == "conversations":
                     rating = conversation.get("rating") or {}
                     turns = conversation.get("turns", [])
+                    observation = conversation.get("client_observation", {})
                     anomalies = conversation.get("anomalies", {})
                     quality = conversation.get("quality_review", {})
+                    task_state = task_analysis_state(task)
+                    escalation_count = sum(
+                        bool(turn.get("gate", {}).get("escalated"))
+                        for turn in turns
+                    )
                     rows.append(
                         {
                             **conversation_fields,
@@ -509,6 +745,22 @@ def analysis_rows(sessions: Iterable[dict[str, Any]], table: str) -> list[dict[s
                                 "evaluation_completed_at"
                             ),
                             "analysis_complete": bool(rating),
+                            "telemetry_complete": bool(turns),
+                            "response_record_status": response_record_status(
+                                conversation
+                            ),
+                            "task_ratings_complete": task_state[
+                                "ratings_complete"
+                            ],
+                            "task_comparison_complete": task_state[
+                                "comparison_complete"
+                            ],
+                            "task_analysis_complete": task_state[
+                                "analysis_complete"
+                            ],
+                            "task_telemetry_complete": task_state[
+                                "telemetry_complete"
+                            ],
                             "quality_status": quality.get("status"),
                             "quality_reason": quality.get("reason"),
                             "quality_note": quality.get("note", ""),
@@ -528,8 +780,39 @@ def analysis_rows(sessions: Iterable[dict[str, Any]], table: str) -> list[dict[s
                                 "model_runtime", {}
                             ).get("event_log_path"),
                             "turn_count": len(turns),
-                            "escalation_count": sum(
-                                bool(turn.get("gate", {}).get("escalated"))
+                            "client_received_model_audio": observation.get(
+                                "received_model_audio"
+                            ),
+                            "client_completed_turn_count": observation.get(
+                                "completed_turn_count"
+                            ),
+                            "client_model_audio_ms": observation.get(
+                                "model_audio_ms"
+                            ),
+                            "escalation_count": escalation_count,
+                            "escalation_rate": (
+                                escalation_count / len(turns)
+                                if turns
+                                and conversation.get("model")
+                                == MODEL_MINICPM_PLUS
+                                else None
+                            ),
+                            "latency_gate_median_ms": _median_numeric(
+                                _reliable_turn_latency(
+                                    turn, "speech_end_to_gate"
+                                )
+                                for turn in turns
+                            ),
+                            "latency_first_audio_median_ms": _median_numeric(
+                                _reliable_turn_latency(
+                                    turn, "speech_end_to_first_audio"
+                                )
+                                for turn in turns
+                            ),
+                            "latency_response_complete_median_ms": _median_numeric(
+                                _reliable_turn_latency(
+                                    turn, "speech_end_to_response_complete"
+                                )
                                 for turn in turns
                             ),
                             "routing_reviewed_turn_count": sum(
@@ -545,12 +828,27 @@ def analysis_rows(sessions: Iterable[dict[str, Any]], table: str) -> list[dict[s
                                 for turn in turns
                             ),
                             "missing_user_transcript_count": sum(
-                                not turn.get("user", {}).get("transcript")
+                                not meaningful_text(
+                                    turn.get("user", {}).get("transcript")
+                                )
                                 for turn in turns
                             ),
                             "rating_metrics": rating.get("metrics", {}),
                             "rating_feedback": rating.get("feedback", ""),
                             "rating_submitted_at": rating.get("submitted_at"),
+                            "rating_id": rating.get("rating_id"),
+                            "rating_response_record_status": rating.get(
+                                "response_record_status"
+                            ),
+                            "rating_turn_count_at_submission": rating.get(
+                                "turn_count_at_submission"
+                            ),
+                            **{
+                                f"rating_{key}": value
+                                for key, value in rating.get(
+                                    "metrics", {}
+                                ).items()
+                            },
                             "completed_after_error": bool(
                                 conversation.get("status")
                                 == "interaction_completed"
@@ -574,17 +872,14 @@ def analysis_rows(sessions: Iterable[dict[str, Any]], table: str) -> list[dict[s
                     gate = turn.get("gate", {})
                     timestamps = dict(turn.get("timestamps", {}))
                     speech_end_estimated = False
+                    latency = dict(turn.get("latency_ms", {}))
                     if (
                         not timestamps.get("user_speech_ended_at")
-                        and timestamps.get("gate_decision_at")
-                        and isinstance(gate.get("eot_read_ms"), (int, float))
+                        and latency.get("speech_end_to_gate") == 0
+                        and "gate_latency_ms"
+                        not in turn.get("raw_model_metrics", {})
                     ):
-                        estimated = datetime.fromisoformat(
-                            timestamps["gate_decision_at"]
-                        ) - timedelta(milliseconds=gate["eot_read_ms"])
-                        timestamps["user_speech_ended_at"] = estimated.isoformat()
-                        speech_end_estimated = True
-                    latency = dict(turn.get("latency_ms", {}))
+                        latency.pop("speech_end_to_gate", None)
                     if timestamps.get("user_speech_ended_at"):
                         derived_latency = {
                             "speech_end_to_gate": _elapsed_ms(

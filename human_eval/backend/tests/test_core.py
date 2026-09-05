@@ -26,6 +26,17 @@ class AssignmentTests(unittest.TestCase):
     def setUp(self) -> None:
         self.scenarios = json.loads(SCENARIOS_PATH.read_text(encoding="utf-8"))
 
+    def test_participant_config_uses_four_focused_ratings(self) -> None:
+        self.assertEqual(
+            [question["id"] for question in self.scenarios["ratingQuestions"]],
+            [
+                "correctness",
+                "helpfulness",
+                "context_consistency",
+                "conversation_naturalness",
+            ],
+        )
+
     def test_32_participant_block_is_balanced(self) -> None:
         rng = random.Random(7)
         sessions = []
@@ -170,10 +181,142 @@ class StoreTests(unittest.TestCase):
         conversation["rating"] = {"metrics": {"overall": 4}, "submitted_at": "now"}
         conversation["evaluation_status"] = "completed"
         recompute_summary(session)
+        self.assertEqual(
+            session["summary"]["evaluation_completed_conversation_count"], 1
+        )
         self.assertEqual(session["summary"]["completed_conversation_count"], 1)
         self.assertEqual(
             session["summary"]["analysis_complete_conversation_count"], 1
         )
+        self.assertEqual(
+            session["summary"]["telemetry_complete_rated_conversation_count"],
+            0,
+        )
+
+        conversation["turns"] = [
+            {
+                "turn_id": "turn_rated",
+                "user": {"transcript": "Question"},
+                "gate": {},
+                "anomalies": {},
+                "routing_review": {},
+            }
+        ]
+        recompute_summary(session)
+        self.assertEqual(session["summary"]["completed_conversation_count"], 1)
+        self.assertEqual(
+            session["summary"]["analysis_complete_conversation_count"], 1
+        )
+        self.assertEqual(
+            session["summary"]["telemetry_complete_rated_conversation_count"],
+            1,
+        )
+
+    def test_task_rating_analysis_is_independent_from_turn_telemetry(self) -> None:
+        session = create_assignment(
+            self.scenarios, [], "rating-first", rng=random.Random(8)
+        )
+        task = session["tasks"][0]
+        for conversation in task["conversations"]:
+            conversation["status"] = "interaction_completed"
+            conversation["evaluation_status"] = "completed"
+            conversation["client_observation"] = {
+                "received_model_audio": True,
+                "completed_turn_count": 1,
+                "model_audio_ms": 2000,
+                "reported_at": "2026-09-04T00:00:00+00:00",
+            }
+            conversation["rating"] = {
+                "metrics": {"overall": 4},
+                "submitted_at": "2026-09-04T00:01:00+00:00",
+                "response_record_status": "client_observed",
+                "turn_count_at_submission": 0,
+            }
+        task["comparison"] = {
+            "preference": "first",
+            "reasons": ["More accurate"],
+            "feedback": "",
+            "submitted_at": "2026-09-04T00:02:00+00:00",
+        }
+        recompute_summary(session)
+
+        task_row = analysis_rows([session], "tasks")[0]
+        self.assertTrue(task_row["analysis_complete"])
+        self.assertFalse(task_row["telemetry_complete"])
+        self.assertEqual(task_row["analyzable_rating_count"], 2)
+        self.assertEqual(task_row["recorded_rating_count"], 0)
+        self.assertIn(task_row["preferred_model"], {"minicpm", "minicpm_plus"})
+
+    def test_completed_task_is_analysis_ready_even_if_session_expires(self) -> None:
+        session = create_assignment(
+            self.scenarios, [], "partial-user", rng=random.Random(6)
+        )
+        completed_task = session["tasks"][0]
+        for index, conversation in enumerate(completed_task["conversations"], 1):
+            conversation["status"] = "interaction_completed"
+            conversation["evaluation_status"] = "completed"
+            conversation["quality_review"]["status"] = "valid"
+            conversation["turns"] = [
+                {
+                    "turn_id": f"turn_partial_{index}",
+                    "user": {"transcript": f"Question {index}"},
+                    "gate": {},
+                    "anomalies": {},
+                    "routing_review": {},
+                }
+            ]
+            conversation["rating"] = {
+                "metrics": {"overall": 4},
+                "submitted_at": "2026-09-04T00:00:00+00:00",
+            }
+        completed_task["comparison"] = {
+            "preference": "first",
+            "reasons": ["More accurate"],
+            "feedback": "",
+            "submitted_at": "2026-09-04T00:01:00+00:00",
+        }
+        session["status"] = "expired"
+        recompute_summary(session)
+
+        self.assertEqual(session["summary"]["analysis_complete_task_count"], 1)
+        self.assertEqual(session["summary"]["ratings_complete_task_count"], 1)
+        task_rows = analysis_rows([session], "tasks")
+        self.assertTrue(task_rows[0]["analysis_complete"])
+        self.assertTrue(task_rows[0]["quality_review_complete"])
+        self.assertTrue(task_rows[0]["quality_valid"])
+        self.assertFalse(task_rows[1]["analysis_complete"])
+        conversation_rows = analysis_rows([session], "conversations")
+        completed_rows = [
+            row
+            for row in conversation_rows
+            if row["task_id"] == completed_task["task_id"]
+        ]
+        self.assertTrue(all(row["analysis_complete"] for row in completed_rows))
+        self.assertTrue(
+            all(row["task_analysis_complete"] for row in completed_rows)
+        )
+
+    def test_whitespace_transcript_is_missing(self) -> None:
+        session = create_assignment(
+            self.scenarios, [], "blank-transcript", rng=random.Random(7)
+        )
+        conversation = session["tasks"][0]["conversations"][0]
+        conversation["turns"] = [
+            {
+                "turn_id": "turn_blank",
+                "user": {"transcript": "\n", "transcript_status": "complete"},
+                "gate": {},
+                "anomalies": {"missing_transcript": False},
+                "routing_review": {},
+            }
+        ]
+        recompute_summary(session)
+
+        turn = conversation["turns"][0]
+        self.assertIsNone(turn["user"]["transcript"])
+        self.assertEqual(turn["user"]["transcript_status"], "missing")
+        self.assertTrue(turn["anomalies"]["missing_transcript"])
+        self.assertEqual(session["summary"]["missing_user_transcript_count"], 1)
 
 
 class ModelGatewayTests(unittest.TestCase):
@@ -217,6 +360,7 @@ class ModelGatewayTests(unittest.TestCase):
                     "score": 0.81,
                     "thr": 0.62,
                     "fired": True,
+                    "eot_read_ms": 12.5,
                     "act": 0.73,
                     "is_info": True,
                     "probe_on": True,
@@ -237,6 +381,7 @@ class ModelGatewayTests(unittest.TestCase):
                         "eot_score": 0.81,
                         "threshold": 0.62,
                         "scores": [0.41],
+                        "eot_read_ms": 12.5,
                         "act_score": 0.73,
                         "is_info": True,
                         "probe_on": True,
@@ -246,7 +391,9 @@ class ModelGatewayTests(unittest.TestCase):
                         "uplink_text": "Test question",
                         "answer": "Test answer",
                         "expert_answer": "Verified answer",
+                        "gate_latency_ms": 18,
                         "first_audio_ms": 300,
+                        "response_complete_ms": 900,
                         "expert_latency_s": 1.2,
                     }
             recorder.record_server_event(turn_payload)
@@ -269,8 +416,13 @@ class ModelGatewayTests(unittest.TestCase):
             self.assertEqual(turn["routing_review"]["status"], "unreviewed")
             self.assertEqual(turn["routing_review"]["actual_action"], "escalate")
             self.assertIsNone(turn["routing_review"]["correct"])
-            self.assertIsNotNone(turn["timestamps"]["user_speech_ended_at"])
-            self.assertIn("speech_end_to_gate", turn["latency_ms"])
+            self.assertIsNone(turn["timestamps"]["user_speech_ended_at"])
+            self.assertEqual(turn["latency_ms"]["speech_end_to_gate"], 18)
+            self.assertEqual(turn["latency_ms"]["speech_end_to_first_audio"], 300)
+            self.assertEqual(
+                turn["latency_ms"]["speech_end_to_response_complete"], 900
+            )
+            self.assertEqual(turn["gate"]["eot_read_ms"], 12.5)
             self.assertTrue(turn["audio_quality"]["speech_detected"])
             self.assertEqual(turn["user"]["audio_bytes"], 10000)
             self.assertTrue(Path(turn["user"]["audio_path"]).exists())
@@ -294,7 +446,85 @@ class ModelGatewayTests(unittest.TestCase):
             self.assertEqual(turn_rows[0]["user_transcript_source"], "upstream_asr")
             self.assertEqual(turn_rows[0]["routing_review_status"], "unreviewed")
             self.assertEqual(turn_rows[0]["model_act_score"], 0.73)
-            self.assertIn("latency_speech_end_to_gate_ms", turn_rows[0])
+            self.assertFalse(turn_rows[0]["speech_end_estimated"])
+            self.assertEqual(turn_rows[0]["latency_speech_end_to_gate_ms"], 18)
+            self.assertEqual(
+                turn_rows[0]["latency_speech_end_to_first_audio_ms"], 300
+            )
+
+            conversation_rows = analysis_rows([persisted], "conversations")
+            conversation_row = next(
+                row
+                for row in conversation_rows
+                if row["conversation_id"] == conversation["conversation_id"]
+            )
+            self.assertEqual(conversation_row["escalation_rate"], 1)
+            self.assertEqual(conversation_row["latency_gate_median_ms"], 18)
+            self.assertEqual(conversation_row["latency_first_audio_median_ms"], 300)
+            self.assertEqual(
+                conversation_row["latency_response_complete_median_ms"], 900
+            )
+
+    def test_eot_read_cost_is_not_exported_as_gate_latency(self) -> None:
+        scenarios = json.loads(SCENARIOS_PATH.read_text(encoding="utf-8"))
+        session = create_assignment(
+            scenarios, [], "read-cost-only", rng=random.Random(13)
+        )
+        conversation = session["tasks"][0]["conversations"][0]
+        conversation["turns"] = [
+            {
+                "turn_id": "turn_read_cost_only",
+                "timestamps": {
+                    "user_speech_ended_at": None,
+                    "gate_decision_at": "2026-09-04T00:00:00+00:00",
+                },
+                "latency_ms": {},
+                "gate": {"eot_read_ms": 2.4},
+                "user": {"transcript": "Question"},
+                "model_response": {"transcript": "Answer"},
+                "audio_quality": {},
+                "anomalies": {},
+                "routing_review": {},
+                "raw_model_metrics": {},
+            }
+        ]
+
+        turn_row = analysis_rows([session], "turns")[0]
+        self.assertEqual(turn_row["eot_read_ms"], 2.4)
+        self.assertNotIn("latency_speech_end_to_gate_ms", turn_row)
+
+    def test_legacy_zero_gate_latency_is_exported_as_missing(self) -> None:
+        scenarios = json.loads(SCENARIOS_PATH.read_text(encoding="utf-8"))
+        session = create_assignment(
+            scenarios, [], "legacy-latency", rng=random.Random(12)
+        )
+        conversation = session["tasks"][0]["conversations"][0]
+        conversation["turns"] = [
+            {
+                "turn_id": "turn_legacy_zero",
+                "timestamps": {
+                    "user_speech_ended_at": None,
+                    "gate_decision_at": "2026-09-04T00:00:00+00:00",
+                },
+                "latency_ms": {"speech_end_to_gate": 0},
+                "gate": {"eot_read_ms": None},
+                "user": {"transcript": "Question"},
+                "model_response": {"transcript": "Answer"},
+                "audio_quality": {},
+                "anomalies": {},
+                "routing_review": {},
+                "raw_model_metrics": {},
+            }
+        ]
+
+        turn_row = analysis_rows([session], "turns")[0]
+        self.assertNotIn("latency_speech_end_to_gate_ms", turn_row)
+        conversation_row = next(
+            row
+            for row in analysis_rows([session], "conversations")
+            if row["conversation_id"] == conversation["conversation_id"]
+        )
+        self.assertIsNone(conversation_row["latency_gate_median_ms"])
 
 
 if __name__ == "__main__":
