@@ -6495,3 +6495,46 @@ repetition observed in smokes (the closed turn carries stock
 semantics), fallback is a minimal neutral note; a synth-failed piece
 can leave its text in the committed turn (index alignment kept,
 audio skipped) — rare, logged.
+
+## 8cg — spontaneous speech on an open mic is head-native (silence-probe A/B) (2026-09-05)
+
+**User report (phone session):** the model starts lecturing with
+nobody talking — "This is a Hyperloop test track… we built it with
+the help of SpaceX" — and the turn-1 ASR snapshot comes back EMPTY
+(1.4s, no speech). A "Stop, stop." then gets answered with MORE
+lecture (turn 2 continues the Hyperloop topic).
+
+**A/B (`_ws_silence_probe.py`): 100s of mic-floor noise (RMS ~0.003,
+breath-like bumps to 0.008, no speech) into both arms.** Vanilla
+(stock config, zero gate machinery): **4 spontaneous commits**
+(17/48/78/94s), narrating a Hyperloop pod tour. Gate demo: 1 commit
+(16.6s), a SpaceX team-building lecture. Verdict: commit-on-noise is
+the HEAD's own behavior — the stock arm does it more, not less; our
+machinery neither causes nor (much) suppresses it. Mechanism: the
+listen/speak decision is sampled per second from the head's logits;
+on ambient noise the speak probability is small but nonzero, so an
+open mic eventually fires; with no real content in the audio the
+audio-LM free-associates spoken-corpus material (YouTube-lecture
+register; the Musk/SpaceX/Hyperloop theme recurred across all three
+independent sessions — plausibly anchored by the OFFICIAL default
+ref voice `assets/system_ref_audio.wav` + system prompt, same asset
+in both arms). Same family as Whisper's silence hallucinations.
+
+**Why "Stop, stop." made it lecture more:** turn 1's hallucinated
+monologue is in the context; the head hears speech, commits to
+respond, and self-conditions on its own lecture — it continues the
+topic instead of engaging the user. The escalation gate behaved
+correctly throughout the user's session: both commits were ruled
+floor turns (P(info)=.42/.11) and NOT escalated — no expert calls
+wasted on hallucinated turns.
+
+**Mitigation options (stance decision, deferred to the user):**
+(1) accept + disclose — it is stock behavior, the vanilla arm
+proves it, and a demo/limitations sentence covers it; (2) transport-
+side damper — if the head commits while the trailing ~2s uplink RMS
+is at the silence floor, end the turn and mute it (mirrors the 8ce
+energy cut: transport-only, but it DOES veto a head speak decision —
+same VAD-adjacent territory the paper stance argues against);
+(3) system-prompt nudge ("speak only when the user speaks") — cheap,
+but in-band imperatives have failed three times before (8bd/8bm).
+Files: _ws_silence_probe.py (new). No code change deployed.
