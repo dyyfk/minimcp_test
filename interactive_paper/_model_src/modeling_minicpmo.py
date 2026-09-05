@@ -2607,6 +2607,27 @@ class MiniCPMODuplex:
     def clear_break_event(self):
         self.break_event.clear()
 
+    def end_turn_now(self):
+        """8ce: externally terminate an in-flight speak turn (barge cut).
+
+        Mirrors a sampled <|turn_eos|>: feed the terminator so the
+        decoder context closes the half-open utterance (leaving it open
+        drags down the head's commit probability on the next user turn
+        — post-cut listen-lock), unlock listen (current_turn_ended
+        gates the mid-turn listen suppression), and reset the per-turn
+        TTS/token2wav state exactly like the natural end_of_turn branch
+        of streaming_generate.
+        """
+        if getattr(self, "current_turn_ended", True):
+            return
+        self.decoder.feed(self.decoder.embed_token(self.turn_eos_token_id))
+        self.total_ids.append(self.turn_eos_token_id)
+        self.current_turn_ended = True
+        self.tts_text_start_pos = 0
+        self.tts_past_key_values = None
+        self.tts_current_turn_start_time = None
+        self._reset_token2wav_for_new_turn()
+
     def set_session_stop(self):
         self.session_stop_event.set()
         self.break_event.set()

@@ -800,6 +800,13 @@ class DuplexVoice:
                                     relay_pause = 0
                                     muted = 0
                                     self.st3.update(sum=None, cnt=0)
+                                    # 8ce: hard-end the stale babble turn
+                                    # like a sampled <|turn_eos|> — flag
+                                    # alone left the utterance half-open
+                                    # in the decoder context and the head
+                                    # intermittently never committed on
+                                    # the follow-up (post-cut deafness).
+                                    self.duplex.end_turn_now()
                                     self.duplex.force_listen_count = \
                                         FORCE_LISTEN
                                     prev_listen = True
