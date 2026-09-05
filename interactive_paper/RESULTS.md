@@ -6600,3 +6600,42 @@ known ~1/6 first-utterance intrinsic lock (no commit at all, act not
 involved). NOTE for the study: this changes deployed gate behavior
 (act head + threshold) — the human-eval freeze question was raised
 and the user chose the refit (option A).
+
+## 8ci — stop-then-ask made reliable: the loop was running seconds behind the wall clock (2026-09-05)
+
+**User's acceptance script** (verified end to end, `_ws_stop_follow.py`):
+NVDA question → stall+relay → "Stop." (single word, mid-relay) → model
+stops → Google question → stall+relay with the GOOGL quote.
+
+**Diagnosis from full traces:** the act refit (8ch) was necessary but
+not sufficient — three stacked engineering faults remained:
+(1) LOOP LAG. Relay-piece TTS synth (2-4s each) runs inside the chunk
+loop; every synth backlogs the uplink, so cuts/commits/gate reads ran
+3-18s behind the wall clock ("falling behind realtime (18.3s
+queued)"). A phone user's "Stop" took ~4.6s to cut and their next
+question was chopped into fragment turns ("Up. What's the current
+stock?" / "Price of Google.") — perceived as the model going mute.
+Fix: drop backlogged SILENCE (keep any speechy suffix) whenever the
+queue exceeds 3s; the head never acts on silence, so nothing of
+value is lost and the loop stays realtime.
+(2) STALE CUT READ. The barge-energy test read user_win (processed
+audio) — lag made it fire on 4s-old sound. Fix: read the fresh tail
+(processed window + unprocessed backlog); cut now lands ~2s after
+the stop.
+(3) SNAPSHOT BOUNDARY LOSS. When the head briefly commits mid-
+question (hears "Stop. What's the" → floor reply), its end-of-turn
+cleared user_win, discarding the question's second half — the next
+fire went out with an EMPTY uplink ("turn 3 ASR heard: ''", thinker
+fed "\n", expert answered "What would you like to know?"). Fix: keep
+the last 2s of user_win across turn boundaries + .strip() the uplink
+before the thinker gate.
+
+**Live (v52, user's script × 5): 4/5 PASS.** Passing runs: cut
+~1.9-3.7s after the stop, question intact as ONE turn (act .84-.95,
+fire .68-.82), correct GOOGL relay; run 1 even survived a mid-
+question commit (empty-uplink fire blocked by the strip guard, full
+question re-captured via the kept tail, fired on the next commit).
+The one FAIL is the head never committing post-cut at all (zero gate
+reads) — the intrinsic listen-lock residue (8ce investigation), the
+same ~1/6-1/3 variance no non-VAD lever moves. v50→v52 deploys.
+Files: demo_duplex.py, _ws_stop_follow.py (new).

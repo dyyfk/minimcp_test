@@ -654,7 +654,7 @@ class DuplexVoice:
                     # the expert to resolve references against it.
                     try:
                         transcribe_turn(state)
-                        up = state.get("uplink_text")
+                        up = (state.get("uplink_text") or "").strip()
                         if not up:
                             raise RuntimeError(
                                 state.get("asr_error") or "empty ASR transcript")
@@ -698,6 +698,37 @@ class DuplexVoice:
                             if len(pend) < CH:
                                 time.sleep(0.02)
                                 continue
+                            # 8ci: relay-piece synth (2-4s each) runs
+                            # inside this loop, so during a relay the
+                            # inbound audio backlogs and every decision
+                            # (energy cut, commit, gate read) runs
+                            # seconds late — live, a "Stop" took ~4s to
+                            # cut and the follow-up question was chopped
+                            # into fragment turns; the model looks deaf.
+                            # Recover wall-clock by dropping backlogged
+                            # SILENCE (the head never acts on it); any
+                            # speechy suffix is kept, so user speech is
+                            # never discarded, just reached sooner.
+                            if len(pend) > 3 * CH:
+                                over, keep = pend[:-2 * CH], pend[-2 * CH:]
+                                cut_at = None
+                                for oi in range(0, len(over), CH):
+                                    seg = over[oi:oi + CH]
+                                    if float(np.sqrt(np.mean(
+                                            seg.astype(np.float32)
+                                            ** 2))) > 0.012:
+                                        cut_at = oi
+                                        break
+                                if cut_at is None:
+                                    emit({"type": "log",
+                                          "msg": f"dropped "
+                                                 f"{len(over) / CH:.1f}s "
+                                                 "of backlogged silence "
+                                                 "(staying realtime)"})
+                                    pend = keep
+                                else:
+                                    pend = np.concatenate(
+                                        [over[cut_at:], keep])
                             ch, pend = pend[:CH], pend[CH:]
                             if len(pend) > 6 * CH:
                                 emit({"type": "log",
@@ -862,9 +893,15 @@ class DuplexVoice:
                                 # window is post-thinker silence, so no
                                 # turn-1 residue. AEC keeps the client's
                                 # own relay playback out of this uplink.
-                                recent = (
-                                    np.concatenate(user_win[-2:])
-                                    if len(user_win) >= 1
+                                # 8ci: read the FRESH tail (processed
+                                # window + unprocessed backlog), not
+                                # just user_win — during relay synth
+                                # the loop lags the wall clock and a
+                                # user_win-only read fired the cut ~4s
+                                # after the actual "stop".
+                                recent = (np.concatenate(
+                                    user_win[-2:] + [pend])[-2 * CH:]
+                                    if (user_win or len(pend))
                                     else np.zeros(1, np.float32))
                                 user_rms = float(np.sqrt(np.mean(
                                     recent.astype(np.float32) ** 2)))
@@ -993,7 +1030,7 @@ class DuplexVoice:
                                     finish_turn_async(relay_turn)
                                     relay_turn = None
                                 active_turn = None
-                                user_win = []
+                                user_win = user_win[-2:]   # 8ci
                                 turn_text, turn_fired = [], False
                                 turn_scores = []
                                 relay_guard = False
@@ -1126,7 +1163,13 @@ class DuplexVoice:
                                     # (fired turns are closed at fire —
                                     # state owned by thinker/relay)
                                     active_turn = None
-                                user_win = []
+                                # 8ci: keep the last 2s — user speech
+                                # that overlapped the model's turn (e.g.
+                                # a question spoken across a short floor
+                                # reply) belongs to the NEXT snapshot; a
+                                # full clear discarded it and the next
+                                # fire went out with an empty uplink.
+                                user_win = user_win[-2:]
                                 turn_text, turn_fired = [], False
                                 turn_scores = []
                                 relay_guard = False
