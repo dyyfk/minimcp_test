@@ -34,10 +34,10 @@ ARMS = {
                 "https://rhe9527--vanilla-duplex-voice.modal.run/"
                 "62dc5cd9"),
     "off": ("wss://rhe9527--gate-duplex-voice.modal.run/62dc5cd9/ws"
-            "?tier=aggressive&probe_on=0",
+            "?tier=aggressive&probe_on=0&tracker=0",
             "https://rhe9527--gate-duplex-voice.modal.run/62dc5cd9"),
     "on": ("wss://rhe9527--gate-duplex-voice.modal.run/62dc5cd9/ws"
-           "?tier=aggressive&probe_on=1",
+           "?tier=aggressive&probe_on=1&tracker=0",
            "https://rhe9527--gate-duplex-voice.modal.run/62dc5cd9"),
 }
 Q1 = "What's the stock price of Nvidia today?"

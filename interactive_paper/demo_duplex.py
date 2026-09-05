@@ -148,10 +148,30 @@ def _split_sents(t):
 _CLAUSE_SPLIT = r"(?<=[,;:，；：])\s+"
 
 
-def _relay_pieces(t, first_max=60, piece_max=110):
+def _relay_pieces(t, first_max=50, piece_max=80):
     """TTS piece list: a short first piece so playback starts fast,
     then roughly piece_max-char pieces. Split at sentence bounds;
-    sentences longer than piece_max split again at clause marks."""
+    sentences longer than piece_max split again at clause marks, and
+    clauses still longer than piece_max split at word boundaries.
+    8cl: piece_max 110->80 and a HARD cap — synth runs ~0.73-0.85x
+    realtime, so the pipeline only stays ahead when every piece's
+    synth time (~0.8 x len) fits inside the previous piece's playback;
+    one 14.5s tail piece behind a 3.1s opener starved the buffer for
+    ~7s (the residual mid-relay stutter)."""
+    def _words(c):
+        if len(c) <= piece_max:
+            return [c]
+        out, cur = [], ""
+        for w in c.split(" "):
+            if cur and len(cur) + 1 + len(w) > piece_max:
+                out.append(cur)
+                cur = w
+            else:
+                cur = (cur + " " + w).strip()
+        if cur:
+            out.append(cur)
+        return out
+
     parts = []
     for s in (_split_sents(t) or [t]):
         if len(s) <= piece_max:
@@ -160,12 +180,12 @@ def _relay_pieces(t, first_max=60, piece_max=110):
         cur = ""
         for c in re.split(_CLAUSE_SPLIT, s):
             if cur and len(cur) + 1 + len(c) > piece_max:
-                parts.append(cur)
+                parts.extend(_words(cur))
                 cur = c
             else:
                 cur = (cur + " " + c).strip()
         if cur:
-            parts.append(cur)
+            parts.extend(_words(cur))
     if parts and len(parts[0]) > first_max:
         cut = re.split(_CLAUSE_SPLIT, parts[0])
         if len(cut) > 1 and len(cut[0]) <= first_max:
@@ -242,6 +262,23 @@ class DuplexVoice:
         # as_duplex() runs init_tts itself (default asset path) and owns
         # its token2wav stream cache via prepare(prompt_wav_path=...)
         self.duplex = self.model.as_duplex()
+        # 8cl: a SECOND instance dedicated to relay/stall TTS synthesis,
+        # so piece synth (0.8-2x realtime) runs on a worker thread and
+        # never stalls the chunk loop (the mid-relay stutter, 8ck).
+        # Isolation-tested: concurrent synth+duplex, 0 errors, chunk
+        # p50 0.10->0.46s worst-case; +16.5G VRAM, +5s load.
+        # init_tts() is MANDATORY here — as_duplex() calls it for the
+        # main model implicitly; skipping it on the bare instance left
+        # tts.audio_tokenizer=None, the load-time stall synth failed,
+        # tts_ok silently went False and the whole relay fell back to
+        # steer mode (the 8ck-2 outage).
+        self.smodel = AutoModel.from_pretrained(
+            MODEL_DIR, trust_remote_code=True, attn_implementation="sdpa",
+            torch_dtype=torch.bfloat16,
+            init_vision=False, init_audio=True,
+            init_tts=True).eval().cuda()
+        self.smodel.init_tts()
+        print(">>> synth model (B) loaded + init_tts", flush=True)
 
         # in-regime probe: 8be native-duplex refit (2310 rows, same
         # speak-onset read point as this app; scripts/22)
@@ -281,15 +318,19 @@ class DuplexVoice:
         try:
             import librosa as _lb
             ref, _ = _lb.load(PROMPT_WAV, sr=16000, mono=True)
-            self.model.init_token2wav_cache(ref)
+            self.smodel.init_token2wav_cache(ref)
             self.tts_ok = True
             self.stall_pcm = self._synth_pcm(STALL, max_new_tokens=64)
             if self.stall_pcm is not None:
                 print(f">>> canned stall: "
                       f"{len(self.stall_pcm) / 24000:.2f}s", flush=True)
         except Exception as e:
-            print(f">>> stall synth failed (no audio stall): {e}",
-                  flush=True)
+            # 8cl: this fallback also flips the RELAY to steer mode —
+            # make it impossible to miss in the logs.
+            import traceback as _tb
+            _tb.print_exc()
+            print(f">>> stall synth FAILED — tts_ok=False, RELAY WILL "
+                  f"FALL BACK TO STEER MODE: {e}", flush=True)
         self.load_s = round(time.time() - t0, 1)
         print(f">>> DuplexVoice ready in {self.load_s}s", flush=True)
 
@@ -297,16 +338,16 @@ class DuplexVoice:
         """Talker's own voice, verbatim `text`, via the turn-based
         teacher-forcing path (24 kHz float32 pcm or None)."""
         import numpy as _np
-        self.model.reset_session(reset_token2wav_cache=False)
-        sys_msg = _call_def(self.model.get_sys_prompt, mode="omni",
+        self.smodel.reset_session(reset_token2wav_cache=False)
+        sys_msg = _call_def(self.smodel.get_sys_prompt, mode="omni",
                             language="en")
-        _call_def(self.model.streaming_prefill, session_id="s1",
+        _call_def(self.smodel.streaming_prefill, session_id="s1",
                   msgs=[sys_msg], tokenizer=self.tok)
-        _call_def(self.model.streaming_prefill, session_id="s1",
+        _call_def(self.smodel.streaming_prefill, session_id="s1",
                   msgs=[{"role": "user",
                          "content": [_np.zeros(16000, dtype="float32")]}],
                   tokenizer=self.tok, is_last_chunk=True)
-        res = _call_def(self.model.streaming_generate,
+        res = _call_def(self.smodel.streaming_generate,
                         tokenizer=self.tok, temperature=0.1,
                         generate_audio=True, use_tts_template=True,
                         teacher_forcing=True, teacher_forcing_text=text,
@@ -568,8 +609,10 @@ class DuplexVoice:
             # buffer drains and every piece boundary is an audible
             # pause. MUST live at this scope (chunk_loop-local state
             # would NameError the pacer).
-            rst = {"frames": [], "next_at": None}
+            rst = {"frames": [], "toks": [], "next_at": None,
+                   "gen": 0, "pending": 0}
             relay_lock = _th.Lock()
+            synth_jobs = []           # (gen, piece text) for the worker
 
             def emit(m):
                 asyncio.run_coroutine_threadsafe(sock.send_json(m), loop)
@@ -595,9 +638,7 @@ class DuplexVoice:
                 turn_scores = []
                 relay_guard = False               # relay being delivered
                 relay_deadline = None             # 8cb: tts playback end
-                relay_texts = []                  # 8ce: pieces not yet synth'd
                 relay_pause = 0                   # 8ce: head-yield seconds
-                relay_toks = []                   # 8cj: tokens to force-pace
                 relay_ctx_closed = False          # 8cj: relay turn eos fed
                 tts_relay = RELAY_MODE == "tts" and self.tts_ok
                 prev_listen = True
@@ -823,38 +864,29 @@ class DuplexVoice:
                                           "relay": True})
                                     relay_turn["assistant_parts"].append(
                                         " " + spoken)
-                                    t_s = time.time()
                                     pieces = _relay_pieces(spoken)
-                                    p0 = None
-                                    try:
-                                        p0 = self._synth_pcm(pieces[0])
-                                    except Exception as se:
-                                        emit({"type": "log",
-                                              "msg": "relay synth failed: "
-                                                     + str(se)[:100]})
-                                    relay_texts = pieces[1:]
+                                    # 8cl: ALL pieces to the synth
+                                    # worker (dedicated second model) —
+                                    # synthesis pipelines off-loop, so
+                                    # playback never starves at piece
+                                    # boundaries and the loop stays
+                                    # realtime. gen guards stale
+                                    # results landing after a cut.
                                     with relay_lock:
-                                        rst["frames"] = ([
-                                            p0[i:i + 24000]
-                                            for i in range(0, len(p0),
-                                                           24000)]
-                                            if p0 is not None else [])
-                                        rst["next_at"] = time.time()
-                                    # 8cj: pace these tokens into the
-                                    # audio units as the pcm ships
-                                    relay_toks = (self.tok.encode(
-                                        " " + pieces[0],
-                                        add_special_tokens=False)
-                                        if p0 is not None else [])
+                                        rst["gen"] += 1
+                                        rst["frames"] = []
+                                        rst["toks"] = []
+                                        rst["next_at"] = None
+                                        rst["pending"] = len(pieces)
+                                        synth_jobs[:] = [
+                                            (rst["gen"], pc)
+                                            for pc in pieces]
                                     relay_ctx_closed = False
                                     emit({"type": "log",
                                           "msg": f"relay (tts, paced): "
-                                                 f"{(len(p0) / 24000 if p0 is not None else 0):.1f}s"
-                                                 f" queued, "
-                                                 f"{len(relay_texts)} "
-                                                 f"pieces pending, first "
-                                                 f"synth "
-                                                 f"{time.time() - t_s:.1f}s"})
+                                                 f"{len(pieces)} pieces "
+                                                 "queued to synth "
+                                                 "worker"})
                                     relay_pause = 0
                                 else:
                                     self.duplex.streaming_prefill(
@@ -906,16 +938,19 @@ class DuplexVoice:
                             forced_chunk = (relay_guard and tts_relay
                                             and not relay_ctx_closed)
                             if forced_chunk:
-                                sec_left = max(1, len(rst["frames"])
-                                               + 6 * len(relay_texts))
-                                k = (min(18, max(2, -(-len(relay_toks)
-                                                      // sec_left)))
-                                     if relay_toks else 0)
-                                toks, relay_toks = (relay_toks[:k],
-                                                    relay_toks[k:])
-                                end_now = (not relay_toks
-                                           and not relay_texts
-                                           and len(rst["frames"]) <= 1)
+                                with relay_lock:
+                                    sec_left = max(1, len(rst["frames"])
+                                                   + 6 * rst["pending"])
+                                    k = (min(18, max(2,
+                                             -(-len(rst["toks"])
+                                               // sec_left)))
+                                         if rst["toks"] else 0)
+                                    toks = rst["toks"][:k]
+                                    rst["toks"] = rst["toks"][k:]
+                                    end_now = (not rst["toks"]
+                                               and rst["pending"] == 0
+                                               and len(rst["frames"])
+                                               <= 1)
                                 self._speak_forced_unit(
                                     toks, end_turn=end_now)
                                 if end_now:
@@ -954,25 +989,6 @@ class DuplexVoice:
                             # escalation decision still belongs to the
                             # duplex head; there is no VAD in the model
                             # path and no client kill-switch.
-                            if (relay_guard and relay_texts
-                                    and len(rst["frames"]) < 6):
-                                _sent = relay_texts.pop(0)
-                                _p = None
-                                try:
-                                    _p = self._synth_pcm(_sent)
-                                except Exception as se:
-                                    emit({"type": "log",
-                                          "msg": "relay synth failed: "
-                                                 + str(se)[:100]})
-                                if _p is not None:
-                                    with relay_lock:
-                                        rst["frames"].extend(
-                                            _p[i:i + 24000]
-                                            for i in range(0, len(_p),
-                                                           24000))
-                                    relay_toks += self.tok.encode(
-                                        " " + _sent,
-                                        add_special_tokens=False)
                             if relay_guard and rst["frames"]:
                                 # user speech over the last ~2s (silence
                                 # RMS ~0.003, speech ~0.03+); relay-onset
@@ -1001,9 +1017,12 @@ class DuplexVoice:
                                                  " of relay tail"})
                                     emit({"type": "interrupt"})
                                     with relay_lock:
+                                        rst["gen"] += 1
                                         rst["frames"] = []
+                                        rst["toks"] = []
                                         rst["next_at"] = None
-                                    relay_texts = []
+                                        rst["pending"] = 0
+                                        synth_jobs[:] = []
                                     if relay_turn is not None:
                                         relay_turn["relay_cut"] = True
                                         relay_turn["relay_ms"] = int(
@@ -1019,7 +1038,6 @@ class DuplexVoice:
                                     # closes it with turn_eos below —
                                     # "half-said answer + self-shaped
                                     # eos", the exact stock yield.
-                                    relay_toks = []
                                     relay_ctx_closed = True
                                     active_turn = None
                                     user_win = []
@@ -1048,7 +1066,8 @@ class DuplexVoice:
                                 # pacer thread — no in-loop drip)
                             if (relay_guard and relay_deadline is None
                                     and not rst["frames"]
-                                    and not relay_texts):
+                                    and not rst["toks"]
+                                    and rst["pending"] == 0):
                                 # queue drained: playback ends ~1s after
                                 # the last frame; the 8cb close below
                                 # finishes the bookkeeping.
@@ -1073,7 +1092,9 @@ class DuplexVoice:
                                 # after a finished turn (stock parity).
                                 self._force_end_turn()
                                 self.duplex.force_listen_count = 0
-                                relay_toks = []
+                                with relay_lock:
+                                    rst["toks"] = []
+                                    rst["pending"] = 0
                                 relay_ctx_closed = False
                                 if relay_turn is not None:
                                     relay_turn["relay_ms"] = int(
@@ -1251,6 +1272,45 @@ class DuplexVoice:
                 finally:
                     emit({"type": "bye"})
 
+            def synth_worker():
+                # 8cl: piece synthesis on the DEDICATED second model
+                # instance, fully off the chunk loop. Results append
+                # under the lock; a gen mismatch (barge cut happened
+                # while synthesizing) drops the stale audio.
+                while not stop.is_set():
+                    job = None
+                    with relay_lock:
+                        if synth_jobs:
+                            job = synth_jobs.pop(0)
+                    if job is None:
+                        time.sleep(0.05)
+                        continue
+                    gen, sent = job
+                    p = None
+                    t0s_ = time.time()
+                    try:
+                        p = self._synth_pcm(sent)
+                    except Exception as se:
+                        emit({"type": "log",
+                              "msg": "relay synth failed: "
+                                     + str(se)[:100]})
+                    with relay_lock:
+                        if rst["gen"] != gen:
+                            continue          # cut while synthesizing
+                        if p is not None:
+                            rst["frames"].extend(
+                                p[i:i + 24000]
+                                for i in range(0, len(p), 24000))
+                            rst["toks"] += self.tok.encode(
+                                " " + sent, add_special_tokens=False)
+                            if rst["next_at"] is None:
+                                rst["next_at"] = time.time()
+                        rst["pending"] = max(0, rst["pending"] - 1)
+                    if p is not None:
+                        emit({"type": "log",
+                              "msg": f"synth {len(p) / 24000:.1f}s in "
+                                     f"{time.time() - t0s_:.1f}s"})
+
             def relay_pacer():
                 # 8ck: frame delivery decoupled from the chunk loop.
                 # In-loop piece synth (2-4s each) used to stall the
@@ -1308,6 +1368,8 @@ class DuplexVoice:
                 await sock.send_json({"type": "phase", "v": "listening"})
                 pacer = _th.Thread(target=relay_pacer, daemon=True)
                 pacer.start()
+                synther = _th.Thread(target=synth_worker, daemon=True)
+                synther.start()
                 worker = _th.Thread(target=chunk_loop, daemon=True)
                 worker.start()
                 while True:

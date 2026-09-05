@@ -67,7 +67,7 @@ async def run(q1: str = "", q2: str = ""):
     events = []
     FR = 2048
 
-    async with websockets.connect(f"{WS}?tier=aggressive&probe_on=1",
+    async with websockets.connect(f"{WS}?tier=aggressive&probe_on=1&tracker=0",
                                   max_size=2 ** 24,
                                   open_timeout=60) as sock:
         t0s = _t.time()

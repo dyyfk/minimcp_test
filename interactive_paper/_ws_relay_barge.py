@@ -69,7 +69,7 @@ async def run():
 
     events = []
     FR = 2048
-    async with websockets.connect(f"{WS}?tier=aggressive&probe_on=1",
+    async with websockets.connect(f"{WS}?tier=aggressive&probe_on=1&tracker=0",
                                   max_size=2 ** 24,
                                   open_timeout=60) as sock:
         t0s = _t.time()
@@ -164,7 +164,17 @@ async def run():
     print(f"relay text at: {rts[:1]}, paced audio events pre-barge: "
           f"{len(audio1)} at {audio1}")
     print(f"cut log at: {cut_logs}")
+    # is the chunk loop even alive after the cut? score events carry a
+    # per-chunk listen flag. all-listen => head stuck listening (the
+    # intrinsic listen-lock, same as turn 1's ~1/6); none => loop dead;
+    # mixed/speak => head committed.
+    scores_after = [(t, e.get("listen")) for t, e in events
+                    if e.get("type") == "score" and t > t_cut]
+    n_listen = sum(1 for _, ls in scores_after if ls)
+    n_speak = sum(1 for _, ls in scores_after if ls is False)
     print(f"--- post-follow-up recovery ---")
+    print(f"post-cut score events: {len(scores_after)} "
+          f"(listen={n_listen}, speak={n_speak})")
     print(f"ASR after follow-up: {asr_follow}")
     print(f"gate reads after follow-up: {gates_follow[:4]}")
     print(f"relay text after follow-up: {relay_follow[:1]}")
