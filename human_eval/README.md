@@ -24,6 +24,7 @@ English, blinded voice evaluation of MiniCPM and MiniCPM+. The participant UI an
 - Temporary pilot logging shows the blinded model configuration in the browser console and Modal logs.
 - Task examples are short conversation starters. S3 uses familiar date or meeting planning topics and lets the participant continue naturally.
 - Per-conversation feedback is reduced from eight overlapping ratings to four focused ratings.
+- Finishing a conversation shows a saving spinner while final turn data is drained and persisted.
 
 ## Open questions before launch
 

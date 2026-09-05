@@ -21,6 +21,7 @@ let modelWarmPromise = null;
 let refreshSetupUi = null;
 let smoothedMicLevel = 0;
 let finishReceiptResolver = null;
+let assistantLiveStatus = "listening";
 
 const mainContent = document.getElementById("mainContent");
 const progressLabel = document.getElementById("progressLabel");
@@ -409,6 +410,7 @@ function renderTask(taskIndex) {
     const scenario = conversation.scenario || definition.scenarios.find(item => item.id === conversation.scenarioId);
     if (conversation.phase === "idle") renderConversationIdle(taskIndex, task, conversation, scenario);
     else if (conversation.phase === "running") renderConversationRunning(taskIndex, task, conversation, scenario);
+    else if (conversation.phase === "finishing") renderConversationFinishing(task, scenario);
     else renderConversationRating(taskIndex, task, conversation, scenario);
   } else {
     renderPairComparison(taskIndex, task);
@@ -422,16 +424,13 @@ function renderConversationIdle(taskIndex, task, conversation, scenario) {
       <section class="conversation-panel surface">
         <div class="status-row"><span class="status-pill">${ordinalConversation(task.substep)}</span><span class="status-pill neutral">Not started</span></div>
         <h1>Start when you are ready</h1>
-        <p class="lede">Read the task card first. When you start, the system will begin recording and start a two-minute countdown.</p>
+        <p class="lede">${conversationPrompt(conversation.targetTurns)}</p>
         <div class="voice-stage">
           <div>
             ${voiceOrb(false)}
-            <div class="voice-title">Start to talk</div>
-            <p class="voice-copy">Use the numbered flow on the task card as your guide. Speak naturally, while keeping the same type of task and constraints.</p>
             <div class="voice-actions"><button id="startConversation" class="primary-button" type="button">Start conversation</button></div>
           </div>
         </div>
-        ${conversationRuleTip(conversation.targetTurns)}
         <div id="conversationError" class="inline-error" role="alert" hidden></div>
       </section>
       ${renderTaskCard(scenario)}
@@ -447,25 +446,16 @@ function renderConversationRunning(taskIndex, task, conversation, scenario) {
       <section class="conversation-panel surface">
         <div class="status-row"><span class="status-pill live" id="livePill">Conversation in progress</span><span class="status-pill neutral">${ordinalConversation(task.substep)}</span></div>
         <h1>Conversation in progress</h1>
-        <p class="lede">Use the task card as a guide and keep the conversation focused on its goal. You may finish whenever you feel you have tested it.</p>
+        <p class="lede">${conversationPrompt(conversation.targetTurns)}</p>
         <div class="voice-stage">
           <div class="voice-stage-content">
-            <div class="voice-status-grid">
-              ${microphoneWaveform()}
-              <section class="speaker-card assistant-activity" id="assistantActivity" aria-live="polite">
-                <div class="speaker-card-header"><span class="speaker-identity assistant"><i aria-hidden="true"></i>Assistant</span><strong id="assistantActivityStatus">Listening</strong></div>
-                ${assistantWaveform()}
-                <div class="voice-title" id="liveTitle">Listening to you</div>
-                <p class="voice-copy" id="liveCopy">Speak naturally or follow the task card.</p>
-              </section>
-            </div>
+            ${conversationActivity()}
             <div class="timer" id="conversationTimer">02:00</div>
             <div class="timer-label">Time remaining</div>
             <div class="voice-actions"><button id="finishConversation" class="danger-button" type="button" ${conversation.completedTurns > 0 ? "" : "disabled"}>Finish the conversation</button></div>
             <div class="timer-label" id="finishHint">Finish becomes available after one complete answer is recorded.</div>
           </div>
         </div>
-        ${conversationRuleTip(conversation.targetTurns)}
       </section>
       ${renderTaskCard(scenario)}
     </div>`;
@@ -473,6 +463,22 @@ function renderConversationRunning(taskIndex, task, conversation, scenario) {
   document.getElementById("finishConversation").addEventListener("click", () => finishConversation(taskIndex, task.substep, "user_finished"));
   resumeTimer(taskIndex, task.substep);
   updateLiveStatus(conversation.liveStatus || "listening");
+}
+
+function renderConversationFinishing(task, scenario) {
+  const stage = document.getElementById("taskStage");
+  stage.innerHTML = `
+    <div class="conversation-layout">
+      <section class="conversation-panel surface conversation-finishing" aria-live="polite" aria-busy="true">
+        <div class="status-row"><span class="status-pill">Saving conversation</span><span class="status-pill neutral">${ordinalConversation(task.substep)}</span></div>
+        <div class="finish-loading">
+          <div class="loading-dot" aria-hidden="true"></div>
+          <h1>Saving your conversation…</h1>
+          <p class="lede">Please wait while we finish saving the audio and conversation record. This usually takes a few seconds.</p>
+        </div>
+      </section>
+      ${renderTaskCard(scenario)}
+    </div>`;
 }
 
 function renderConversationRating(taskIndex, task, conversation, scenario) {
@@ -662,6 +668,7 @@ function handleModelMessage(event, taskIndex, conversationIndex) {
   // HUMAN_EVAL_DEBUG_REMOVE_AFTER_PILOT_END
   if (message.type === "phase") {
     const status = message.v === "listening" ? "listening" : message.v === "answering" || message.v === "relaying" ? "speaking" : "processing";
+    if (status === "listening" && activePlaybackSources.length > 0) return;
     updateLiveStatus(status);
   } else if (message.type === "audio") {
     updateLiveStatus("speaking");
@@ -692,7 +699,7 @@ function playPcmAudio(encodedPcm, sampleRate) {
   const bytes = new Uint8Array(binary.length);
   for (let index = 0; index < binary.length; index += 1) bytes[index] = binary.charCodeAt(index);
   const samples = new Int16Array(bytes.buffer);
-  updateAssistantWaveform(samples);
+  updateConversationWaveform(samples, "assistant-speaking");
   const buffer = activeAudioContext.createBuffer(1, samples.length, sampleRate);
   const channel = buffer.getChannelData(0);
   for (let index = 0; index < samples.length; index += 1) channel[index] = samples[index] / 32768;
@@ -706,7 +713,7 @@ function playPcmAudio(encodedPcm, sampleRate) {
   source.addEventListener("ended", () => {
     activePlaybackSources = activePlaybackSources.filter(item => item !== source);
     if (activePlaybackSources.length === 0) {
-      resetAssistantWaveform();
+      resetConversationWaveform();
       if (getActiveConversation()?.phase === "running") {
         updateLiveStatus("listening");
       }
@@ -721,7 +728,7 @@ function stopModelPlayback() {
   });
   activePlaybackSources = [];
   activePlaybackCursor = activeAudioContext?.currentTime || 0;
-  resetAssistantWaveform();
+  resetConversationWaveform();
 }
 
 function resumeTimer(taskIndex, conversationIndex) {
@@ -742,36 +749,18 @@ function resumeTimer(taskIndex, conversationIndex) {
 }
 
 function updateLiveStatus(status) {
+  assistantLiveStatus = status;
   const active = getActiveConversation();
   if (active) {
     active.liveStatus = status;
     backend.persist(state);
   }
-  const title = document.getElementById("liveTitle");
-  const copy = document.getElementById("liveCopy");
-  const assistant = document.getElementById("assistantActivity");
-  const assistantStatus = document.getElementById("assistantActivityStatus");
-  const microphone = document.getElementById("microphoneActivity");
-  const microphoneMode = document.getElementById("microphoneMode");
-  if (!title || !copy) return;
-  const labels = {
-    listening: ["Listening to you", "Speak naturally or follow the task card."],
-    processing: ["Thinking", "The assistant is preparing its answer."],
-    speaking: ["Assistant speaking", "Listen, or speak to interrupt naturally."]
-  };
-  title.textContent = labels[status]?.[0] || labels.listening[0];
-  copy.textContent = labels[status]?.[1] || labels.listening[1];
-  if (assistant) {
-    assistant.classList.toggle("is-processing", status === "processing");
-    assistant.classList.toggle("is-speaking", status === "speaking");
-  }
-  if (microphone) microphone.classList.toggle("is-listening", status === "listening");
-  if (microphoneMode) {
-    microphoneMode.textContent = status === "listening" ? "Listening" : "Microphone on";
-  }
-  if (assistantStatus) {
-    assistantStatus.textContent = status === "speaking" ? "Speaking" : status === "processing" ? "Thinking" : "Listening";
-  }
+  const activityState = status === "speaking"
+    ? "assistant-speaking"
+    : status === "processing"
+      ? "assistant-thinking"
+      : "listening";
+  setConversationActivity(activityState);
   const finishButton = document.getElementById("finishConversation");
   const finishHint = document.getElementById("finishHint");
   const canFinish = (active?.completedTurns || 0) > 0 && status === "listening";
@@ -785,6 +774,8 @@ async function finishConversation(taskIndex, conversationIndex, reason) {
   if (reason === "user_finished" && !(conversation.completedTurns > 0)) return;
   conversation.phase = "finishing";
   clearInterval(timerHandle);
+  backend.persist(state);
+  render();
   let receiptPromise = null;
   if (activeSocket?.readyState === WebSocket.OPEN) {
     receiptPromise = waitForFinishReceipt();
@@ -886,6 +877,7 @@ async function stopConversationResources(closeSocket = true) {
   activeSilentGain = null;
   activePlaybackCursor = 0;
   smoothedMicLevel = 0;
+  assistantLiveStatus = "listening";
 }
 
 function getActiveConversation() {
@@ -931,26 +923,36 @@ function voiceOrb(live) {
   return `<div class="voice-orb${live ? " is-live" : ""}" aria-hidden="true"><div class="orb-bars"><span></span><span></span><span></span><span></span><span></span></div></div>`;
 }
 
-function microphoneWaveform() {
+function conversationActivity() {
   return `
-    <section class="speaker-card microphone-activity" id="microphoneActivity" aria-live="polite">
-      <div class="speaker-card-header"><span class="speaker-identity participant"><i aria-hidden="true"></i>You</span><strong id="microphoneMode">Listening</strong></div>
-      <div class="microphone-wave" id="microphoneWave" aria-hidden="true">
-        ${Array.from({ length: 15 }, () => "<span></span>").join("")}
+    <section class="conversation-activity" id="conversationActivity" data-state="listening" aria-live="polite">
+      <div class="activity-icon" aria-hidden="true">
+        <svg class="activity-microphone" viewBox="0 0 24 24"><path d="M12 15a4 4 0 0 0 4-4V5a4 4 0 0 0-8 0v6a4 4 0 0 0 4 4Zm-7-4a7 7 0 0 0 14 0M12 18v4M8 22h8"/></svg>
+        <svg class="activity-speaker" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4Zm13-1a5 5 0 0 1 0 8M19 5a9 9 0 0 1 0 14"/></svg>
       </div>
-      <div class="voice-title" id="microphoneActivityStatus">Ready for your voice</div>
-      <p class="voice-copy">These green bars move when you speak.</p>
+      <div class="conversation-wave" id="conversationWave" aria-hidden="true">
+        ${Array.from({ length: 19 }, () => "<span></span>").join("")}
+      </div>
+      <div class="voice-title" id="liveTitle">Assistant listening</div>
     </section>`;
 }
 
-function assistantWaveform() {
-  return `<div class="assistant-wave" id="assistantWave" aria-hidden="true">
-    ${Array.from({ length: 15 }, () => "<span></span>").join("")}
-  </div>`;
+function setConversationActivity(activityState) {
+  const activity = document.getElementById("conversationActivity");
+  const title = document.getElementById("liveTitle");
+  if (!activity || !title) return;
+  const labels = {
+    listening: "Assistant listening",
+    "user-speaking": "You’re speaking · Assistant is listening",
+    "assistant-thinking": "Assistant thinking",
+    "assistant-speaking": "Assistant speaking"
+  };
+  activity.dataset.state = activityState;
+  title.textContent = labels[activityState] || labels.listening;
 }
 
-function updateAssistantWaveform(samples) {
-  const wave = document.getElementById("assistantWave");
+function updateConversationWaveform(samples, activityState) {
+  const wave = document.getElementById("conversationWave");
   if (!wave || !samples.length) return;
   const bars = wave.querySelectorAll("span");
   const stride = Math.max(1, Math.floor(samples.length / bars.length));
@@ -964,10 +966,11 @@ function updateAssistantWaveform(samples) {
     bar.style.transform = `scaleY(${Math.max(0.12, Math.min(1, peak * 2.4)).toFixed(2)})`;
   });
   wave.classList.add("is-active");
+  setConversationActivity(activityState);
 }
 
-function resetAssistantWaveform() {
-  const wave = document.getElementById("assistantWave");
+function resetConversationWaveform() {
+  const wave = document.getElementById("conversationWave");
   if (!wave) return;
   wave.classList.remove("is-active");
   wave.querySelectorAll("span").forEach(bar => {
@@ -976,11 +979,12 @@ function resetAssistantWaveform() {
 }
 
 function updateMicrophoneWaveform(samples) {
-  const wave = document.getElementById("microphoneWave");
+  const wave = document.getElementById("conversationWave");
   if (!wave || !samples.length) return;
   let sumSquares = 0;
   for (const sample of samples) sumSquares += sample * sample;
   const level = Math.min(1, Math.sqrt(sumSquares / samples.length) * 8);
+  if (assistantLiveStatus !== "listening") return;
   smoothedMicLevel = Math.max(level, smoothedMicLevel * 0.72);
   const bars = wave.querySelectorAll("span");
   bars.forEach((bar, index) => {
@@ -989,13 +993,11 @@ function updateMicrophoneWaveform(samples) {
   });
   const voiceDetected = smoothedMicLevel > 0.08;
   wave.classList.toggle("is-active", voiceDetected);
-  document.getElementById("microphoneActivity")?.classList.toggle("is-speaking", voiceDetected);
-  const status = document.getElementById("microphoneActivityStatus");
-  if (status) status.textContent = voiceDetected ? "You are speaking" : "Ready for your voice";
+  setConversationActivity(voiceDetected ? "user-speaking" : "listening");
 }
 
-function conversationRuleTip(targetTurns = 2) {
-  return `<div class="rule-tip"><span class="tip-dot" aria-hidden="true"></span><span>Aim for about ${targetTurns} turns and wait for each answer before continuing. This is guidance, not a requirement—you may finish whenever the task feels complete. The conversation ends automatically after two minutes.</span></div>`;
+function conversationPrompt(targetTurns = 2) {
+  return `Follow the task instruction and start talking when you are ready. We suggest about ${targetTurns} turns. You may finish whenever the task feels complete. Each conversation ends automatically after two minutes.`;
 }
 
 function ordinalConversation(index) {

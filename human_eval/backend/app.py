@@ -764,7 +764,7 @@ async def conversation_stream(client: WebSocket, conversation_id: str) -> None:
 
         await ensure_model_ready()
         async with websockets.connect(
-            upstream_url, max_size=None, open_timeout=60
+            upstream_url, max_size=None, open_timeout=60, close_timeout=1
         ) as upstream:
             async def client_to_model() -> str:
                 while True:
