@@ -105,6 +105,16 @@ gpu_image = (
 RELAY_TMPL = ("A verified answer came back: {ans}\n"
               "Relay it to the user in one or two spoken sentences.")
 RELAY_NUDGE = "Say the verified answer aloud to the user now."
+STALL = "Hmm, let me double-check that — one moment."
+# fired => paper-parity canned stall: the STALL line is synthesized ONCE
+# at load via the turn-based teacher-forcing path (talker's own voice),
+# played to the user at fire time, and the context gets a factual note
+# that the line was said. The onset chunk's ~1 s of local attempt has
+# already been voiced when the gate reads — chunk granularity is the
+# regime's floor.
+STALL_NOTE = ("[SYSTEM NOTE] Your answer so far is likely wrong. You "
+              "just told the user: \"" + STALL + "\" A verified answer "
+              "will arrive in a moment.")
 # 8bu relay mode. "steer": prefill RELAY_TMPL and let the talker voice the
 # answer itself (loses ~20-27 pts of correct expert answers: truncation,
 # self-answering, 99% nudges). "tts": speak the cleaned expert text
@@ -116,6 +126,43 @@ RELAY_NOTE = "[SYSTEM NOTE] You just told the user: \"{ans}\" Do not repeat it."
 
 
 import re
+
+
+_SENT_SPLIT = (r"(?<!\b[A-Z])(?<!\b[A-Z][a-z])(?<!\bU\.S)(?<!\bDr)"
+               r"(?<!\bMr)(?<!\bMrs)(?<!\bSt)(?<!\bNo)(?<=[.!?])\s+"
+               r"(?=[A-Z0-9一-鿿])")
+
+
+def _split_sents(t):
+    return [s for s in re.split(_SENT_SPLIT, t) if s.strip()]
+
+
+_CLAUSE_SPLIT = r"(?<=[,;:，；：])\s+"
+
+
+def _relay_pieces(t, first_max=60, piece_max=110):
+    """TTS piece list: a short first piece so playback starts fast,
+    then roughly piece_max-char pieces. Split at sentence bounds;
+    sentences longer than piece_max split again at clause marks."""
+    parts = []
+    for s in (_split_sents(t) or [t]):
+        if len(s) <= piece_max:
+            parts.append(s)
+            continue
+        cur = ""
+        for c in re.split(_CLAUSE_SPLIT, s):
+            if cur and len(cur) + 1 + len(c) > piece_max:
+                parts.append(cur)
+                cur = c
+            else:
+                cur = (cur + " " + c).strip()
+        if cur:
+            parts.append(cur)
+    if parts and len(parts[0]) > first_max:
+        cut = re.split(_CLAUSE_SPLIT, parts[0])
+        if len(cut) > 1 and len(cut[0]) <= first_max:
+            parts = [cut[0], " ".join(cut[1:])] + parts[1:]
+    return parts
 
 
 def clean_expert(txt, max_chars=400):
@@ -133,7 +180,7 @@ def clean_expert(txt, max_chars=400):
     t = re.sub(r"\s*,\s*,+", ", ", t)
     t = re.sub(r":\s*,\s*", ": ", t)
     t = re.sub(r"\s+", " ", t).strip(" ,")
-    sents = re.split(r"(?<!\b[A-Z])(?<!\b[A-Z][a-z])(?<!\bU\.S)(?<!\bDr)(?<!\bMr)(?<!\bMrs)(?<!\bSt)(?<!\bNo)(?<=[.!?])\s+(?=[A-Z0-9\u4e00-\u9fff])", t)
+    sents = re.split(_SENT_SPLIT, t)
     out = ""
     for se in sents:
         if out and len(out) + 1 + len(se) > max_chars:
@@ -389,6 +436,11 @@ class DuplexVoice:
                 turn_index = 0
                 turn_scores = []
                 relay_guard = False               # relay being delivered
+                relay_deadline = None             # 8cb: tts playback end
+                relay_frames = []                 # 8ce: paced ~1s tts frames
+                relay_texts = []                  # 8ce: pieces not yet synth'd
+                relay_next_at = None              # 8ce: wall-clock pacer
+                relay_pause = 0                   # 8ce: head-yield seconds
                 muted = 0                         # 8bm: suppressed chunks
                 prev_listen = True
                 thinking = _th.Event()           # thinker in flight
@@ -568,30 +620,48 @@ class DuplexVoice:
                                     # context only gets a note, and the
                                     # local continuation stays muted to
                                     # end_of_turn so nothing talks over it
+                                    # 8ce: chunk-paced delivery. 8cd's
+                                    # eager emission handed the browser
+                                    # 7-10s of scheduled audio no one
+                                    # could stop — the classic half-
+                                    # duplex playback tail. Synthesize
+                                    # piece 1 now (answer still starts
+                                    # ~2.5s), queue the rest; the main
+                                    # loop synthesizes at most one piece
+                                    # per iteration and drips ~1s frames
+                                    # on a wall-clock pacer, so the
+                                    # client never holds more than ~2s
+                                    # and the duplex head keeps the
+                                    # floor decision every second.
                                     spoken = clean_expert(ans)
-                                    t_s = time.time()
-                                    pcm = None
-                                    try:
-                                        pcm = self._synth_pcm(spoken)
-                                    except Exception as se:
-                                        emit({"type": "log",
-                                              "msg": "relay synth failed: "
-                                                     + str(se)[:100]})
-                                    if pcm is not None:
-                                        i16r = (np.clip(pcm, -1, 1)
-                                                * 32767).astype("<i2")
-                                        emit({"type": "audio", "sr": 24000,
-                                              "pcm": base64.b64encode(
-                                                  i16r.tobytes()).decode()})
                                     emit({"type": "text", "v": " " + spoken,
                                           "relay": True})
                                     relay_turn["assistant_parts"].append(
                                         " " + spoken)
+                                    t_s = time.time()
+                                    pieces = _relay_pieces(spoken)
+                                    p0 = None
+                                    try:
+                                        p0 = self._synth_pcm(pieces[0])
+                                    except Exception as se:
+                                        emit({"type": "log",
+                                              "msg": "relay synth failed: "
+                                                     + str(se)[:100]})
+                                    relay_texts = pieces[1:]
+                                    relay_frames = ([
+                                        p0[i:i + 24000]
+                                        for i in range(0, len(p0), 24000)]
+                                        if p0 is not None else [])
                                     emit({"type": "log",
-                                          "msg": f"relay (tts) "
-                                                 f"{len(pcm) / 24000 if pcm is not None else 0:.1f}s "
-                                                 f"audio, synth "
+                                          "msg": f"relay (tts, paced): "
+                                                 f"{(len(p0) / 24000 if p0 is not None else 0):.1f}s"
+                                                 f" queued, "
+                                                 f"{len(relay_texts)} "
+                                                 f"pieces pending, first "
+                                                 f"synth "
                                                  f"{time.time() - t_s:.1f}s"})
+                                    relay_next_at = time.time()
+                                    relay_pause = 0
                                     self.duplex.streaming_prefill(
                                         text_list=[RELAY_NOTE.format(ans=spoken)])
                                     r = self.duplex.streaming_generate(
@@ -648,6 +718,153 @@ class DuplexVoice:
                                 emit({"type": "score", "i": n_chunk,
                                       "v": round(score, 4),
                                       "listen": bool(r["is_listen"])})
+
+                            # 8ce: paced relay delivery. One pending
+                            # piece synthesized per iteration; due ~1s
+                            # frames dripped on a wall-clock pacer so the
+                            # client never buffers more than ~2s. Barge-
+                            # in is gated on USER SPEECH ENERGY, not the
+                            # act/is_info probe: "wait, stop" reads as
+                            # floor-management (is_info False) yet is
+                            # exactly the interruption to honor. The
+                            # energy test gates transport only (dropping
+                            # injected frames) — every turn-taking and
+                            # escalation decision still belongs to the
+                            # duplex head; there is no VAD in the model
+                            # path and no client kill-switch.
+                            if (relay_guard and relay_texts
+                                    and len(relay_frames) < 6):
+                                _sent = relay_texts.pop(0)
+                                _p = None
+                                try:
+                                    _p = self._synth_pcm(_sent)
+                                except Exception as se:
+                                    emit({"type": "log",
+                                          "msg": "relay synth failed: "
+                                                 + str(se)[:100]})
+                                if _p is not None:
+                                    relay_frames.extend(
+                                        _p[i:i + 24000]
+                                        for i in range(0, len(_p), 24000))
+                            if relay_guard and relay_frames:
+                                # user speech over the last ~2s (silence
+                                # RMS ~0.003, speech ~0.03+); relay-onset
+                                # window is post-thinker silence, so no
+                                # turn-1 residue. AEC keeps the client's
+                                # own relay playback out of this uplink.
+                                recent = (
+                                    np.concatenate(user_win[-2:])
+                                    if len(user_win) >= 1
+                                    else np.zeros(1, np.float32))
+                                user_rms = float(np.sqrt(np.mean(
+                                    recent.astype(np.float32) ** 2)))
+                                if user_rms > 0.012:
+                                    emit({"type": "log",
+                                          "msg": "user takes the floor "
+                                                 f"mid-relay (rms "
+                                                 f"{user_rms:.3f}) — "
+                                                 "dropping "
+                                                 f"~{len(relay_frames)}s"
+                                                 " of relay tail"})
+                                    emit({"type": "interrupt"})
+                                    relay_frames = []
+                                    relay_texts = []
+                                    if relay_turn is not None:
+                                        relay_turn["relay_cut"] = True
+                                        relay_turn["relay_ms"] = int(
+                                            (time.time()
+                                             - relay_turn.get(
+                                                 "relay_started_at",
+                                                 time.time())) * 1000)
+                                        finish_turn_async(relay_turn)
+                                        relay_turn = None
+                                    # 8ce: at cut the head is still mid-
+                                    # babble with no mid-turn yield
+                                    # channel (8bk), so clearing relay
+                                    # state alone leaves it rambling the
+                                    # stale (now un-muted) turn while the
+                                    # user's new utterance collides with
+                                    # it — the model appears deaf. Mirror
+                                    # the 8cb close AND force the head to
+                                    # listen so the ongoing utterance
+                                    # opens a clean turn; drop this chunk
+                                    # (continue) so the stale babble is
+                                    # not voiced.
+                                    active_turn = None
+                                    user_win = []
+                                    turn_text, turn_fired = [], False
+                                    turn_scores = []
+                                    relay_guard = False
+                                    relay_deadline = None
+                                    relay_next_at = None
+                                    relay_pause = 0
+                                    muted = 0
+                                    self.st3.update(sum=None, cnt=0)
+                                    self.duplex.force_listen_count = \
+                                        FORCE_LISTEN
+                                    prev_listen = True
+                                    emit({"type": "phase",
+                                          "v": "listening"})
+                                    continue
+                                else:
+                                    while (relay_frames
+                                           and time.time()
+                                           >= relay_next_at - 1.2):
+                                        fr = relay_frames.pop(0)
+                                        i16f = (np.clip(fr, -1, 1)
+                                                * 32767).astype("<i2")
+                                        emit({"type": "audio",
+                                              "sr": 24000,
+                                              "pcm":
+                                              base64.b64encode(
+                                                  i16f.tobytes())
+                                              .decode()})
+                                        relay_next_at = (
+                                            max(relay_next_at,
+                                                time.time())
+                                            + len(fr) / 24000.0)
+                            if (relay_guard and relay_deadline is None
+                                    and not relay_frames
+                                    and not relay_texts):
+                                # queue drained: playback ends ~1s after
+                                # the last frame; the 8cb close below
+                                # finishes the bookkeeping.
+                                relay_deadline = ((relay_next_at
+                                                   or time.time()) + 1.0)
+
+                            # 8cb: the audible relay turn ends when
+                            # playback does, but the muted local
+                            # continuation can ramble to turn_eos for
+                            # 30s+, holding relay_guard (no follow-up
+                            # can fire) and merging the next utterance
+                            # into the stale turn snapshot. Close the
+                            # relay turn at playback end; the muted
+                            # tail stays muted to its real eot.
+                            if (relay_guard and relay_deadline is not None
+                                    and time.time() > relay_deadline):
+                                emit({"type": "log",
+                                      "msg": "relay playback done — "
+                                             "closing turn early (muted "
+                                             f"tail {max(0, muted - 1)} "
+                                             "chunks so far)"})
+                                if relay_turn is not None:
+                                    relay_turn["relay_ms"] = int(
+                                        (time.time() - relay_turn.get(
+                                            "relay_started_at",
+                                            time.time())) * 1000)
+                                    finish_turn_async(relay_turn)
+                                    relay_turn = None
+                                active_turn = None
+                                user_win = []
+                                turn_text, turn_fired = [], False
+                                turn_scores = []
+                                relay_guard = False
+                                relay_deadline = None
+                                relay_next_at = None
+                                relay_pause = 0
+                                self.st3.update(sum=None, cnt=0)
+                                self.duplex.force_listen_count = 2
+                                emit({"type": "phase", "v": "listening"})
 
                             fired_now = False
                             if prev_listen and not r["is_listen"]:
@@ -744,7 +961,17 @@ class DuplexVoice:
                                     prompt_wav_path=PROMPT_WAV,
                                     top_k=GEN_TOP_K)
                                 _emit_gen(r, mute=True)
-                            if r.get("end_of_turn"):
+                            if (r.get("end_of_turn") and relay_guard
+                                    and (relay_frames or relay_texts)):
+                                # 8ce: the muted babble ended but relay
+                                # frames are still being delivered —
+                                # keep the relay turn open; the drain
+                                # path sets relay_deadline and the 8cb
+                                # close finishes the bookkeeping.
+                                emit({"type": "log",
+                                      "msg": "babble eot mid-relay — "
+                                             "delivery continues"})
+                            elif r.get("end_of_turn"):
                                 if muted:
                                     emit({"type": "log",
                                           "msg": f"muted {muted - 1} chunks "
@@ -772,6 +999,7 @@ class DuplexVoice:
                                 turn_text, turn_fired = [], False
                                 turn_scores = []
                                 relay_guard = False
+                                relay_deadline = None
                                 self.st3.update(sum=None, cnt=0)
                             prev_listen = r["is_listen"]
                         except Exception as ie:
@@ -927,7 +1155,7 @@ const T="__TOKEN__";
 const VOICE="https://rhe9527--gate-duplex-voice.modal.run";
 const $=s=>document.querySelector(s);
 let probeOn=true,ws=null,ac=null,micStream=null,proc=null,talking=false;
-let playCtx=null,playT=0,gpuReady=false;
+let playCtx=null,playT=0,gpuReady=false,playSrcs=[];
 function log(m,c){const l=$("#log");
  l.innerHTML+=`<div class="${c||''}"><b>${new Date()
  .toLocaleTimeString()}</b> ${m}</div>`;l.scrollTop=l.scrollHeight;}
@@ -945,7 +1173,15 @@ function playPCM(b64,sr){
  const src=playCtx.createBufferSource();src.buffer=buf;
  src.connect(playCtx.destination);
  playT=Math.max(playT,playCtx.currentTime);
- src.start(playT);playT+=buf.duration;}
+ src.start(playT);playT+=buf.duration;
+ playSrcs.push(src);
+ src.onended=()=>{playSrcs=playSrcs.filter(s=>s!==src);};}
+// 8ce: server dropped the relay tail (user barged) — stop whatever
+// audio is still scheduled in the client so the ~2s buffer goes quiet
+// at once, matching the native interrupt of plain speech.
+function stopPlayback(){
+ playSrcs.forEach(s=>{try{s.stop();}catch(e){}});
+ playSrcs=[];playT=playCtx?playCtx.currentTime:0;}
 async function warm(){
  const t0=Date.now();let j=null;
  const tick=setInterval(()=>{if(!gpuReady)$("#state").textContent=
@@ -1005,6 +1241,7 @@ function handle(m){
   +`probe ${m.probe_on?"ON":"OFF"} — ${m.mode}`);
  else if(m.type==="phase")$("#phase").textContent=m.v;
  else if(m.type==="audio")playPCM(m.pcm,m.sr);
+ else if(m.type==="interrupt")stopPlayback();
  else if(m.type==="text"){turnText+=m.v;
   $("#text").textContent=turnText.slice(-300);
   log((m.relay?"[relay] ":"")+m.v,"txt");}
