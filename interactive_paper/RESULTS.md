@@ -6538,3 +6538,19 @@ same VAD-adjacent territory the paper stance argues against);
 (3) system-prompt nudge ("speak only when the user speaks") — cheap,
 but in-band imperatives have failed three times before (8bd/8bm).
 Files: _ws_silence_probe.py (new). No code change deployed.
+
+### 8cg repeats — the stock arm does it every run (2026-09-05)
+
+User asked to test 原版 directly. The vanilla arm IS stock: it loads
+the CHECKPOINT's own modeling sources (no _model_src overwrite;
+decode path byte-identical to OpenBMB/minicpm-o-4_5-pytorch-simple-
+demo) under the official serving config (top_k=20, force_listen 3,
+official prompt), bare loop. Three 100s-noise runs: 4, 1, 2
+spontaneous commits — every run produces a hallucinated Musk-register
+monologue (Hyperloop pod tour; energy crisis/EVs; a 36,000 km/h
+orbital "super-highway"). Detail: the FIRST commit lands at 16.4-17.0s
+in all four probe runs across both arms — right after the probe's
+first breath-like amplitude bump (~15.4s + latency), i.e. the head
+commits on the first marginally speech-like noise, then free-
+associates. Conclusion stands and is now n=3 on stock: commit-on-
+noise is 原版 MiniCPM-o 4.5 behavior, not ours.
