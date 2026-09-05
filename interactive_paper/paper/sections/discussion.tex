@@ -75,13 +75,22 @@ remain open \citep{lin2026fdbv3}, and in native testing a new
 question asked during the expert wait usually derails the pending
 relay, so a production system has to cancel or replace an in-flight
 request when the user moves on. Interruption inherits the duplex
-head's own turn-taking: barging out of a spoken relay stops the audio
-reliably, but the head commits to the following question only about
-two times in three, and after an interruption it sometimes stays in
-the listen state and lets a fresh question go unanswered. This
-listen-lock is a property of the head's native listen/speak
-distribution, not of the escalation harness---down-weighting the
-listen token in decode, forcing a listen window, and closing the
-interrupted turn all fail to make the commit reliable---so removing it
-would require an external voice-activity trigger of exactly the kind
-the native regime is meant to retire.
+head's own turn-taking, and here the harness's bookkeeping matters
+more than decode-time levers. Our first design narrated escalations to
+the head in bracketed system notes and let the condemned local answer
+run on silently to its own end-of-turn; after a barge the head then
+committed to the following question only about two times in three,
+and no decode-side intervention (down-weighting the listen token,
+forced listen windows, closing the interrupted turn) made the commit
+reliable. The failures traced to the context those mechanisms left
+behind---content the head never saw in training, stacked against
+speaking. Replacing them with teacher-forcing---whatever audio the
+system actually played (stall line, relayed answer up to the cut) is
+written into the context as the head's own speech and closed with a
+turn-end token, the exact shape a native yield leaves---restored
+post-interruption commits in our live runs (8/8, vs.\ the prior
+$\sim$2/3 ceiling). The residual is the head's baseline turn-taking
+variance (a $\sim$1-in-6 chance of ignoring a first utterance in a
+clean session), which escalation neither causes nor can fix without
+an external voice-activity trigger of exactly the kind the native
+regime is meant to retire.

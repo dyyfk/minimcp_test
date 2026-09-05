@@ -100,29 +100,37 @@ gpu_image = (
 
 # proven wording (first escalate smoke: relayed + self-corrected);
 # free-text imperatives like "stop speaking and wait" made the head
-# swallow the relay, and "say X now" got followed one unit late — the
-# canned-stall + factual context note below avoids steering entirely.
+# swallow the relay, and "say X now" got followed one unit late.
 RELAY_TMPL = ("A verified answer came back: {ans}\n"
               "Relay it to the user in one or two spoken sentences.")
 RELAY_NUDGE = "Say the verified answer aloud to the user now."
 STALL = "Hmm, let me double-check that — one moment."
 # fired => paper-parity canned stall: the STALL line is synthesized ONCE
-# at load via the turn-based teacher-forcing path (talker's own voice),
-# played to the user at fire time, and the context gets a factual note
-# that the line was said. The onset chunk's ~1 s of local attempt has
-# already been voiced when the gate reads — chunk granularity is the
-# regime's floor.
-STALL_NOTE = ("[SYSTEM NOTE] Your answer so far is likely wrong. You "
-              "just told the user: \"" + STALL + "\" A verified answer "
-              "will arrive in a moment.")
+# at load via the turn-based teacher-forcing path (talker's own voice)
+# and played to the user at fire time. The onset chunk's ~1 s of local
+# attempt has already been voiced when the gate reads — chunk
+# granularity is the regime's floor.
+#
+# 8cf stock-parity context: whatever pcm we ship out-of-band (canned
+# stall, paced relay tts) is teacher-forced into the duplex context as
+# the head's OWN speak tokens and the turn is closed with turn_eos —
+# the exact shape a natural stock yield leaves behind. The previous
+# design ([SYSTEM NOTE] text units + a muted local "babble" that
+# rambled to its own eot) put content in the context the duplex head
+# never saw in training ("Your answer so far is likely wrong" + a 30s
+# phantom turn) and measurably tilted it toward <|listen|> after
+# escalations and barge cuts (8ce: ~1/3 post-barge lock vs ~1/6
+# clean-session baseline). Stock MiniCPM-o 4.5 has no such lock
+# inflation — its post-interruption context is just "partial answer +
+# self-sampled turn_eos", which is what we now reproduce.
+#
 # 8bu relay mode. "steer": prefill RELAY_TMPL and let the talker voice the
 # answer itself (loses ~20-27 pts of correct expert answers: truncation,
 # self-answering, 99% nudges). "tts": speak the cleaned expert text
 # verbatim in the talker's own voice via the same teacher-forcing path
-# that synthesizes the canned stall, then hand the context a note. The
-# chunk loop keeps running, so the relay stays interruptible.
+# that synthesizes the canned stall. The chunk loop keeps running, so
+# the relay stays interruptible.
 RELAY_MODE = os.environ.get("RELAY_MODE", "tts")
-RELAY_NOTE = "[SYSTEM NOTE] You just told the user: \"{ans}\" Do not repeat it."
 
 
 import re
@@ -375,6 +383,65 @@ class DuplexVoice:
             pass
         d._streaming_generate_count = 0
 
+    def _speak_forced(self, text, end_turn=True):
+        """8cf: teacher-force `text` into the duplex context as the head's
+        own speech — normal speak units closed with turn_eos — for audio
+        the caller already shipped (canned stall / paced relay pcm). Keeps
+        the context aligned with what the user actually heard, replacing
+        the [SYSTEM NOTE] narration. Prefer the model method; inline
+        fallback for a warm container running pre-8cf modeling sources
+        (same caveat as _force_end_turn).
+        """
+        d = self.duplex
+        fn = getattr(d, "speak_forced", None)
+        if callable(fn):
+            fn(text, end_turn=end_turn)
+            return
+        tok = d.tokenizer
+        ids = tok.encode(text, add_special_tokens=False) if text else []
+        if not ids and not end_turn:
+            return
+        d.pending_logits = None
+        unit_end = tok.convert_tokens_to_ids("</unit>")
+
+        def _feed(tid):
+            d.decoder.feed(d.decoder.embed_token(tid))
+            d.total_ids.append(tid)
+
+        groups = [ids[i:i + 18] for i in range(0, len(ids), 18)] or [[]]
+        for gi, g in enumerate(groups):
+            last = gi == len(groups) - 1
+            d.decoder.register_unit_start()
+            gen = []
+            _feed(d.unit_token_id)
+            _feed(d.speak_token_id)
+            d.current_turn_ended = False
+            for tid in g:
+                _feed(tid)
+                gen.append(tid)
+                d.res_ids.append(tid)
+                d.speak_count += 1
+            if last and end_turn:
+                _feed(d.turn_eos_token_id)
+                gen.append(d.turn_eos_token_id)
+                d.current_turn_ended = True
+                _feed(d.chunk_tts_eos_token_id)
+            else:
+                _feed(d.chunk_eos_token_id)
+            _feed(unit_end)
+            d.decoder.register_unit_end(
+                input_type="text", generated_tokens=gen, is_listen=False,
+                generated_text=tok.decode(g, skip_special_tokens=True))
+            d.total_hidden.append([])
+        if end_turn:
+            d.tts_text_start_pos = 0
+            d.tts_past_key_values = None
+            d.tts_current_turn_start_time = None
+            try:
+                d._reset_token2wav_for_new_turn()
+            except Exception:
+                pass
+
     def _session_reset(self):
         import librosa
         ref, _ = librosa.load(PROMPT_WAV, sr=16000, mono=True)
@@ -472,11 +539,14 @@ class DuplexVoice:
                 turn_scores = []
                 relay_guard = False               # relay being delivered
                 relay_deadline = None             # 8cb: tts playback end
-                relay_frames = []                 # 8ce: paced ~1s tts frames
+                relay_frames = []                 # 8ce: paced (piece, ~1s frame)
                 relay_texts = []                  # 8ce: pieces not yet synth'd
                 relay_next_at = None              # 8ce: wall-clock pacer
                 relay_pause = 0                   # 8ce: head-yield seconds
-                muted = 0                         # 8bm: suppressed chunks
+                relay_all_pieces = []             # 8cf: full piece list
+                relay_next_piece = 1              # 8cf: next piece index
+                relay_heard_upto = 0              # 8cf: pieces w/ audio shipped
+                tts_relay = RELAY_MODE == "tts" and self.tts_ok
                 prev_listen = True
                 thinking = _th.Event()           # thinker in flight
                 n_chunk = 0
@@ -641,20 +711,12 @@ class DuplexVoice:
                                 relay_turn = relay_box.pop(0)
                                 ans = relay_turn.get("expert_answer", "")
                                 relay_turn["relay_started_at"] = time.time()
-                                if muted:
-                                    emit({"type": "log",
-                                          "msg": f"muted {muted - 1} chunks "
-                                                 "of local continuation"})
-                                    muted = 0
                                 relay_guard = True   # no gate fire until
                                 #                      this delivery's eot
                                 emit({"type": "phase", "v": "relaying"})
-                                if RELAY_MODE == "tts" and self.tts_ok:
+                                if tts_relay:
                                     # 8bu: verbatim expert text in the
-                                    # talker's own voice; the duplex
-                                    # context only gets a note, and the
-                                    # local continuation stays muted to
-                                    # end_of_turn so nothing talks over it
+                                    # talker's own voice.
                                     # 8ce: chunk-paced delivery. 8cd's
                                     # eager emission handed the browser
                                     # 7-10s of scheduled audio no one
@@ -668,6 +730,10 @@ class DuplexVoice:
                                     # client never holds more than ~2s
                                     # and the duplex head keeps the
                                     # floor decision every second.
+                                    # 8cf: no [SYSTEM NOTE] — the pieces
+                                    # actually shipped are teacher-forced
+                                    # into the context as the head's own
+                                    # closed turn at delivery end / cut.
                                     spoken = clean_expert(ans)
                                     emit({"type": "text", "v": " " + spoken,
                                           "relay": True})
@@ -684,9 +750,12 @@ class DuplexVoice:
                                                      + str(se)[:100]})
                                     relay_texts = pieces[1:]
                                     relay_frames = ([
-                                        p0[i:i + 24000]
+                                        (0, p0[i:i + 24000])
                                         for i in range(0, len(p0), 24000)]
                                         if p0 is not None else [])
+                                    relay_all_pieces = pieces
+                                    relay_next_piece = 1
+                                    relay_heard_upto = 0
                                     emit({"type": "log",
                                           "msg": f"relay (tts, paced): "
                                                  f"{(len(p0) / 24000 if p0 is not None else 0):.1f}s"
@@ -697,14 +766,6 @@ class DuplexVoice:
                                                  f"{time.time() - t_s:.1f}s"})
                                     relay_next_at = time.time()
                                     relay_pause = 0
-                                    self.duplex.streaming_prefill(
-                                        text_list=[RELAY_NOTE.format(ans=spoken)])
-                                    r = self.duplex.streaming_generate(
-                                        prompt_wav_path=PROMPT_WAV,
-                                        top_k=GEN_TOP_K)
-                                    _emit_gen(r, mute=True)
-                                    muted = 1
-                                    prev_listen = r["is_listen"]
                                 else:
                                     self.duplex.streaming_prefill(
                                         text_list=[RELAY_TMPL.format(ans=ans)])
@@ -742,6 +803,19 @@ class DuplexVoice:
                                       "msg": f"prefill skipped: "
                                              f"{ok.get('reason', '')[:80]}"})
                                 continue
+                            # 8cf: while the thinker is out or a tts
+                            # relay is being delivered, hold the head in
+                            # listen one chunk at a time (its turn was
+                            # already closed at fire; there is no muted
+                            # babble to occupy the floor). Self-releases
+                            # the moment the guards clear — thinker
+                            # failure clears `thinking` in its finally.
+                            # Steer mode keeps the head free: it must
+                            # voice the relay itself.
+                            if thinking.is_set() or (relay_guard
+                                                     and tts_relay):
+                                self.duplex._streaming_generate_count = 0
+                                self.duplex.force_listen_count = 1
                             r = self.duplex.streaming_generate(
                                 prompt_wav_path=PROMPT_WAV,
                                 top_k=GEN_TOP_K)
@@ -779,8 +853,9 @@ class DuplexVoice:
                                                  + str(se)[:100]})
                                 if _p is not None:
                                     relay_frames.extend(
-                                        _p[i:i + 24000]
+                                        (relay_next_piece, _p[i:i + 24000])
                                         for i in range(0, len(_p), 24000))
+                                relay_next_piece += 1
                             if relay_guard and relay_frames:
                                 # user speech over the last ~2s (silence
                                 # RMS ~0.003, speech ~0.03+); relay-onset
@@ -813,18 +888,25 @@ class DuplexVoice:
                                                  time.time())) * 1000)
                                         finish_turn_async(relay_turn)
                                         relay_turn = None
-                                    # 8ce: at cut the head is still mid-
-                                    # babble with no mid-turn yield
-                                    # channel (8bk), so clearing relay
-                                    # state alone leaves it rambling the
-                                    # stale (now un-muted) turn while the
-                                    # user's new utterance collides with
-                                    # it — the model appears deaf. Mirror
-                                    # the 8cb close AND force the head to
-                                    # listen so the ongoing utterance
-                                    # opens a clean turn; drop this chunk
-                                    # (continue) so the stale babble is
-                                    # not voiced.
+                                    # 8cf: close the relay turn in the
+                                    # context exactly like a natural
+                                    # mid-answer yield — teacher-force
+                                    # ONLY the pieces whose audio was
+                                    # actually shipped, then turn_eos.
+                                    # The post-cut context is then the
+                                    # same shape a stock self-yield
+                                    # leaves ("half-said answer + eos"),
+                                    # with no notes and no aborted
+                                    # babble — the delta that inflated
+                                    # the post-barge listen-lock (8ce).
+                                    if relay_heard_upto > 0:
+                                        self._speak_forced(
+                                            " " + " ".join(
+                                                relay_all_pieces[
+                                                    :relay_heard_upto]),
+                                            end_turn=True)
+                                    relay_all_pieces = []
+                                    relay_heard_upto = 0
                                     active_turn = None
                                     user_win = []
                                     turn_text, turn_fired = [], False
@@ -833,14 +915,12 @@ class DuplexVoice:
                                     relay_deadline = None
                                     relay_next_at = None
                                     relay_pause = 0
-                                    muted = 0
                                     self.st3.update(sum=None, cnt=0)
-                                    # 8ce: hard-end the stale babble turn
-                                    # like a sampled <|turn_eos|> — flag
-                                    # alone left the utterance half-open
-                                    # in the decoder context and the head
-                                    # intermittently never committed on
-                                    # the follow-up (post-cut deafness).
+                                    # 8cf: with the local turn already
+                                    # closed at fire there is no babble
+                                    # left to end; keep the hard-end as
+                                    # a safety net (no-op unless a turn
+                                    # is somehow open).
                                     self._force_end_turn()
                                     # force_listen gates on
                                     # _streaming_generate_count <
@@ -862,7 +942,9 @@ class DuplexVoice:
                                     while (relay_frames
                                            and time.time()
                                            >= relay_next_at - 1.2):
-                                        fr = relay_frames.pop(0)
+                                        pi, fr = relay_frames.pop(0)
+                                        relay_heard_upto = max(
+                                            relay_heard_upto, pi + 1)
                                         i16f = (np.clip(fr, -1, 1)
                                                 * 32767).astype("<i2")
                                         emit({"type": "audio",
@@ -884,21 +966,25 @@ class DuplexVoice:
                                 relay_deadline = ((relay_next_at
                                                    or time.time()) + 1.0)
 
-                            # 8cb: the audible relay turn ends when
-                            # playback does, but the muted local
-                            # continuation can ramble to turn_eos for
-                            # 30s+, holding relay_guard (no follow-up
-                            # can fire) and merging the next utterance
-                            # into the stale turn snapshot. Close the
-                            # relay turn at playback end; the muted
-                            # tail stays muted to its real eot.
+                            # 8cb: close the relay turn when playback
+                            # ends. 8cf: this is also where the
+                            # delivered answer enters the context — as
+                            # the head's own closed speak turn
+                            # (teacher-forced), not a [SYSTEM NOTE].
                             if (relay_guard and relay_deadline is not None
                                     and time.time() > relay_deadline):
                                 emit({"type": "log",
                                       "msg": "relay playback done — "
-                                             "closing turn early (muted "
-                                             f"tail {max(0, muted - 1)} "
-                                             "chunks so far)"})
+                                             "committing spoken turn to "
+                                             "context and closing"})
+                                if relay_heard_upto > 0:
+                                    self._speak_forced(
+                                        " " + " ".join(
+                                            relay_all_pieces[
+                                                :relay_heard_upto]),
+                                        end_turn=True)
+                                relay_all_pieces = []
+                                relay_heard_upto = 0
                                 if relay_turn is not None:
                                     relay_turn["relay_ms"] = int(
                                         (time.time() - relay_turn.get(
@@ -915,7 +1001,6 @@ class DuplexVoice:
                                 relay_next_at = None
                                 relay_pause = 0
                                 self.st3.update(sum=None, cnt=0)
-                                self.duplex.force_listen_count = 2
                                 emit({"type": "phase", "v": "listening"})
 
                             fired_now = False
@@ -980,10 +1065,8 @@ class DuplexVoice:
                                                args=(active_turn,),
                                                daemon=True).start()
 
-                            _emit_gen(r, mute=muted > 0)
-                            if muted:
-                                muted += 1
-                            if r.get("text") and not muted:
+                            _emit_gen(r)
+                            if r.get("text"):
                                 turn_text.append(r["text"])
                                 target_turn = (relay_turn if relay_guard
                                                and relay_turn is not None
@@ -1002,33 +1085,29 @@ class DuplexVoice:
                                     emit({"type": "text", "v": " " + STALL})
                                     active_turn["assistant_parts"].append(
                                         " " + STALL)
+                                # 8cf: stock-parity context — the stall
+                                # line joins the onset words as the
+                                # head's OWN speech and the turn closes
+                                # with turn_eos, exactly the shape a
+                                # natural yield leaves. No [SYSTEM NOTE]
+                                # ("your answer is likely wrong" was
+                                # accumulating anti-speak bias), no
+                                # muted babble (a 30s phantom turn that
+                                # held current_turn_ended=False and
+                                # suppressed every listen bid). The head
+                                # is held in listen per-chunk while the
+                                # thinker is out (guard above).
                                 emit({"type": "log",
-                                      "msg": "canned stall + context note; "
-                                             "local continuation muted "
-                                             "until relay"})
-                                muted = 1
-                                self.duplex.streaming_prefill(
-                                    text_list=[STALL_NOTE])
-                                r = self.duplex.streaming_generate(
-                                    prompt_wav_path=PROMPT_WAV,
-                                    top_k=GEN_TOP_K)
-                                _emit_gen(r, mute=True)
-                            if (r.get("end_of_turn") and relay_guard
-                                    and (relay_frames or relay_texts)):
-                                # muted babble ended but relay frames are
-                                # still being delivered — keep the relay
-                                # turn open; the drain path sets
-                                # relay_deadline and the 8cb close
-                                # finishes the bookkeeping.
-                                emit({"type": "log",
-                                      "msg": "babble eot mid-relay — "
-                                             "delivery continues"})
-                            elif r.get("end_of_turn"):
-                                if muted:
-                                    emit({"type": "log",
-                                          "msg": f"muted {muted - 1} chunks "
-                                                 "of local continuation"})
-                                    muted = 0
+                                      "msg": "canned stall voiced + "
+                                             "teacher-forced; turn closed, "
+                                             "holding listen until relay"})
+                                self._speak_forced(" " + STALL,
+                                                   end_turn=True)
+                                turn_text = []
+                                # turn state is owned by thinker/relay
+                                # from here (no natural eot will come)
+                                active_turn = None
+                            if r.get("end_of_turn"):
                                 ans = "".join(turn_text).strip()
                                 if relay_guard and relay_turn is not None:
                                     relay_turn["relay_ms"] = int(
@@ -1044,8 +1123,8 @@ class DuplexVoice:
                                             active_turn["assistant_parts"].append(
                                                 ans)
                                         finish_turn_async(active_turn)
-                                    # Fired local continuation is intentionally
-                                    # muted; its state is owned by thinker/relay.
+                                    # (fired turns are closed at fire —
+                                    # state owned by thinker/relay)
                                     active_turn = None
                                 user_win = []
                                 turn_text, turn_fired = [], False
@@ -1073,20 +1152,7 @@ class DuplexVoice:
                 finally:
                     emit({"type": "bye"})
 
-            def _emit_gen(r, relay=False, mute=False):
-                if mute:
-                    # 8bm: thinker engaged — the condemned turn's
-                    # continuation is generated (context true,
-                    # perception intact, natively interruptible)
-                    # but not voiced
-                    emit({"type": "chunk",
-                          "listen": bool(r["is_listen"]),
-                          "eot": bool(r.get("end_of_turn")),
-                          "muted": True,
-                          "cost": round(r.get("cost_all", 0), 3)})
-                    if r.get("end_of_turn"):
-                        emit({"type": "phase", "v": "listening"})
-                    return
+            def _emit_gen(r, relay=False):
                 wf = r.get("audio_waveform")
                 if not r["is_listen"] and wf is not None and len(wf):
                     i16 = (np.clip(np.asarray(wf, dtype=np.float32),

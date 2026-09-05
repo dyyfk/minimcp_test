@@ -6436,3 +6436,62 @@ paper-stance decision (deferred to the user). Live = v47 (= the v44
 build: end_turn + force_listen counter reset + paced relay + energy
 cut). Reverted experiments: listen_prob_scale recovery bias,
 allow_midturn_yield, mid-stream unit-close.
+
+## 8cf — stock-parity context: teacher-force what was played, delete the notes and the babble ⭐ (2026-09-05)
+
+**User's counter-diagnosis was right; 8ce's "intrinsic" verdict was
+half-wrong.** 8ce concluded the post-barge listen-lock (~1/3, vs ~1/6
+first-utterance baseline) was the head's own turn-taking because every
+DECODE-side lever failed (listen_prob_scale 0.15, force_listen,
+turn_eos injection, midturn yield). But stock MiniCPM-o 4.5 has no
+such inflation, and our diff vs stock is not in the decision chain
+(the head samples listen/speak from its own logits, unmodified) — it
+is in what the serving layer wrote into the context: (1)
+`[SYSTEM NOTE] Your answer so far is likely wrong…` +
+`…Do not repeat it` — bracketed text units the duplex head never saw
+in training, one more per fire, stacking "when you speak you are
+wrong"; (2) the muted babble — a phantom turn up to 30s the user
+never heard, holding current_turn_ended=False (so every mid-turn
+listen bid was suppressed, the 8bk path) and reading as "I just held
+the floor forever"; (3) at a barge cut, a half-sentence + externally
+injected turn_eos. Stock's post-interruption context is just "partial
+answer + self-sampled turn_eos". 8ce attacked decode; the poison was
+context.
+
+**Fix (v48): make every escalation leave the context stock-shaped.**
+`MiniCPMODuplex.speak_forced(text, end_turn)` teacher-forces text into
+the decoder as the head's OWN speech in normal speak-unit framing
+(`<unit><|speak|> t1..t18 <|chunk_eos|></unit>` …, last unit
+`<|turn_eos|><|chunk_tts_eos|>`), no TTS (audio ships separately);
+same per-turn resets as a sampled eos. demo_duplex then: fire = play
+canned stall pcm + speak_forced(onset-continuing stall line,
+end_turn) — turn closed at fire, STALL_NOTE deleted, muted-babble
+machinery deleted; thinking/relay window = per-chunk force_listen
+(counter reset + count 1 each iteration, self-releasing, steer mode
+exempt); relay = paced tts frames tagged by piece, and at playback end
+(8cb close) or barge cut, ONLY the pieces actually shipped are
+speak_forced as one closed turn — a cut leaves "half-said answer +
+eos", exactly a native yield. RELAY_NOTE deleted; the no-op
+force_listen_count=2 at the 8cb close deleted.
+
+**Live (v48):** `_ws_context_smoke.py` PASS (both fires, NVDA→AAPL
+reference resolution intact, gate reads normal on the teacher-forced
+context: turn-2 score .8873). `_ws_relay_barge.py` × 9: one run lost
+to a client-harness early exit (no server error); of the 8 completed,
+**follow-up recovery 8/8** (proper mid-relay cuts 6/6; the other two
+barged pre-relay and still recovered) vs the 8ce ceiling of ~60-65%
+over ~30 runs. Post-cut commit at ~3-6s (3s of which is the
+deliberate force-listen capture window); follow-ups escalate and
+relay correctly (.71-.87 gate reads). Zero `loop error (recovered)`.
+P(8/8 | true rate .65) ≈ 3% — small n, but every recovery lever 8ce
+tried had failed, and this one changed only the context. Paper:
+Limitations rewritten (discussion.tex) — the ~2/3 commit is now
+attributed to the harness's context pollution, fixed by
+teacher-forcing; the residual is the ~1/6 clean-session baseline.
+Files: _model_src/modeling_minicpmo.py (+speak_forced),
+demo_duplex.py (fire/relay/cut rewrite). Caveats to watch in the
+pilot: relay text now sits in context as the head's own words — no
+repetition observed in smokes (the closed turn carries stock
+semantics), fallback is a minimal neutral note; a synth-failed piece
+can leave its text in the committed turn (index alignment kept,
+audio skipped) — rare, logged.
