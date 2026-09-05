@@ -6407,3 +6407,32 @@ our history — collaborator or scheduled agent), reverting the demo to
 pre-8cb code mid-testing; 8cb-8ce are now committed (b7da740,
 a5f87c1) and re-deployed (v36-v38), but deployment ownership needs
 coordination or the next foreign deploy clobbers live again.
+
+### 8ce investigation — the post-barge listen-lock is the head's own turn-taking, not a harness bug (2026-09-05)
+
+User asked to understand the residual before deciding on a VAD net.
+Findings: (1) MECHANISM — the head's listen/speak choice is driven by
+its raw logits (utils.py decode(): a mid-turn <|listen|> is sampled
+from the head's own distribution). The "lock" is simply that
+distribution strongly favouring <|listen|> for that context; no VAD or
+energy gate is involved anywhere in the decision. (2) SAME SPECIES —
+the ~1/6 first-utterance lock (clean session, no cut) and the ~1/3
+post-barge lock are the same phenomenon; the barge case is worse
+because the post-cut context (stall + STALL_NOTE + aborted babble)
+further tilts the head toward listen. (3) NON-VAD LEVERS TESTED AND
+INSUFFICIENT — force_listen counter reset (real fix, made force_listen
+actually engage), turn_eos injection (end_turn_now), mid-stream
+unit-close (register_unit_end + window: neutral-to-worse), scoped
+allow_midturn_yield (never triggered — energy cut fires first), and
+the decode knob listen_prob_scale down to 0.15 (head still picks
+listen 36/36 in locked runs — even cutting the listen logit to 15%
+does not flip it). Measured ceiling: follow-up commit after a forced
+barge cut is ~60-65% across ~30 live runs; the barge AUDIO cut itself
+(relay stops ~2s + client stopPlayback) is reliable. CONCLUSION: the
+recovery ceiling is the duplex head's intrinsic turn-taking variance;
+the only lever that would guarantee a commit is a forced speak turn
+when the user has clearly spoken = a VAD-style harness, which is a
+paper-stance decision (deferred to the user). Live = v47 (= the v44
+build: end_turn + force_listen counter reset + paced relay + energy
+cut). Reverted experiments: listen_prob_scale recovery bias,
+allow_midturn_yield, mid-stream unit-close.
