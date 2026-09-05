@@ -562,6 +562,14 @@ class DuplexVoice:
             stop = _th.Event()
             inbox, ilock = [], _th.Lock()
             relay_box = []            # thinker -> chunk loop (one slot)
+            # 8ck: frames + schedule shared between the chunk loop and
+            # the pacer thread — frame delivery must not stall while
+            # the loop synthesizes a piece (2-4s), or the client's ~2s
+            # buffer drains and every piece boundary is an audible
+            # pause. MUST live at this scope (chunk_loop-local state
+            # would NameError the pacer).
+            rst = {"frames": [], "next_at": None}
+            relay_lock = _th.Lock()
 
             def emit(m):
                 asyncio.run_coroutine_threadsafe(sock.send_json(m), loop)
@@ -587,9 +595,7 @@ class DuplexVoice:
                 turn_scores = []
                 relay_guard = False               # relay being delivered
                 relay_deadline = None             # 8cb: tts playback end
-                relay_frames = []                 # 8ce: paced (piece, ~1s frame)
                 relay_texts = []                  # 8ce: pieces not yet synth'd
-                relay_next_at = None              # 8ce: wall-clock pacer
                 relay_pause = 0                   # 8ce: head-yield seconds
                 relay_toks = []                   # 8cj: tokens to force-pace
                 relay_ctx_closed = False          # 8cj: relay turn eos fed
@@ -827,10 +833,13 @@ class DuplexVoice:
                                               "msg": "relay synth failed: "
                                                      + str(se)[:100]})
                                     relay_texts = pieces[1:]
-                                    relay_frames = ([
-                                        p0[i:i + 24000]
-                                        for i in range(0, len(p0), 24000)]
-                                        if p0 is not None else [])
+                                    with relay_lock:
+                                        rst["frames"] = ([
+                                            p0[i:i + 24000]
+                                            for i in range(0, len(p0),
+                                                           24000)]
+                                            if p0 is not None else [])
+                                        rst["next_at"] = time.time()
                                     # 8cj: pace these tokens into the
                                     # audio units as the pcm ships
                                     relay_toks = (self.tok.encode(
@@ -846,7 +855,6 @@ class DuplexVoice:
                                                  f"pieces pending, first "
                                                  f"synth "
                                                  f"{time.time() - t_s:.1f}s"})
-                                    relay_next_at = time.time()
                                     relay_pause = 0
                                 else:
                                     self.duplex.streaming_prefill(
@@ -898,7 +906,7 @@ class DuplexVoice:
                             forced_chunk = (relay_guard and tts_relay
                                             and not relay_ctx_closed)
                             if forced_chunk:
-                                sec_left = max(1, len(relay_frames)
+                                sec_left = max(1, len(rst["frames"])
                                                + 6 * len(relay_texts))
                                 k = (min(18, max(2, -(-len(relay_toks)
                                                       // sec_left)))
@@ -907,7 +915,7 @@ class DuplexVoice:
                                                     relay_toks[k:])
                                 end_now = (not relay_toks
                                            and not relay_texts
-                                           and len(relay_frames) <= 1)
+                                           and len(rst["frames"]) <= 1)
                                 self._speak_forced_unit(
                                     toks, end_turn=end_now)
                                 if end_now:
@@ -947,7 +955,7 @@ class DuplexVoice:
                             # duplex head; there is no VAD in the model
                             # path and no client kill-switch.
                             if (relay_guard and relay_texts
-                                    and len(relay_frames) < 6):
+                                    and len(rst["frames"]) < 6):
                                 _sent = relay_texts.pop(0)
                                 _p = None
                                 try:
@@ -957,13 +965,15 @@ class DuplexVoice:
                                           "msg": "relay synth failed: "
                                                  + str(se)[:100]})
                                 if _p is not None:
-                                    relay_frames.extend(
-                                        _p[i:i + 24000]
-                                        for i in range(0, len(_p), 24000))
+                                    with relay_lock:
+                                        rst["frames"].extend(
+                                            _p[i:i + 24000]
+                                            for i in range(0, len(_p),
+                                                           24000))
                                     relay_toks += self.tok.encode(
                                         " " + _sent,
                                         add_special_tokens=False)
-                            if relay_guard and relay_frames:
+                            if relay_guard and rst["frames"]:
                                 # user speech over the last ~2s (silence
                                 # RMS ~0.003, speech ~0.03+); relay-onset
                                 # window is post-thinker silence, so no
@@ -987,10 +997,12 @@ class DuplexVoice:
                                                  f"mid-relay (rms "
                                                  f"{user_rms:.3f}) — "
                                                  "dropping "
-                                                 f"~{len(relay_frames)}s"
+                                                 f"~{len(rst['frames'])}s"
                                                  " of relay tail"})
                                     emit({"type": "interrupt"})
-                                    relay_frames = []
+                                    with relay_lock:
+                                        rst["frames"] = []
+                                        rst["next_at"] = None
                                     relay_texts = []
                                     if relay_turn is not None:
                                         relay_turn["relay_cut"] = True
@@ -1015,7 +1027,6 @@ class DuplexVoice:
                                     turn_scores = []
                                     relay_guard = False
                                     relay_deadline = None
-                                    relay_next_at = None
                                     relay_pause = 0
                                     self.st3.update(sum=None, cnt=0)
                                     # 8cj: feed the turn_eos that closes
@@ -1033,30 +1044,15 @@ class DuplexVoice:
                                     emit({"type": "phase",
                                           "v": "listening"})
                                     continue
-                                else:
-                                    while (relay_frames
-                                           and time.time()
-                                           >= relay_next_at - 1.2):
-                                        fr = relay_frames.pop(0)
-                                        i16f = (np.clip(fr, -1, 1)
-                                                * 32767).astype("<i2")
-                                        emit({"type": "audio",
-                                              "sr": 24000,
-                                              "pcm":
-                                              base64.b64encode(
-                                                  i16f.tobytes())
-                                              .decode()})
-                                        relay_next_at = (
-                                            max(relay_next_at,
-                                                time.time())
-                                            + len(fr) / 24000.0)
+                                # (frame delivery lives in the 8ck
+                                # pacer thread — no in-loop drip)
                             if (relay_guard and relay_deadline is None
-                                    and not relay_frames
+                                    and not rst["frames"]
                                     and not relay_texts):
                                 # queue drained: playback ends ~1s after
                                 # the last frame; the 8cb close below
                                 # finishes the bookkeeping.
-                                relay_deadline = ((relay_next_at
+                                relay_deadline = ((rst["next_at"]
                                                    or time.time()) + 1.0)
 
                             # 8cb: close the relay turn when playback
@@ -1092,7 +1088,9 @@ class DuplexVoice:
                                 turn_scores = []
                                 relay_guard = False
                                 relay_deadline = None
-                                relay_next_at = None
+                                with relay_lock:
+                                    rst["frames"] = []
+                                    rst["next_at"] = None
                                 relay_pause = 0
                                 self.st3.update(sum=None, cnt=0)
                                 emit({"type": "phase", "v": "listening"})
@@ -1253,6 +1251,33 @@ class DuplexVoice:
                 finally:
                     emit({"type": "bye"})
 
+            def relay_pacer():
+                # 8ck: frame delivery decoupled from the chunk loop.
+                # In-loop piece synth (2-4s each) used to stall the
+                # drip, draining the client's ~2s buffer mid-relay —
+                # an audible pause at every piece boundary (user-
+                # reported stutter). The pacer keeps shipping on the
+                # wall clock while the loop synthesizes; the 1.2s
+                # lead is unchanged, so barge tails stay as they were.
+                while not stop.is_set():
+                    fr = None
+                    with relay_lock:
+                        if (rst["frames"]
+                                and rst["next_at"] is not None
+                                and time.time()
+                                >= rst["next_at"] - 1.2):
+                            fr = rst["frames"].pop(0)
+                            rst["next_at"] = (max(rst["next_at"],
+                                                  time.time())
+                                              + len(fr) / 24000.0)
+                    if fr is None:
+                        time.sleep(0.05)
+                        continue
+                    i16f = (np.clip(fr, -1, 1) * 32767).astype("<i2")
+                    emit({"type": "audio", "sr": 24000,
+                          "pcm": base64.b64encode(i16f.tobytes())
+                          .decode()})
+
             def _emit_gen(r, relay=False):
                 wf = r.get("audio_waveform")
                 if not r["is_listen"] and wf is not None and len(wf):
@@ -1281,6 +1306,8 @@ class DuplexVoice:
                              "no soft barge-in harness"})
                 await loop.run_in_executor(None, self._session_reset)
                 await sock.send_json({"type": "phase", "v": "listening"})
+                pacer = _th.Thread(target=relay_pacer, daemon=True)
+                pacer.start()
                 worker = _th.Thread(target=chunk_loop, daemon=True)
                 worker.start()
                 while True:

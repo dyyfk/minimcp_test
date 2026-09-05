@@ -157,6 +157,20 @@ async def run():
     n_speak = sum(1 for _, ls in scores_follow if ls is False)
     google_ok = any(("Google" in r or "Alphabet" in r or "GOOG" in r)
                     for r in relay_follow)
+    # 8ck: playback continuity — simulate the client cursor (frames
+    # schedule back-to-back from arrival); a frame arriving after the
+    # cursor means the buffer ran dry = audible stutter.
+    aud = [(t, len(e.get("pcm", "")) * 3 // 4 // 2 / 24000.0)
+           for t, e in events if e.get("type") == "audio"]
+    stalls, cursor = [], None
+    for t, d in aud:
+        # 0.15-5s late = mid-delivery stutter; >5s = the ordinary
+        # silence between turns (not a stall)
+        if cursor is not None and 0.15 < t - cursor <= 5.0:
+            stalls.append(round(t - cursor, 2))
+        cursor = (t if cursor is None else max(cursor, t)) + d
+    print(f"playback stalls 0.15-5s: {len(stalls)} "
+          f"({sum(stalls):.1f}s total) {stalls[:8]}")
     print("\n===== STOP-FOLLOW SMOKE =====")
     print(f"stop at {t_stop:.1f}s -> cut logs {cut_logs} / "
           f"relay-close logs {close_logs}")
@@ -169,7 +183,10 @@ async def run():
     fired = any(f for _, f, _, _, _ in gates_follow)
     print(f"follow-up fired: {fired}  google relay: {google_ok}  "
           f"audio events: {audio_follow}")
-    print("PASS" if (fired and google_ok) else "FAIL")
+    # 8ck: PASS requires the relay AUDIO to actually ship (a text-only
+    # PASS masked a dead pacer thread once)
+    print("PASS" if (fired and google_ok and audio_follow >= 3)
+          else "FAIL")
     return {"fired": fired, "google": google_ok,
             "gates": gates_follow[:4], "cut": cut_logs,
             "n_listen": n_listen, "n_speak": n_speak}
