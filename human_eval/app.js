@@ -139,6 +139,7 @@ function mapServerSession(session) {
         completedTurns,
         receivedModelAudio,
         modelAudioMs: Number(conversation.client_observation?.model_audio_ms || 0),
+        finishError: null,
         targetTurns: conversation.target_turns || conversation.scenario?.targetTurns || (task.capability === "S3" ? 3 : 2),
         ratings: conversation.rating?.metrics || {},
         feedback: conversation.rating?.feedback || ""
@@ -410,7 +411,7 @@ function renderTask(taskIndex) {
     const scenario = conversation.scenario || definition.scenarios.find(item => item.id === conversation.scenarioId);
     if (conversation.phase === "idle") renderConversationIdle(taskIndex, task, conversation, scenario);
     else if (conversation.phase === "running") renderConversationRunning(taskIndex, task, conversation, scenario);
-    else if (conversation.phase === "finishing") renderConversationFinishing(task, scenario);
+    else if (conversation.phase === "finishing") renderConversationFinishing(taskIndex, task, conversation, scenario);
     else renderConversationRating(taskIndex, task, conversation, scenario);
   } else {
     renderPairComparison(taskIndex, task);
@@ -465,20 +466,23 @@ function renderConversationRunning(taskIndex, task, conversation, scenario) {
   updateLiveStatus(conversation.liveStatus || "listening");
 }
 
-function renderConversationFinishing(task, scenario) {
+function renderConversationFinishing(taskIndex, task, conversation, scenario) {
   const stage = document.getElementById("taskStage");
+  const failed = Boolean(conversation.finishError);
   stage.innerHTML = `
     <div class="conversation-layout">
-      <section class="conversation-panel surface conversation-finishing" aria-live="polite" aria-busy="true">
-        <div class="status-row"><span class="status-pill">Saving conversation</span><span class="status-pill neutral">${ordinalConversation(task.substep)}</span></div>
+      <section class="conversation-panel surface conversation-finishing" aria-live="polite" aria-busy="${String(!failed)}">
+        <div class="status-row"><span class="status-pill">${failed ? "Save interrupted" : "Saving conversation"}</span><span class="status-pill neutral">${ordinalConversation(task.substep)}</span></div>
         <div class="finish-loading">
-          <div class="loading-dot" aria-hidden="true"></div>
-          <h1>Saving your conversation…</h1>
-          <p class="lede">Please wait while we finish saving the audio and conversation record. This usually takes a few seconds.</p>
+          ${failed ? "" : '<div class="loading-dot" aria-hidden="true"></div>'}
+          <h1>${failed ? "We couldn’t save the conversation" : "Saving your conversation…"}</h1>
+          <p class="lede">${failed ? `${escapeHtml(conversation.finishError)} Your conversation is still available in this page.` : "Please wait while we finish saving the audio and conversation record. This usually takes a few seconds."}</p>
+          ${failed ? '<button id="retryFinish" class="primary-button" type="button">Retry saving</button>' : ""}
         </div>
       </section>
       ${renderTaskCard(scenario)}
     </div>`;
+  document.getElementById("retryFinish")?.addEventListener("click", () => retryFinishConversation(taskIndex, task.substep));
 }
 
 function renderConversationRating(taskIndex, task, conversation, scenario) {
@@ -597,6 +601,10 @@ async function startModelConversation(taskIndex, conversationIndex) {
   activeSocket = socket;
   socket.addEventListener("message", event => handleModelMessage(event, taskIndex, conversationIndex));
   socket.addEventListener("close", () => {
+    if (conversation.phase === "finishing") {
+      finishReceiptResolver?.(null);
+      return;
+    }
     if (!expectedSocketClose && conversation.phase === "running") {
       finishConversation(taskIndex, conversationIndex, "disconnect");
     }
@@ -687,7 +695,6 @@ function handleModelMessage(event, taskIndex, conversationIndex) {
     finishConversation(taskIndex, conversationIndex, "time_limit");
   } else if (message.type === "conversation_finished") {
     finishReceiptResolver?.(message);
-    finishReceiptResolver = null;
   } else if (message.type === "error") {
     finishConversation(taskIndex, conversationIndex, "crash");
   }
@@ -763,7 +770,7 @@ function updateLiveStatus(status) {
   setConversationActivity(activityState);
   const finishButton = document.getElementById("finishConversation");
   const finishHint = document.getElementById("finishHint");
-  const canFinish = (active?.completedTurns || 0) > 0 && status === "listening";
+  const canFinish = (active?.completedTurns || 0) > 0;
   if (finishButton) finishButton.disabled = !canFinish;
   if (finishHint) finishHint.hidden = (active?.completedTurns || 0) > 0;
 }
@@ -773,6 +780,7 @@ async function finishConversation(taskIndex, conversationIndex, reason) {
   if (conversation.phase !== "running") return;
   if (reason === "user_finished" && !(conversation.completedTurns > 0)) return;
   conversation.phase = "finishing";
+  conversation.finishError = null;
   clearInterval(timerHandle);
   backend.persist(state);
   render();
@@ -793,19 +801,30 @@ async function finishConversation(taskIndex, conversationIndex, reason) {
   conversation.endReason = reason;
   conversation.durationMs = new Date(conversation.endedAt).getTime() - new Date(conversation.startedAt).getTime();
   backend.persist(state);
-  let finalized = null;
-  if (receiptPromise) {
-    finalized = await Promise.race([
-      receiptPromise,
-      new Promise(resolve => window.setTimeout(() => resolve(null), FINISH_RECEIPT_TIMEOUT_MS))
-    ]);
+  await completeConversationFinish(taskIndex, conversationIndex, receiptPromise);
+}
+
+async function completeConversationFinish(taskIndex, conversationIndex, receiptPromise = null) {
+  const conversation = state.tasks[taskIndex].conversations[conversationIndex];
+  try {
+    // Compatibility fallback for an older backend or an interrupted receipt.
+    let finalized = receiptPromise ? await receiptPromise : null;
+    if (!finalized) finalized = await backend.finalizeConversation(conversation);
+    finishReceiptResolver = null;
+    applyFinalizedConversation(conversation, finalized);
+  } catch (error) {
+    finishReceiptResolver = null;
+    conversation.finishError = error instanceof Error ? error.message : "The server could not be reached.";
+    backend.persist(state);
+    render();
   }
-  // Compatibility fallback for an older backend or an interrupted receipt.
-  if (!finalized) finalized = await backend.finalizeConversation(conversation);
-  finishReceiptResolver = null;
+}
+
+function applyFinalizedConversation(conversation, finalized) {
   conversation.completedTurns = finalized.turn_count;
   if (!finalized.rating_allowed) {
     conversation.phase = "idle";
+    conversation.finishError = null;
     conversation.startedAt = null;
     conversation.endedAt = null;
     conversation.endReason = null;
@@ -815,14 +834,29 @@ async function finishConversation(taskIndex, conversationIndex, reason) {
     errorBox.hidden = false;
     return;
   }
+  conversation.finishError = null;
   conversation.phase = "rating";
   render();
 }
 
 function waitForFinishReceipt() {
   return new Promise(resolve => {
-    finishReceiptResolver = resolve;
+    const timeout = window.setTimeout(() => settle(null), FINISH_RECEIPT_TIMEOUT_MS);
+    const settle = receipt => {
+      clearTimeout(timeout);
+      if (finishReceiptResolver === settle) finishReceiptResolver = null;
+      resolve(receipt);
+    };
+    finishReceiptResolver = settle;
   });
+}
+
+async function retryFinishConversation(taskIndex, conversationIndex) {
+  const conversation = state.tasks[taskIndex].conversations[conversationIndex];
+  if (conversation.phase !== "finishing" || !conversation.finishError) return;
+  conversation.finishError = null;
+  render();
+  await completeConversationFinish(taskIndex, conversationIndex);
 }
 
 async function submitConversationRating(taskIndex, conversationIndex, questions) {

@@ -22,6 +22,15 @@ class ApiTests(unittest.TestCase):
         self.client.close()
         self.temporary.cleanup()
 
+    @staticmethod
+    def rating_metrics(score: int = 4) -> dict[str, int]:
+        return {
+            "correctness": score,
+            "helpfulness": score,
+            "context_consistency": score,
+            "conversation_naturalness": score,
+        }
+
     def test_complete_persistence_flow(self) -> None:
         page = self.client.get("/")
         self.assertEqual(page.status_code, 200)
@@ -78,7 +87,10 @@ class ApiTests(unittest.TestCase):
                 self.assertEqual(interaction["evaluation_status"], "pending")
                 rating = self.client.put(
                     f"/api/conversations/{conversation_id}/rating",
-                    json={"metrics": {"overall": 4}, "feedback": "Clear response"},
+                    json={
+                        "metrics": self.rating_metrics(),
+                        "feedback": "Clear response",
+                    },
                 )
                 self.assertEqual(rating.status_code, 200)
                 evaluated = app_module.store.find_conversation(conversation_id)[2]
@@ -145,7 +157,7 @@ class ApiTests(unittest.TestCase):
 
         early_rating = self.client.put(
             f"/api/conversations/{conversation_id}/rating",
-            json={"metrics": {"overall": 4}, "feedback": ""},
+            json={"metrics": self.rating_metrics(), "feedback": ""},
         )
         self.assertEqual(early_rating.status_code, 409)
         early_finish = self.client.post(
@@ -169,7 +181,7 @@ class ApiTests(unittest.TestCase):
         )
         empty_rating = self.client.put(
             f"/api/conversations/{conversation_id}/rating",
-            json={"metrics": {"overall": 4}, "feedback": ""},
+            json={"metrics": self.rating_metrics(), "feedback": ""},
         )
         self.assertEqual(empty_rating.status_code, 409)
 
@@ -212,7 +224,7 @@ class ApiTests(unittest.TestCase):
         rating = self.client.put(
             f"/api/conversations/{conversation_id}/rating",
             json={
-                "metrics": {"overall": 4},
+                "metrics": self.rating_metrics(),
                 "feedback": "I heard the answer.",
                 "client_received_model_audio": True,
                 "client_completed_turn_count": 1,
@@ -239,6 +251,26 @@ class ApiTests(unittest.TestCase):
         self.assertTrue(row["analysis_complete"])
         self.assertFalse(row["telemetry_complete"])
         self.assertEqual(row["response_record_status"], "client_observed")
+
+    def test_rating_metrics_must_match_the_study_rubric(self) -> None:
+        assignment = self.client.post(
+            "/api/study-sessions", json={"user_id": "rating-validation"}
+        ).json()
+        conversation_id = assignment["tasks"][0]["conversations"][0][
+            "conversation_id"
+        ]
+
+        for metrics in (
+            {"correctness": 4},
+            {**self.rating_metrics(), "unknown_metric": 4},
+            {**self.rating_metrics(), "correctness": 6},
+            {**self.rating_metrics(), "correctness": True},
+        ):
+            response = self.client.put(
+                f"/api/conversations/{conversation_id}/rating",
+                json={"metrics": metrics, "feedback": ""},
+            )
+            self.assertEqual(response.status_code, 422)
 
     def test_expired_session_is_not_resumed(self) -> None:
         first = self.client.post(

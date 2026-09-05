@@ -105,6 +105,8 @@ node --check human_eval/app.js
 | S2: real-time information | Chat about something happening now or today | Escalate when fresh information is needed | Freshness, correctness, responsiveness |
 | S3: complex conversation | Plan something together and continue the conversation naturally | Escalate when deeper reasoning is needed | Helpfulness and context retention |
 
+**S3 design decision (approved for version 13):** S3 intentionally uses familiar, open-ended planning instead of the earlier scripted constraint-satisfaction flow. Participants found the old flow difficult to follow naturally. The new task still asks for about three turns to measure context retention, but it is not a direct replication of the paper's original S3 task. Do not pool or directly compare version 5 and version 13 S3 results. Freeze the task wording before recruitment; any later task change requires a new study version.
+
 Each participant completes:
 
 1. Device check and consent.

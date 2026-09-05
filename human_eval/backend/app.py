@@ -12,7 +12,7 @@ import os
 import secrets
 import threading
 from pathlib import Path
-from typing import Any, Dict, Literal, Optional, Union
+from typing import Any, Dict, Literal, Optional
 from urllib.parse import quote
 
 from fastapi import (
@@ -79,7 +79,7 @@ class CreateSessionRequest(BaseModel):
 
 
 class RatingRequest(BaseModel):
-    metrics: Dict[str, Union[float, int, bool]]
+    metrics: Dict[str, Any]
     feedback: str = Field(default="", max_length=5000)
     client_received_model_audio: bool = False
     client_completed_turn_count: int = Field(default=0, ge=0)
@@ -118,6 +118,39 @@ class QualityReviewRequest(BaseModel):
 
 def _not_found(label: str, identifier: str) -> HTTPException:
     return HTTPException(status_code=404, detail=f"{label} not found: {identifier}")
+
+
+def _validated_rating_metrics(metrics: dict[str, Any]) -> dict[str, int]:
+    metric_ids = tuple(question["id"] for question in SCENARIOS["ratingQuestions"])
+    expected = set(metric_ids)
+    provided = set(metrics)
+    if provided != expected:
+        missing = sorted(expected - provided)
+        extra = sorted(provided - expected)
+        details = []
+        if missing:
+            details.append(f"missing: {', '.join(missing)}")
+        if extra:
+            details.append(f"unknown: {', '.join(extra)}")
+        raise HTTPException(
+            status_code=422,
+            detail=f"Rating metrics must match the study rubric ({'; '.join(details)})",
+        )
+    normalized: dict[str, int] = {}
+    for metric_id in metric_ids:
+        value = metrics[metric_id]
+        if (
+            isinstance(value, bool)
+            or not isinstance(value, (int, float))
+            or not float(value).is_integer()
+            or not 1 <= int(value) <= 5
+        ):
+            raise HTTPException(
+                status_code=422,
+                detail=f"Rating metric '{metric_id}' must be an integer from 1 to 5",
+            )
+        normalized[metric_id] = int(value)
+    return normalized
 
 
 def _nonnegative_int(value: Any) -> int:
@@ -385,6 +418,7 @@ def get_session(session_id: str) -> dict[str, Any]:
 @app.put("/api/conversations/{conversation_id}/rating")
 def save_rating(conversation_id: str, request: RatingRequest) -> dict[str, Any]:
     _require_active_conversation(conversation_id)
+    metrics = _validated_rating_metrics(request.metrics)
 
     def update(_task: dict[str, Any], conversation: dict[str, Any]) -> None:
         if conversation.get("status") not in TERMINAL_INTERACTION_STATUSES:
@@ -404,7 +438,7 @@ def save_rating(conversation_id: str, request: RatingRequest) -> dict[str, Any]:
                 "rating": {
                     "rating_id": previous_rating.get("rating_id")
                     or new_id("rating"),
-                    "metrics": request.metrics,
+                    "metrics": metrics,
                     "feedback": request.feedback,
                     "submitted_at": submitted_at,
                     "response_record_status": response_record_status(
