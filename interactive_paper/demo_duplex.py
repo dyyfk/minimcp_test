@@ -340,6 +340,41 @@ class DuplexVoice:
             + self.act["b"]
         return float(1.0 / (1.0 + np.exp(-z)))
 
+    def _force_end_turn(self):
+        """8ce: terminate an in-flight speak turn from the serving loop
+        (barge cut). Prefer the model method if the loaded modeling
+        sources carry it; otherwise inline the same steps using only
+        attributes the shipped class already has — a warm container may
+        have imported a pre-8ce MiniCPMODuplex even after @enter copied
+        newer sources, so we must not depend on the new method existing.
+        """
+        d = self.duplex
+        if getattr(d, "current_turn_ended", True):
+            return
+        fn = getattr(d, "end_turn_now", None)
+        if callable(fn):
+            fn()
+            return
+        # inline for a warm container running pre-8ce sources without the
+        # method: turn_eos (unlocks listen suppression) + per-turn TTS/
+        # token2wav reset + force-listen counter reset. No unit-close
+        # bookkeeping on purpose — it lowered the commit rate (see
+        # end_turn_now).
+        try:
+            d.decoder.feed(d.decoder.embed_token(d.turn_eos_token_id))
+            d.total_ids.append(d.turn_eos_token_id)
+        except Exception:
+            pass
+        d.current_turn_ended = True
+        d.tts_text_start_pos = 0
+        d.tts_past_key_values = None
+        d.tts_current_turn_start_time = None
+        try:
+            d._reset_token2wav_for_new_turn()
+        except Exception:
+            pass
+        d._streaming_generate_count = 0
+
     def _session_reset(self):
         import librosa
         ref, _ = librosa.load(PROMPT_WAV, sr=16000, mono=True)
@@ -806,7 +841,17 @@ class DuplexVoice:
                                     # in the decoder context and the head
                                     # intermittently never committed on
                                     # the follow-up (post-cut deafness).
-                                    self.duplex.end_turn_now()
+                                    self._force_end_turn()
+                                    # force_listen gates on
+                                    # _streaming_generate_count <
+                                    # force_listen_count, and that
+                                    # counter only resets at session
+                                    # prepare — mid-session it is large,
+                                    # so force_listen was a silent no-op.
+                                    # Reset it so the head is actually
+                                    # forced to listen and capture the
+                                    # follow-up utterance.
+                                    self.duplex._streaming_generate_count = 0
                                     self.duplex.force_listen_count = \
                                         FORCE_LISTEN
                                     prev_listen = True
@@ -970,11 +1015,11 @@ class DuplexVoice:
                                 _emit_gen(r, mute=True)
                             if (r.get("end_of_turn") and relay_guard
                                     and (relay_frames or relay_texts)):
-                                # 8ce: the muted babble ended but relay
-                                # frames are still being delivered —
-                                # keep the relay turn open; the drain
-                                # path sets relay_deadline and the 8cb
-                                # close finishes the bookkeeping.
+                                # muted babble ended but relay frames are
+                                # still being delivered — keep the relay
+                                # turn open; the drain path sets
+                                # relay_deadline and the 8cb close
+                                # finishes the bookkeeping.
                                 emit({"type": "log",
                                       "msg": "babble eot mid-relay — "
                                              "delivery continues"})
