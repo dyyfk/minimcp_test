@@ -12,12 +12,15 @@ Optional environment variables:
 - `OPENAI_API_KEY` — post-hoc transcription for turns without upstream text.
 - `HUMAN_EVAL_ASR_MODEL` — ASR model; defaults to `gpt-transcribe`.
 - `HUMAN_EVAL_REQUIRE_TRANSCRIPTS` — set to `1` for formal/public collection; readiness fails when ASR is not configured.
+- `HUMAN_EVAL_FINISH_DRAIN_SECONDS` — grace period for final upstream turn persistence after Finish; defaults to `8`.
 - `HUMAN_EVAL_PUBLIC` — set to `1` on a public deployment.
 - `HUMAN_EVAL_ADMIN_TOKEN` — Bearer token required by `/api/admin/*` in public mode.
+
+Analysis is intentionally independent of whole-session completion: submitted conversation ratings are exported immediately, and a task becomes `analysis_complete` once both blinded conversations have ratings and their pairwise comparison is saved. Recorded turns are a separate `telemetry_complete` dimension. Expired sessions retain all such rows.
 - `HUMAN_EVAL_DEBUG_MODEL_LOGS` — temporary pilot flag that exposes the blinded model configuration to the browser console.
 
 `human_eval/modal_app.py` provides the public one-replica deployment and commits each atomic save to the `human-eval-data` Volume. It stores session JSON under `sessions/`, WAV files under `audio/`, and timestamped structured event logs under `logs/`. The browser does not retain study records.
 
-Conversation interaction and rating lifecycles are separate in schema 1.4. API access sweeps expired reservations into an explicit terminal `expired` session state, and analysis exports expose reservation and QC status directly.
+Conversation interaction and rating lifecycles are separate in schema 1.4. Schema 1.5 adds task-level readiness and normalizes blank transcripts as missing. Schema 1.6 preserves ratings when the browser received an answer even if final turn telemetry is missing. Schema 1.7 adds a persistence receipt for Finish and upstream-clock EOT latency, and keeps expected stop-path socket closure out of crash counts. API access sweeps expired reservations into an explicit terminal `expired` session state, and analysis exports expose reservation, response-record, telemetry, and QC status directly.
 
 See [DATA_SCHEMA.md](./DATA_SCHEMA.md) for the persisted record shape.

@@ -1,20 +1,15 @@
 {
-  "version": "2026-09-02.human-eval.5",
+  "version": "2026-09-04.human-eval.12",
   "ratingQuestions": [
-    {
-      "id": "helpfulness",
-      "label": "Helpfulness",
-      "text": "Was the assistant informative, relevant, and genuinely helpful in completing your task?"
-    },
     {
       "id": "correctness",
       "label": "Correctness",
       "text": "Was the assistant's response accurate?"
     },
     {
-      "id": "instruction_following",
-      "label": "Instruction Following",
-      "text": "Did the assistant follow the requirements and constraints you provided?"
+      "id": "helpfulness",
+      "label": "Task Helpfulness",
+      "text": "Did the assistant help you complete the task while following your requirements and constraints?"
     },
     {
       "id": "context_consistency",
@@ -22,24 +17,9 @@
       "text": "Did the assistant remember earlier information and remain consistent across turns?"
     },
     {
-      "id": "clarity_spoken_conciseness",
-      "label": "Clarity & Spoken Conciseness",
-      "text": "Was the response clear, well organized, and appropriately concise for a spoken conversation?"
-    },
-    {
-      "id": "overall_content_quality",
-      "label": "Overall Content Quality",
-      "text": "Considering only the response content, not speed or voice quality, how would you rate this conversation?"
-    },
-    {
-      "id": "turn_taking_naturalness",
-      "label": "Turn-taking Naturalness",
-      "text": "Did pauses, interruptions, overlap, and turn changes feel natural?"
-    },
-    {
-      "id": "responsiveness",
-      "label": "Responsiveness",
-      "text": "Did the assistant respond at an appropriate time without noticeable delay or unnecessary interruption?"
+      "id": "conversation_naturalness",
+      "label": "Conversation Naturalness",
+      "text": "Did the assistant respond at the right time, take turns naturally, and keep spoken answers clear and concise?"
     }
   ],
   "tasks": [
@@ -50,36 +30,36 @@
         {
           "id": "simple_guardrail_x",
           "participantTitle": "Simple Fact Questions",
-          "goal": "Have a short conversation about related facts that do not change over time.",
+          "goal": "Have a casual chat with the assistant about simple facts. The questions below are just examples.",
           "targetTurns": 2,
           "prompts": [
             {
-              "label": "Example question",
+              "label": "Example question 1",
               "text": "What is the capital of Australia?"
             },
             {
-              "label": "Related question",
+              "label": "Example question 2",
               "text": "Which state or territory is Canberra in?"
             }
           ],
-          "doNotRepeatInstruction": "Use these examples or ask similar questions in your own words. Stay with simple facts and avoid current information or complicated decisions."
+          "doNotRepeatInstruction": "Use your own words or pick a different simple topic."
         },
         {
           "id": "simple_guardrail_y",
           "participantTitle": "Simple Fact Questions",
-          "goal": "Have a short conversation about related facts that do not change over time.",
+          "goal": "Have a casual chat with the assistant about simple facts. The questions below are just examples.",
           "targetTurns": 2,
           "prompts": [
             {
-              "label": "Example question",
+              "label": "Example question 1",
               "text": "What is the largest ocean on Earth?"
             },
             {
-              "label": "Related question",
+              "label": "Example question 2",
               "text": "Name one continent that borders the Pacific Ocean."
             }
           ],
-          "doNotRepeatInstruction": "Use these examples or ask similar questions in your own words. Stay with simple facts and avoid current information or complicated decisions."
+          "doNotRepeatInstruction": "Use your own words or pick a different simple topic."
         }
       ]
     },
@@ -90,36 +70,36 @@
         {
           "id": "realtime_x",
           "participantTitle": "Real-time Information",
-          "goal": "Have a short conversation about information that may have changed today.",
+          "goal": "Chat with the assistant about something happening right now or today. The questions below are just examples.",
           "targetTurns": 2,
           "prompts": [
             {
-              "label": "Example question",
+              "label": "Example question 1",
               "text": "What is Apple's stock price today?"
             },
             {
-              "label": "Related question",
-              "text": "How much has Apple's stock changed since the market opened today?"
+              "label": "Example question 2",
+              "text": "Is it up or down today?"
             }
           ],
-          "doNotRepeatInstruction": "Use these examples or choose a similar company. Keep both questions about the same topic and make sure the answer could change today."
+          "doNotRepeatInstruction": "Use your own words or pick a different real-time topic."
         },
         {
           "id": "realtime_y",
           "participantTitle": "Real-time Information",
-          "goal": "Have a short conversation about information that may have changed today.",
+          "goal": "Chat with the assistant about something happening right now or today. The questions below are just examples.",
           "targetTurns": 2,
           "prompts": [
             {
-              "label": "Example question",
+              "label": "Example question 1",
               "text": "What is the weather in Seattle right now?"
             },
             {
-              "label": "Related question",
-              "text": "Will it rain in Seattle in the next three hours?"
+              "label": "Example question 2",
+              "text": "Will it rain later today?"
             }
           ],
-          "doNotRepeatInstruction": "Use these examples or choose a similar place. Keep both questions about the same topic and make sure the answer could change right now."
+          "doNotRepeatInstruction": "Use your own words or pick a different real-time topic."
         }
       ]
     },
@@ -129,45 +109,29 @@
       "scenarios": [
         {
           "id": "context_reasoning_x",
-          "participantTitle": "Complex Conversation",
-          "goal": "Compare a few options, add a change, and see whether the assistant updates its choice using the details you already shared.",
+          "participantTitle": "Plan Something Together",
+          "goal": "Have a slightly deeper chat with the assistant, like planning something together. The question below is just an example.",
           "targetTurns": 3,
           "prompts": [
             {
-              "label": "Options",
-              "text": "I am choosing a venue for 12 people. Venue A seats 14, costs $180, includes a projector, and is 40 minutes away. Venue B seats 16, costs $150, has a projector rental for $35, and is 55 minutes away. Venue C seats 20, costs $200, includes a projector, and is 25 minutes away."
-            },
-            {
-              "label": "Requirements",
-              "text": "I need space for all 12 people, a projector, a total cost of no more than $200, and travel time under 45 minutes. Which venues meet every requirement, and which is the cheapest?"
-            },
-            {
-              "label": "New information",
-              "text": "Venue A is no longer available. Venue B can now provide the projector for $20, and the trip there will take 40 minutes. Using all my earlier requirements, which venue should I choose now, and why?"
+              "label": "Example question",
+              "text": "Could you help me plan a date with my boyfriend?"
             }
           ],
-          "doNotRepeatInstruction": "Use this example or a similar everyday decision. Let the details build naturally, then add a change without restating every earlier requirement."
+          "doNotRepeatInstruction": "Use your own words or pick a similar topic. Add details as you chat. We suggest having about three back-and-forth turns."
         },
         {
           "id": "context_reasoning_y",
-          "participantTitle": "Complex Conversation",
-          "goal": "Compare a few options, add a change, and see whether the assistant updates its choice using the details you already shared.",
+          "participantTitle": "Plan Something Together",
+          "goal": "Have a slightly deeper chat with the assistant, like planning something together. The question below is just an example.",
           "targetTurns": 3,
           "prompts": [
             {
-              "label": "Options",
-              "text": "I am comparing three delivery services. Service A costs $45, arrives in two days, and includes insurance. Service B costs $30, arrives in one day, and charges $20 for insurance. Service C costs $40, arrives in three days, and includes insurance."
-            },
-            {
-              "label": "Requirements",
-              "text": "I need the package insured, delivered within two days, and the total cost must be no more than $50. Which services meet every requirement, and which is the cheapest?"
-            },
-            {
-              "label": "New information",
-              "text": "Service A is sold out. Service B is offering insurance for $10, but delivery will now take two days. Using all my earlier requirements, which service should I choose now, and why?"
+              "label": "Example question",
+              "text": "Could you help me plan a meeting agenda?"
             }
           ],
-          "doNotRepeatInstruction": "Use this example or a similar everyday decision. Let the details build naturally, then add a change without restating every earlier requirement."
+          "doNotRepeatInstruction": "Use your own words or pick a similar topic. Add details as you chat. We suggest having about three back-and-forth turns."
         }
       ]
     }

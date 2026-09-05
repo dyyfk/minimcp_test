@@ -4,7 +4,7 @@ English, blinded voice evaluation of MiniCPM and MiniCPM+. The participant UI an
 
 ## Current status
 
-- The browser checks the microphone, speaker, consent, and model readiness.
+- The browser checks the microphone, speaker, consent, and model readiness. During each conversation, a green **You** card shows live microphone movement while a separate blue **Assistant** card shows listening, thinking, and speaking states.
 - Each participant receives two tasks. Each task contains one MiniCPM conversation and one MiniCPM+ conversation in blinded, balanced order.
 - Each conversation lasts at most two minutes and uses one fixed model arm.
 - The backend saves assignments, audio, transcripts, model telemetry, ratings, and pairwise feedback.
@@ -22,6 +22,8 @@ English, blinded voice evaluation of MiniCPM and MiniCPM+. The participant UI an
 - Session JSON, WAV audio, and timestamped JSONL event logs persist in the `human-eval-data` Modal Volume.
 - `/api/admin/*` requires a Bearer token on the public deployment.
 - Temporary pilot logging shows the blinded model configuration in the browser console and Modal logs.
+- Task examples are short conversation starters. S3 uses familiar date or meeting planning topics and lets the participant continue naturally.
+- Per-conversation feedback is reduced from eight overlapping ratings to four focused ratings.
 
 ## Open questions before launch
 
@@ -62,16 +64,16 @@ python3 human_eval/serve.py
 To start another test in the same browser:
 
 1. Restart `serve.py` if `scenarios.json` or backend code changed. Scenario definitions are loaded when the server starts.
-2. Open browser developer tools and run:
+2. To request another assignment within the same study version, open browser developer tools and run:
 
    ```js
    sessionStorage.removeItem("humanEvalUserId");
    location.reload();
    ```
 
-3. Use a hard refresh (`Command+Shift+R`) if UI files changed. `scenarios.json` already uses `cache: "no-store"`.
+3. Reload the page after deploying. The HTML, JavaScript, CSS, and scenario config use versioned URLs plus `Cache-Control: no-store`, so a hard refresh should not be necessary.
 
-Both the server restart and the cleared browser user ID are required to test a new scenario version. Existing sessions keep the scenario assigned when they were created.
+After a scenario-version change, the backend automatically creates a current-version session instead of resuming an older assignment. Clearing the browser user ID is only needed to repeat the same version as a fresh participant.
 
 Do not delete old records to reset the UI. Local output is stored here:
 
@@ -98,9 +100,9 @@ node --check human_eval/app.js
 
 | Task | Participant action | Expected MiniCPM+ behavior | Main measure |
 |---|---|---|---|
-| S1: simple fact | Ask two related, self-contained stable facts | Stay local | Quality, latency, unnecessary escalation |
-| S2: current information | Ask two related, self-contained questions about now or today | Escalate when fresh information is needed | Freshness, correctness, responsiveness |
-| S3: reasoning and context | Give options, constraints, and an update across at least three turns | Escalate when deeper reasoning is needed | Constraint reasoning and context retention |
+| S1: simple conversation | Chat about simple, stable facts | Stay local | Quality, latency, unnecessary escalation |
+| S2: real-time information | Chat about something happening now or today | Escalate when fresh information is needed | Freshness, correctness, responsiveness |
+| S3: complex conversation | Plan something together and continue the conversation naturally | Escalate when deeper reasoning is needed | Helpfulness and context retention |
 
 Each participant completes:
 
@@ -119,29 +121,35 @@ Assignments continuously target these task-pair proportions: 25% S1+S2, 25% S1+S
 
 After each conversation, participants rate 1–5:
 
-- Helpfulness
-- Correctness
-- Instruction following
-- Context consistency
-- Clarity and spoken conciseness
-- Overall content quality
-- Turn-taking naturalness
-- Responsiveness
+- **Correctness:** was the answer accurate?
+- **Task helpfulness:** did it complete the task while following the participant's requirements?
+- **Context consistency:** did it remember and use earlier information across turns?
+- **Conversation naturalness:** was the timing and turn-taking natural, with clear and concise spoken answers?
 
-After each task pair, they select conversation A, conversation B, or about the same; choose reasons; and may add a comment.
+These four cover the paper's primary delivered-answer accuracy outcome, practical task success, the S3 multi-turn gap, and the quality/latency tradeoff of a duplex spoken system. Separate instruction-following, overall-quality, clarity, and responsiveness ratings were removed because they substantially overlap these measures.
+
+After both conversations in a task, participants complete one pairwise comparison. This is not another 1–5 rubric. It stores:
+
+- Overall preference: Conversation 1, Conversation 2, or About the same.
+- Reasons: About the same, More accurate, More complete, Clearer, Used current information, Did not require repetition, or More natural pacing.
+- An optional comment.
 
 ## Stored data and metrics
 
 - **Identity and assignment:** user/session/task/conversation IDs, capability, scenario, order, model arm, probe setting, and threshold tier.
-- **Feedback:** eight ratings, conversation comment, pairwise preference, reasons, task comment, and submission times.
+- **Feedback:** four ratings, conversation comment, pairwise preference, reasons, task comment, and submission times.
 - **Lifecycle:** voice interaction status and rating/evaluation status are stored separately. Analysis completion requires a submitted rating.
+- **Partial completion:** every submitted conversation rating remains a primary outcome. When both conversations in one task have ratings and its comparison is submitted, that task is analysis-complete even if the participant never finishes the other task and the session later expires. `response_record_status` and `telemetry_complete` separately identify whether transcripts, routing, and latency were fully captured.
 - **Interaction:** user/model WAV, transcripts and source, expert answer, turn count, interruption state, and conversation end reason.
 - **Routing:** local/escalated action, threshold, EOT score and series, plus manual expected action and correctness review.
 - **Latency:** speech end, gate decision, first model audio, response completion, expert, relay, stall, EOT-read, and ASR timing.
+- **Persistence evidence:** browser-observed model audio, completed-turn acknowledgements, response-record status, and stable rating/comparison IDs. Finish drains final upstream events and returns a persistence receipt before the rating screen opens.
 - **Audio quality:** input/output duration, speech detection, RMS/VAD statistics, and short or missing audio flags.
 - **Guardrails:** timeout, crash, disconnect, empty response, interruption, missing transcript, routing-review status, and manual conversation QC (`needs_review`, `valid`, or `invalid`).
 
 Expired reservations are persisted as session status `expired`; an in-progress conversation in that session becomes `abandoned` with `end_reason=reservation_expired`. A returning participant receives a new assignment rather than silently reviving the stale one. Exports include `reservation_status` and `reservation_active`.
+
+Expiration releases an inactive assignment from balancing; it does not delete or invalidate ratings already submitted. Analysis should use conversation- and task-level readiness fields rather than filtering only for `session.status=completed`.
 
 Raw JSON is the audit record. Flattened JSONL exports are intended for analysis. Exact fields are in [backend/DATA_SCHEMA.md](./backend/DATA_SCHEMA.md).
 
@@ -278,7 +286,7 @@ rg -n "HUMAN_EVAL_DEBUG_REMOVE_AFTER_PILOT" human_eval
 - `GET /api/model/readiness`: warm and check the model; formal mode also checks ASR configuration.
 - `WS /api/conversations/{conversation_id}/stream`: proxy blinded audio to the assigned model.
 - `POST /api/conversations/{conversation_id}/finalize`: save the conversation result.
-- `PUT /api/conversations/{conversation_id}/rating`: save conversation ratings.
+- `PUT /api/conversations/{conversation_id}/rating`: save `correctness`, `helpfulness`, `context_consistency`, and `conversation_naturalness` ratings plus optional feedback.
 - `PUT /api/tasks/{task_id}/comparison`: save pairwise feedback.
 - `POST /api/study-sessions/{session_id}/complete`: complete the study.
 - `GET /api/admin/export/{table}.jsonl`: export analysis data.

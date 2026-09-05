@@ -2,6 +2,7 @@
 
 const CONVERSATION_LIMIT_SECONDS = 120;
 const MODEL_READY_TIMEOUT_MS = 210000;
+const FINISH_RECEIPT_TIMEOUT_MS = 12000;
 
 let studyConfig = null;
 let backend = null;
@@ -18,6 +19,8 @@ let expectedSocketClose = false;
 let timerHandle = null;
 let modelWarmPromise = null;
 let refreshSetupUi = null;
+let smoothedMicLevel = 0;
+let finishReceiptResolver = null;
 
 const mainContent = document.getElementById("mainContent");
 const progressLabel = document.getElementById("progressLabel");
@@ -64,7 +67,10 @@ class StudyBackend {
         timeout: conversation.endReason === "time_limit",
         crash: conversation.endReason === "crash",
         disconnect: conversation.endReason === "disconnect",
-        error: abnormal ? "Browser model stream ended unexpectedly" : null
+        error: abnormal ? "Browser model stream ended unexpectedly" : null,
+        client_received_model_audio: Boolean(conversation.receivedModelAudio),
+        client_completed_turn_count: conversation.completedTurns || 0,
+        client_model_audio_ms: Math.round(conversation.modelAudioMs || 0)
       })
     });
   }
@@ -72,7 +78,13 @@ class StudyBackend {
   submitConversationRating(conversation) {
     return this.request(`/api/conversations/${conversation.conversationId}/rating`, {
       method: "PUT",
-      body: JSON.stringify({ metrics: conversation.ratings, feedback: conversation.feedback })
+      body: JSON.stringify({
+        metrics: conversation.ratings,
+        feedback: conversation.feedback,
+        client_received_model_audio: Boolean(conversation.receivedModelAudio),
+        client_completed_turn_count: conversation.completedTurns || 0,
+        client_model_audio_ms: Math.round(conversation.modelAudioMs || 0)
+      })
     });
   }
 
@@ -102,25 +114,35 @@ class StudyBackend {
 
 function mapServerSession(session) {
   const tasks = session.tasks.map(task => {
-    const conversations = task.conversations.map(conversation => ({
-      conversationId: conversation.conversation_id,
-      scenarioId: conversation.scenario_id,
-      scenario: conversation.scenario,
-      phase: conversation.rating || conversation.evaluation_status === "completed"
-        ? "done"
-        : ["interaction_completed", "completed", "failed", "abandoned"].includes(conversation.status)
-          ? "rating"
-          : "idle",
-      liveStatus: "idle",
-      startedAt: conversation.started_at,
-      endedAt: conversation.ended_at,
-      deadlineAt: null,
-      endReason: conversation.end_reason,
-      durationMs: null,
-      targetTurns: conversation.target_turns || conversation.scenario?.targetTurns || (task.capability === "S3" ? 3 : 2),
-      ratings: conversation.rating?.metrics || {},
-      feedback: conversation.rating?.feedback || ""
-    }));
+    const conversations = task.conversations.map(conversation => {
+      const completedTurns = Number(conversation.turn_count || 0);
+      const receivedModelAudio = conversation.client_observation?.received_model_audio === true || completedTurns > 0;
+      const endedWithoutAnswer = ["failed", "abandoned"].includes(conversation.status) && !receivedModelAudio && !conversation.rating;
+      return {
+        conversationId: conversation.conversation_id,
+        scenarioId: conversation.scenario_id,
+        scenario: conversation.scenario,
+        phase: conversation.rating || conversation.evaluation_status === "completed"
+          ? "done"
+          : endedWithoutAnswer
+            ? "idle"
+            : ["interaction_completed", "completed", "failed", "abandoned"].includes(conversation.status)
+              ? "rating"
+              : "idle",
+        liveStatus: "idle",
+        startedAt: conversation.started_at,
+        endedAt: conversation.ended_at,
+        deadlineAt: null,
+        endReason: conversation.end_reason,
+        durationMs: null,
+        completedTurns,
+        receivedModelAudio,
+        modelAudioMs: Number(conversation.client_observation?.model_audio_ms || 0),
+        targetTurns: conversation.target_turns || conversation.scenario?.targetTurns || (task.capability === "S3" ? 3 : 2),
+        ratings: conversation.rating?.metrics || {},
+        feedback: conversation.rating?.feedback || ""
+      };
+    });
     const firstUnrated = conversations.findIndex(conversation => conversation.phase !== "done");
     const comparison = task.comparison
       ? { preference: task.comparison.preference, reasons: task.comparison.reasons, comment: task.comparison.feedback }
@@ -427,13 +449,20 @@ function renderConversationRunning(taskIndex, task, conversation, scenario) {
         <h1>Conversation in progress</h1>
         <p class="lede">Use the task card as a guide and keep the conversation focused on its goal. You may finish whenever you feel you have tested it.</p>
         <div class="voice-stage">
-          <div>
-            ${voiceOrb(true)}
-            <div class="voice-title" id="liveTitle">Listening</div>
-            <p class="voice-copy" id="liveCopy">Keep speaking naturally. The assistant's response will play in the same voice session.</p>
+          <div class="voice-stage-content">
+            <div class="voice-status-grid">
+              ${microphoneWaveform()}
+              <section class="speaker-card assistant-activity" id="assistantActivity" aria-live="polite">
+                <div class="speaker-card-header"><span class="speaker-identity assistant"><i aria-hidden="true"></i>Assistant</span><strong id="assistantActivityStatus">Listening</strong></div>
+                ${assistantWaveform()}
+                <div class="voice-title" id="liveTitle">Listening to you</div>
+                <p class="voice-copy" id="liveCopy">Speak naturally or follow the task card.</p>
+              </section>
+            </div>
             <div class="timer" id="conversationTimer">02:00</div>
             <div class="timer-label">Time remaining</div>
-            <div class="voice-actions"><button id="finishConversation" class="danger-button" type="button">Finish the conversation</button></div>
+            <div class="voice-actions"><button id="finishConversation" class="danger-button" type="button" ${conversation.completedTurns > 0 ? "" : "disabled"}>Finish the conversation</button></div>
+            <div class="timer-label" id="finishHint">Finish becomes available after one complete answer is recorded.</div>
           </div>
         </div>
         ${conversationRuleTip(conversation.targetTurns)}
@@ -478,7 +507,7 @@ function renderConversationRating(taskIndex, task, conversation, scenario) {
 function renderPairComparison(taskIndex, task) {
   const stage = document.getElementById("taskStage");
   const comparison = task.comparison;
-  const reasons = ["About the same", "More accurate", "More complete", "Clearer", "Followed constraints better", "Used current information", "Did not require repetition", "More natural pacing"];
+  const reasons = ["About the same", "More accurate", "More complete", "Clearer", "Used current information", "Did not require repetition", "More natural pacing"];
   stage.innerHTML = `
     <section class="comparison-panel surface">
       <div class="status-row"><span class="status-pill">Overall comparison</span></div>
@@ -531,6 +560,9 @@ async function startConversation(taskIndex, conversationIndex) {
     await startModelConversation(taskIndex, conversationIndex);
     conversation.phase = "running";
     conversation.liveStatus = "listening";
+    conversation.receivedModelAudio = false;
+    conversation.modelAudioMs = 0;
+    conversation.completedTurns = 0;
     conversation.startedAt = new Date().toISOString();
     conversation.deadlineAt = new Date(Date.now() + CONVERSATION_LIMIT_SECONDS * 1000).toISOString();
     render();
@@ -603,6 +635,7 @@ async function startModelConversation(taskIndex, conversationIndex) {
   activeProcessor.onaudioprocess = event => {
     if (socket.readyState !== WebSocket.OPEN) return;
     const input = event.inputBuffer.getChannelData(0);
+    updateMicrophoneWaveform(input);
     const output = new Int16Array(Math.floor(input.length / ratio));
     for (let index = 0; index < output.length; index += 1) {
       const value = input[Math.floor(index * ratio)];
@@ -613,6 +646,7 @@ async function startModelConversation(taskIndex, conversationIndex) {
 }
 
 function handleModelMessage(event, taskIndex, conversationIndex) {
+  const conversation = state.tasks[taskIndex].conversations[conversationIndex];
   let message;
   try {
     message = JSON.parse(event.data);
@@ -631,25 +665,34 @@ function handleModelMessage(event, taskIndex, conversationIndex) {
     updateLiveStatus(status);
   } else if (message.type === "audio") {
     updateLiveStatus("speaking");
-    playPcmAudio(message.pcm, message.sr || 24000);
+    const receivedMs = playPcmAudio(message.pcm, message.sr || 24000);
+    if (receivedMs > 0) {
+      conversation.receivedModelAudio = true;
+      conversation.modelAudioMs = (conversation.modelAudioMs || 0) + receivedMs;
+    }
   } else if (message.type === "turn") {
-    updateLiveStatus("listening");
+    conversation.completedTurns = (conversation.completedTurns || 0) + 1;
+    if (activePlaybackSources.length === 0) updateLiveStatus("listening");
   } else if (message.type === "interrupt") {
     stopModelPlayback();
     updateLiveStatus("listening");
   } else if (message.type === "auto_finish") {
     finishConversation(taskIndex, conversationIndex, "time_limit");
+  } else if (message.type === "conversation_finished") {
+    finishReceiptResolver?.(message);
+    finishReceiptResolver = null;
   } else if (message.type === "error") {
     finishConversation(taskIndex, conversationIndex, "crash");
   }
 }
 
 function playPcmAudio(encodedPcm, sampleRate) {
-  if (!activeAudioContext || !encodedPcm) return;
+  if (!activeAudioContext || !encodedPcm) return 0;
   const binary = atob(encodedPcm);
   const bytes = new Uint8Array(binary.length);
   for (let index = 0; index < binary.length; index += 1) bytes[index] = binary.charCodeAt(index);
   const samples = new Int16Array(bytes.buffer);
+  updateAssistantWaveform(samples);
   const buffer = activeAudioContext.createBuffer(1, samples.length, sampleRate);
   const channel = buffer.getChannelData(0);
   for (let index = 0; index < samples.length; index += 1) channel[index] = samples[index] / 32768;
@@ -662,7 +705,14 @@ function playPcmAudio(encodedPcm, sampleRate) {
   activePlaybackSources.push(source);
   source.addEventListener("ended", () => {
     activePlaybackSources = activePlaybackSources.filter(item => item !== source);
+    if (activePlaybackSources.length === 0) {
+      resetAssistantWaveform();
+      if (getActiveConversation()?.phase === "running") {
+        updateLiveStatus("listening");
+      }
+    }
   });
+  return buffer.duration * 1000;
 }
 
 function stopModelPlayback() {
@@ -671,6 +721,7 @@ function stopModelPlayback() {
   });
   activePlaybackSources = [];
   activePlaybackCursor = activeAudioContext?.currentTime || 0;
+  resetAssistantWaveform();
 }
 
 function resumeTimer(taskIndex, conversationIndex) {
@@ -698,33 +749,89 @@ function updateLiveStatus(status) {
   }
   const title = document.getElementById("liveTitle");
   const copy = document.getElementById("liveCopy");
+  const assistant = document.getElementById("assistantActivity");
+  const assistantStatus = document.getElementById("assistantActivityStatus");
+  const microphone = document.getElementById("microphoneActivity");
+  const microphoneMode = document.getElementById("microphoneMode");
   if (!title || !copy) return;
   const labels = {
-    listening: ["Listening", "You may add constraints, ask follow-up questions, or interrupt naturally."],
-    processing: ["Processing", "The assistant is preparing a response."],
-    speaking: ["Assistant is responding", "Keep listening or interrupt naturally."]
+    listening: ["Listening to you", "Speak naturally or follow the task card."],
+    processing: ["Thinking", "The assistant is preparing its answer."],
+    speaking: ["Assistant speaking", "Listen, or speak to interrupt naturally."]
   };
   title.textContent = labels[status]?.[0] || labels.listening[0];
   copy.textContent = labels[status]?.[1] || labels.listening[1];
+  if (assistant) {
+    assistant.classList.toggle("is-processing", status === "processing");
+    assistant.classList.toggle("is-speaking", status === "speaking");
+  }
+  if (microphone) microphone.classList.toggle("is-listening", status === "listening");
+  if (microphoneMode) {
+    microphoneMode.textContent = status === "listening" ? "Listening" : "Microphone on";
+  }
+  if (assistantStatus) {
+    assistantStatus.textContent = status === "speaking" ? "Speaking" : status === "processing" ? "Thinking" : "Listening";
+  }
+  const finishButton = document.getElementById("finishConversation");
+  const finishHint = document.getElementById("finishHint");
+  const canFinish = (active?.completedTurns || 0) > 0 && status === "listening";
+  if (finishButton) finishButton.disabled = !canFinish;
+  if (finishHint) finishHint.hidden = (active?.completedTurns || 0) > 0;
 }
 
 async function finishConversation(taskIndex, conversationIndex, reason) {
   const conversation = state.tasks[taskIndex].conversations[conversationIndex];
   if (conversation.phase !== "running") return;
+  if (reason === "user_finished" && !(conversation.completedTurns > 0)) return;
   conversation.phase = "finishing";
   clearInterval(timerHandle);
+  let receiptPromise = null;
   if (activeSocket?.readyState === WebSocket.OPEN) {
-    activeSocket.send(JSON.stringify({ type: "finish_conversation" }));
+    receiptPromise = waitForFinishReceipt();
+    activeSocket.send(JSON.stringify({
+      type: "finish_conversation",
+      end_reason: reason,
+      client_received_model_audio: Boolean(conversation.receivedModelAudio),
+      client_completed_turn_count: conversation.completedTurns || 0,
+      client_model_audio_ms: Math.round(conversation.modelAudioMs || 0)
+    }));
   }
   await stopConversationResources(false);
-  conversation.phase = "rating";
   conversation.liveStatus = "idle";
   conversation.endedAt = new Date().toISOString();
   conversation.endReason = reason;
   conversation.durationMs = new Date(conversation.endedAt).getTime() - new Date(conversation.startedAt).getTime();
   backend.persist(state);
-  await backend.finalizeConversation(conversation);
+  let finalized = null;
+  if (receiptPromise) {
+    finalized = await Promise.race([
+      receiptPromise,
+      new Promise(resolve => window.setTimeout(() => resolve(null), FINISH_RECEIPT_TIMEOUT_MS))
+    ]);
+  }
+  // Compatibility fallback for an older backend or an interrupted receipt.
+  if (!finalized) finalized = await backend.finalizeConversation(conversation);
+  finishReceiptResolver = null;
+  conversation.completedTurns = finalized.turn_count;
+  if (!finalized.rating_allowed) {
+    conversation.phase = "idle";
+    conversation.startedAt = null;
+    conversation.endedAt = null;
+    conversation.endReason = null;
+    render();
+    const errorBox = document.getElementById("conversationError");
+    errorBox.textContent = "No complete answer was recorded. Please try this conversation again.";
+    errorBox.hidden = false;
+    return;
+  }
+  conversation.phase = "rating";
   render();
+}
+
+function waitForFinishReceipt() {
+  return new Promise(resolve => {
+    finishReceiptResolver = resolve;
+  });
 }
 
 async function submitConversationRating(taskIndex, conversationIndex, questions) {
@@ -778,6 +885,7 @@ async function stopConversationResources(closeSocket = true) {
   activeProcessor = null;
   activeSilentGain = null;
   activePlaybackCursor = 0;
+  smoothedMicLevel = 0;
 }
 
 function getActiveConversation() {
@@ -798,9 +906,9 @@ function renderTaskCard(scenario) {
       <h2>${escapeHtml(scenario.participantTitle)}</h2>
       <h3>Your goal</h3>
       <p class="muted">${escapeHtml(scenario.goal)}</p>
-      <h3>Suggested conversation flow</h3>
+      <h3>Conversation ideas</h3>
       <ol>${scenario.prompts.map((prompt, index) => `<li><span>${index + 1}</span><div><strong>${escapeHtml(prompt.label)}</strong>${escapeHtml(prompt.text)}</div></li>`).join("")}</ol>
-      <div class="task-instruction"><strong>Before you finish:</strong> ${escapeHtml(scenario.doNotRepeatInstruction)}</div>
+      <div class="task-instruction"><strong>Make it your own:</strong> ${escapeHtml(scenario.doNotRepeatInstruction)}</div>
     </aside>`;
 }
 
@@ -821,6 +929,69 @@ function renderChoice(value, label, detail, selected) {
 
 function voiceOrb(live) {
   return `<div class="voice-orb${live ? " is-live" : ""}" aria-hidden="true"><div class="orb-bars"><span></span><span></span><span></span><span></span><span></span></div></div>`;
+}
+
+function microphoneWaveform() {
+  return `
+    <section class="speaker-card microphone-activity" id="microphoneActivity" aria-live="polite">
+      <div class="speaker-card-header"><span class="speaker-identity participant"><i aria-hidden="true"></i>You</span><strong id="microphoneMode">Listening</strong></div>
+      <div class="microphone-wave" id="microphoneWave" aria-hidden="true">
+        ${Array.from({ length: 15 }, () => "<span></span>").join("")}
+      </div>
+      <div class="voice-title" id="microphoneActivityStatus">Ready for your voice</div>
+      <p class="voice-copy">These green bars move when you speak.</p>
+    </section>`;
+}
+
+function assistantWaveform() {
+  return `<div class="assistant-wave" id="assistantWave" aria-hidden="true">
+    ${Array.from({ length: 15 }, () => "<span></span>").join("")}
+  </div>`;
+}
+
+function updateAssistantWaveform(samples) {
+  const wave = document.getElementById("assistantWave");
+  if (!wave || !samples.length) return;
+  const bars = wave.querySelectorAll("span");
+  const stride = Math.max(1, Math.floor(samples.length / bars.length));
+  bars.forEach((bar, index) => {
+    const start = index * stride;
+    const end = Math.min(samples.length, start + stride);
+    let peak = 0;
+    for (let sampleIndex = start; sampleIndex < end; sampleIndex += 1) {
+      peak = Math.max(peak, Math.abs(samples[sampleIndex]) / 32768);
+    }
+    bar.style.transform = `scaleY(${Math.max(0.12, Math.min(1, peak * 2.4)).toFixed(2)})`;
+  });
+  wave.classList.add("is-active");
+}
+
+function resetAssistantWaveform() {
+  const wave = document.getElementById("assistantWave");
+  if (!wave) return;
+  wave.classList.remove("is-active");
+  wave.querySelectorAll("span").forEach(bar => {
+    bar.style.transform = "scaleY(.12)";
+  });
+}
+
+function updateMicrophoneWaveform(samples) {
+  const wave = document.getElementById("microphoneWave");
+  if (!wave || !samples.length) return;
+  let sumSquares = 0;
+  for (const sample of samples) sumSquares += sample * sample;
+  const level = Math.min(1, Math.sqrt(sumSquares / samples.length) * 8);
+  smoothedMicLevel = Math.max(level, smoothedMicLevel * 0.72);
+  const bars = wave.querySelectorAll("span");
+  bars.forEach((bar, index) => {
+    const shape = 0.55 + 0.45 * Math.sin(((index + 1) / (bars.length + 1)) * Math.PI);
+    bar.style.transform = `scaleY(${(0.12 + smoothedMicLevel * shape).toFixed(2)})`;
+  });
+  const voiceDetected = smoothedMicLevel > 0.08;
+  wave.classList.toggle("is-active", voiceDetected);
+  document.getElementById("microphoneActivity")?.classList.toggle("is-speaking", voiceDetected);
+  const status = document.getElementById("microphoneActivityStatus");
+  if (status) status.textContent = voiceDetected ? "You are speaking" : "Ready for your voice";
 }
 
 function conversationRuleTip(targetTurns = 2) {
