@@ -74,4 +74,14 @@ Disfluent correction, chained tool calls, and multi-turn grounding
 remain open \citep{lin2026fdbv3}, and in native testing a new
 question asked during the expert wait usually derails the pending
 relay, so a production system has to cancel or replace an in-flight
-request when the user moves on.
+request when the user moves on. Interruption inherits the duplex
+head's own turn-taking: barging out of a spoken relay stops the audio
+reliably, but the head commits to the following question only about
+two times in three, and after an interruption it sometimes stays in
+the listen state and lets a fresh question go unanswered. This
+listen-lock is a property of the head's native listen/speak
+distribution, not of the escalation harness---down-weighting the
+listen token in decode, forcing a listen window, and closing the
+interrupted turn all fail to make the commit reliable---so removing it
+would require an external voice-activity trigger of exactly the kind
+the native regime is meant to retire.
