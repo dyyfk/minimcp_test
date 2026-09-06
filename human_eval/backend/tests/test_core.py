@@ -417,6 +417,8 @@ class ModelGatewayTests(unittest.TestCase):
                         "speech_rms_threshold": 0.012,
                         "output_rms_threshold": 0.001,
                         "expert_latency_s": 1.2,
+                        "finish_reason": "completed",
+                        "superseded": False,
                     }
             recorder.record_server_event(turn_payload)
             asyncio.run(recorder.finalize_turn(turn_payload))
@@ -478,6 +480,11 @@ class ModelGatewayTests(unittest.TestCase):
             self.assertEqual(
                 turn["raw_model_metrics"]["relay_tts_voice"], "alloy"
             )
+            self.assertEqual(
+                turn["raw_model_metrics"]["finish_reason"], "completed"
+            )
+            self.assertFalse(turn["raw_model_metrics"]["superseded"])
+            self.assertFalse(turn["anomalies"]["response_superseded"])
             self.assertTrue(turn["audio_quality"]["speech_detected"])
             self.assertEqual(turn["user"]["audio_bytes"], 10000)
             self.assertTrue(Path(turn["user"]["audio_path"]).exists())

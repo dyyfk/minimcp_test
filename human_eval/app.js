@@ -3,6 +3,12 @@
 const CONVERSATION_LIMIT_SECONDS = 120;
 const MODEL_READY_TIMEOUT_MS = 210000;
 const FINISH_RECEIPT_TIMEOUT_MS = 12000;
+// MiniCPM produces spoken audio in roughly one-second chunks. Buffer only the
+// start of each answer so small generation/network jitter does not create a
+// pause between every phrase. Short answers flush as soon as their turn ends.
+const PLAYBACK_BUFFER_TARGET_SECONDS = 0.9;
+const PLAYBACK_BUFFER_MAX_WAIT_MS = 450;
+const PLAYBACK_START_LEAD_SECONDS = 0.06;
 
 let studyConfig = null;
 let backend = null;
@@ -15,6 +21,10 @@ let activeProcessor = null;
 let activeSilentGain = null;
 let activePlaybackCursor = 0;
 let activePlaybackSources = [];
+let pendingPlaybackBuffers = [];
+let pendingPlaybackDuration = 0;
+let pendingPlaybackTimer = null;
+let playbackStartedForTurn = false;
 let expectedSocketClose = false;
 let timerHandle = null;
 let modelWarmPromise = null;
@@ -675,6 +685,7 @@ function handleModelMessage(event, taskIndex, conversationIndex) {
   }
   // HUMAN_EVAL_DEBUG_REMOVE_AFTER_PILOT_END
   if (message.type === "phase") {
+    if (message.v === "listening") finishPlaybackTurn();
     // "relaying" means the answer is being prepared. Only an audible audio
     // event below is allowed to claim that the assistant is speaking.
     const status = message.v === "listening" ? "listening" : message.v === "answering" ? "speaking" : "processing";
@@ -683,11 +694,12 @@ function handleModelMessage(event, taskIndex, conversationIndex) {
   } else if (message.type === "audio") {
     const receivedMs = playPcmAudio(message.pcm, message.sr || 24000);
     if (receivedMs > 0) {
-      updateLiveStatus("speaking");
+      if (activePlaybackSources.length > 0) updateLiveStatus("speaking");
       conversation.receivedModelAudio = true;
       conversation.modelAudioMs = (conversation.modelAudioMs || 0) + receivedMs;
     }
   } else if (message.type === "turn") {
+    finishPlaybackTurn();
     conversation.completedTurns = (conversation.completedTurns || 0) + 1;
     if (activePlaybackSources.length === 0) updateLiveStatus("listening");
   } else if (message.type === "interrupt") {
@@ -715,14 +727,42 @@ function playPcmAudio(encodedPcm, sampleRate) {
     energy += value * value;
   }
   if (Math.sqrt(energy / samples.length) < 0.001) return 0;
-  updateConversationWaveform(samples, "assistant-speaking");
   const buffer = activeAudioContext.createBuffer(1, samples.length, sampleRate);
   const channel = buffer.getChannelData(0);
   for (let index = 0; index < samples.length; index += 1) channel[index] = samples[index] / 32768;
+  const item = { buffer, samples };
+  if (playbackStartedForTurn) {
+    schedulePlaybackBuffer(item);
+  } else {
+    pendingPlaybackBuffers.push(item);
+    pendingPlaybackDuration += buffer.duration;
+    if (pendingPlaybackDuration >= PLAYBACK_BUFFER_TARGET_SECONDS) {
+      flushPendingPlayback();
+    } else if (!pendingPlaybackTimer) {
+      pendingPlaybackTimer = window.setTimeout(
+        flushPendingPlayback,
+        PLAYBACK_BUFFER_MAX_WAIT_MS
+      );
+    }
+  }
+  return buffer.duration * 1000;
+}
+
+function schedulePlaybackBuffer({ buffer, samples }) {
+  if (!activeAudioContext || activeAudioContext.state === "closed") return;
   const source = activeAudioContext.createBufferSource();
   source.buffer = buffer;
   source.connect(activeAudioContext.destination);
-  activePlaybackCursor = Math.max(activePlaybackCursor, activeAudioContext.currentTime);
+  if (activePlaybackSources.length === 0) {
+    activePlaybackCursor = Math.max(
+      activePlaybackCursor,
+      activeAudioContext.currentTime + PLAYBACK_START_LEAD_SECONDS
+    );
+    updateConversationWaveform(samples, "assistant-speaking");
+    updateLiveStatus("speaking");
+  } else {
+    activePlaybackCursor = Math.max(activePlaybackCursor, activeAudioContext.currentTime);
+  }
   source.start(activePlaybackCursor);
   activePlaybackCursor += buffer.duration;
   activePlaybackSources.push(source);
@@ -735,10 +775,30 @@ function playPcmAudio(encodedPcm, sampleRate) {
       }
     }
   });
-  return buffer.duration * 1000;
+}
+
+function flushPendingPlayback() {
+  if (pendingPlaybackTimer) window.clearTimeout(pendingPlaybackTimer);
+  pendingPlaybackTimer = null;
+  if (!pendingPlaybackBuffers.length) return;
+  const queued = pendingPlaybackBuffers;
+  pendingPlaybackBuffers = [];
+  pendingPlaybackDuration = 0;
+  playbackStartedForTurn = true;
+  queued.forEach(schedulePlaybackBuffer);
+}
+
+function finishPlaybackTurn() {
+  flushPendingPlayback();
+  playbackStartedForTurn = false;
 }
 
 function stopModelPlayback() {
+  if (pendingPlaybackTimer) window.clearTimeout(pendingPlaybackTimer);
+  pendingPlaybackTimer = null;
+  pendingPlaybackBuffers = [];
+  pendingPlaybackDuration = 0;
+  playbackStartedForTurn = false;
   activePlaybackSources.forEach(source => {
     try { source.stop(); } catch { /* already stopped */ }
   });

@@ -457,7 +457,10 @@ class ConversationRecorder:
                 ),
                 "input_audio_anomaly": len(self.user_pcm) < 3200,
                 "output_audio_anomaly": len(self.model_pcm) < 2400,
-                "interrupted": bool(payload.get("interrupted")),
+                "interrupted": bool(
+                    payload.get("interrupted") or payload.get("superseded")
+                ),
+                "response_superseded": bool(payload.get("superseded")),
                 "missing_transcript": not bool(user_transcript),
             }
         )
@@ -500,6 +503,8 @@ class ConversationRecorder:
                 "is_info",
                 "asr_error",
                 "expert_error",
+                "finish_reason",
+                "superseded",
                 "probe_on",
             )
             if payload.get(key) is not None

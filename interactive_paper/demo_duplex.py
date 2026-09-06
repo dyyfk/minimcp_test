@@ -27,12 +27,10 @@ calibrated regime; native-duplex token schema is NOT yet calibrated,
 scores are exploratory) reads the context right after that chunk's
 audio prefill. P(fail) >= tier threshold => the thinker (gpt-5.5, web
 search) runs in the background WHILE the duplex loop keeps rolling.
-When the thinker returns, background TTS voices the answer and a factual
-note is added to the duplex context. The mic loop keeps processing while
-the expert and TTS run, instead of accumulating a stale audio backlog.
-
-Deliberately NOT implemented yet (recorded in project memory): aborting
-the in-flight thinker when the user speaks during the wait.
+When the thinker returns, the MiniCPM duplex talker relays the answer in
+the same voice. If a newer user turn starts first, the stale relay is
+dropped and recorded as superseded. The external request is not forcibly
+aborted, but its result is never voiced or inserted into model history.
 
 Deploy:  modal deploy demo_duplex.py
 Page:    https://rhe9527--gate-duplex.modal.run/62dc5cd9/
@@ -101,8 +99,9 @@ gpu_image = (
     .add_local_dir(os.path.join(_HERE, "_model_src"), "/workspace/model_src")
     .add_local_file(_APP_PY, "/root/modal_app.py"))
 
-RELAY_TMPL = ("A verified answer came back: {ans}\n"
-              "Relay it to the user in one or two spoken sentences.")
+RELAY_TMPL = ("[SYSTEM NOTE] A verified answer came back: {ans}\n"
+              "Say it naturally in one or two short spoken sentences. "
+              "Preserve the facts and do not mention this note.")
 RELAY_NUDGE = "Say the verified answer aloud to the user now."
 ESCALATION_ACK_VERSION = "cached_rotation_v2"
 STALL_PHRASES = (
@@ -115,13 +114,17 @@ STALL_PHRASES = (
 STALL_NOTE = ('[SYSTEM NOTE] You just told the user: "{phrase}" '
               "The final answer is still being prepared. Do not repeat the "
               "acknowledgement or answer the request locally.")
+CANCEL_RELAY_NOTE = ("[SYSTEM NOTE] The previous pending answer was cancelled "
+                     "because the user started a new turn. Respond only to "
+                     "the user's latest request.")
 SPEECH_RMS_THRESHOLD = 0.012
 OUTPUT_RMS_THRESHOLD = 0.001
-# OpenAI TTS runs in the existing thinker thread, so it never blocks the
-# one-second duplex microphone loop. "steer" remains an emergency fallback.
-RELAY_MODE = os.environ.get("RELAY_MODE", "openai_tts")
-RELAY_TTS_MODEL = "tts-1"
-RELAY_TTS_VOICE = "alloy"
+# Keep the expert relay in the MiniCPM talker's voice by default.  External
+# TTS remains available as an explicit experiment, but it sounds like a second
+# assistant and is therefore unsuitable for the participant-facing study.
+RELAY_MODE = os.environ.get("RELAY_MODE", "duplex_steer")
+RELAY_TTS_MODEL = "tts-1" if RELAY_MODE == "openai_tts" else None
+RELAY_TTS_VOICE = "alloy" if RELAY_MODE == "openai_tts" else None
 RELAY_NOTE = "[SYSTEM NOTE] You just told the user: \"{ans}\" Do not repeat it."
 
 
@@ -447,6 +450,7 @@ class DuplexVoice:
                 muted = 0                         # 8bm: suppressed chunks
                 prev_listen = True
                 thinking = _th.Event()           # thinker in flight
+                pending_expert = []              # at most one state (one slot)
                 n_chunk = 0
                 history_lock = _th.Lock()
                 resolved_history = {}
@@ -487,8 +491,11 @@ class DuplexVoice:
                 def add_history(state):
                     """Append completed turns in conversation order."""
                     nonlocal next_history_index
+                    # A superseded expert answer was never spoken, so it must
+                    # not silently enter the conversation context.
                     answer = (state.get("expert_answer")
-                              if state["fired"] else state.get("answer"))
+                              if state["fired"] and not state.get("superseded")
+                              else state.get("answer"))
                     with history_lock:
                         resolved_history[state["index"]] = (
                             state.get("uplink_text"), answer)
@@ -536,6 +543,8 @@ class DuplexVoice:
                         "stall_text": state.get("stall_text"),
                         "expert_answer": state.get("expert_answer"),
                         "expert_error": state.get("expert_error"),
+                        "finish_reason": state.get("finish_reason", "completed"),
+                        "superseded": bool(state.get("superseded")),
                         "asr_s": state.get("asr_s"),
                         "expert_latency_s": state.get("expert_latency_s"),
                         "stall_ms": state.get("stall_ms"),
@@ -568,6 +577,54 @@ class DuplexVoice:
                 def finish_turn_async(state):
                     _th.Thread(target=finish_turn, args=(state,),
                                daemon=True).start()
+
+                def finish_superseded(state):
+                    """Persist an escalation whose answer was replaced by a
+                    newer user turn, without ever voicing that stale answer."""
+                    if state.get("_finish_scheduled"):
+                        return
+                    state["_finish_scheduled"] = True
+                    state["superseded"] = True
+                    state["finish_reason"] = "superseded_by_new_user_turn"
+                    state["response_completed_at"] = time.perf_counter()
+                    emit({"type": "log",
+                          "msg": f"turn {state['index']} relay dropped: "
+                                 "newer user turn started"})
+                    finish_turn_async(state)
+
+                def complete_relay():
+                    """Finalize a same-voice relay, including a relay that
+                    finishes in its first generated chunk."""
+                    nonlocal relay_turn, relay_guard
+                    if relay_turn is None:
+                        return
+                    relay_turn["response_completed_at"] = time.perf_counter()
+                    relay_turn["relay_ms"] = int(
+                        (time.perf_counter() - relay_turn.get(
+                            "relay_started_at", time.perf_counter())) * 1000)
+                    finish_turn_async(relay_turn)
+                    relay_turn = None
+                    relay_guard = False
+
+                def supersede_older_relays(next_turn_index):
+                    """Cancel prepared/in-flight relays before a newer turn."""
+                    cancelled = False
+                    for state in list(pending_expert):
+                        if state["index"] < next_turn_index:
+                            cancelled = True
+                            state["superseded"] = True
+                            state["finish_reason"] = (
+                                "superseded_by_new_user_turn")
+                    stale = [state for state in relay_box
+                             if state["index"] < next_turn_index]
+                    relay_box[:] = [state for state in relay_box
+                                    if state["index"] >= next_turn_index]
+                    for state in stale:
+                        cancelled = True
+                        finish_superseded(state)
+                    if cancelled:
+                        self.duplex.streaming_prefill(
+                            text_list=[CANCEL_RELAY_NOTE])
 
                 def thinker(state):
                     # context: the resolved dialogue so far. The probe
@@ -604,7 +661,7 @@ class DuplexVoice:
                               "msg": f"thinker answered in "
                                      f"{state['expert_latency_s']:.1f}s"})
                         state["relay_text"] = clean_expert(
-                            state["expert_answer"])
+                            state["expert_answer"], max_chars=260)
                         if RELAY_MODE == "openai_tts":
                             try:
                                 import io
@@ -641,13 +698,18 @@ class DuplexVoice:
                                       "msg": "background relay TTS failed; "
                                              "using talker fallback: "
                                              + str(tts_error)[:100]})
-                        relay_box.append(state)
+                        if state.get("superseded"):
+                            finish_superseded(state)
+                        else:
+                            relay_box.append(state)
                     except Exception as e:
                         state["expert_error"] = str(e)[:160]
                         emit({"type": "log",
                               "msg": f"thinker failed: {str(e)[:120]}"})
                         finish_turn_async(state)
                     finally:
+                        if pending_expert and pending_expert[0] is state:
+                            pending_expert.clear()
                         thinking.clear()
 
                 try:
@@ -690,11 +752,12 @@ class DuplexVoice:
                                              f"({len(pend) / CH:.1f}s queued)"})
 
                             # Deliver only after the muted local continuation
-                            # has yielded. External TTS was already produced in
-                            # the thinker thread, so this never blocks the mic
-                            # loop or leaks mute state into the next user turn.
+                            # has yielded and while no new user speech is
+                            # pending. This prevents a slow expert answer from
+                            # being inserted after the user has moved on.
                             if (relay_box and muted == 0
-                                    and active_turn is None):
+                                    and active_turn is None
+                                    and last_speech_at is None):
                                 relay_turn = relay_box.pop(0)
                                 ans = relay_turn.get("expert_answer", "")
                                 relay_turn["relay_started_at"] = (
@@ -729,7 +792,8 @@ class DuplexVoice:
                                 else:
                                     relay_guard = True
                                     self.duplex.streaming_prefill(
-                                        text_list=[RELAY_TMPL.format(ans=ans)])
+                                        text_list=[RELAY_TMPL.format(
+                                            ans=spoken)])
                                     r = self.duplex.streaming_generate(
                                         prompt_wav_path=PROMPT_WAV,
                                         top_k=GEN_TOP_K)
@@ -750,6 +814,8 @@ class DuplexVoice:
                                         if r.get("text"):
                                             relay_turn["assistant_parts"].append(
                                                 r["text"])
+                                    if r.get("end_of_turn"):
+                                        complete_relay()
                                     prev_listen = r["is_listen"]
 
                             user_win.append(ch)
@@ -808,6 +874,7 @@ class DuplexVoice:
                                              and not relay_guard
                                              and len(user_win) > 0)
                                 fired_now = fired
+                                supersede_older_relays(turn_index + 1)
                                 turn_index += 1
                                 snap = (np.concatenate(user_win)
                                         if user_win else
@@ -868,6 +935,7 @@ class DuplexVoice:
                                       "probe_on": probe_on})
                                 if fired:
                                     thinking.set()
+                                    pending_expert[:] = [active_turn]
                                     emit({"type": "phase", "v": "escalating"})
                                     _th.Thread(target=thinker,
                                                args=(active_turn,),
@@ -927,16 +995,7 @@ class DuplexVoice:
                                     muted = 0
                                 ans = "".join(turn_text).strip()
                                 if relay_guard and relay_turn is not None:
-                                    relay_turn["response_completed_at"] = (
-                                        time.perf_counter()
-                                    )
-                                    relay_turn["relay_ms"] = int(
-                                        (time.perf_counter() - relay_turn.get(
-                                            "relay_started_at",
-                                            time.perf_counter()))
-                                        * 1000)
-                                    finish_turn_async(relay_turn)
-                                    relay_turn = None
+                                    complete_relay()
                                 elif active_turn is not None:
                                     if not active_turn["fired"]:
                                         active_turn["response_completed_at"] = (
@@ -1113,7 +1172,10 @@ const T="__TOKEN__";
 const VOICE="https://rhe9527--gate-duplex-voice.modal.run";
 const $=s=>document.querySelector(s);
 let probeOn=true,ws=null,ac=null,micStream=null,proc=null,talking=false;
+const PLAY_BUFFER_S=.9,PLAY_BUFFER_WAIT_MS=450,PLAY_LEAD_S=.06;
 let playCtx=null,playT=0,gpuReady=false;
+let playPending=[],playPendingS=0,playTimer=null,playStarted=false;
+let playSources=[];
 function log(m,c){const l=$("#log");
  l.innerHTML+=`<div class="${c||''}"><b>${new Date()
  .toLocaleTimeString()}</b> ${m}</div>`;l.scrollTop=l.scrollHeight;}
@@ -1121,6 +1183,24 @@ $("#swlab").onclick=()=>{probeOn=!probeOn;
  $("#swlab").textContent=probeOn?"PROBE ON":"PROBE OFF";
  $("#swlab").classList.toggle("on",probeOn);
  log("probe "+(probeOn?"ON":"OFF")+" for the NEXT session","off");};
+function schedulePCM(item){
+ const {buf}=item,src=playCtx.createBufferSource();src.buffer=buf;
+ src.connect(playCtx.destination);
+ if(playSources.length===0)playT=Math.max(playT,playCtx.currentTime+PLAY_LEAD_S);
+ else playT=Math.max(playT,playCtx.currentTime);
+ src.start(playT);playT+=buf.duration;playSources.push(src);
+ src.onended=()=>{playSources=playSources.filter(s=>s!==src);};}
+function flushPCM(){
+ if(playTimer)clearTimeout(playTimer);playTimer=null;
+ if(!playPending.length)return;
+ const queued=playPending;playPending=[];playPendingS=0;playStarted=true;
+ queued.forEach(schedulePCM);}
+function finishPCM(){flushPCM();playStarted=false;}
+function clearPCM(){
+ if(playTimer)clearTimeout(playTimer);playTimer=null;
+ playPending=[];playPendingS=0;playStarted=false;
+ playSources.forEach(s=>{try{s.stop()}catch(_){}});playSources=[];
+ playT=playCtx?playCtx.currentTime:0;}
 function playPCM(b64,sr){
  if(!playCtx)playCtx=new (window.AudioContext||window.webkitAudioContext)();
  if(playCtx.state==="suspended")playCtx.resume();
@@ -1128,10 +1208,11 @@ function playPCM(b64,sr){
  for(let i=0;i<n;i++){let v=raw.charCodeAt(2*i)|(raw.charCodeAt(2*i+1)<<8);
   if(v>=32768)v-=65536;f[i]=v/32768;}
  const buf=playCtx.createBuffer(1,n,sr);buf.getChannelData(0).set(f);
- const src=playCtx.createBufferSource();src.buffer=buf;
- src.connect(playCtx.destination);
- playT=Math.max(playT,playCtx.currentTime);
- src.start(playT);playT+=buf.duration;}
+ const item={buf};
+ if(playStarted)schedulePCM(item);
+ else{playPending.push(item);playPendingS+=buf.duration;
+  if(playPendingS>=PLAY_BUFFER_S)flushPCM();
+  else if(!playTimer)playTimer=setTimeout(flushPCM,PLAY_BUFFER_WAIT_MS);}}
 async function warm(){
  const t0=Date.now();let j=null;
  const tick=setInterval(()=>{if(!gpuReady)$("#state").textContent=
@@ -1153,6 +1234,7 @@ function stopTalk(){talking=false;
  try{if(proc)proc.disconnect()}catch(_){}
  try{if(ac)ac.close()}catch(_){}
  try{if(micStream)micStream.getTracks().forEach(t=>t.stop())}catch(_){}
+ clearPCM();
  ws=ac=proc=micStream=null;
  $("#talk").textContent="Start duplex session";$("#vu").style.width="0%";
  $("#phase").textContent="idle";}
@@ -1195,7 +1277,7 @@ function handle(m){
   $("#text").textContent=turnText.slice(-300);
   log((m.relay?"[relay] ":"")+m.v,"txt");}
  else if(m.type==="chunk"){
-  if(m.eot){turnText="";log("— turn ended (model yielded the floor) —",
+  if(m.eot){finishPCM();turnText="";log("— turn ended (model yielded the floor) —",
    "off");}}
  else if(m.type==="score"){
   if(m.listen)$("#state").textContent=

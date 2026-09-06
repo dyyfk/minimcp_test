@@ -32,7 +32,7 @@ For every model turn:
 - Model WAV path, byte count, sample rate, final transcript, escalation acknowledgement and strategy version, and expert transcript when escalated
 - Input-stream start, user-speech start/end, gate decision, first model audio, and response-complete timestamps
 - Upstream speech-end-to-gate, speech-end-to-first-audio, and speech-end-to-response-complete latency, measured on one model-runtime clock. First audio is the first PCM chunk emitted by the runtime; response complete is the runtime's end-of-turn/relay completion, not browser playback completion.
-- Model-reported expert, stall, relay/TTS configuration, EOT score-read, optional post-hoc ASR latency, and the input/output RMS thresholds used for timing and audible-audio validation
+- Model-reported expert, stall, relay/TTS configuration, relay finish reason and superseded flag, EOT score-read, optional post-hoc ASR latency, and the input/output RMS thresholds used for timing and audible-audio validation
 - Input/output duration, speech-detected flag, input RMS mean/max, mean VAD threshold, and silence before EOT
 
 ## MiniCPM+ escalation data
@@ -49,7 +49,7 @@ For every model turn:
 - Conversation interaction status (`assigned`, `in_progress`, `interaction_completed`, `failed`, or `abandoned`) and evaluation status (`not_ready`, `pending`, `completed`, or `not_submitted`)
 - Manual `quality_review.status` (`needs_review`, `valid`, or `invalid`), reason, note, reviewer, timestamp, and automatic screening flags
 - Suggested task-flow length is not enforced. Fewer recorded turns than the task target adds `fewer_than_target_turns` for review but never blocks the participant or automatically invalidates data.
-- Timeout, model crash, disconnect, interruption, and empty-response flags
+- Timeout, model crash, disconnect, interruption, superseded-response, and empty-response flags
 - The browser reports whether model audio was received, its approximate duration, and the number of completed-turn acknowledgements. This is supporting evidence only; model identity and authoritative turn telemetry remain server-side.
 - A conversation with neither a recorded turn nor browser-observed model audio is marked `abandoned` with `no_observed_response`; it cannot accept a rating and may be retried while the session reservation is active.
 - If audio was observed but the final turn is missing, the rating is preserved with `response_record_status=client_observed` and the conversation receives a `response_not_persisted` QC flag.

@@ -143,12 +143,14 @@ After both conversations in a task, participants complete one pairwise compariso
 - **Feedback:** four ratings, conversation comment, pairwise preference, reasons, task comment, and submission times.
 - **Lifecycle:** voice interaction status and rating/evaluation status are stored separately. Analysis completion requires a submitted rating.
 - **Partial completion:** every submitted conversation rating remains a primary outcome. When both conversations in one task have ratings and its comparison is submitted, that task is analysis-complete even if the participant never finishes the other task and the session later expires. `response_record_status` and `telemetry_complete` separately identify whether transcripts, routing, and latency were fully captured.
-- **Interaction:** user/model WAV, transcripts and source, expert answer, turn count, interruption state, and conversation end reason.
+- **Interaction:** user/model WAV, transcripts and source, expert answer, turn count, interruption state, conversation end reason, and whether a slow relay was superseded by a newer user turn.
 - **Routing:** local/escalated action, threshold, EOT score and series, plus manual expected action and correctness review.
-- **Latency:** speech end, gate decision, first model audio, response completion, expert, relay, stall, EOT-read, and ASR timing. Speech end is measured from the last 20 ms microphone frame above the RMS threshold; this measurement does not control turn-taking or routing.
+- **Latency:** speech end, gate decision, first model audio, response completion, expert, relay, stall, EOT-read, and ASR timing. Speech end is measured from the last 20 ms microphone frame above the RMS threshold; this measurement does not control turn-taking or routing. The participant UI uses a shared start-of-answer jitter buffer (0.9 seconds of queued audio or a 450 ms maximum wait) for both arms; model-runtime latency remains measured before browser playout.
 - **Persistence evidence:** browser-observed model audio, completed-turn acknowledgements, response-record status, and stable rating/comparison IDs. Finish drains final upstream events and returns a persistence receipt before the rating screen opens.
 - **Audio quality:** input/output duration, speech detection, RMS/VAD statistics, and short or missing audio flags.
 - **Guardrails:** timeout, crash, disconnect, empty response, interruption, missing transcript, routing-review status, and manual conversation QC (`needs_review`, `valid`, or `invalid`).
+
+Escalated answers use the MiniCPM duplex talker's voice by default, so participants hear one assistant throughout a conversation. If the participant starts a newer turn before an expert answer is relayed, the stale relay is dropped instead of being played over the newer response. `RELAY_MODE=openai_tts` remains an explicit diagnostic option and must not be used for the main study because it changes the speaker voice.
 
 Expired reservations are persisted as session status `expired`; an in-progress conversation in that session becomes `abandoned` with `end_reason=reservation_expired`. A returning participant receives a new assignment rather than silently reviving the stale one. Exports include `reservation_status` and `reservation_active`.
 

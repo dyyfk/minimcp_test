@@ -20,7 +20,7 @@ from pathlib import Path
 from typing import Any, Callable, Iterable
 
 
-SCHEMA_VERSION = "1.9"
+SCHEMA_VERSION = "2.0"
 MODEL_MINICPM = "minicpm"
 MODEL_MINICPM_PLUS = "minicpm_plus"
 DEFAULT_TIER = "aggressive"
@@ -420,6 +420,7 @@ ANOMALY_KEYS = (
     "output_audio_anomaly",
     "disconnect",
     "interrupted",
+    "response_superseded",
     "missing_transcript",
 )
 
