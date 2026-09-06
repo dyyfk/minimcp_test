@@ -87,7 +87,10 @@ async def run():
                            or f"fired={e.get('fired')} "
                               f"is_info={e.get('is_info')} "
                               f"score={e.get('score')} "
-                              f"act={e.get('act')}")
+                              f"act={e.get('act')} "
+                              f"rms={e.get('snap_rms')} "
+                              f"guard={e.get('guard')} "
+                              f"think={e.get('thinking')}")
                     print(f"[{t}s] {tag}: {str(val)[:120]}")
 
         rt = asyncio.create_task(reader())

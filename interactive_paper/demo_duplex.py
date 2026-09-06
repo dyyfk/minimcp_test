@@ -219,6 +219,42 @@ def clean_expert(txt, max_chars=400):
     return out or t[:max_chars]
 
 
+def _env_blocks(x, sr, blk=0.08):
+    import numpy as np
+    n = max(1, int(sr * blk))
+    m = len(x) // n
+    if m < 4:
+        return None
+    return np.sqrt(np.mean(
+        x[:m * n].reshape(m, n).astype(np.float32) ** 2, axis=1))
+
+
+def _echo_corr(up16, ref24):
+    """8cn: max normalized envelope correlation between the uplink
+    tail (16 kHz) and the recently-shipped relay audio (24 kHz) —
+    high correlation means the mic is hearing OUR OWN playback
+    (speakerphone leakage past AEC), not the user. Live trace: leaked
+    relay read rms 0.025, above the 0.012 barge threshold, and cut
+    the relay with an EMPTY user transcript; real barges have been
+    measured down to rms 0.015, so no energy threshold separates the
+    two — the reference signal does."""
+    import numpy as np
+    eu = _env_blocks(up16, 16000)
+    er = _env_blocks(ref24, 24000)
+    if eu is None or er is None or len(er) < len(eu):
+        return 0.0
+    eu = eu - eu.mean()
+    su = float(np.sqrt((eu ** 2).sum())) + 1e-9
+    best = 0.0
+    for off in range(0, len(er) - len(eu) + 1):
+        w = er[off:off + len(eu)]
+        w = w - w.mean()
+        c = float((eu * w).sum()
+                  / (su * (float(np.sqrt((w ** 2).sum())) + 1e-9)))
+        best = max(best, c)
+    return best
+
+
 def _call_def(fn, /, **kw):
     import inspect
     p = set(inspect.signature(fn).parameters)
@@ -641,7 +677,8 @@ class DuplexVoice:
             # pause. MUST live at this scope (chunk_loop-local state
             # would NameError the pacer).
             rst = {"frames": [], "toks": [], "next_at": None,
-                   "gen": 0, "synthing": False, "est_rest": 0.0}
+                   "gen": 0, "synthing": False, "est_rest": 0.0,
+                   "sent": []}   # 8cn: last ~3s shipped (echo ref)
             relay_lock = _th.Lock()
             synth_jobs = []           # (gen, piece text) for the worker
 
@@ -670,6 +707,7 @@ class DuplexVoice:
                 relay_guard = False               # relay being delivered
                 relay_deadline = None             # 8cb: tts playback end
                 relay_pause = 0                   # 8ce: head-yield seconds
+                echo_warned = False               # 8cn: once-per-relay log
                 relay_ctx_closed = False          # 8cj: relay turn eos fed
                 tts_relay = RELAY_MODE == "tts" and self.tts_ok
                 prev_listen = True
@@ -916,6 +954,7 @@ class DuplexVoice:
                                         synth_jobs[:] = [
                                             (rst["gen"], spoken)]
                                     relay_ctx_closed = False
+                                    echo_warned = False
                                     emit({"type": "log",
                                           "msg": "relay: streaming "
                                                  "synth started "
@@ -1024,7 +1063,16 @@ class DuplexVoice:
                             # escalation decision still belongs to the
                             # duplex head; there is no VAD in the model
                             # path and no client kill-switch.
-                            if relay_guard and rst["frames"]:
+                            if relay_guard and (rst["frames"]
+                                                or rst["synthing"]
+                                                or rst["next_at"]
+                                                is not None):
+                                # 8cn: the old rst["frames"] precondition
+                                # went deaf under slow streaming synth —
+                                # the pacer ships frames as they arrive,
+                                # the queue hovers EMPTY, and a "Stop."
+                                # mid-relay never even reached the
+                                # energy test (4/4 regression runs).
                                 # user speech over the last ~2s (silence
                                 # RMS ~0.003, speech ~0.03+); relay-onset
                                 # window is post-thinker silence, so no
@@ -1042,7 +1090,23 @@ class DuplexVoice:
                                     else np.zeros(1, np.float32))
                                 user_rms = float(np.sqrt(np.mean(
                                     recent.astype(np.float32) ** 2)))
-                                if user_rms > 0.012:
+                                with relay_lock:
+                                    ref = (np.concatenate(rst["sent"])
+                                           if rst["sent"]
+                                           else np.zeros(
+                                               1, np.float32))
+                                ec = (_echo_corr(recent, ref)
+                                      if user_rms > 0.012 else 0.0)
+                                if user_rms > 0.012 and ec >= 0.6:
+                                    if not echo_warned:
+                                        emit({"type": "log",
+                                              "msg": "barge energy "
+                                                     f"(rms {user_rms:.3f})"
+                                                     " suppressed as our "
+                                                     "own playback echo "
+                                                     f"(corr {ec:.2f})"})
+                                        echo_warned = True
+                                if user_rms > 0.012 and ec < 0.6:
                                     emit({"type": "log",
                                           "msg": "user takes the floor "
                                                  f"mid-relay (rms "
@@ -1100,6 +1164,49 @@ class DuplexVoice:
                                     continue
                                 # (frame delivery lives in the 8ck
                                 # pacer thread — no in-loop drip)
+                            # 8cn: starvation watchdog — synth at
+                            # 0.45-0.7x realtime can hold relay_guard
+                            # for 20-40s (gate skipped the whole time =
+                            # deaf to follow-ups). If playback has been
+                            # starved >3s, kill the synth (gen bump),
+                            # truncate the answer, hand the floor back.
+                            if (relay_guard and rst["synthing"]
+                                    and not rst["frames"]
+                                    and rst["next_at"] is not None
+                                    and time.time()
+                                    > rst["next_at"] + 3.0):
+                                emit({"type": "log",
+                                      "msg": "relay starved >3s — "
+                                             "truncating answer, "
+                                             "closing early"})
+                                with relay_lock:
+                                    rst["gen"] += 1
+                                    rst["frames"] = []
+                                    rst["toks"] = []
+                                    rst["next_at"] = None
+                                    rst["synthing"] = False
+                                    rst["est_rest"] = 0.0
+                                    rst["sent"] = []
+                                    synth_jobs[:] = []
+                                relay_ctx_closed = True
+                                if relay_turn is not None:
+                                    relay_turn["relay_ms"] = int(
+                                        (time.time() - relay_turn.get(
+                                            "relay_started_at",
+                                            time.time())) * 1000)
+                                    finish_turn_async(relay_turn)
+                                    relay_turn = None
+                                active_turn = None
+                                user_win = user_win[-2:]
+                                turn_text, turn_fired = [], False
+                                turn_scores = []
+                                relay_guard = False
+                                relay_deadline = None
+                                self.st3.update(sum=None, cnt=0)
+                                self._force_end_turn()
+                                self.duplex.force_listen_count = 0
+                                prev_listen = True
+                                emit({"type": "phase", "v": "listening"})
                             if (relay_guard and relay_deadline is None
                                     and not rst["frames"]
                                     and not rst["toks"]
@@ -1167,17 +1274,27 @@ class DuplexVoice:
                                 thr_eff, thr_mode = effective_thr()
                                 if score is not None and is_info:
                                     score_win.append(float(score))
-                                fired = bool(probe_on and score is not None
-                                             and score >= thr_eff and is_info
-                                             and not thinking.is_set()
-                                             and not relay_guard
-                                             and len(user_win) > 0)
-                                fired_now = fired
-                                turn_index += 1
                                 snap = (np.concatenate(user_win)
                                         if user_win else
                                         np.zeros(1600,
                                                  np.float32))[-30 * 16000:]
+                                # 8cn: escalation requires actual speech
+                                # energy in the recent snapshot — the
+                                # probe reads garbage confidently on
+                                # noise/hallucinated turns (8cg) and a
+                                # post-cut echo tail once fired with an
+                                # EMPTY transcript ("market update...").
+                                snap_rms = float(np.sqrt(np.mean(
+                                    snap[-3 * 16000:]
+                                    .astype(np.float32) ** 2)))
+                                fired = bool(probe_on and score is not None
+                                             and score >= thr_eff and is_info
+                                             and not thinking.is_set()
+                                             and not relay_guard
+                                             and len(user_win) > 0
+                                             and snap_rms > 0.008)
+                                fired_now = fired
+                                turn_index += 1
                                 active_turn = {
                                     "index": turn_index,
                                     "started_at": time.time(),
@@ -1194,6 +1311,9 @@ class DuplexVoice:
                                     "asr_done": _th.Event(),
                                 }
                                 emit({"type": "gate",
+                                      "snap_rms": round(snap_rms, 4),
+                                      "guard": bool(relay_guard),
+                                      "thinking": thinking.is_set(),
                                       "score": (None if score is None
                                                 else round(score, 4)),
                                       "thr": round(thr_eff, 4),
@@ -1395,6 +1515,8 @@ class DuplexVoice:
                             rst["next_at"] = (max(rst["next_at"],
                                                   time.time())
                                               + len(fr) / 24000.0)
+                            rst["sent"].append(fr)
+                            rst["sent"] = rst["sent"][-3:]
                     if fr is None:
                         time.sleep(0.05)
                         continue

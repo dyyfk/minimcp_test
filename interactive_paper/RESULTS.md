@@ -6685,3 +6685,40 @@ floor behavior; "intrinsic to the head" claims must survive a
 stock-serving control). NEW STANDING RULE (user): every change runs
 the regression suite; every "model-intrinsic" claim needs the
 vanilla arm first. Files: demo_duplex.py, _ws_stop_compare.py (new).
+
+## 8cn — echo-guard, fire energy floor, cut precondition, starvation watchdog: the streaming-relay regressions closed (2026-09-05)
+
+**User's live phone trace exposed a FALSE BARGE:** rms .025 cut the
+relay with an EMPTY user transcript — the phone speaker's relay
+playback leaking past AEC (real barges measured down to rms .015, so
+no energy threshold separates leakage from soft speech). The head
+then committed on the leaked tail and ESCALATED with an empty
+snapshot ("market update…" + spurious stall; the 8ci strip guard
+stopped the thinker, not the theater).
+
+**Four fixes (one deploy):**
+(1) ECHO GUARD — we hold the reference signal (the last ~3s of
+shipped relay pcm): envelope cross-correlation between the uplink
+tail and the shipped audio; corr ≥.6 = our own playback, cut
+suppressed. Transport-layer, stance-compatible.
+(2) FIRE ENERGY FLOOR — escalation requires snapshot speech energy
+(rms >.008): blocks empty-snapshot fires and stops escalating the
+8cg hallucinated-commit turns.
+(3) CUT PRECONDITION — `rst["frames"]` non-empty went deaf under
+slow streaming synth (pacer ships as produced, queue hovers EMPTY;
+4/4 regression runs never even reached the energy test on "Stop.").
+Now: any active delivery (frames | synthing | next_at).
+(4) STARVATION WATCHDOG — synth at 0.45-0.7x realtime can hold
+relay_guard 20-40s (gate skipped = deaf to follow-ups). Playback
+starved >3s → kill the synth (gen bump), truncate the answer, hand
+the floor back.
+
+**Regression (instrumented build; gate events now carry
+snap_rms/guard/thinking):** stop-follow 6/7 across the last two
+batches with clean field traces (stop remnant held at act .007-.047,
+follow-ups fire .69-.90, snap_rms ~.05); compare-on 3/3, off 3/3,
+ctx PASS. Cut fires at the stop reliably again. Residuals on the
+books: synth throughput under GPU sharing (0.45-1.2x, the
+latency/smoothness/answer-length triangle — design decision pending),
+and the occasional missed cut on a single soft "Stop." (energy-window
+variance). Files: demo_duplex.py, _ws_stop_follow.py (field prints).
