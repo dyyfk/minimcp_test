@@ -1679,6 +1679,23 @@ separate cleanly every time, and what re-opens at each regime or
 domain shift is calibration coverage and thresholds: interactive
 use is itself an evaluation modality.
 
+The same lesson recurred with \emph{phatic} questions. Utterances
+that are question-shaped but carry no information need (``How are
+you?'', ``Can you hear me?'') pass an act gate trained on
+floor-\emph{command} negatives---grammatically they are
+questions---and the failure probe is again out-of-distribution: on
+88 TTS'd phatic stims (social openers, channel checks,
+assistant-meta; en+zh, two voices) it false-fires on 97--100\% of
+social and channel-check stims at the aggressive tier (37--44\% at
+balanced), i.e.\ it would escalate ``how are you'' to the expert,
+and live users hit exactly this. Adding the phatic stims to the
+act-gate negatives closes the category at no cost: the act read
+stays separable (OOF AUC 0.9999), all phatic categories score below
+threshold (0\% admitted, residual false-fire 0\%), and the
+question-side cost \emph{drops} from 0.5\% to 0.24\% of true
+escalations---the wider negative manifold moves the joint-gap
+threshold to a better operating point.
+
 \paragraph{Multi-turn grounding.} A stateless expert uplink breaks on
 follow-ups: ``what is NVDA trading at'' then ``what about Apple'' sends
 only the second utterance, unresolvable in isolation. The probe itself

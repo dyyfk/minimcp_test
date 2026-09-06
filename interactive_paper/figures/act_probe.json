@@ -1,12 +1,12 @@
 {
  "false_fire_before": {
-  "conservative": 0.213,
-  "balanced": 0.601,
-  "aggressive": 0.814
+  "conservative": 0.182,
+  "balanced": 0.553,
+  "aggressive": 0.858
  },
  "act_oof_auc": 0.9999,
- "act_thr": 0.5506971031427383,
+ "act_thr": 0.47403404489159584,
  "questions_lost": 0.0024,
- "floor_pass_rate": 0.0038,
+ "floor_pass_rate": 0.0,
  "residual_fire_balanced": 0.0
 }

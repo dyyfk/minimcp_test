@@ -126,6 +126,7 @@ FEAT_POOLS = {
     "sreason":    (f"{DATA}/queries_sreason.jsonl",    f"{DATA}/bench_audio"),
     "valpaca":    (f"{DATA}/queries_valpaca.jsonl",    f"{DATA}/bench_audio"),
     "flooract":   (f"{DATA}/queries_flooract.jsonl",   f"{DATA}/flooract_audio"),
+    "phatic":     (f"{DATA}/queries_phatic.jsonl",     f"{DATA}/phatic_audio"),
     "reqq":       (f"{DATA}/queries_reqq.jsonl",       f"{DATA}/reqq_audio"),
     "stopq":      (f"{DATA}/queries_stopq.jsonl",      f"{DATA}/stopq_audio"),
     "fresh":      (f"{DATA}/queries_fresh.jsonl",      f"{DATA}/audio_fresh"),

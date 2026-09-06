@@ -59,13 +59,23 @@ def main():
     qs = {json.loads(l)["id"]: json.loads(l)
           for l in open(D / "queries_flooract.jsonl", encoding="utf-8")
           if l.strip()}
+    # 8cp: phatic questions (social openers / channel checks /
+    # assistant-meta) — question-shaped but no info need; the live
+    # demo escalated "how are you" / "can you hear me".
+    try:
+        qs.update({json.loads(l)["id"]: json.loads(l)
+                   for l in open(D / "queries_phatic.jsonl",
+                                 encoding="utf-8") if l.strip()})
+    except FileNotFoundError:
+        pass
     # 8ch: floorpc (stop commands dumped post-cut) is NOT in the fit:
     # 71/72 never commit after a cut (no onset, no gate read), and the
     # single one that does scores inseparably with the postcut question
     # positives — an n=1 unfixable singleton that dragged the joint-gap
     # threshold from ~.51 to .67, taxing live questions to guard a
     # 1-in-72-commits exposure. Reported below instead.
-    for t, sfx in (("flooract", ""), ("flooractx", "+ctx")):
+    for t, sfx in (("flooract", ""), ("flooractx", "+ctx"),
+                   ("phatic", "")):
         try:
             ids_t, Xt = load_feats(t)
             neg_parts.append(Xt)
@@ -152,7 +162,7 @@ def main():
            "layer": 22, "act_threshold": act_thr, "C": C,
            "oof_auc": round(float(auc), 4),
            "n_pos": int(len(Xq)), "n_neg": int(len(Xf)),
-           "recipe": "scripts/24 floor-act probe (8bh): escalate only "
+           "recipe": "scripts/24 floor-act probe (8bh, 8cp +phatic): escalate only "
                      "if act>=thr (info-seeking) AND P(fail)>=tier thr"}
     (D / "gate_act.json").write_text(json.dumps(art))
     out = {"false_fire_before": {t: round(float((s_fail >= thr).mean()), 3)
