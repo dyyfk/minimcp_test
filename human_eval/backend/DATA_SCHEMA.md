@@ -29,10 +29,10 @@ Each `sessions/{session_id}.json` document is the complete audit record for one 
 For every model turn:
 
 - User WAV path, byte count, sample rate, transcript, transcript status, and source (`upstream_asr` or `posthoc_asr`)
-- Model WAV path, byte count, sample rate, final transcript, and expert transcript when escalated
+- Model WAV path, byte count, sample rate, final transcript, escalation acknowledgement and strategy version, and expert transcript when escalated
 - Input-stream start, user-speech start/end, gate decision, first model audio, and response-complete timestamps
-- Upstream EOT-to-gate, EOT-to-first-audio, and EOT-to-response-complete latency, measured on one model-runtime clock
-- Model-reported expert, stall, relay, EOT score-read, and optional post-hoc ASR latency
+- Upstream speech-end-to-gate, speech-end-to-first-audio, speech-end-to-substantive-audio, and speech-end-to-response-complete latency, measured on one model-runtime clock. First audio is the first audible PCM chunk and may be an escalation acknowledgement. Substantive audio is the local answer or the expert relay, excluding that acknowledgement. Response complete is the runtime's end-of-turn/relay completion, not browser playback completion.
+- Model-reported expert, stall, relay/TTS configuration, relay finish reason and superseded flag, EOT score-read, optional post-hoc ASR latency, and the input/output RMS thresholds used for timing and audible-audio validation
 - Input/output duration, speech-detected flag, input RMS mean/max, mean VAD threshold, and silence before EOT
 
 ## MiniCPM+ escalation data
@@ -49,7 +49,7 @@ For every model turn:
 - Conversation interaction status (`assigned`, `in_progress`, `interaction_completed`, `failed`, or `abandoned`) and evaluation status (`not_ready`, `pending`, `completed`, or `not_submitted`)
 - Manual `quality_review.status` (`needs_review`, `valid`, or `invalid`), reason, note, reviewer, timestamp, and automatic screening flags
 - Suggested task-flow length is not enforced. Fewer recorded turns than the task target adds `fewer_than_target_turns` for review but never blocks the participant or automatically invalidates data.
-- Timeout, model crash, disconnect, interruption, and empty-response flags
+- Timeout, model crash, disconnect, interruption, superseded-response, and empty-response flags
 - The browser reports whether model audio was received, its approximate duration, and the number of completed-turn acknowledgements. This is supporting evidence only; model identity and authoritative turn telemetry remain server-side.
 - A conversation with neither a recorded turn nor browser-observed model audio is marked `abandoned` with `no_observed_response`; it cannot accept a rating and may be retried while the session reservation is active.
 - If audio was observed but the final turn is missing, the rating is preserved with `response_record_status=client_observed` and the conversation receives a `response_not_persisted` QC flag.
@@ -65,7 +65,7 @@ Null interpretation:
 - `quality_review.status=needs_review` is likewise not an invalid label; it asks a reviewer to check task adherence and data quality.
 - Records from schema 1.3 and earlier are normalized on read. Legacy conversation `status=completed` becomes `interaction_completed`; rating presence determines evaluation completion.
 - Expert, stall, and relay fields do not apply to local turns and are omitted in new records.
-- Missing EOT-derived latency fields indicate a collection defect, not “not applicable.” `eot_read_ms` measures only the cost of reading the gate score and must never be substituted for EOT-to-gate latency. Older affected records remain missing rather than being exported as a false `0ms` value.
+- Missing EOT-derived latency fields indicate a collection defect, not “not applicable.” A missing substantive-audio value is expected for a superseded or failed escalated answer. `eot_read_ms` measures only the cost of reading the gate score and must never be substituted for EOT-to-gate latency. Older affected records remain missing rather than being exported as a false `0ms` value.
 - Blank or whitespace-only transcripts are normalized to missing and receive `missing_transcript=true`.
 
 Analysis exports:

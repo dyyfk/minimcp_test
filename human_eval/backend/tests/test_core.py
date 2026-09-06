@@ -350,10 +350,23 @@ class ModelGatewayTests(unittest.TestCase):
                     "tier": "aggressive",
                     "thr": 0.62,
                     "probe_on": True,
+                    "escalation_ack_version": "cached_rotation_v2",
+                    "relay_mode": "openai_tts",
+                    "relay_tts_model": "tts-1",
+                    "relay_tts_voice": "alloy",
                 }
             )
             recorder.record_client_audio(b"\x00\x00" * 2000)
             recorder.record_server_event({"type": "score", "v": 0.41})
+            recorder.record_client_event({"type": "eot"})
+            browser_speech_end = recorder.speech_ended_at
+            recorder.record_server_event(
+                {
+                    "type": "eot",
+                    "speech_end_age_ms": 240,
+                    "speech_end_source": "server_audio_rms",
+                }
+            )
             recorder.record_server_event(
                 {
                     "type": "gate",
@@ -390,11 +403,24 @@ class ModelGatewayTests(unittest.TestCase):
                         ).decode(),
                         "uplink_text": "Test question",
                         "answer": "Test answer",
+                        "stall_text": "Let me check that for you.",
                         "expert_answer": "Verified answer",
                         "gate_latency_ms": 18,
                         "first_audio_ms": 300,
+                        "substantive_first_audio_ms": 620,
+                        "relay_first_audio_ms": 620,
                         "response_complete_ms": 900,
+                        "escalation_ack_version": "cached_rotation_v2",
+                        "relay_mode": "openai_tts",
+                        "relay_tts_model": "tts-1",
+                        "relay_tts_voice": "alloy",
+                        "relay_tts_ms": 210,
+                        "speech_end_source": "server_audio_rms",
+                        "speech_rms_threshold": 0.012,
+                        "output_rms_threshold": 0.001,
                         "expert_latency_s": 1.2,
+                        "finish_reason": "completed",
+                        "superseded": False,
                     }
             recorder.record_server_event(turn_payload)
             asyncio.run(recorder.finalize_turn(turn_payload))
@@ -407,22 +433,69 @@ class ModelGatewayTests(unittest.TestCase):
             )
             turn = saved_conversation["turns"][0]
             self.assertEqual(saved_conversation["threshold_tier"], "aggressive")
+            self.assertEqual(
+                saved_conversation["model_runtime"]["escalation_ack_version"],
+                "cached_rotation_v2",
+            )
+            self.assertEqual(
+                saved_conversation["model_runtime"]["relay_mode"],
+                "openai_tts",
+            )
             self.assertTrue(turn["gate"]["escalated"])
             self.assertEqual(turn["gate"]["score"], 0.81)
             self.assertEqual(turn["gate"]["act_score"], 0.73)
             self.assertTrue(turn["gate"]["is_information_request"])
             self.assertEqual(turn["user"]["transcript"], "Test question")
             self.assertEqual(turn["user"]["transcript_source"], "upstream_asr")
+            self.assertEqual(
+                turn["model_response"]["stall_transcript"],
+                "Let me check that for you.",
+            )
             self.assertEqual(turn["routing_review"]["status"], "unreviewed")
             self.assertEqual(turn["routing_review"]["actual_action"], "escalate")
             self.assertIsNone(turn["routing_review"]["correct"])
-            self.assertIsNone(turn["timestamps"]["user_speech_ended_at"])
+            self.assertIsNotNone(turn["timestamps"]["user_speech_ended_at"])
+            self.assertLess(
+                turn["timestamps"]["user_speech_ended_at"], browser_speech_end
+            )
             self.assertEqual(turn["latency_ms"]["speech_end_to_gate"], 18)
             self.assertEqual(turn["latency_ms"]["speech_end_to_first_audio"], 300)
             self.assertEqual(
                 turn["latency_ms"]["speech_end_to_response_complete"], 900
             )
+            self.assertEqual(
+                turn["latency_ms"]["speech_end_to_substantive_audio"], 620
+            )
             self.assertEqual(turn["gate"]["eot_read_ms"], 12.5)
+            self.assertEqual(
+                turn["raw_model_metrics"]["speech_end_source"],
+                "server_audio_rms",
+            )
+            self.assertEqual(
+                turn["raw_model_metrics"]["speech_rms_threshold"], 0.012
+            )
+            self.assertEqual(
+                turn["raw_model_metrics"]["output_rms_threshold"], 0.001
+            )
+            self.assertEqual(
+                turn["raw_model_metrics"]["escalation_ack_version"],
+                "cached_rotation_v2",
+            )
+            self.assertEqual(turn["raw_model_metrics"]["relay_tts_ms"], 210)
+            self.assertEqual(
+                turn["raw_model_metrics"]["substantive_first_audio_ms"], 620
+            )
+            self.assertEqual(
+                turn["raw_model_metrics"]["relay_first_audio_ms"], 620
+            )
+            self.assertEqual(
+                turn["raw_model_metrics"]["relay_tts_voice"], "alloy"
+            )
+            self.assertEqual(
+                turn["raw_model_metrics"]["finish_reason"], "completed"
+            )
+            self.assertFalse(turn["raw_model_metrics"]["superseded"])
+            self.assertFalse(turn["anomalies"]["response_superseded"])
             self.assertTrue(turn["audio_quality"]["speech_detected"])
             self.assertEqual(turn["user"]["audio_bytes"], 10000)
             self.assertTrue(Path(turn["user"]["audio_path"]).exists())
@@ -451,6 +524,9 @@ class ModelGatewayTests(unittest.TestCase):
             self.assertEqual(
                 turn_rows[0]["latency_speech_end_to_first_audio_ms"], 300
             )
+            self.assertEqual(
+                turn_rows[0]["latency_speech_end_to_substantive_audio_ms"], 620
+            )
 
             conversation_rows = analysis_rows([persisted], "conversations")
             conversation_row = next(
@@ -461,6 +537,9 @@ class ModelGatewayTests(unittest.TestCase):
             self.assertEqual(conversation_row["escalation_rate"], 1)
             self.assertEqual(conversation_row["latency_gate_median_ms"], 18)
             self.assertEqual(conversation_row["latency_first_audio_median_ms"], 300)
+            self.assertEqual(
+                conversation_row["latency_substantive_audio_median_ms"], 620
+            )
             self.assertEqual(
                 conversation_row["latency_response_complete_median_ms"], 900
             )

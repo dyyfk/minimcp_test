@@ -102,6 +102,14 @@ def _reported_or_derived_milliseconds(
     return measured if measured is not None else _milliseconds(start, end)
 
 
+def _timestamp_before(timestamp: str, milliseconds: float | int) -> str:
+    from datetime import datetime, timedelta
+
+    return (
+        datetime.fromisoformat(timestamp) - timedelta(milliseconds=milliseconds)
+    ).isoformat()
+
+
 def _write_pcm_wav(path: Path, pcm: bytes, sample_rate: int) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_suffix(".wav.tmp")
@@ -224,7 +232,7 @@ class ConversationRecorder:
     def record_server_event(self, payload: dict[str, Any]) -> None:
         event_type = payload.get("type")
         now = utc_now()
-        if event_type in {"hello", "gate", "turn", "error", "bye"}:
+        if event_type in {"hello", "eot", "gate", "turn", "error", "bye"}:
             self.record_backend_event(f"upstream_{event_type}", payload)
         if event_type == "hello":
             self.store.mutate_conversation(
@@ -258,7 +266,17 @@ class ConversationRecorder:
                 self.silence_before_eot_s = float(payload["sil"])
             self.speech_detected = self.speech_detected or bool(payload.get("speech"))
         elif event_type == "eot":
-            self.speech_ended_at = self.speech_ended_at or now
+            speech_end_age_ms = _nonnegative_milliseconds(
+                payload.get("speech_end_age_ms")
+            )
+            measured_at = (
+                _timestamp_before(now, speech_end_age_ms)
+                if speech_end_age_ms is not None
+                else now
+            )
+            # The runtime measurement is on the same clock as its reported
+            # latency values, so it supersedes any coarse browser-side EOT.
+            self.speech_ended_at = measured_at
             turn = self._ensure_turn()
             turn["timestamps"]["user_speech_ended_at"] = self.speech_ended_at
         elif event_type == "gate":
@@ -373,6 +391,8 @@ class ConversationRecorder:
         }
         if payload.get("expert_answer") is not None:
             model_response["expert_transcript"] = payload.get("expert_answer")
+        if payload.get("stall_text") is not None:
+            model_response["stall_transcript"] = payload.get("stall_text")
         turn["model_response"] = model_response
 
         audio_quality = {
@@ -394,9 +414,14 @@ class ConversationRecorder:
             audio_quality["silence_before_eot_s"] = self.silence_before_eot_s
         turn["audio_quality"] = audio_quality
 
-        # The duplex runtime reports these three durations from one clock,
-        # starting at its actual end-of-turn decision. Prefer them over
+        # The duplex runtime reports these durations from one clock,
+        # starting at its measured last speech frame. Prefer them over
         # timestamps observed after network transport at the eval backend.
+        substantive_first_audio_ms = payload.get("substantive_first_audio_ms")
+        if substantive_first_audio_ms is None and not turn["gate"].get("escalated"):
+            # Backward-compatible local turns: their first audio is already the
+            # answer. Never apply this fallback to an escalated stall phrase.
+            substantive_first_audio_ms = payload.get("first_audio_ms")
         latency_candidates = {
             "speech_end_to_gate": _reported_or_derived_milliseconds(
                 payload.get("gate_latency_ms"),
@@ -407,6 +432,9 @@ class ConversationRecorder:
                 payload.get("first_audio_ms"),
                 turn["timestamps"].get("user_speech_ended_at"),
                 self.first_model_audio_at,
+            ),
+            "speech_end_to_substantive_audio": _nonnegative_milliseconds(
+                substantive_first_audio_ms
             ),
             "speech_end_to_response_complete": _reported_or_derived_milliseconds(
                 payload.get("response_complete_ms"),
@@ -437,7 +465,10 @@ class ConversationRecorder:
                 ),
                 "input_audio_anomaly": len(self.user_pcm) < 3200,
                 "output_audio_anomaly": len(self.model_pcm) < 2400,
-                "interrupted": bool(payload.get("interrupted")),
+                "interrupted": bool(
+                    payload.get("interrupted") or payload.get("superseded")
+                ),
+                "response_superseded": bool(payload.get("superseded")),
                 "missing_transcript": not bool(user_transcript),
             }
         )
@@ -464,13 +495,26 @@ class ConversationRecorder:
                 "total_ms",
                 "gate_latency_ms",
                 "first_audio_ms",
+                "substantive_first_audio_ms",
+                "relay_first_audio_ms",
                 "response_complete_ms",
+                "escalation_ack_version",
+                "relay_mode",
+                "relay_tts_model",
+                "relay_tts_voice",
+                "relay_tts_ms",
+                "relay_tts_error",
+                "speech_end_source",
+                "speech_rms_threshold",
+                "output_rms_threshold",
                 "protocol",
                 "turn_index",
                 "act_score",
                 "is_info",
                 "asr_error",
                 "expert_error",
+                "finish_reason",
+                "superseded",
                 "probe_on",
             )
             if payload.get(key) is not None
@@ -574,6 +618,12 @@ class ConversationRecorder:
                 "model_runtime": {
                     "protocol": payload.get("protocol", "duplex_v1"),
                     "mode": payload.get("mode"),
+                    "escalation_ack_version": payload.get(
+                        "escalation_ack_version"
+                    ),
+                    "relay_mode": payload.get("relay_mode"),
+                    "relay_tts_model": payload.get("relay_tts_model"),
+                    "relay_tts_voice": payload.get("relay_tts_voice"),
                     "event_log_path": str(self.event_log_path),
                     "threshold_tier": payload.get("tier"),
                     "threshold": payload.get("thr"),
