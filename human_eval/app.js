@@ -753,12 +753,14 @@ function schedulePlaybackBuffer({ buffer, samples }) {
   const source = activeAudioContext.createBufferSource();
   source.buffer = buffer;
   source.connect(activeAudioContext.destination);
+  // Refresh on every streamed buffer. Updating only when the queue first
+  // starts makes the waveform freeze for the rest of a long response.
+  updateConversationWaveform(samples, "assistant-speaking");
   if (activePlaybackSources.length === 0) {
     activePlaybackCursor = Math.max(
       activePlaybackCursor,
       activeAudioContext.currentTime + PLAYBACK_START_LEAD_SECONDS
     );
-    updateConversationWaveform(samples, "assistant-speaking");
     updateLiveStatus("speaking");
   } else {
     activePlaybackCursor = Math.max(activePlaybackCursor, activeAudioContext.currentTime);
