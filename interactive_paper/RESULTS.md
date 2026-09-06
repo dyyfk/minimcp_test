@@ -6722,3 +6722,21 @@ books: synth throughput under GPU sharing (0.45-1.2x, the
 latency/smoothness/answer-length triangle — design decision pending),
 and the occasional missed cut on a single soft "Stop." (energy-window
 variance). Files: demo_duplex.py, _ws_stop_follow.py (field prints).
+
+### 8co — empty-ASR cascade: cut now resyncs the backlog to the wall clock (2026-09-05)
+
+**User trace:** empty ASR on every post-cut turn (turns 2/3/8/9),
+spurious local answers with stale relay numbers one turn later.
+Mechanism: GPU contention during streaming synth lags the loop 6-8s
+("dropped 7.4s of backlogged silence"); a cut clears user_win, which
+then REFILLS with relay-era audio from the backlog (leakage/silence,
+rms ~.02 — above the .008 fire floor) while the user's real follow-up
+sits deep in the queue → empty-transcript fire, question heard one
+turn late. Fix: the cut drops all backlog older than ~3s (everything
+before it is playback-era uplink) — the loop snaps back to realtime,
+the head hears the follow-up immediately, snapshots carry real
+speech. Cut logs now include the echo-correlation value (live barges
+measure corr .17-.49 vs the .6 suppression threshold; phone-leakage
+corr values wanted from the field to tune it). Suite green:
+stop-follow 4/4 (post-cut ASR hears the full question; one residual
+single empty turn immediately recovered), compare-on 3/3, ctx PASS.

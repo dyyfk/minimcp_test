@@ -1110,10 +1110,29 @@ class DuplexVoice:
                                     emit({"type": "log",
                                           "msg": "user takes the floor "
                                                  f"mid-relay (rms "
-                                                 f"{user_rms:.3f}) — "
+                                                 f"{user_rms:.3f}, echo "
+                                                 f"corr {ec:.2f}) — "
                                                  "dropping "
                                                  f"~{len(rst['frames'])}s"
                                                  " of relay tail"})
+                                    # 8co: resync to the wall clock —
+                                    # GPU contention during synth lags
+                                    # the loop 6-8s; after a cut the
+                                    # rebuilt user_win was filling with
+                                    # STALE relay-era audio (leakage/
+                                    # silence) while the user's real
+                                    # follow-up sat deep in the backlog:
+                                    # empty-ASR fires, and the question
+                                    # surfaced one turn late. Everything
+                                    # older than ~3s is playback-era
+                                    # uplink; drop it.
+                                    if len(pend) > 3 * CH:
+                                        emit({"type": "log",
+                                              "msg": "cut resync: dropped "
+                                                     f"{(len(pend) - 3 * CH) / CH:.1f}s"
+                                                     " of stale pre-cut "
+                                                     "backlog"})
+                                        pend = pend[-3 * CH:]
                                     emit({"type": "interrupt"})
                                     with relay_lock:
                                         rst["gen"] += 1
