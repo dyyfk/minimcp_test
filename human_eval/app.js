@@ -675,13 +675,15 @@ function handleModelMessage(event, taskIndex, conversationIndex) {
   }
   // HUMAN_EVAL_DEBUG_REMOVE_AFTER_PILOT_END
   if (message.type === "phase") {
-    const status = message.v === "listening" ? "listening" : message.v === "answering" || message.v === "relaying" ? "speaking" : "processing";
+    // "relaying" means the answer is being prepared. Only an audible audio
+    // event below is allowed to claim that the assistant is speaking.
+    const status = message.v === "listening" ? "listening" : message.v === "answering" ? "speaking" : "processing";
     if (status === "listening" && activePlaybackSources.length > 0) return;
     updateLiveStatus(status);
   } else if (message.type === "audio") {
-    updateLiveStatus("speaking");
     const receivedMs = playPcmAudio(message.pcm, message.sr || 24000);
     if (receivedMs > 0) {
+      updateLiveStatus("speaking");
       conversation.receivedModelAudio = true;
       conversation.modelAudioMs = (conversation.modelAudioMs || 0) + receivedMs;
     }
@@ -706,6 +708,13 @@ function playPcmAudio(encodedPcm, sampleRate) {
   const bytes = new Uint8Array(binary.length);
   for (let index = 0; index < binary.length; index += 1) bytes[index] = binary.charCodeAt(index);
   const samples = new Int16Array(bytes.buffer);
+  if (!samples.length) return 0;
+  let energy = 0;
+  for (let index = 0; index < samples.length; index += 1) {
+    const value = samples[index] / 32768;
+    energy += value * value;
+  }
+  if (Math.sqrt(energy / samples.length) < 0.001) return 0;
   updateConversationWaveform(samples, "assistant-speaking");
   const buffer = activeAudioContext.createBuffer(1, samples.length, sampleRate);
   const channel = buffer.getChannelData(0);

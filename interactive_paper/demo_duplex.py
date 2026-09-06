@@ -27,10 +27,9 @@ calibrated regime; native-duplex token schema is NOT yet calibrated,
 scores are exploratory) reads the context right after that chunk's
 audio prefill. P(fail) >= tier threshold => the thinker (gpt-5.5, web
 search) runs in the background WHILE the duplex loop keeps rolling.
-When the thinker returns, its answer is prefilled as a TEXT unit into
-the same duplex stream and the talker voices it; the mic never stops
-flowing, so the user can interrupt the relay exactly like any other
-speech — same native mechanism, zero special-casing.
+When the thinker returns, background TTS voices the answer and a factual
+note is added to the duplex context. The mic loop keeps processing while
+the expert and TTS run, instead of accumulating a stale audio backlog.
 
 Deliberately NOT implemented yet (recorded in project memory): aborting
 the in-flight thinker when the user speaks during the wait.
@@ -105,27 +104,24 @@ gpu_image = (
 RELAY_TMPL = ("A verified answer came back: {ans}\n"
               "Relay it to the user in one or two spoken sentences.")
 RELAY_NUDGE = "Say the verified answer aloud to the user now."
-ESCALATION_ACK_VERSION = "choice_v1"
+ESCALATION_ACK_VERSION = "cached_rotation_v2"
 STALL_PHRASES = (
     "One moment — let me check that.",
-    "Give me a second to look into that.",
+    "Interesting",
     "Let me make sure I get this right.",
-    "Hang on — I'm checking that now.",
+    "Well well well,let's see.",
     "Let me think about that for a moment.",
 )
-ESCALATION_PROMPT = (
-    "[SYSTEM NOTE] The final answer is still being prepared. Choose exactly "
-    "one line below that best fits the conversation and say it word for word. "
-    "Say only that line, with no number, explanation, answer, or extra words. "
-    "Then stop speaking.\n- " + "\n- ".join(STALL_PHRASES)
-)
+STALL_NOTE = ('[SYSTEM NOTE] You just told the user: "{phrase}" '
+              "The final answer is still being prepared. Do not repeat the "
+              "acknowledgement or answer the request locally.")
 SPEECH_RMS_THRESHOLD = 0.012
-# 8bu relay mode. "steer": prefill RELAY_TMPL and let the talker voice the
-# answer itself (loses ~20-27 pts of correct expert answers: truncation,
-# self-answering, 99% nudges). "tts": speak the cleaned expert text
-# verbatim in the talker's own voice, then hand the context a note. The
-# chunk loop keeps running, so the relay stays interruptible.
-RELAY_MODE = os.environ.get("RELAY_MODE", "tts")
+OUTPUT_RMS_THRESHOLD = 0.001
+# OpenAI TTS runs in the existing thinker thread, so it never blocks the
+# one-second duplex microphone loop. "steer" remains an emergency fallback.
+RELAY_MODE = os.environ.get("RELAY_MODE", "openai_tts")
+RELAY_TTS_MODEL = "tts-1"
+RELAY_TTS_VOICE = "alloy"
 RELAY_NOTE = "[SYSTEM NOTE] You just told the user: \"{ans}\" Do not repeat it."
 
 
@@ -233,16 +229,30 @@ class DuplexVoice:
                 self.st3["cnt"] += h.shape[0]
         self.model.llm.model.layers[LAYER].register_forward_hook(hook)
         self.lock = threading.Lock()
-        # The expert relay uses the talker's TTS. Escalation acknowledgements
-        # are generated live by the duplex model rather than pre-recorded.
-        self.tts_ok = False
+        # Cache a small acknowledgement bank in the talker's own voice. The
+        # runtime rotates through it, avoiding both a repeated fixed phrase
+        # and an unreliable extra duplex generation at escalation time.
+        self.stall_pcms = []
+        self.stall_index = 0
         try:
             import librosa as _lb
+            import numpy as _np
             ref, _ = _lb.load(PROMPT_WAV, sr=16000, mono=True)
             self.model.init_token2wav_cache(ref)
-            self.tts_ok = True
+            for phrase in STALL_PHRASES:
+                try:
+                    pcm = self._synth_pcm(phrase, max_new_tokens=64)
+                    if (pcm is not None and len(pcm)
+                            and float(_np.sqrt(_np.mean(pcm * pcm)))
+                            >= OUTPUT_RMS_THRESHOLD):
+                        self.stall_pcms.append((phrase, pcm))
+                except Exception as phrase_error:
+                    print(f">>> stall synth failed for {phrase!r}: "
+                          f"{phrase_error}", flush=True)
+            print(f">>> cached {len(self.stall_pcms)} stall phrases",
+                  flush=True)
         except Exception as e:
-            print(f">>> relay TTS init failed: {e}",
+            print(f">>> stall TTS init failed: {e}",
                   flush=True)
         self.load_s = round(time.time() - t0, 1)
         print(f">>> DuplexVoice ready in {self.load_s}s", flush=True)
@@ -395,6 +405,25 @@ class DuplexVoice:
             def emit(m):
                 asyncio.run_coroutine_threadsafe(sock.send_json(m), loop)
 
+            def emit_audible_audio(waveform, state=None, sample_rate=24000):
+                """Send and timestamp only PCM that contains audible energy."""
+                if waveform is None:
+                    return False
+                samples = np.asarray(waveform, dtype=np.float32).reshape(-1)
+                if not len(samples):
+                    return False
+                rms = float(np.sqrt(np.mean(samples * samples)))
+                if rms < OUTPUT_RMS_THRESHOLD:
+                    emit({"type": "log",
+                          "msg": f"suppressed silent audio chunk "
+                                 f"(rms={rms:.6f})"})
+                    return False
+                i16 = (np.clip(samples, -1, 1) * 32767).astype("<i2")
+                mark_first_audio(state)
+                emit({"type": "audio", "sr": sample_rate,
+                      "pcm": base64.b64encode(i16.tobytes()).decode()})
+                return True
+
             def chunk_loop():
                 """The whole session: one native duplex stream. No VAD,
                 no abort — the model owns the floor."""
@@ -492,6 +521,9 @@ class DuplexVoice:
                         "fired": state["fired"],
                         "probe_on": probe_on,
                         "escalation_ack_version": ESCALATION_ACK_VERSION,
+                        "relay_mode": RELAY_MODE,
+                        "relay_tts_model": RELAY_TTS_MODEL,
+                        "relay_tts_voice": RELAY_TTS_VOICE,
                         "eot_score": state.get("score"),
                         "threshold": state.get("threshold"),
                         "scores": state.get("scores", []),
@@ -506,7 +538,10 @@ class DuplexVoice:
                         "expert_error": state.get("expert_error"),
                         "asr_s": state.get("asr_s"),
                         "expert_latency_s": state.get("expert_latency_s"),
+                        "stall_ms": state.get("stall_ms"),
                         "relay_ms": state.get("relay_ms"),
+                        "relay_tts_ms": state.get("relay_tts_ms"),
+                        "relay_tts_error": state.get("relay_tts_error"),
                         "gate_latency_ms": int(max(
                             0, (state["gate_decision_at"]
                                 - state["speech_ended_at"]) * 1000)),
@@ -520,6 +555,7 @@ class DuplexVoice:
                                 - state["speech_ended_at"]) * 1000)),
                         "speech_end_source": state["speech_end_source"],
                         "speech_rms_threshold": SPEECH_RMS_THRESHOLD,
+                        "output_rms_threshold": OUTPUT_RMS_THRESHOLD,
                         "total_ms": int(max(
                             0, (finished_at - state["speech_ended_at"]) * 1000)),
                         "audio_s": round(len(snapshot) / 16000, 2),
@@ -567,6 +603,44 @@ class DuplexVoice:
                         emit({"type": "log",
                               "msg": f"thinker answered in "
                                      f"{state['expert_latency_s']:.1f}s"})
+                        state["relay_text"] = clean_expert(
+                            state["expert_answer"])
+                        if RELAY_MODE == "openai_tts":
+                            try:
+                                import io
+
+                                t_tts = time.perf_counter()
+                                speech = (escalate._client().audio.speech
+                                          .create(
+                                              model=RELAY_TTS_MODEL,
+                                              voice=RELAY_TTS_VOICE,
+                                              input=state["relay_text"],
+                                              response_format="wav"))
+                                pcm, sample_rate = sf.read(
+                                    io.BytesIO(speech.content),
+                                    dtype="float32")
+                                if getattr(pcm, "ndim", 1) > 1:
+                                    pcm = pcm.mean(axis=1)
+                                if sample_rate != 24000:
+                                    old = np.arange(len(pcm),
+                                                    dtype=np.float64)
+                                    new = np.linspace(
+                                        0, max(0, len(pcm) - 1),
+                                        max(1, round(len(pcm) * 24000
+                                                     / sample_rate)),
+                                    )
+                                    pcm = np.interp(new, old, pcm).astype(
+                                        np.float32)
+                                state["relay_pcm"] = pcm
+                                state["relay_tts_ms"] = int(
+                                    (time.perf_counter() - t_tts) * 1000)
+                            except Exception as tts_error:
+                                state["relay_tts_error"] = str(
+                                    tts_error)[:160]
+                                emit({"type": "log",
+                                      "msg": "background relay TTS failed; "
+                                             "using talker fallback: "
+                                             + str(tts_error)[:100]})
                         relay_box.append(state)
                     except Exception as e:
                         state["expert_error"] = str(e)[:160]
@@ -615,63 +689,45 @@ class DuplexVoice:
                                       "msg": f"falling behind realtime "
                                              f"({len(pend) / CH:.1f}s queued)"})
 
-                            # thinker result: prefill as a TEXT unit into the
-                            # SAME stream; the talker voices it in-band and
-                            # stays interruptible (native, chunk 3 below)
-                            if relay_box:
+                            # Deliver only after the muted local continuation
+                            # has yielded. External TTS was already produced in
+                            # the thinker thread, so this never blocks the mic
+                            # loop or leaks mute state into the next user turn.
+                            if (relay_box and muted == 0
+                                    and active_turn is None):
                                 relay_turn = relay_box.pop(0)
                                 ans = relay_turn.get("expert_answer", "")
                                 relay_turn["relay_started_at"] = (
                                     time.perf_counter()
                                 )
-                                if muted:
-                                    emit({"type": "log",
-                                          "msg": f"muted {muted - 1} chunks "
-                                                 "of local continuation"})
-                                    muted = 0
-                                relay_guard = True   # no gate fire until
-                                #                      this delivery's eot
                                 emit({"type": "phase", "v": "relaying"})
-                                if RELAY_MODE == "tts" and self.tts_ok:
-                                    # 8bu: verbatim expert text in the
-                                    # talker's own voice; the duplex
-                                    # context only gets a note, and the
-                                    # local continuation stays muted to
-                                    # end_of_turn so nothing talks over it
-                                    spoken = clean_expert(ans)
-                                    t_s = time.time()
-                                    pcm = None
-                                    try:
-                                        pcm = self._synth_pcm(spoken)
-                                    except Exception as se:
-                                        emit({"type": "log",
-                                              "msg": "relay synth failed: "
-                                                     + str(se)[:100]})
-                                    if pcm is not None:
-                                        i16r = (np.clip(pcm, -1, 1)
-                                                * 32767).astype("<i2")
-                                        mark_first_audio(relay_turn)
-                                        emit({"type": "audio", "sr": 24000,
-                                              "pcm": base64.b64encode(
-                                                  i16r.tobytes()).decode()})
+                                spoken = (relay_turn.get("relay_text")
+                                          or clean_expert(ans))
+                                pcm = relay_turn.get("relay_pcm")
+                                if (RELAY_MODE == "openai_tts"
+                                        and emit_audible_audio(
+                                            pcm, relay_turn)):
                                     emit({"type": "text", "v": " " + spoken,
                                           "relay": True})
                                     relay_turn["assistant_parts"].append(
                                         " " + spoken)
+                                    relay_turn["relay_ms"] = relay_turn.get(
+                                        "relay_tts_ms")
+                                    relay_turn["response_completed_at"] = (
+                                        time.perf_counter()
+                                    )
                                     emit({"type": "log",
-                                          "msg": f"relay (tts) "
-                                                 f"{len(pcm) / 24000 if pcm is not None else 0:.1f}s "
+                                          "msg": f"relay (background tts) "
+                                                 f"{len(pcm) / 24000:.1f}s "
                                                  f"audio, synth "
-                                                 f"{time.time() - t_s:.1f}s"})
+                                                 f"{(relay_turn.get('relay_tts_ms') or 0) / 1000:.1f}s"})
                                     self.duplex.streaming_prefill(
                                         text_list=[RELAY_NOTE.format(ans=spoken)])
-                                    r = self.duplex.streaming_generate(
-                                        prompt_wav_path=PROMPT_WAV,
-                                        top_k=GEN_TOP_K)
-                                    _emit_gen(r, mute=True)
-                                    muted = 1
-                                    prev_listen = r["is_listen"]
+                                    finish_turn_async(relay_turn)
+                                    relay_turn = None
+                                    relay_guard = False
                                 else:
+                                    relay_guard = True
                                     self.duplex.streaming_prefill(
                                         text_list=[RELAY_TMPL.format(ans=ans)])
                                     r = self.duplex.streaming_generate(
@@ -825,8 +881,8 @@ class DuplexVoice:
                                            and relay_turn is not None
                                            else active_turn)
                             # When the gate fires, suppress the local answer's
-                            # opening fragment. The model generates one fresh,
-                            # natural acknowledgement below instead.
+                            # opening fragment and play one cached, verified
+                            # acknowledgement immediately.
                             _emit_gen(r, mute=muted > 0 or fired_now,
                                       state=target_turn)
                             if muted:
@@ -839,23 +895,30 @@ class DuplexVoice:
                             if fired_now:
                                 turn_fired = True
                                 emit({"type": "log",
-                                      "msg": "local opening muted; generating "
-                                             "a natural escalation acknowledgement"})
+                                      "msg": "local opening muted; playing a "
+                                             "cached escalation acknowledgement"})
                                 muted = 1
-                                self.duplex.streaming_prefill(
-                                    text_list=[ESCALATION_PROMPT])
-                                stall_r = self.duplex.streaming_generate(
-                                    prompt_wav_path=PROMPT_WAV,
-                                    max_new_speak_tokens_per_chunk=24,
-                                    temperature=0.4,
-                                    top_k=GEN_TOP_K,
-                                    top_p=0.7,
-                                    text_repetition_penalty=1.15)
-                                _emit_gen(stall_r, state=active_turn)
-                                if stall_r.get("text"):
-                                    active_turn["assistant_parts"].append(
-                                        stall_r["text"])
-                                    active_turn["stall_text"] = stall_r["text"]
+                                if self.stall_pcms:
+                                    phrase, pcm = self.stall_pcms[
+                                        self.stall_index
+                                        % len(self.stall_pcms)]
+                                    self.stall_index += 1
+                                    if emit_audible_audio(pcm, active_turn):
+                                        emit({"type": "text", "v": phrase})
+                                        active_turn["stall_text"] = phrase
+                                        active_turn["stall_ms"] = int(max(
+                                            0, (active_turn["first_audio_at"]
+                                                - active_turn[
+                                                    "speech_ended_at"]) * 1000))
+                                        active_turn["assistant_parts"].append(
+                                            phrase)
+                                        self.duplex.streaming_prefill(
+                                            text_list=[STALL_NOTE.format(
+                                                phrase=phrase)])
+                                else:
+                                    emit({"type": "log",
+                                          "msg": "no cached stall audio; "
+                                                 "waiting silently for relay"})
                             if r.get("end_of_turn"):
                                 if muted:
                                     emit({"type": "log",
@@ -928,12 +991,8 @@ class DuplexVoice:
                         emit({"type": "phase", "v": "listening"})
                     return
                 wf = r.get("audio_waveform")
-                if not r["is_listen"] and wf is not None and len(wf):
-                    i16 = (np.clip(np.asarray(wf, dtype=np.float32),
-                                   -1, 1) * 32767).astype("<i2")
-                    mark_first_audio(state)
-                    emit({"type": "audio", "sr": 24000,
-                          "pcm": base64.b64encode(i16.tobytes()).decode()})
+                if not r["is_listen"]:
+                    emit_audible_audio(wf, state)
                 if not r["is_listen"] and r.get("text"):
                     emit({"type": "text", "v": r["text"],
                           "relay": relay})
@@ -950,6 +1009,9 @@ class DuplexVoice:
                      "thr": round(thr, 4), "tier": tier,
                      "lang": lang, "probe_on": probe_on,
                      "escalation_ack_version": ESCALATION_ACK_VERSION,
+                     "relay_mode": RELAY_MODE,
+                     "relay_tts_model": RELAY_TTS_MODEL,
+                     "relay_tts_voice": RELAY_TTS_VOICE,
                      "tracker": tracker_on, "n_window": len(score_win),
                      "mode": "NATIVE full duplex — the model itself "
                              "decides listen/speak every second; no VAD, "

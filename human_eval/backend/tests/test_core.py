@@ -350,7 +350,10 @@ class ModelGatewayTests(unittest.TestCase):
                     "tier": "aggressive",
                     "thr": 0.62,
                     "probe_on": True,
-                    "escalation_ack_version": "choice_v1",
+                    "escalation_ack_version": "cached_rotation_v2",
+                    "relay_mode": "openai_tts",
+                    "relay_tts_model": "tts-1",
+                    "relay_tts_voice": "alloy",
                 }
             )
             recorder.record_client_audio(b"\x00\x00" * 2000)
@@ -405,9 +408,14 @@ class ModelGatewayTests(unittest.TestCase):
                         "gate_latency_ms": 18,
                         "first_audio_ms": 300,
                         "response_complete_ms": 900,
-                        "escalation_ack_version": "choice_v1",
+                        "escalation_ack_version": "cached_rotation_v2",
+                        "relay_mode": "openai_tts",
+                        "relay_tts_model": "tts-1",
+                        "relay_tts_voice": "alloy",
+                        "relay_tts_ms": 210,
                         "speech_end_source": "server_audio_rms",
                         "speech_rms_threshold": 0.012,
+                        "output_rms_threshold": 0.001,
                         "expert_latency_s": 1.2,
                     }
             recorder.record_server_event(turn_payload)
@@ -423,7 +431,11 @@ class ModelGatewayTests(unittest.TestCase):
             self.assertEqual(saved_conversation["threshold_tier"], "aggressive")
             self.assertEqual(
                 saved_conversation["model_runtime"]["escalation_ack_version"],
-                "choice_v1",
+                "cached_rotation_v2",
+            )
+            self.assertEqual(
+                saved_conversation["model_runtime"]["relay_mode"],
+                "openai_tts",
             )
             self.assertTrue(turn["gate"]["escalated"])
             self.assertEqual(turn["gate"]["score"], 0.81)
@@ -456,8 +468,15 @@ class ModelGatewayTests(unittest.TestCase):
                 turn["raw_model_metrics"]["speech_rms_threshold"], 0.012
             )
             self.assertEqual(
+                turn["raw_model_metrics"]["output_rms_threshold"], 0.001
+            )
+            self.assertEqual(
                 turn["raw_model_metrics"]["escalation_ack_version"],
-                "choice_v1",
+                "cached_rotation_v2",
+            )
+            self.assertEqual(turn["raw_model_metrics"]["relay_tts_ms"], 210)
+            self.assertEqual(
+                turn["raw_model_metrics"]["relay_tts_voice"], "alloy"
             )
             self.assertTrue(turn["audio_quality"]["speech_detected"])
             self.assertEqual(turn["user"]["audio_bytes"], 10000)
