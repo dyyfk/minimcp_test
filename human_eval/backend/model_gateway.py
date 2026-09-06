@@ -485,6 +485,7 @@ class ConversationRecorder:
                 "gate_latency_ms",
                 "first_audio_ms",
                 "response_complete_ms",
+                "escalation_ack_version",
                 "speech_end_source",
                 "speech_rms_threshold",
                 "protocol",
@@ -596,6 +597,9 @@ class ConversationRecorder:
                 "model_runtime": {
                     "protocol": payload.get("protocol", "duplex_v1"),
                     "mode": payload.get("mode"),
+                    "escalation_ack_version": payload.get(
+                        "escalation_ack_version"
+                    ),
                     "event_log_path": str(self.event_log_path),
                     "threshold_tier": payload.get("tier"),
                     "threshold": payload.get("thr"),

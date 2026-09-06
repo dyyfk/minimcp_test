@@ -29,7 +29,7 @@ Each `sessions/{session_id}.json` document is the complete audit record for one 
 For every model turn:
 
 - User WAV path, byte count, sample rate, transcript, transcript status, and source (`upstream_asr` or `posthoc_asr`)
-- Model WAV path, byte count, sample rate, final transcript, model-generated escalation acknowledgement, and expert transcript when escalated
+- Model WAV path, byte count, sample rate, final transcript, model-generated escalation acknowledgement and prompt version, and expert transcript when escalated
 - Input-stream start, user-speech start/end, gate decision, first model audio, and response-complete timestamps
 - Upstream speech-end-to-gate, speech-end-to-first-audio, and speech-end-to-response-complete latency, measured on one model-runtime clock. First audio is the first PCM chunk emitted by the runtime; response complete is the runtime's end-of-turn/relay completion, not browser playback completion.
 - Model-reported expert, stall, relay, EOT score-read, and optional post-hoc ASR latency

@@ -350,6 +350,7 @@ class ModelGatewayTests(unittest.TestCase):
                     "tier": "aggressive",
                     "thr": 0.62,
                     "probe_on": True,
+                    "escalation_ack_version": "choice_v1",
                 }
             )
             recorder.record_client_audio(b"\x00\x00" * 2000)
@@ -404,6 +405,7 @@ class ModelGatewayTests(unittest.TestCase):
                         "gate_latency_ms": 18,
                         "first_audio_ms": 300,
                         "response_complete_ms": 900,
+                        "escalation_ack_version": "choice_v1",
                         "speech_end_source": "server_audio_rms",
                         "speech_rms_threshold": 0.012,
                         "expert_latency_s": 1.2,
@@ -419,6 +421,10 @@ class ModelGatewayTests(unittest.TestCase):
             )
             turn = saved_conversation["turns"][0]
             self.assertEqual(saved_conversation["threshold_tier"], "aggressive")
+            self.assertEqual(
+                saved_conversation["model_runtime"]["escalation_ack_version"],
+                "choice_v1",
+            )
             self.assertTrue(turn["gate"]["escalated"])
             self.assertEqual(turn["gate"]["score"], 0.81)
             self.assertEqual(turn["gate"]["act_score"], 0.73)
@@ -448,6 +454,10 @@ class ModelGatewayTests(unittest.TestCase):
             )
             self.assertEqual(
                 turn["raw_model_metrics"]["speech_rms_threshold"], 0.012
+            )
+            self.assertEqual(
+                turn["raw_model_metrics"]["escalation_ack_version"],
+                "choice_v1",
             )
             self.assertTrue(turn["audio_quality"]["speech_detected"])
             self.assertEqual(turn["user"]["audio_bytes"], 10000)

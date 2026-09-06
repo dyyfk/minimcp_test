@@ -105,11 +105,19 @@ gpu_image = (
 RELAY_TMPL = ("A verified answer came back: {ans}\n"
               "Relay it to the user in one or two spoken sentences.")
 RELAY_NUDGE = "Say the verified answer aloud to the user now."
+ESCALATION_ACK_VERSION = "choice_v1"
+STALL_PHRASES = (
+    "One moment — let me check that.",
+    "Give me a second to look into that.",
+    "Let me make sure I get this right.",
+    "Hang on — I'm checking that now.",
+    "Let me think about that for a moment.",
+)
 ESCALATION_PROMPT = (
-    "[SYSTEM NOTE] A slower source is preparing the final answer. Say one "
-    "brief, natural sentence that fits this conversation and lets the user "
-    "know you need a moment. Choose your own wording, avoid acknowledgements "
-    "you already used in this conversation, and do not answer the request yet."
+    "[SYSTEM NOTE] The final answer is still being prepared. Choose exactly "
+    "one line below that best fits the conversation and say it word for word. "
+    "Say only that line, with no number, explanation, answer, or extra words. "
+    "Then stop speaking.\n- " + "\n- ".join(STALL_PHRASES)
 )
 SPEECH_RMS_THRESHOLD = 0.012
 # 8bu relay mode. "steer": prefill RELAY_TMPL and let the talker voice the
@@ -483,6 +491,7 @@ class DuplexVoice:
                         "mode": "escalated" if state["fired"] else "local",
                         "fired": state["fired"],
                         "probe_on": probe_on,
+                        "escalation_ack_version": ESCALATION_ACK_VERSION,
                         "eot_score": state.get("score"),
                         "threshold": state.get("threshold"),
                         "scores": state.get("scores", []),
@@ -837,8 +846,11 @@ class DuplexVoice:
                                     text_list=[ESCALATION_PROMPT])
                                 stall_r = self.duplex.streaming_generate(
                                     prompt_wav_path=PROMPT_WAV,
-                                    max_new_speak_tokens_per_chunk=32,
-                                    top_k=GEN_TOP_K)
+                                    max_new_speak_tokens_per_chunk=24,
+                                    temperature=0.4,
+                                    top_k=GEN_TOP_K,
+                                    top_p=0.7,
+                                    text_repetition_penalty=1.15)
                                 _emit_gen(stall_r, state=active_turn)
                                 if stall_r.get("text"):
                                     active_turn["assistant_parts"].append(
@@ -937,6 +949,7 @@ class DuplexVoice:
                     {"type": "hello", "protocol": "duplex_v1",
                      "thr": round(thr, 4), "tier": tier,
                      "lang": lang, "probe_on": probe_on,
+                     "escalation_ack_version": ESCALATION_ACK_VERSION,
                      "tracker": tracker_on, "n_window": len(score_win),
                      "mode": "NATIVE full duplex — the model itself "
                              "decides listen/speak every second; no VAD, "
