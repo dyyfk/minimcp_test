@@ -164,9 +164,9 @@ async def run():
            for t, e in events if e.get("type") == "audio"]
     stalls, cursor = [], None
     for t, d in aud:
-        # 0.15-5s late = mid-delivery stutter; >5s = the ordinary
-        # silence between turns (not a stall)
-        if cursor is not None and 0.15 < t - cursor <= 5.0:
+        # 0.15-8s late = mid-delivery stutter; >8s = the ordinary
+        # silence between turns (5s hid the biggest starvation events)
+        if cursor is not None and 0.15 < t - cursor <= 8.0:
             stalls.append(round(t - cursor, 2))
         cursor = (t if cursor is None else max(cursor, t)) + d
     print(f"playback stalls 0.15-5s: {len(stalls)} "
