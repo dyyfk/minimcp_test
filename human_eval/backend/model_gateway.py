@@ -102,6 +102,14 @@ def _reported_or_derived_milliseconds(
     return measured if measured is not None else _milliseconds(start, end)
 
 
+def _timestamp_before(timestamp: str, milliseconds: float | int) -> str:
+    from datetime import datetime, timedelta
+
+    return (
+        datetime.fromisoformat(timestamp) - timedelta(milliseconds=milliseconds)
+    ).isoformat()
+
+
 def _write_pcm_wav(path: Path, pcm: bytes, sample_rate: int) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_suffix(".wav.tmp")
@@ -224,7 +232,7 @@ class ConversationRecorder:
     def record_server_event(self, payload: dict[str, Any]) -> None:
         event_type = payload.get("type")
         now = utc_now()
-        if event_type in {"hello", "gate", "turn", "error", "bye"}:
+        if event_type in {"hello", "eot", "gate", "turn", "error", "bye"}:
             self.record_backend_event(f"upstream_{event_type}", payload)
         if event_type == "hello":
             self.store.mutate_conversation(
@@ -258,7 +266,17 @@ class ConversationRecorder:
                 self.silence_before_eot_s = float(payload["sil"])
             self.speech_detected = self.speech_detected or bool(payload.get("speech"))
         elif event_type == "eot":
-            self.speech_ended_at = self.speech_ended_at or now
+            speech_end_age_ms = _nonnegative_milliseconds(
+                payload.get("speech_end_age_ms")
+            )
+            measured_at = (
+                _timestamp_before(now, speech_end_age_ms)
+                if speech_end_age_ms is not None
+                else now
+            )
+            # The runtime measurement is on the same clock as its reported
+            # latency values, so it supersedes any coarse browser-side EOT.
+            self.speech_ended_at = measured_at
             turn = self._ensure_turn()
             turn["timestamps"]["user_speech_ended_at"] = self.speech_ended_at
         elif event_type == "gate":
@@ -373,6 +391,8 @@ class ConversationRecorder:
         }
         if payload.get("expert_answer") is not None:
             model_response["expert_transcript"] = payload.get("expert_answer")
+        if payload.get("stall_text") is not None:
+            model_response["stall_transcript"] = payload.get("stall_text")
         turn["model_response"] = model_response
 
         audio_quality = {
@@ -395,7 +415,7 @@ class ConversationRecorder:
         turn["audio_quality"] = audio_quality
 
         # The duplex runtime reports these three durations from one clock,
-        # starting at its actual end-of-turn decision. Prefer them over
+        # starting at its measured last speech frame. Prefer them over
         # timestamps observed after network transport at the eval backend.
         latency_candidates = {
             "speech_end_to_gate": _reported_or_derived_milliseconds(
@@ -465,6 +485,8 @@ class ConversationRecorder:
                 "gate_latency_ms",
                 "first_audio_ms",
                 "response_complete_ms",
+                "speech_end_source",
+                "speech_rms_threshold",
                 "protocol",
                 "turn_index",
                 "act_score",

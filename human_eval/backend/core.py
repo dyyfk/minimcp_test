@@ -20,7 +20,7 @@ from pathlib import Path
 from typing import Any, Callable, Iterable
 
 
-SCHEMA_VERSION = "1.7"
+SCHEMA_VERSION = "1.8"
 MODEL_MINICPM = "minicpm"
 MODEL_MINICPM_PLUS = "minicpm_plus"
 DEFAULT_TIER = "aggressive"

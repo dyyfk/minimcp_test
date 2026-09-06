@@ -145,7 +145,7 @@ After both conversations in a task, participants complete one pairwise compariso
 - **Partial completion:** every submitted conversation rating remains a primary outcome. When both conversations in one task have ratings and its comparison is submitted, that task is analysis-complete even if the participant never finishes the other task and the session later expires. `response_record_status` and `telemetry_complete` separately identify whether transcripts, routing, and latency were fully captured.
 - **Interaction:** user/model WAV, transcripts and source, expert answer, turn count, interruption state, and conversation end reason.
 - **Routing:** local/escalated action, threshold, EOT score and series, plus manual expected action and correctness review.
-- **Latency:** speech end, gate decision, first model audio, response completion, expert, relay, stall, EOT-read, and ASR timing.
+- **Latency:** speech end, gate decision, first model audio, response completion, expert, relay, stall, EOT-read, and ASR timing. Speech end is measured from the last 20 ms microphone frame above the RMS threshold; this measurement does not control turn-taking or routing.
 - **Persistence evidence:** browser-observed model audio, completed-turn acknowledgements, response-record status, and stable rating/comparison IDs. Finish drains final upstream events and returns a persistence receipt before the rating screen opens.
 - **Audio quality:** input/output duration, speech detection, RMS/VAD statistics, and short or missing audio flags.
 - **Guardrails:** timeout, crash, disconnect, empty response, interruption, missing transcript, routing-review status, and manual conversation QC (`needs_review`, `valid`, or `invalid`).

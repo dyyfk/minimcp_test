@@ -354,6 +354,15 @@ class ModelGatewayTests(unittest.TestCase):
             )
             recorder.record_client_audio(b"\x00\x00" * 2000)
             recorder.record_server_event({"type": "score", "v": 0.41})
+            recorder.record_client_event({"type": "eot"})
+            browser_speech_end = recorder.speech_ended_at
+            recorder.record_server_event(
+                {
+                    "type": "eot",
+                    "speech_end_age_ms": 240,
+                    "speech_end_source": "server_audio_rms",
+                }
+            )
             recorder.record_server_event(
                 {
                     "type": "gate",
@@ -390,10 +399,13 @@ class ModelGatewayTests(unittest.TestCase):
                         ).decode(),
                         "uplink_text": "Test question",
                         "answer": "Test answer",
+                        "stall_text": "Let me check that for you.",
                         "expert_answer": "Verified answer",
                         "gate_latency_ms": 18,
                         "first_audio_ms": 300,
                         "response_complete_ms": 900,
+                        "speech_end_source": "server_audio_rms",
+                        "speech_rms_threshold": 0.012,
                         "expert_latency_s": 1.2,
                     }
             recorder.record_server_event(turn_payload)
@@ -413,16 +425,30 @@ class ModelGatewayTests(unittest.TestCase):
             self.assertTrue(turn["gate"]["is_information_request"])
             self.assertEqual(turn["user"]["transcript"], "Test question")
             self.assertEqual(turn["user"]["transcript_source"], "upstream_asr")
+            self.assertEqual(
+                turn["model_response"]["stall_transcript"],
+                "Let me check that for you.",
+            )
             self.assertEqual(turn["routing_review"]["status"], "unreviewed")
             self.assertEqual(turn["routing_review"]["actual_action"], "escalate")
             self.assertIsNone(turn["routing_review"]["correct"])
-            self.assertIsNone(turn["timestamps"]["user_speech_ended_at"])
+            self.assertIsNotNone(turn["timestamps"]["user_speech_ended_at"])
+            self.assertLess(
+                turn["timestamps"]["user_speech_ended_at"], browser_speech_end
+            )
             self.assertEqual(turn["latency_ms"]["speech_end_to_gate"], 18)
             self.assertEqual(turn["latency_ms"]["speech_end_to_first_audio"], 300)
             self.assertEqual(
                 turn["latency_ms"]["speech_end_to_response_complete"], 900
             )
             self.assertEqual(turn["gate"]["eot_read_ms"], 12.5)
+            self.assertEqual(
+                turn["raw_model_metrics"]["speech_end_source"],
+                "server_audio_rms",
+            )
+            self.assertEqual(
+                turn["raw_model_metrics"]["speech_rms_threshold"], 0.012
+            )
             self.assertTrue(turn["audio_quality"]["speech_detected"])
             self.assertEqual(turn["user"]["audio_bytes"], 10000)
             self.assertTrue(Path(turn["user"]["audio_path"]).exists())

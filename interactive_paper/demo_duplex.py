@@ -16,6 +16,10 @@ duplex head's decision — no VAD, no burst ASR, no abort Event, no
 client-side duck/kill-switch. The only echo protection is browser AEC
 (use headphones for a clean run).
 
+A 20 ms RMS scan timestamps the last received speech frame for latency
+measurement only. It never controls when the model speaks or whether the
+gate fires.
+
 The gate lives at the listen->speak transition: the chunk where the
 talker first decides to answer is its "starts thinking" moment. The
 L22 probe (concurrent-regime weights, gate_conc_frozen.json — closest
@@ -98,18 +102,20 @@ gpu_image = (
     .add_local_dir(os.path.join(_HERE, "_model_src"), "/workspace/model_src")
     .add_local_file(_APP_PY, "/root/modal_app.py"))
 
-# proven wording (first escalate smoke: relayed + self-corrected);
-# free-text imperatives like "stop speaking and wait" made the head
-# swallow the relay, and "say X now" got followed one unit late — the
-# canned-stall + factual context note below avoids steering entirely.
 RELAY_TMPL = ("A verified answer came back: {ans}\n"
               "Relay it to the user in one or two spoken sentences.")
 RELAY_NUDGE = "Say the verified answer aloud to the user now."
+ESCALATION_PROMPT = (
+    "[SYSTEM NOTE] A slower source is preparing the final answer. Say one "
+    "brief, natural sentence that fits this conversation and lets the user "
+    "know you need a moment. Choose your own wording, avoid acknowledgements "
+    "you already used in this conversation, and do not answer the request yet."
+)
+SPEECH_RMS_THRESHOLD = 0.012
 # 8bu relay mode. "steer": prefill RELAY_TMPL and let the talker voice the
 # answer itself (loses ~20-27 pts of correct expert answers: truncation,
 # self-answering, 99% nudges). "tts": speak the cleaned expert text
-# verbatim in the talker's own voice via the same teacher-forcing path
-# that synthesizes the canned stall, then hand the context a note. The
+# verbatim in the talker's own voice, then hand the context a note. The
 # chunk loop keeps running, so the relay stays interruptible.
 RELAY_MODE = os.environ.get("RELAY_MODE", "tts")
 RELAY_NOTE = "[SYSTEM NOTE] You just told the user: \"{ans}\" Do not repeat it."
@@ -219,21 +225,16 @@ class DuplexVoice:
                 self.st3["cnt"] += h.shape[0]
         self.model.llm.model.layers[LAYER].register_forward_hook(hook)
         self.lock = threading.Lock()
-        # canned stall in the talker's own voice (teacher-forced via the
-        # turn-based path; the duplex wrapper reuses the same TTS)
-        self.stall_pcm = None
+        # The expert relay uses the talker's TTS. Escalation acknowledgements
+        # are generated live by the duplex model rather than pre-recorded.
         self.tts_ok = False
         try:
             import librosa as _lb
             ref, _ = _lb.load(PROMPT_WAV, sr=16000, mono=True)
             self.model.init_token2wav_cache(ref)
             self.tts_ok = True
-            self.stall_pcm = self._synth_pcm(STALL, max_new_tokens=64)
-            if self.stall_pcm is not None:
-                print(f">>> canned stall: "
-                      f"{len(self.stall_pcm) / 24000:.2f}s", flush=True)
         except Exception as e:
-            print(f">>> stall synth failed (no audio stall): {e}",
+            print(f">>> relay TTS init failed: {e}",
                   flush=True)
         self.load_s = round(time.time() - t0, 1)
         print(f">>> DuplexVoice ready in {self.load_s}s", flush=True)
@@ -366,6 +367,23 @@ class DuplexVoice:
             inbox, ilock = [], _th.Lock()
             relay_box = []            # thinker -> chunk loop (one slot)
 
+            def last_speech_sample(samples):
+                """Last voiced sample in a mic packet; measurement only."""
+                frame = 320  # 20 ms at 16 kHz
+                last = None
+                for start in range(0, len(samples), frame):
+                    block = samples[start:start + frame]
+                    if len(block) == 0:
+                        continue
+                    rms = float(np.sqrt(np.mean(block * block)))
+                    if rms >= SPEECH_RMS_THRESHOLD:
+                        last = start + len(block)
+                return last
+
+            def mark_first_audio(state):
+                if state is not None and state.get("first_audio_at") is None:
+                    state["first_audio_at"] = time.perf_counter()
+
             def emit(m):
                 asyncio.run_coroutine_threadsafe(sock.send_json(m), loop)
 
@@ -396,6 +414,8 @@ class DuplexVoice:
                 history_lock = _th.Lock()
                 resolved_history = {}
                 next_history_index = 1
+                speech_marks = []                # pending-sample offset, clock
+                last_speech_at = None
 
                 def transcribe_turn(state):
                     """ASR every committed user turn without blocking audio."""
@@ -448,6 +468,7 @@ class DuplexVoice:
 
                 def finish_turn(state):
                     """Emit one analysis-ready event after ASR and speech end."""
+                    finished_at = time.perf_counter()
                     if not state["asr_done"].wait(timeout=90):
                         state["asr_error"] = "timeout"
                     state["answer"] = "".join(
@@ -465,18 +486,33 @@ class DuplexVoice:
                         "eot_score": state.get("score"),
                         "threshold": state.get("threshold"),
                         "scores": state.get("scores", []),
+                        "eot_read_ms": state.get("eot_read_ms"),
                         "act_score": state.get("act_score"),
                         "is_info": state.get("is_info"),
                         "uplink_text": state.get("uplink_text"),
                         "asr_error": state.get("asr_error"),
                         "answer": state.get("answer", ""),
+                        "stall_text": state.get("stall_text"),
                         "expert_answer": state.get("expert_answer"),
                         "expert_error": state.get("expert_error"),
                         "asr_s": state.get("asr_s"),
                         "expert_latency_s": state.get("expert_latency_s"),
                         "relay_ms": state.get("relay_ms"),
-                        "total_ms": int((time.time() - state["started_at"])
-                                        * 1000),
+                        "gate_latency_ms": int(max(
+                            0, (state["gate_decision_at"]
+                                - state["speech_ended_at"]) * 1000)),
+                        "first_audio_ms": (
+                            int(max(0, (state["first_audio_at"]
+                                       - state["speech_ended_at"]) * 1000))
+                            if state.get("first_audio_at") is not None else None
+                        ),
+                        "response_complete_ms": int(max(
+                            0, (state.get("response_completed_at", finished_at)
+                                - state["speech_ended_at"]) * 1000)),
+                        "speech_end_source": state["speech_end_source"],
+                        "speech_rms_threshold": SPEECH_RMS_THRESHOLD,
+                        "total_ms": int(max(
+                            0, (finished_at - state["speech_ended_at"]) * 1000)),
                         "audio_s": round(len(snapshot) / 16000, 2),
                         # 30 seconds of PCM16 is ~960 KB, below Modal's
                         # 2 MiB WebSocket-message limit after base64 encoding.
@@ -537,11 +573,34 @@ class DuplexVoice:
                             with ilock:
                                 got, inbox[:] = inbox[:], []
                             if got:
-                                pend = np.concatenate([pend] + got)
+                                parts = [pend]
+                                offset = len(pend)
+                                for audio, received_at, speech_sample in got:
+                                    parts.append(audio)
+                                    if speech_sample is not None:
+                                        speech_at = received_at - (
+                                            len(audio) - speech_sample
+                                        ) / 16000
+                                        speech_marks.append(
+                                            (offset + speech_sample, speech_at)
+                                        )
+                                    offset += len(audio)
+                                pend = np.concatenate(parts)
                             if len(pend) < CH:
                                 time.sleep(0.02)
                                 continue
                             ch, pend = pend[:CH], pend[CH:]
+                            consumed_marks = [
+                                timestamp for position, timestamp in speech_marks
+                                if position <= CH
+                            ]
+                            if consumed_marks:
+                                last_speech_at = max(consumed_marks)
+                            speech_marks = [
+                                (position - CH, timestamp)
+                                for position, timestamp in speech_marks
+                                if position > CH
+                            ]
                             if len(pend) > 6 * CH:
                                 emit({"type": "log",
                                       "msg": f"falling behind realtime "
@@ -553,7 +612,9 @@ class DuplexVoice:
                             if relay_box:
                                 relay_turn = relay_box.pop(0)
                                 ans = relay_turn.get("expert_answer", "")
-                                relay_turn["relay_started_at"] = time.time()
+                                relay_turn["relay_started_at"] = (
+                                    time.perf_counter()
+                                )
                                 if muted:
                                     emit({"type": "log",
                                           "msg": f"muted {muted - 1} chunks "
@@ -580,6 +641,7 @@ class DuplexVoice:
                                     if pcm is not None:
                                         i16r = (np.clip(pcm, -1, 1)
                                                 * 32767).astype("<i2")
+                                        mark_first_audio(relay_turn)
                                         emit({"type": "audio", "sr": 24000,
                                               "pcm": base64.b64encode(
                                                   i16r.tobytes()).decode()})
@@ -606,7 +668,7 @@ class DuplexVoice:
                                     r = self.duplex.streaming_generate(
                                         prompt_wav_path=PROMPT_WAV,
                                         top_k=GEN_TOP_K)
-                                    _emit_gen(r, relay=True)
+                                    _emit_gen(r, relay=True, state=relay_turn)
                                     if r.get("text"):
                                         relay_turn["assistant_parts"].append(
                                             r["text"])
@@ -618,7 +680,8 @@ class DuplexVoice:
                                         r = self.duplex.streaming_generate(
                                             prompt_wav_path=PROMPT_WAV,
                                             top_k=GEN_TOP_K)
-                                        _emit_gen(r, relay=True)
+                                        _emit_gen(r, relay=True,
+                                                  state=relay_turn)
                                         if r.get("text"):
                                             relay_turn["assistant_parts"].append(
                                                 r["text"])
@@ -642,7 +705,19 @@ class DuplexVoice:
                                 top_k=GEN_TOP_K)
                             n_chunk += 1
 
+                            transition_detected_at = (
+                                time.perf_counter()
+                                if prev_listen and not r["is_listen"]
+                                else None
+                            )
+
+                            score_read_started_at = time.perf_counter()
                             score = self._score_now()
+                            score_read_ms = round(
+                                (time.perf_counter()
+                                 - score_read_started_at) * 1000,
+                                3,
+                            )
                             if score is not None:
                                 turn_scores.append(round(score, 4))
                                 emit({"type": "score", "i": n_chunk,
@@ -673,21 +748,43 @@ class DuplexVoice:
                                         if user_win else
                                         np.zeros(1600,
                                                  np.float32))[-30 * 16000:]
+                                gate_decision_at = time.perf_counter()
+                                speech_ended_at = min(
+                                    last_speech_at or transition_detected_at,
+                                    transition_detected_at,
+                                )
                                 active_turn = {
                                     "index": turn_index,
-                                    "started_at": time.time(),
+                                    "started_at": speech_ended_at,
+                                    "speech_ended_at": speech_ended_at,
+                                    "speech_end_source": (
+                                        "server_audio_rms"
+                                        if last_speech_at is not None
+                                        else "model_speak_transition"
+                                    ),
+                                    "gate_decision_at": gate_decision_at,
                                     "snapshot": snap.copy(),
                                     "fired": fired,
                                     "score": (None if score is None
                                               else round(score, 4)),
-                                    "threshold": round(thr, 4),
+                                    "threshold": round(thr_eff, 4),
                                     "scores": list(turn_scores),
+                                    "eot_read_ms": score_read_ms,
                                     "act_score": (None if act is None
                                                   else round(act, 4)),
                                     "is_info": bool(is_info),
                                     "assistant_parts": [],
                                     "asr_done": _th.Event(),
                                 }
+                                emit({
+                                    "type": "eot",
+                                    "turn_index": turn_index,
+                                    "speech_end_age_ms": int(max(
+                                        0, (gate_decision_at
+                                            - speech_ended_at) * 1000)),
+                                    "speech_end_source": active_turn[
+                                        "speech_end_source"],
+                                })
                                 emit({"type": "gate",
                                       "score": (None if score is None
                                                 else round(score, 4)),
@@ -695,6 +792,10 @@ class DuplexVoice:
                                       "thr_mode": thr_mode,
                                       "thr_static": round(thr, 4),
                                       "n_window": len(score_win),
+                                      "eot_read_ms": score_read_ms,
+                                      "gate_latency_ms": int(max(
+                                          0, (gate_decision_at
+                                              - speech_ended_at) * 1000)),
                                       "fired": fired,
                                       "act": (None if act is None
                                               else round(act, 4)),
@@ -711,39 +812,38 @@ class DuplexVoice:
                                                args=(active_turn,),
                                                daemon=True).start()
 
-                            _emit_gen(r, mute=muted > 0)
+                            target_turn = (relay_turn if relay_guard
+                                           and relay_turn is not None
+                                           else active_turn)
+                            # When the gate fires, suppress the local answer's
+                            # opening fragment. The model generates one fresh,
+                            # natural acknowledgement below instead.
+                            _emit_gen(r, mute=muted > 0 or fired_now,
+                                      state=target_turn)
                             if muted:
                                 muted += 1
-                            if r.get("text") and not muted:
+                            if r.get("text") and not muted and not fired_now:
                                 turn_text.append(r["text"])
-                                target_turn = (relay_turn if relay_guard
-                                               and relay_turn is not None
-                                               else active_turn)
                                 if target_turn is not None:
                                     target_turn["assistant_parts"].append(
                                         r["text"])
                             if fired_now:
                                 turn_fired = True
-                                if self.stall_pcm is not None:
-                                    i16s = (np.clip(self.stall_pcm, -1, 1)
-                                            * 32767).astype("<i2")
-                                    emit({"type": "audio", "sr": 24000,
-                                          "pcm": base64.b64encode(
-                                              i16s.tobytes()).decode()})
-                                    emit({"type": "text", "v": " " + STALL})
-                                    active_turn["assistant_parts"].append(
-                                        " " + STALL)
                                 emit({"type": "log",
-                                      "msg": "canned stall + context note; "
-                                             "local continuation muted "
-                                             "until relay"})
+                                      "msg": "local opening muted; generating "
+                                             "a natural escalation acknowledgement"})
                                 muted = 1
                                 self.duplex.streaming_prefill(
-                                    text_list=[STALL_NOTE])
-                                r = self.duplex.streaming_generate(
+                                    text_list=[ESCALATION_PROMPT])
+                                stall_r = self.duplex.streaming_generate(
                                     prompt_wav_path=PROMPT_WAV,
+                                    max_new_speak_tokens_per_chunk=32,
                                     top_k=GEN_TOP_K)
-                                _emit_gen(r, mute=True)
+                                _emit_gen(stall_r, state=active_turn)
+                                if stall_r.get("text"):
+                                    active_turn["assistant_parts"].append(
+                                        stall_r["text"])
+                                    active_turn["stall_text"] = stall_r["text"]
                             if r.get("end_of_turn"):
                                 if muted:
                                     emit({"type": "log",
@@ -752,14 +852,21 @@ class DuplexVoice:
                                     muted = 0
                                 ans = "".join(turn_text).strip()
                                 if relay_guard and relay_turn is not None:
+                                    relay_turn["response_completed_at"] = (
+                                        time.perf_counter()
+                                    )
                                     relay_turn["relay_ms"] = int(
-                                        (time.time() - relay_turn.get(
-                                            "relay_started_at", time.time()))
+                                        (time.perf_counter() - relay_turn.get(
+                                            "relay_started_at",
+                                            time.perf_counter()))
                                         * 1000)
                                     finish_turn_async(relay_turn)
                                     relay_turn = None
                                 elif active_turn is not None:
                                     if not active_turn["fired"]:
+                                        active_turn["response_completed_at"] = (
+                                            time.perf_counter()
+                                        )
                                         if ans and not active_turn[
                                                 "assistant_parts"]:
                                             active_turn["assistant_parts"].append(
@@ -773,6 +880,7 @@ class DuplexVoice:
                                 turn_scores = []
                                 relay_guard = False
                                 self.st3.update(sum=None, cnt=0)
+                                last_speech_at = None
                             prev_listen = r["is_listen"]
                         except Exception as ie:
                             # 8bn: one bad iteration must not
@@ -793,7 +901,7 @@ class DuplexVoice:
                 finally:
                     emit({"type": "bye"})
 
-            def _emit_gen(r, relay=False, mute=False):
+            def _emit_gen(r, relay=False, mute=False, state=None):
                 if mute:
                     # 8bm: thinker engaged — the condemned turn's
                     # continuation is generated (context true,
@@ -811,6 +919,7 @@ class DuplexVoice:
                 if not r["is_listen"] and wf is not None and len(wf):
                     i16 = (np.clip(np.asarray(wf, dtype=np.float32),
                                    -1, 1) * 32767).astype("<i2")
+                    mark_first_audio(state)
                     emit({"type": "audio", "sr": 24000,
                           "pcm": base64.b64encode(i16.tobytes()).decode()})
                 if not r["is_listen"] and r.get("text"):
@@ -850,10 +959,12 @@ class DuplexVoice:
                         continue
                     b = msg.get("bytes")
                     if b:
+                        received_at = time.perf_counter()
                         f = (np.frombuffer(b, dtype=np.int16)
                              .astype(np.float32) / 32768.0)
+                        speech_sample = last_speech_sample(f)
                         with ilock:
-                            inbox.append(f)
+                            inbox.append((f, received_at, speech_sample))
             except RuntimeError:
                 pass
             finally:
