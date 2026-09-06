@@ -414,9 +414,14 @@ class ConversationRecorder:
             audio_quality["silence_before_eot_s"] = self.silence_before_eot_s
         turn["audio_quality"] = audio_quality
 
-        # The duplex runtime reports these three durations from one clock,
+        # The duplex runtime reports these durations from one clock,
         # starting at its measured last speech frame. Prefer them over
         # timestamps observed after network transport at the eval backend.
+        substantive_first_audio_ms = payload.get("substantive_first_audio_ms")
+        if substantive_first_audio_ms is None and not turn["gate"].get("escalated"):
+            # Backward-compatible local turns: their first audio is already the
+            # answer. Never apply this fallback to an escalated stall phrase.
+            substantive_first_audio_ms = payload.get("first_audio_ms")
         latency_candidates = {
             "speech_end_to_gate": _reported_or_derived_milliseconds(
                 payload.get("gate_latency_ms"),
@@ -427,6 +432,9 @@ class ConversationRecorder:
                 payload.get("first_audio_ms"),
                 turn["timestamps"].get("user_speech_ended_at"),
                 self.first_model_audio_at,
+            ),
+            "speech_end_to_substantive_audio": _nonnegative_milliseconds(
+                substantive_first_audio_ms
             ),
             "speech_end_to_response_complete": _reported_or_derived_milliseconds(
                 payload.get("response_complete_ms"),
@@ -487,6 +495,8 @@ class ConversationRecorder:
                 "total_ms",
                 "gate_latency_ms",
                 "first_audio_ms",
+                "substantive_first_audio_ms",
+                "relay_first_audio_ms",
                 "response_complete_ms",
                 "escalation_ack_version",
                 "relay_mode",

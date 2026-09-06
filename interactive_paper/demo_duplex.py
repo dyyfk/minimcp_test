@@ -401,14 +401,26 @@ class DuplexVoice:
                         last = start + len(block)
                 return last
 
-            def mark_first_audio(state):
-                if state is not None and state.get("first_audio_at") is None:
-                    state["first_audio_at"] = time.perf_counter()
+            def mark_first_audio(state, audio_role):
+                if state is None:
+                    return
+                now = time.perf_counter()
+                if state.get("first_audio_at") is None:
+                    state["first_audio_at"] = now
+                # A stall acknowledgement is audible but is not the useful
+                # answer. Local output and expert relay output are substantive.
+                if audio_role in {"local", "relay"}:
+                    if state.get("substantive_first_audio_at") is None:
+                        state["substantive_first_audio_at"] = now
+                    if (audio_role == "relay"
+                            and state.get("relay_first_audio_at") is None):
+                        state["relay_first_audio_at"] = now
 
             def emit(m):
                 asyncio.run_coroutine_threadsafe(sock.send_json(m), loop)
 
-            def emit_audible_audio(waveform, state=None, sample_rate=24000):
+            def emit_audible_audio(waveform, state=None, sample_rate=24000,
+                                   audio_role="local"):
                 """Send and timestamp only PCM that contains audible energy."""
                 if waveform is None:
                     return False
@@ -422,7 +434,7 @@ class DuplexVoice:
                                  f"(rms={rms:.6f})"})
                     return False
                 i16 = (np.clip(samples, -1, 1) * 32767).astype("<i2")
-                mark_first_audio(state)
+                mark_first_audio(state, audio_role)
                 emit({"type": "audio", "sr": sample_rate,
                       "pcm": base64.b64encode(i16.tobytes()).decode()})
                 return True
@@ -558,6 +570,19 @@ class DuplexVoice:
                             int(max(0, (state["first_audio_at"]
                                        - state["speech_ended_at"]) * 1000))
                             if state.get("first_audio_at") is not None else None
+                        ),
+                        "substantive_first_audio_ms": (
+                            int(max(0, (
+                                state["substantive_first_audio_at"]
+                                - state["speech_ended_at"]) * 1000))
+                            if state.get("substantive_first_audio_at") is not None
+                            else None
+                        ),
+                        "relay_first_audio_ms": (
+                            int(max(0, (state["relay_first_audio_at"]
+                                       - state["speech_ended_at"]) * 1000))
+                            if state.get("relay_first_audio_at") is not None
+                            else None
                         ),
                         "response_complete_ms": int(max(
                             0, (state.get("response_completed_at", finished_at)
@@ -769,7 +794,8 @@ class DuplexVoice:
                                 pcm = relay_turn.get("relay_pcm")
                                 if (RELAY_MODE == "openai_tts"
                                         and emit_audible_audio(
-                                            pcm, relay_turn)):
+                                            pcm, relay_turn,
+                                            audio_role="relay")):
                                     emit({"type": "text", "v": " " + spoken,
                                           "relay": True})
                                     relay_turn["assistant_parts"].append(
@@ -951,7 +977,8 @@ class DuplexVoice:
                             # When the gate fires, suppress the local answer's
                             # opening fragment and play one cached, verified
                             # acknowledgement immediately.
-                            _emit_gen(r, mute=muted > 0 or fired_now,
+                            _emit_gen(r, relay=relay_guard,
+                                      mute=muted > 0 or fired_now,
                                       state=target_turn)
                             if muted:
                                 muted += 1
@@ -971,7 +998,9 @@ class DuplexVoice:
                                         self.stall_index
                                         % len(self.stall_pcms)]
                                     self.stall_index += 1
-                                    if emit_audible_audio(pcm, active_turn):
+                                    if emit_audible_audio(
+                                            pcm, active_turn,
+                                            audio_role="stall"):
                                         emit({"type": "text", "v": phrase})
                                         active_turn["stall_text"] = phrase
                                         active_turn["stall_ms"] = int(max(
@@ -1051,7 +1080,8 @@ class DuplexVoice:
                     return
                 wf = r.get("audio_waveform")
                 if not r["is_listen"]:
-                    emit_audible_audio(wf, state)
+                    emit_audible_audio(
+                        wf, state, audio_role="relay" if relay else "local")
                 if not r["is_listen"] and r.get("text"):
                     emit({"type": "text", "v": r["text"],
                           "relay": relay})

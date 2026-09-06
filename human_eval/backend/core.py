@@ -20,7 +20,7 @@ from pathlib import Path
 from typing import Any, Callable, Iterable
 
 
-SCHEMA_VERSION = "2.0"
+SCHEMA_VERSION = "2.1"
 MODEL_MINICPM = "minicpm"
 MODEL_MINICPM_PLUS = "minicpm_plus"
 DEFAULT_TIER = "aggressive"
@@ -578,6 +578,7 @@ def _reliable_turn_latency(turn: dict[str, Any], key: str) -> float | int | None
         raw_key = {
             "speech_end_to_gate": "gate_latency_ms",
             "speech_end_to_first_audio": "first_audio_ms",
+            "speech_end_to_substantive_audio": "substantive_first_audio_ms",
             "speech_end_to_response_complete": "response_complete_ms",
         }.get(key)
         if value != 0 or timestamps.get("user_speech_ended_at") or (
@@ -807,6 +808,12 @@ def analysis_rows(sessions: Iterable[dict[str, Any]], table: str) -> list[dict[s
                             "latency_first_audio_median_ms": _median_numeric(
                                 _reliable_turn_latency(
                                     turn, "speech_end_to_first_audio"
+                                )
+                                for turn in turns
+                            ),
+                            "latency_substantive_audio_median_ms": _median_numeric(
+                                _reliable_turn_latency(
+                                    turn, "speech_end_to_substantive_audio"
                                 )
                                 for turn in turns
                             ),

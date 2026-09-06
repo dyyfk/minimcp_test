@@ -407,6 +407,8 @@ class ModelGatewayTests(unittest.TestCase):
                         "expert_answer": "Verified answer",
                         "gate_latency_ms": 18,
                         "first_audio_ms": 300,
+                        "substantive_first_audio_ms": 620,
+                        "relay_first_audio_ms": 620,
                         "response_complete_ms": 900,
                         "escalation_ack_version": "cached_rotation_v2",
                         "relay_mode": "openai_tts",
@@ -461,6 +463,9 @@ class ModelGatewayTests(unittest.TestCase):
             self.assertEqual(
                 turn["latency_ms"]["speech_end_to_response_complete"], 900
             )
+            self.assertEqual(
+                turn["latency_ms"]["speech_end_to_substantive_audio"], 620
+            )
             self.assertEqual(turn["gate"]["eot_read_ms"], 12.5)
             self.assertEqual(
                 turn["raw_model_metrics"]["speech_end_source"],
@@ -477,6 +482,12 @@ class ModelGatewayTests(unittest.TestCase):
                 "cached_rotation_v2",
             )
             self.assertEqual(turn["raw_model_metrics"]["relay_tts_ms"], 210)
+            self.assertEqual(
+                turn["raw_model_metrics"]["substantive_first_audio_ms"], 620
+            )
+            self.assertEqual(
+                turn["raw_model_metrics"]["relay_first_audio_ms"], 620
+            )
             self.assertEqual(
                 turn["raw_model_metrics"]["relay_tts_voice"], "alloy"
             )
@@ -513,6 +524,9 @@ class ModelGatewayTests(unittest.TestCase):
             self.assertEqual(
                 turn_rows[0]["latency_speech_end_to_first_audio_ms"], 300
             )
+            self.assertEqual(
+                turn_rows[0]["latency_speech_end_to_substantive_audio_ms"], 620
+            )
 
             conversation_rows = analysis_rows([persisted], "conversations")
             conversation_row = next(
@@ -523,6 +537,9 @@ class ModelGatewayTests(unittest.TestCase):
             self.assertEqual(conversation_row["escalation_rate"], 1)
             self.assertEqual(conversation_row["latency_gate_median_ms"], 18)
             self.assertEqual(conversation_row["latency_first_audio_median_ms"], 300)
+            self.assertEqual(
+                conversation_row["latency_substantive_audio_median_ms"], 620
+            )
             self.assertEqual(
                 conversation_row["latency_response_complete_median_ms"], 900
             )

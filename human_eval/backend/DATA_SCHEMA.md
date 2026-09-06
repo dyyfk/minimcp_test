@@ -31,7 +31,7 @@ For every model turn:
 - User WAV path, byte count, sample rate, transcript, transcript status, and source (`upstream_asr` or `posthoc_asr`)
 - Model WAV path, byte count, sample rate, final transcript, escalation acknowledgement and strategy version, and expert transcript when escalated
 - Input-stream start, user-speech start/end, gate decision, first model audio, and response-complete timestamps
-- Upstream speech-end-to-gate, speech-end-to-first-audio, and speech-end-to-response-complete latency, measured on one model-runtime clock. First audio is the first PCM chunk emitted by the runtime; response complete is the runtime's end-of-turn/relay completion, not browser playback completion.
+- Upstream speech-end-to-gate, speech-end-to-first-audio, speech-end-to-substantive-audio, and speech-end-to-response-complete latency, measured on one model-runtime clock. First audio is the first audible PCM chunk and may be an escalation acknowledgement. Substantive audio is the local answer or the expert relay, excluding that acknowledgement. Response complete is the runtime's end-of-turn/relay completion, not browser playback completion.
 - Model-reported expert, stall, relay/TTS configuration, relay finish reason and superseded flag, EOT score-read, optional post-hoc ASR latency, and the input/output RMS thresholds used for timing and audible-audio validation
 - Input/output duration, speech-detected flag, input RMS mean/max, mean VAD threshold, and silence before EOT
 
@@ -65,7 +65,7 @@ Null interpretation:
 - `quality_review.status=needs_review` is likewise not an invalid label; it asks a reviewer to check task adherence and data quality.
 - Records from schema 1.3 and earlier are normalized on read. Legacy conversation `status=completed` becomes `interaction_completed`; rating presence determines evaluation completion.
 - Expert, stall, and relay fields do not apply to local turns and are omitted in new records.
-- Missing EOT-derived latency fields indicate a collection defect, not “not applicable.” `eot_read_ms` measures only the cost of reading the gate score and must never be substituted for EOT-to-gate latency. Older affected records remain missing rather than being exported as a false `0ms` value.
+- Missing EOT-derived latency fields indicate a collection defect, not “not applicable.” A missing substantive-audio value is expected for a superseded or failed escalated answer. `eot_read_ms` measures only the cost of reading the gate score and must never be substituted for EOT-to-gate latency. Older affected records remain missing rather than being exported as a false `0ms` value.
 - Blank or whitespace-only transcripts are normalized to missing and receive `missing_transcript=true`.
 
 Analysis exports:
