@@ -42,14 +42,21 @@ async def smoke(arm: str = "local", tier: str = "balanced",
     import pandas as pd
     import websockets
 
-    assert arm in ("local", "barge", "escalate", "stopword"), arm
-    if arm == "stopword":
+    assert arm in ("local", "barge", "escalate", "stopword",
+                   "phatic"), arm
+    if arm in ("stopword", "phatic"):
         # speak ONLY floor-management utterances from silence — with the
         # 8bh act gate none of them may escalate (gate events must show
         # is_info=false or stay local; zero "escalating" phases)
         import glob as _glob
-        stims = sorted(_glob.glob("/data/flooract_audio/fa0*.wav"))
-        stims = stims[::37][:6] or stims[:6]
+        if arm == "phatic":
+            # 8cp: the user-hit false escalations — social openers,
+            # channel checks, meta (en+zh); zero may escalate
+            stims = [f"/data/phatic_audio/ph{i:04d}.wav"
+                     for i in (0, 4, 18, 30, 36, 66)]
+        else:
+            stims = sorted(_glob.glob("/data/flooract_audio/fa0*.wav"))
+            stims = stims[::37][:6] or stims[:6]
         t0 = _time.time()
         r = None
         while _time.time() - t0 < 480:
@@ -105,7 +112,7 @@ async def smoke(arm: str = "local", tier: str = "balanced",
             await asyncio.sleep(1)
             rt.cancel()
         fired = sum(1 for g in gates if g.get("fired"))
-        print(f"\n===== STOPWORD SUMMARY =====\n{len(stims)} stims, "
+        print(f"\n===== {arm.upper()} SUMMARY =====\n{len(stims)} stims, "
               f"{len(gates)} gate reads, fired={fired}, "
               f"escalating-phases={esc_phases}")
         return {"arm": arm, "n_stims": len(stims),

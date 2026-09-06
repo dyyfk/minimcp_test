@@ -74,4 +74,38 @@ Disfluent correction, chained tool calls, and multi-turn grounding
 remain open \citep{lin2026fdbv3}, and in native testing a new
 question asked during the expert wait usually derails the pending
 relay, so a production system has to cancel or replace an in-flight
-request when the user moves on.
+request when the user moves on. Interruption inherits the duplex
+head's own turn-taking, and here the harness's bookkeeping matters
+more than decode-time levers. Our first design narrated escalations to
+the head in bracketed system notes and let the condemned local answer
+run on silently to its own end-of-turn; after a barge the head then
+committed to the following question only about two times in three,
+and no decode-side intervention (down-weighting the listen token,
+forced listen windows, closing the interrupted turn) made the commit
+reliable. The failures traced to the context those mechanisms left
+behind---content the head never saw in training, stacked against
+speaking. A three-arm control (stock serving, gate-disabled, full
+escalation) made the attribution exact: after a mid-answer ``stop''
+the stock head commits to a follow-up question within $\sim$2\,s in
+6/6 runs, our gate-disabled loop matches it 6/6, and only the
+escalation arm locked (3/6)---so every part of the deficit was the
+harness, none of it the head. Closing the gap took three rounds of
+making the escalation context indistinguishable from a native
+session: teacher-forcing whatever audio the system actually played
+(stall line, relayed answer up to the cut) into the context as the
+head's own closed speech turn; pacing the relayed words into the
+per-second audio units \emph{while} they play, rather than holding
+the head in a forced listen state through its own audible answer;
+and dropping the post-interruption forced-listen window. With all
+three, the escalation arm recovers 6/6, matching stock. Restoring
+the commit also exposed a calibration layer: the post-interruption
+context is a regime of its own, and the dialogue-act gate---
+calibrated on standalone and ordinary in-context utterances---
+initially ruled real follow-up questions floor turns there; its
+stimulus set had to be extended with interruption-context dumps.
+The general lesson is that a duplex head's turn-taking is
+conditioned on everything the serving layer writes into its context,
+and any bookkeeping shape a native session cannot produce (system
+notes, phantom muted turns, forced listen runs) is paid for in
+floor behavior; claims that a failure is ``intrinsic to the head''
+should be required to survive a stock-serving control arm.

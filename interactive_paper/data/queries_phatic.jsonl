@@ -1,0 +1,88 @@
+{"id": "ph0000", "pool": "phatic-social", "query": "How are you?", "reference_answer": null, "split": ""}
+{"id": "ph0001", "pool": "phatic-social", "query": "How are you?", "reference_answer": null, "split": ""}
+{"id": "ph0002", "pool": "phatic-social", "query": "How are you doing?", "reference_answer": null, "split": ""}
+{"id": "ph0003", "pool": "phatic-social", "query": "How are you doing?", "reference_answer": null, "split": ""}
+{"id": "ph0004", "pool": "phatic-social", "query": "How's it going?", "reference_answer": null, "split": ""}
+{"id": "ph0005", "pool": "phatic-social", "query": "How's it going?", "reference_answer": null, "split": ""}
+{"id": "ph0006", "pool": "phatic-social", "query": "What's up?", "reference_answer": null, "split": ""}
+{"id": "ph0007", "pool": "phatic-social", "query": "What's up?", "reference_answer": null, "split": ""}
+{"id": "ph0008", "pool": "phatic-social", "query": "How was your day?", "reference_answer": null, "split": ""}
+{"id": "ph0009", "pool": "phatic-social", "query": "How was your day?", "reference_answer": null, "split": ""}
+{"id": "ph0010", "pool": "phatic-social", "query": "How's your day going?", "reference_answer": null, "split": ""}
+{"id": "ph0011", "pool": "phatic-social", "query": "How's your day going?", "reference_answer": null, "split": ""}
+{"id": "ph0012", "pool": "phatic-social", "query": "How have you been?", "reference_answer": null, "split": ""}
+{"id": "ph0013", "pool": "phatic-social", "query": "How have you been?", "reference_answer": null, "split": ""}
+{"id": "ph0014", "pool": "phatic-social", "query": "What's new?", "reference_answer": null, "split": ""}
+{"id": "ph0015", "pool": "phatic-social", "query": "What's new?", "reference_answer": null, "split": ""}
+{"id": "ph0016", "pool": "phatic-social", "query": "You doing okay?", "reference_answer": null, "split": ""}
+{"id": "ph0017", "pool": "phatic-social", "query": "You doing okay?", "reference_answer": null, "split": ""}
+{"id": "ph0018", "pool": "phatic-social", "query": "你好吗？", "reference_answer": null, "split": ""}
+{"id": "ph0019", "pool": "phatic-social", "query": "你好吗？", "reference_answer": null, "split": ""}
+{"id": "ph0020", "pool": "phatic-social", "query": "你今天怎么样？", "reference_answer": null, "split": ""}
+{"id": "ph0021", "pool": "phatic-social", "query": "你今天怎么样？", "reference_answer": null, "split": ""}
+{"id": "ph0022", "pool": "phatic-social", "query": "最近怎么样？", "reference_answer": null, "split": ""}
+{"id": "ph0023", "pool": "phatic-social", "query": "最近怎么样？", "reference_answer": null, "split": ""}
+{"id": "ph0024", "pool": "phatic-social", "query": "最近好吗？", "reference_answer": null, "split": ""}
+{"id": "ph0025", "pool": "phatic-social", "query": "最近好吗？", "reference_answer": null, "split": ""}
+{"id": "ph0026", "pool": "phatic-social", "query": "你还好吗？", "reference_answer": null, "split": ""}
+{"id": "ph0027", "pool": "phatic-social", "query": "你还好吗？", "reference_answer": null, "split": ""}
+{"id": "ph0028", "pool": "phatic-social", "query": "吃了吗？", "reference_answer": null, "split": ""}
+{"id": "ph0029", "pool": "phatic-social", "query": "吃了吗？", "reference_answer": null, "split": ""}
+{"id": "ph0030", "pool": "phatic-chancheck", "query": "Can you hear me?", "reference_answer": null, "split": ""}
+{"id": "ph0031", "pool": "phatic-chancheck", "query": "Can you hear me?", "reference_answer": null, "split": ""}
+{"id": "ph0032", "pool": "phatic-chancheck", "query": "Hello, can you hear me?", "reference_answer": null, "split": ""}
+{"id": "ph0033", "pool": "phatic-chancheck", "query": "Hello, can you hear me?", "reference_answer": null, "split": ""}
+{"id": "ph0034", "pool": "phatic-chancheck", "query": "Can you hear me okay?", "reference_answer": null, "split": ""}
+{"id": "ph0035", "pool": "phatic-chancheck", "query": "Can you hear me okay?", "reference_answer": null, "split": ""}
+{"id": "ph0036", "pool": "phatic-chancheck", "query": "Are you there?", "reference_answer": null, "split": ""}
+{"id": "ph0037", "pool": "phatic-chancheck", "query": "Are you there?", "reference_answer": null, "split": ""}
+{"id": "ph0038", "pool": "phatic-chancheck", "query": "Are you still there?", "reference_answer": null, "split": ""}
+{"id": "ph0039", "pool": "phatic-chancheck", "query": "Are you still there?", "reference_answer": null, "split": ""}
+{"id": "ph0040", "pool": "phatic-chancheck", "query": "Hello? Hello?", "reference_answer": null, "split": ""}
+{"id": "ph0041", "pool": "phatic-chancheck", "query": "Hello? Hello?", "reference_answer": null, "split": ""}
+{"id": "ph0042", "pool": "phatic-chancheck", "query": "Is this working?", "reference_answer": null, "split": ""}
+{"id": "ph0043", "pool": "phatic-chancheck", "query": "Is this working?", "reference_answer": null, "split": ""}
+{"id": "ph0044", "pool": "phatic-chancheck", "query": "Testing, testing.", "reference_answer": null, "split": ""}
+{"id": "ph0045", "pool": "phatic-chancheck", "query": "Testing, testing.", "reference_answer": null, "split": ""}
+{"id": "ph0046", "pool": "phatic-chancheck", "query": "Do you copy?", "reference_answer": null, "split": ""}
+{"id": "ph0047", "pool": "phatic-chancheck", "query": "Do you copy?", "reference_answer": null, "split": ""}
+{"id": "ph0048", "pool": "phatic-chancheck", "query": "Can you hear me now?", "reference_answer": null, "split": ""}
+{"id": "ph0049", "pool": "phatic-chancheck", "query": "Can you hear me now?", "reference_answer": null, "split": ""}
+{"id": "ph0050", "pool": "phatic-chancheck", "query": "能听到我说话吗？", "reference_answer": null, "split": ""}
+{"id": "ph0051", "pool": "phatic-chancheck", "query": "能听到我说话吗？", "reference_answer": null, "split": ""}
+{"id": "ph0052", "pool": "phatic-chancheck", "query": "你能听到吗？", "reference_answer": null, "split": ""}
+{"id": "ph0053", "pool": "phatic-chancheck", "query": "你能听到吗？", "reference_answer": null, "split": ""}
+{"id": "ph0054", "pool": "phatic-chancheck", "query": "听得到吗？", "reference_answer": null, "split": ""}
+{"id": "ph0055", "pool": "phatic-chancheck", "query": "听得到吗？", "reference_answer": null, "split": ""}
+{"id": "ph0056", "pool": "phatic-chancheck", "query": "喂？喂？", "reference_answer": null, "split": ""}
+{"id": "ph0057", "pool": "phatic-chancheck", "query": "喂？喂？", "reference_answer": null, "split": ""}
+{"id": "ph0058", "pool": "phatic-chancheck", "query": "在吗？", "reference_answer": null, "split": ""}
+{"id": "ph0059", "pool": "phatic-chancheck", "query": "在吗？", "reference_answer": null, "split": ""}
+{"id": "ph0060", "pool": "phatic-chancheck", "query": "还在吗？", "reference_answer": null, "split": ""}
+{"id": "ph0061", "pool": "phatic-chancheck", "query": "还在吗？", "reference_answer": null, "split": ""}
+{"id": "ph0062", "pool": "phatic-chancheck", "query": "有人吗？", "reference_answer": null, "split": ""}
+{"id": "ph0063", "pool": "phatic-chancheck", "query": "有人吗？", "reference_answer": null, "split": ""}
+{"id": "ph0064", "pool": "phatic-chancheck", "query": "测试，测试。", "reference_answer": null, "split": ""}
+{"id": "ph0065", "pool": "phatic-chancheck", "query": "测试，测试。", "reference_answer": null, "split": ""}
+{"id": "ph0066", "pool": "phatic-meta", "query": "What's your name?", "reference_answer": null, "split": ""}
+{"id": "ph0067", "pool": "phatic-meta", "query": "What's your name?", "reference_answer": null, "split": ""}
+{"id": "ph0068", "pool": "phatic-meta", "query": "Who are you?", "reference_answer": null, "split": ""}
+{"id": "ph0069", "pool": "phatic-meta", "query": "Who are you?", "reference_answer": null, "split": ""}
+{"id": "ph0070", "pool": "phatic-meta", "query": "What can you do?", "reference_answer": null, "split": ""}
+{"id": "ph0071", "pool": "phatic-meta", "query": "What can you do?", "reference_answer": null, "split": ""}
+{"id": "ph0072", "pool": "phatic-meta", "query": "Are you a robot?", "reference_answer": null, "split": ""}
+{"id": "ph0073", "pool": "phatic-meta", "query": "Are you a robot?", "reference_answer": null, "split": ""}
+{"id": "ph0074", "pool": "phatic-meta", "query": "Can you help me?", "reference_answer": null, "split": ""}
+{"id": "ph0075", "pool": "phatic-meta", "query": "Can you help me?", "reference_answer": null, "split": ""}
+{"id": "ph0076", "pool": "phatic-meta", "query": "Do you speak Chinese?", "reference_answer": null, "split": ""}
+{"id": "ph0077", "pool": "phatic-meta", "query": "Do you speak Chinese?", "reference_answer": null, "split": ""}
+{"id": "ph0078", "pool": "phatic-meta", "query": "你叫什么名字？", "reference_answer": null, "split": ""}
+{"id": "ph0079", "pool": "phatic-meta", "query": "你叫什么名字？", "reference_answer": null, "split": ""}
+{"id": "ph0080", "pool": "phatic-meta", "query": "你是谁？", "reference_answer": null, "split": ""}
+{"id": "ph0081", "pool": "phatic-meta", "query": "你是谁？", "reference_answer": null, "split": ""}
+{"id": "ph0082", "pool": "phatic-meta", "query": "你能做什么？", "reference_answer": null, "split": ""}
+{"id": "ph0083", "pool": "phatic-meta", "query": "你能做什么？", "reference_answer": null, "split": ""}
+{"id": "ph0084", "pool": "phatic-meta", "query": "你是机器人吗？", "reference_answer": null, "split": ""}
+{"id": "ph0085", "pool": "phatic-meta", "query": "你是机器人吗？", "reference_answer": null, "split": ""}
+{"id": "ph0086", "pool": "phatic-meta", "query": "你会说英文吗？", "reference_answer": null, "split": ""}
+{"id": "ph0087", "pool": "phatic-meta", "query": "你会说英文吗？", "reference_answer": null, "split": ""}

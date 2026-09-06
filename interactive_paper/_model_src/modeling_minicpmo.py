@@ -2607,6 +2607,93 @@ class MiniCPMODuplex:
     def clear_break_event(self):
         self.break_event.clear()
 
+    def end_turn_now(self):
+        """8ce: externally terminate an in-flight speak turn (barge cut).
+
+        Feed <|turn_eos|> (unlocks the listen suppression that
+        current_turn_ended gates), reset per-turn TTS/token2wav, and
+        reset the force-listen counter so the caller's force_listen_count
+        actually engages. NOTE: we deliberately do NOT run the unit-close
+        bookkeeping (</unit> + register_unit_end + sliding-window
+        enforcement) here — enforcing the window mid-stream measurably
+        LOWERED the head's follow-up commit rate (8/9 -> ~2/5 in live
+        barge tests). The residual post-cut listen-lock is the head's own
+        intrinsic listen/speak variance, not a bookkeeping gap.
+        """
+        if getattr(self, "current_turn_ended", True):
+            return
+        self.decoder.feed(self.decoder.embed_token(self.turn_eos_token_id))
+        self.total_ids.append(self.turn_eos_token_id)
+        self.current_turn_ended = True
+        self.tts_text_start_pos = 0
+        self.tts_past_key_values = None
+        self.tts_current_turn_start_time = None
+        self._reset_token2wav_for_new_turn()
+        self._streaming_generate_count = 0
+
+    def speak_forced(self, text: str, end_turn: bool = True, tokens_per_unit: int = 18):
+        """8cf: teacher-force `text` into the decoder context as the head's
+        OWN speech, framed as normal speak units
+        (<unit><|speak|> t1..tk <|chunk_eos|></unit> ...,
+         last unit <|turn_eos|><|chunk_tts_eos|>), optionally closing the
+        turn. No TTS/token2wav runs — the caller ships its own audio (canned
+        stall / paced relay pcm); this keeps the context aligned with what
+        the user actually heard. Replaces the [SYSTEM NOTE] text-unit
+        narration, which (with the phantom muted babble) was tilting the
+        head toward <|listen|> after escalations and barge cuts (the 8ce
+        "post-barge listen-lock" delta over the clean-session baseline).
+        Continues the current turn if one is open. No sliding-window
+        enforcement here — the next streaming_generate call enforces it at
+        the stock cadence (mid-stream enforcement lowered commit rate, see
+        end_turn_now).
+        """
+        token_ids = self.tokenizer.encode(text, add_special_tokens=False) if text else []
+        if not token_ids and not end_turn:
+            return
+        self.pending_logits = None
+        unit_end_id = self.tokenizer.convert_tokens_to_ids("</unit>")
+        groups = [token_ids[i:i + tokens_per_unit]
+                  for i in range(0, len(token_ids), tokens_per_unit)] or [[]]
+        for gi, group in enumerate(groups):
+            last = gi == len(groups) - 1
+            self.decoder.register_unit_start()
+            self.prefill_schema_tokens.append([self.unit_token_id])
+            generated = []
+
+            def _feed(tid):
+                self.decoder.feed(self.decoder.embed_token(tid))
+                self.total_ids.append(tid)
+
+            _feed(self.unit_token_id)
+            _feed(self.speak_token_id)
+            self.current_turn_ended = False
+            for tid in group:
+                _feed(tid)
+                generated.append(tid)
+                self.res_ids.append(tid)
+                self.speak_count += 1
+            if last and end_turn:
+                _feed(self.turn_eos_token_id)
+                generated.append(self.turn_eos_token_id)
+                self.current_turn_ended = True
+                _feed(self.chunk_tts_eos_token_id)
+            else:
+                _feed(self.chunk_eos_token_id)
+            _feed(unit_end_id)
+            self.decoder.register_unit_end(
+                input_type="text",
+                generated_tokens=generated,
+                is_listen=False,
+                generated_text=self.tokenizer.decode(group, skip_special_tokens=True),
+            )
+            self.total_hidden.append([])
+        if end_turn:
+            # same per-turn resets as a sampled turn_eos / end_turn_now
+            self.tts_text_start_pos = 0
+            self.tts_past_key_values = None
+            self.tts_current_turn_start_time = None
+            self._reset_token2wav_for_new_turn()
+
     def set_session_stop(self):
         self.session_stop_event.set()
         self.break_event.set()

@@ -126,9 +126,20 @@ FEAT_POOLS = {
     "sreason":    (f"{DATA}/queries_sreason.jsonl",    f"{DATA}/bench_audio"),
     "valpaca":    (f"{DATA}/queries_valpaca.jsonl",    f"{DATA}/bench_audio"),
     "flooract":   (f"{DATA}/queries_flooract.jsonl",   f"{DATA}/flooract_audio"),
+    "phatic":     (f"{DATA}/queries_phatic.jsonl",     f"{DATA}/phatic_audio"),
     "reqq":       (f"{DATA}/queries_reqq.jsonl",       f"{DATA}/reqq_audio"),
+    "stopq":      (f"{DATA}/queries_stopq.jsonl",      f"{DATA}/stopq_audio"),
     "fresh":      (f"{DATA}/queries_fresh.jsonl",      f"{DATA}/audio_fresh"),
 }
+
+# 8ch: post-cut context simulation (see native_shard postcut flag) —
+# the stall + partial-relay turns teacher-forced before the stim,
+# mirroring what the 8cf serving path leaves behind after a barge cut
+# (the model's own onset words arrive naturally at the carrier commit;
+# the stall line continues that open turn, exactly like the live fire).
+POSTCUT_STALL = " Hmm, let me double-check that — one moment."
+POSTCUT_RELAY = (" Nvidia (NVDA) is currently trading at $230.36 USD,"
+                 " up $1.77")
 
 
 @app.function(image=gpu_image, gpu="H100",
@@ -138,13 +149,23 @@ def native_shard(shard: list, shard_id: int = -1, tag: str = "",
                  audio_dir: str = f"{DATA}/audio_pool",
                  temperature: float = 0.0,
                  carrier: str = "",
-                 official_cfg: int = 0) -> list:
+                 official_cfg: int = 0,
+                 postcut: int = 0) -> list:
     """carrier: path to a question wav. If set, every query becomes the
     SECOND turn of a session: carrier question -> model answers to
     end_of_turn (capped) -> per-deployment sum/cnt reset -> target
     utterance -> features at ITS onset. This matches how live floor
     turns and follow-ups actually arrive (8bj: standalone-calibrated
-    act scores shift once conversational context enters the tail)."""
+    act scores shift once conversational context enters the tail).
+
+    postcut (8ch, requires carrier): instead of letting the model
+    answer the carrier, reproduce the 8cf post-barge-cut context — at
+    the carrier commit teacher-force the stall line onto the open turn
+    and close it, hold listen a few chunks (thinker window), teacher-
+    force a PARTIAL relay turn + turn_eos (the cut), reset the force-
+    listen counter like the live cut path, then feed the target
+    utterance. The act read at its onset is then in-distribution for
+    barge-in follow-ups."""
     import glob as _glob
     import shutil
 
@@ -233,6 +254,89 @@ def native_shard(shard: list, shard_id: int = -1, tag: str = "",
         st3.update(sum=None, cnt=0)      # demo resets at end_of_turn
         return ended
 
+    def speak_forced(text, end_turn=True):
+        """8ch: inline teacher-forcing (checkpoint modeling sources have
+        no speak_forced) — mirrors demo_duplex._speak_forced: normal
+        speak-unit framing, no TTS (generate_audio=False here anyway)."""
+        d = duplex
+        ids = d.tokenizer.encode(text, add_special_tokens=False)
+        d.pending_logits = None
+        unit_end = d.tokenizer.convert_tokens_to_ids("</unit>")
+
+        def _feed(tid):
+            d.decoder.feed(d.decoder.embed_token(tid))
+            d.total_ids.append(tid)
+
+        groups = [ids[i:i + 18] for i in range(0, len(ids), 18)] or [[]]
+        for gi, g in enumerate(groups):
+            last = gi == len(groups) - 1
+            d.decoder.register_unit_start()
+            gen = []
+            _feed(d.unit_token_id)
+            _feed(d.speak_token_id)
+            d.current_turn_ended = False
+            for tid in g:
+                _feed(tid)
+                gen.append(tid)
+                d.res_ids.append(tid)
+                d.speak_count += 1
+            if last and end_turn:
+                _feed(d.turn_eos_token_id)
+                gen.append(d.turn_eos_token_id)
+                d.current_turn_ended = True
+                _feed(d.chunk_tts_eos_token_id)
+            else:
+                _feed(d.chunk_eos_token_id)
+            _feed(unit_end)
+            d.decoder.register_unit_end(
+                input_type="text", generated_tokens=gen, is_listen=False,
+                generated_text=d.tokenizer.decode(
+                    g, skip_special_tokens=True))
+            d.total_hidden.append([])
+        if end_turn:
+            d.tts_text_start_pos = 0
+            d.tts_past_key_values = None
+            d.tts_current_turn_start_time = None
+
+    def run_postcut():
+        """8ch: carrier question -> model COMMITS (first non-listen
+        chunk voices its onset words) -> stall teacher-forced onto the
+        open turn + closed -> ~4 forced-listen chunks (thinker window)
+        -> partial relay turn teacher-forced + eos (the cut) -> live
+        cut-path resets. Mirrors demo_duplex 8cf exactly."""
+        committed = False
+        feed = list(car_chunks) + [None] * 15
+        for ci, ch in enumerate(feed):
+            st3["accum"] = True
+            ok = duplex.streaming_prefill(
+                audio_waveform=(sil() if ch is None
+                                else ch.astype(np.float32)))
+            st3["accum"] = False
+            if not ok.get("success"):
+                continue
+            rr = (duplex.streaming_generate(temperature=temperature,
+                                             **GKW)
+                  if temperature else duplex.streaming_generate(**GKW))
+            if not rr["is_listen"]:
+                committed = True
+                break
+        speak_forced(POSTCUT_STALL, end_turn=True)   # fire
+        for _ in range(4):                           # thinker window
+            duplex._streaming_generate_count = 0
+            duplex.force_listen_count = 1
+            st3["accum"] = True
+            ok = duplex.streaming_prefill(audio_waveform=sil())
+            st3["accum"] = False
+            if ok.get("success"):
+                (duplex.streaming_generate(temperature=temperature,
+                                           **GKW)
+                 if temperature else duplex.streaming_generate(**GKW))
+        speak_forced(POSTCUT_RELAY, end_turn=True)   # partial relay+cut
+        duplex._streaming_generate_count = 0         # live cut path
+        duplex.force_listen_count = 3
+        st3.update(sum=None, cnt=0)
+        return committed
+
     traces, feat_ids, feat_X, feat_pre = [], [], [], []
     feat_post = {1: [], 2: [], 3: []}   # 8bw: read again after k answer chunks
     feat_npost = []
@@ -250,7 +354,10 @@ def native_shard(shard: list, shard_id: int = -1, tag: str = "",
                 prefix_system_prompt=SYS,
                 ref_audio=ref, prompt_wav_path=None)
             st3.update(tail=None, sum=None, cnt=0, accum=False)
-            car_ended = run_carrier() if car_chunks else None
+            if postcut:
+                car_ended = run_postcut()
+            else:
+                car_ended = run_carrier() if car_chunks else None
 
             onset_chunk, onset_vec, onset_score = None, None, None
             pre_vec, onset_pre = None, None   # 8br: pre-generate read
@@ -517,8 +624,9 @@ def _read_qfile(qfile: str, split: str = "") -> list:
 @app.local_entrypoint()
 def run_native(pool: str = "frozen", workers: int = 4, limit: int = 0,
                split: str = "", tag: str = "", temp: float = 0.0,
-               carrier: str = "", official: int = 0):
+               carrier: str = "", official: int = 0, postcut: int = 0):
     assert tag, "pass --tag (calib/exp/exp2/test/<pool>)"
+    assert not postcut or carrier, "postcut needs --carrier"
     qfile, audio_dir = FEAT_POOLS[pool]
     qs = _read_qfile.remote(qfile, split)
     if limit:
@@ -526,9 +634,10 @@ def run_native(pool: str = "frozen", workers: int = 4, limit: int = 0,
         workers = 1
     shards = [qs[i::workers] for i in range(workers)]
     print(f">>> native dump [{pool}/{split or 'all'}] tag={tag} "
-          f"temp={temp or 'default'} carrier={carrier or '-'}: "
+          f"temp={temp or 'default'} carrier={carrier or '-'}"
+          f"{' postcut' if postcut else ''}: "
           f"{len(qs)} queries, {workers} workers")
     done = list(native_shard.starmap(
         [(shards[i], i if not limit else -1, tag, audio_dir, temp,
-          carrier, official) for i in range(workers)]))
+          carrier, official, postcut) for i in range(workers)]))
     print(f">>> complete: {sum(len(d) for d in done)} traces")

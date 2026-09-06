@@ -71,6 +71,70 @@ CATS = [("stopcmd", STOPS), ("backch", BCS), ("ack", ACKS),
         ("filler", FILLS)]
 VOICES = ["alloy", "echo"]
 
+# 8ch: STOP-PREFIXED question compounds — a live barge-in follow-up
+# usually arrives as "Stop, stop. <new question>" in one breath, and
+# the stop prefix (plus the post-cut context) drags the act read below
+# threshold: the gate ruled the user's real Apple question a floor
+# turn (P(info)=.336) and the escalation never launched. These are
+# POSITIVES (behavioral stims, 8ba protocol; question halves follow
+# the REQQ hand-inventory style, not an eval pool).
+STOPQ = ["Stop, stop. What is the stock price of Apple today?",
+         "Stop. What's the weather in Tokyo tomorrow?",
+         "Wait, stop. How tall is Mount Everest?",
+         "Okay stop. Who wrote The Old Man and the Sea?",
+         "Stop talking. What is the capital of Mongolia?",
+         "Hold on. What's 15 percent of 260?",
+         "Wait wait. When was the Eiffel Tower built?",
+         "Stop, stop. Can you check Nvidia's stock price right now?",
+         "Hang on. What is the population of Brazil?",
+         "That's enough. What's the boiling point of ethanol?",
+         "Never mind that. Who won the World Cup in 2018?",
+         "Okay okay stop. What is the largest moon of Saturn?",
+         "停停。今天苹果的股价是多少？",
+         "别说了。明天上海的天气怎么样？",
+         "等等。珠穆朗玛峰有多高？",
+         "先别说。英伟达现在的股价是多少？",
+         "打住。巴西有多少人口？",
+         "停一下。二〇一八年世界杯是谁夺冠的？",
+         "行了行了。乙醇的沸点是多少？",
+         "别讲了。《老人与海》是谁写的？"]
+
+
+@app.function(image=img, volumes={DATA: gate_data}, secrets=[OPENAI],
+              timeout=60 * 40)
+def make_stopq():
+    import sys
+    import librosa
+    import numpy as np
+    import soundfile as sf
+    sys.path.insert(0, "/workspace/gate")
+    import escalate
+
+    os.makedirs(f"{DATA}/stopq_audio", exist_ok=True)
+    rows, n = [], 0
+    cli = escalate._client()
+    for txt in STOPQ:
+        for voice in VOICES:
+            qid = f"sq{len(rows):04d}"
+            wav_p = f"{DATA}/stopq_audio/{qid}.wav"
+            if not os.path.exists(wav_p):
+                r = cli.audio.speech.create(
+                    model="tts-1", voice=voice, input=txt,
+                    response_format="wav")
+                open("/tmp/sq.wav", "wb").write(r.content)
+                au, _ = librosa.load("/tmp/sq.wav", sr=16000, mono=True)
+                sf.write(wav_p, au.astype(np.float32), 16000)
+                n += 1
+            rows.append({"id": qid, "pool": "stopq", "query": txt,
+                         "reference_answer": None, "split": ""})
+    with open(f"{DATA}/queries_stopq.jsonl", "w",
+              encoding="utf-8") as fh:
+        for r in rows:
+            fh.write(json.dumps(r, ensure_ascii=False) + "\n")
+    gate_data.commit()
+    print(f">>> {len(rows)} stop-prefixed question stims ({n} new)")
+    return len(rows)
+
 # 8bj: REQUEST-phrased questions — live speech phrases queries as
 # requests ("can you check…") and the benchmark-question-trained act
 # probe scores them lower; these are POSITIVES for the act refit.
@@ -170,4 +234,72 @@ def make_stims():
     print(f">>> {len(rows)} stims ({n} newly synthesized), "
           f"cats: " + ", ".join(f"{c}:{len(t) * len(VOICES)}"
                                 for c, t in CATS))
+    return len(rows)
+
+
+# 8cp: PHATIC questions — question-SHAPED utterances with no info
+# need ("How are you?", "Can you hear me?"). Grammatically questions,
+# so the act gate (trained q-positives vs floor-command negatives)
+# passes them, and the failure probe is OOD on them; the live demo
+# escalated "how are you" / "can you hear me" to gpt-5.5 (user,
+# 2026-09-05). NEGATIVES for the act refit (behavioral stims, 8ba
+# protocol, not an eval pool): the expert adds nothing on these — the
+# local talker's own answer IS the right answer.
+PHAT_SOCIAL = ["How are you?", "How are you doing?", "How's it going?",
+               "What's up?", "How was your day?", "How's your day going?",
+               "How have you been?", "What's new?", "You doing okay?",
+               "你好吗？", "你今天怎么样？", "最近怎么样？", "最近好吗？",
+               "你还好吗？", "吃了吗？"]
+PHAT_CHAN = ["Can you hear me?", "Hello, can you hear me?",
+             "Can you hear me okay?", "Are you there?",
+             "Are you still there?", "Hello? Hello?", "Is this working?",
+             "Testing, testing.", "Do you copy?", "Can you hear me now?",
+             "能听到我说话吗？", "你能听到吗？", "听得到吗？", "喂？喂？",
+             "在吗？", "还在吗？", "有人吗？", "测试，测试。"]
+PHAT_META = ["What's your name?", "Who are you?", "What can you do?",
+             "Are you a robot?", "Can you help me?", "Do you speak Chinese?",
+             "你叫什么名字？", "你是谁？", "你能做什么？", "你是机器人吗？",
+             "你会说英文吗？"]
+PHAT_CATS = [("social", PHAT_SOCIAL), ("chancheck", PHAT_CHAN),
+             ("meta", PHAT_META)]
+
+
+@app.function(image=img, volumes={DATA: gate_data}, secrets=[OPENAI],
+              timeout=60 * 40)
+def make_phatic():
+    import sys
+    import librosa
+    import numpy as np
+    import soundfile as sf
+    sys.path.insert(0, "/workspace/gate")
+    import escalate
+
+    os.makedirs(f"{DATA}/phatic_audio", exist_ok=True)
+    rows, n = [], 0
+    cli = escalate._client()
+    for cat, texts in PHAT_CATS:
+        for txt in texts:
+            for voice in VOICES:
+                qid = f"ph{len(rows):04d}"
+                wav_p = f"{DATA}/phatic_audio/{qid}.wav"
+                if not os.path.exists(wav_p):
+                    r = cli.audio.speech.create(
+                        model="tts-1", voice=voice, input=txt,
+                        response_format="wav")
+                    open("/tmp/ph.wav", "wb").write(r.content)
+                    au, _ = librosa.load("/tmp/ph.wav", sr=16000,
+                                         mono=True)
+                    sf.write(wav_p, au.astype(np.float32), 16000)
+                    n += 1
+                rows.append({"id": qid, "pool": f"phatic-{cat}",
+                             "query": txt, "reference_answer": None,
+                             "split": ""})
+    with open(f"{DATA}/queries_phatic.jsonl", "w",
+              encoding="utf-8") as fh:
+        for r in rows:
+            fh.write(json.dumps(r, ensure_ascii=False) + "\n")
+    gate_data.commit()
+    print(f">>> {len(rows)} phatic stims ({n} newly synthesized), "
+          f"cats: " + ", ".join(f"{c}:{len(t) * len(VOICES)}"
+                                for c, t in PHAT_CATS))
     return len(rows)

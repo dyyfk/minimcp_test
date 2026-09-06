@@ -6154,3 +6154,589 @@ is spread across confident-wrong rows the probe already ranks near
 the boundary. Gains from here come from the channel (relay, done:
 +23 pt on TriviaQA always), the expert (fixable rate .39 on misheard
 turns), and the judge/label floor, not the read.
+
+## 8bz — tier re-selection sweep + benchmark-overlap audit (2026-09-04)
+
+Jisen 09-04 review. Two offline results, both from cached never/always
+native arms (no live cost yet):
+
+1. **Threshold sweep** (`scripts/40_threshold_sweep.py`,
+   `data/threshold_sweep.json`). Deployed-recipe OOF thresholds
+   recomputed at nominal 5-50% (en; sreason via per-pool quantiles =
+   window-tracker limit), never/always remix of acc AND end-to-end
+   latency per query. Internal (nominal -> realized, acc, mean lat):
+   15 -> 8.8%, .446, 9.5s | 20 -> 14.2%, .479, 13.1s |
+   25 -> 21.7%, .525, 14.4s | 30 -> 27.5%, .554, 16.0s |
+   40 -> 40.4%, .604, 19.6s | 50 -> 50%, .642, 23.3s (live 52%,
+   .629, 27.3s). Recommendation: keep conservative=15, move
+   balanced 30->25, aggressive 50->40. Aggressive saves ~30% mean
+   latency and roughly halves the internal P95 (103s live -> ~49s
+   remix) for ~4 internal points (~5 external-avg points). The
+   latency tail is dominated by per-escalation cost (expert wait cap +
+   spoken relay length), not by the rate — rate cuts alone cannot make
+   aggressive "cheap". Chosen tiers need live confirmation arms.
+
+2. **Overlap audit** (`scripts/41_leak_audit.py`,
+   `data/leak_check.json`). 8 collisions between calibration queries
+   and external pools: Speech TriviaQA 4/250 exact (expansion
+   easy-fact rows x0054/x0113/x0114/x0137), Llama Questions 2 exact +
+   2 near (x0173, y0205, z0601 + one queries_gen row not in any
+   merge); WebQ/SD-QA/Reasoning-zh 0. Refit of the deployed
+   5,228-row recipe without the 7 in-merge rows: striviaqa AUC
+   .8113 -> .8109, sllama .7427 -> .7411 (official dumps, native
+   labels); remix acc at 15/25/40% unchanged to <0.5 pt. Disclosed in
+   setup.tex + app:native; "disjoint" wording softened.
+
+## 8ca — confident-wrong reinforcement refit: negative (2026-09-04)
+
+User request: strengthen the probe on the 418 confident-wrong
+failures (failure_types.parquet). Those rows are test-side (336
+external + 82 frozen test) and cannot be trained on; the training
+analogue is the 711 of 2,828 merge failures whose OOF score sits
+below the aggressive threshold (probe-missed failures).
+
+`scripts/42_confident_wrong_reweight.py`: upweight those rows
+x2/x4/x8 in the deployed 5,228-row recipe, plus a random-positive x4
+control. Result is monotonically NEGATIVE: ext-5 mean AUC .7429
+(deployed) -> .7315 / .7147 / .6906; remix acc@40% .7624 -> .7622 /
+.7566 / .7474. Random-pos control .7276 — any extra positive mass
+hurts, targeted emphasis hurts more. Reading: the probe's misses are
+dominated by rows whose failure signal does not exist at the commit
+read (execution slips, taxonomy AUC .47), so emphasis converts
+signal into noise. Third independent confirmation of the 8by ledger
+("more/heavier labels do not buy ranking at this read point").
+Implication: a paid look-alike expansion (PopQA-style) is expected
+to be flat-to-negative; open routes remain read-point/late-read and
+fusion, not data. Synced to app:native diagnostics paragraph.
+
+## 8cb — leak remediation: no-leak deployment candidate (2026-09-04)
+
+Fix beyond disclosure. `data/leak_exclude.json` freezes the 7
+colliding calibration ids (scripts/41); `scripts/43_noleak_artifact.py`
+refits the deployed 5,228-row recipe without them and writes
+`data/gate_native_noleak.json` (guard: testoff AUC .8761 -> .8754;
+zh thresholds land at .505/.370/.265, reproducing the deployed
+construction). The artifact carries thresholds for both the current
+15/30/50 and the proposed 15/25/40 tiers, plus a train-id manifest
+sha. NOT yet swapped into gate_native.json: the paper's live arms
+were run with the current probe, so the swap happens at the 8bz tier
+re-run (new live arms = new probe + new tiers in one pass; leak fix
+then costs zero extra GPU). Remaining after swap: rerun remix
+tables/figures (23/26/27), upgrade the paper disclosure from
+"removing them changes nothing" to "deployed gate contains no
+colliding rows", refresh/annotate the issue-#8 HF bundle
+(dyyfk/minicpm-o45-native-gate-data ships the colliding calib rows),
+and run scripts/41 as a standing gate on every future
+expansion/benchmark addition. Internal direction audited clean:
+frozen test 240 has zero exact/near collisions with any
+expansion/fresh training file.
+
+## 8cb — human-eval serving path: 8bu regression + TTS-relay dead zone (2026-09-04)
+
+Two live-demo bugs found while re-deploying the human-eval stack, both
+on the `gate-demo-duplex` path the study proxies to. (1) 8bu deleted
+the module-level `STALL`/`STALL_NOTE` constants but left their four
+use sites: every gate fire raised a recovered NameError — no canned
+stall audio (participant hears silence at fire) and no `[SYSTEM NOTE]`
+prefill. Restored verbatim from 51fdb4e^. (2) TTS-relay dead zone:
+`relay_guard` (and the turn snapshot boundary) cleared only at the
+model's own `turn_eos`, but after a one-blob TTS relay the muted local
+continuation rambles 20–40 s past playback end. Measured: follow-up
+onset scored 0.93 vs thr 0.55 and was still refused (guard), and its
+ASR snapshot came back as both utterances merged — exactly the S2
+"same-topic second question" shape the study uses. Fix: record
+`relay_deadline` = playback end + 1 s at relay emission; past it, run
+the eot-mirror cleanup (finalize relay turn, reset `user_win`/scores,
+drop guard, `force_listen_count=2`), leaving the muted tail muted to
+its real eot. Verified end-to-end (`_ws_context_smoke.py`, now
+event-driven instead of a fixed 30 s wait): NVDA→"What about Apple?"
+both fire, clean per-turn snapshots, correct AAPL relay — PASS. One
+outlier in ~6 runs: the head stayed in listen >60 s on the first
+utterance (no listen→speak flip at all), so the question rolled out of
+the 45-chunk window — pre-existing head variance, not touched by this
+fix; worth a pilot-phase watch. Deploys: gate-demo-duplex v21 (clean
+HEAD) → v22 (stall restore) → v23/v24 (dead-zone fix);
+minicpm-human-eval v3 (clean HEAD, transcripts verified live).
+
+## 8cc — reweight audit: 8ca survives with corrections (2026-09-04)
+
+GPT-plan P0 items run (`scripts/44_reweight_audit.py`,
+`data/reweight_audit.json`). Two corrections to 8ca, one upgrade:
+
+1. **Regularization artifact was real but partial.** Per-arm nested-CV
+   C retuning with mean-normalized weights: hard x4 recovers .7147 ->
+   .7351 (C drops to 1e-4; x8 .7223 at C=3e-5, n_eff 5228->2082).
+   The solver escapes by refusing to fit the upweighted rows. The 8ca
+   "monotone catastrophic" magnitude overstated; direction stands: no
+   weighted arm ever beats the unweighted baseline (.7429).
+2. **Single random control was unluckily low.** 100-draw nulls at x4:
+   unmatched mean .7371 sd .0056 (min .7236); part-composition-matched
+   mean .7401 sd .0047 (min .7294). The 8ca control (.7276) sat in the
+   low tail.
+3. **Targeting-specific harm is now significant.** Under the original
+   protocol, targeted x4 = .7147 falls below ALL 200 null draws
+   (empirical p < .01 both nulls). Composition-matched null being
+   HIGHER than unmatched rules out the "targeted set is just a worse
+   pool mix" alternative.
+
+Net: emphasis on probe-missed failures buys nothing under any tuning
+and is significantly harmful at fixed capacity; the clean statement
+is "timestamp-limited predictability" (appendix wording updated with
+audited numbers). Alternatives 3/4/5 (fold calibration, weight
+normalization/C, composition) from the audit checklist are now
+closed; stochasticity/judge-noise were already bounded (stability
+pass, re-judge).
+
+## 8cd — relay dead-air cut: sentence/clause-streamed TTS synth (2026-09-04)
+
+Study params (tier=aggressive, arms, lang, gate config) are the
+user's design and stay frozen; stability work is backend-only. The
+dominant awkward moment left after 8cb was relay dead air: the
+one-blob `_synth_pcm` blocked the chunk loop 5-14 s (mic deaf, queue
+7-13 s behind), so a fired turn played the stall and then went silent
+for thinker (2-8 s) + full synth before any answer audio. Fix:
+`_relay_pieces` splits the spoken answer at sentence bounds, long
+sentences again at clause marks (~46-char lead piece), and the relay
+branch synthesizes/emits per piece — both clients schedule audio
+blobs back-to-back on a cursor, and per-piece synth runs ~0.5x
+realtime, so playback is seamless. Measured live: first relay audio
+8.0 s → 2.5-3.4 s after the thinker returns (4 runs). Same runs
+finally exercised the 8cb early-close in production — 3 firings, all
+clean: turn snapshot resets (follow-up ASR no longer merges
+utterances) and the follow-up gate read fires normally after it
+(.9163/.9413 post-close; one .5304 miss was ordinary probe variance,
+same question scored .53-.96 across today's reads). Participant-path
+smoke (`_ws_humaneval_smoke.py`: real study-session assignment, both
+blinded arms through the /stream proxy, TTS'd realtime question):
+4/4 sessions PASS at the study config — ready + first audio 5.3-7.3 s
++ turn transcript finalized, both arms. Deploys: gate-demo-duplex
+v25 (sentence split) → v26 (clause pieces); human-eval unchanged at
+the intended aggressive operating point. Still open (pre-existing,
+unfixed): ~1-in-6 first-utterance listen-lock (head never flips to
+speak for 60 s+; the question then rolls out of the 45-chunk window)
+— needs a pilot-phase watch, no backend-level fix that doesn't touch
+the retired-harness design.
+
+## 8ce — chunk-paced relay delivery: escalation without breaking duplex ⭐ (2026-09-04)
+
+**The problem is ours, not the head's.** Native full duplex is
+interruptible for free: the talker generates 1s of audio, ships it,
+plays it — the client never buffers more than ~1s, so when the model
+yields (hears the user) sound stops within a second. Interruptibility
+is a property of the lock-step generate=deliver=consume cadence, not a
+mechanism. Our escalation architecture breaks that cadence: the gate
+fires, the answer comes from OUTSIDE the model (the thinker's text),
+and 8cd synthesized it as TTS ~2x faster than realtime, handing the
+browser 7-10s of scheduled audio at once. That is an out-of-band
+injection into the duplex stream — a local relapse to half-duplex —
+and it revives the classic un-interruptible playback tail that VAD
+kill-switches exist to solve. Our stance forbids exactly that tool
+(no VAD, no client kill-switch). So: how do you deliver an
+externally-verified answer through the native talker WITHOUT losing
+duplexity? 8bu measured the two endpoints — steer (prefill text, let
+the talker speak it): natively interruptible but loses 20-27 pts of
+answer fidelity to truncation/self-answering; TTS blob (8cd): verbatim
+fidelity, ~10s dead tail. Fidelity and duplexity were a tradeoff.
+
+**8ce closes it — deliver the relay on the duplex cadence.** The
+thinker's answer is split into pieces (8cd's sentence/clause splitter),
+piece 1 synthesized immediately (answer still starts ~2.5s), the rest
+queued; the chunk loop synthesizes at most one pending piece per
+iteration and drips ~1s frames on a wall-clock pacer, so the client
+holds ~2s, never 10s. Barge-in is gated on USER SPEECH ENERGY over the
+last ~2s (silence RMS ~0.003, speech ~0.03+), NOT the act/is_info
+probe — "wait, stop" reads as floor-management (is_info False) yet is
+precisely the interruption to honor; the first prototype gated on
+is_info and let every "stop" through. On barge the server drops the
+remaining frames and emits `interrupt`; the demo client stops its ~2s
+of scheduled buffer at once (tracked BufferSources, `stopPlayback`).
+Design line: the energy test gates TRANSPORT ONLY (whether to keep
+shipping injected frames) — every turn-taking and escalation decision
+still belongs to the duplex head. No VAD in the model path, no client
+kill-switch on the native speech path.
+
+**Live (`_ws_relay_barge.py`, aggressive, real barge mid-relay):**
+paced frames arrive ~1/s (not one burst); barge at 19.2s → cut at
+22.0s ("user takes the floor mid-relay (rms 0.044) — dropping ~10s of
+relay tail"); the interrupting question then gets its own gate read
+and turn. Barge-to-cut ~2.8s (energy has to accumulate over the 2s
+window) + client buffer killed immediately by `interrupt`, vs the old
+~10s hard tail. Regression: `_ws_context_smoke.py` multi-turn still
+PASS (NVDA→Apple both fire, correct AAPL relay); paced delivery does
+not lengthen or corrupt the normal (uninterrupted) relay.
+
+**Paper claim this unlocks** (system section, pairs with 8bu): a
+measurable "post-barge-in yield latency, local speech vs relay",
+before (~10s, buffer-bound) vs after (~2-3s, energy-window-bound) —
+one table stands up "escalation preserves duplexity". Open sub-issues
+to disclose: (1) barge detection is an energy threshold (0.012) — a
+transport-layer signal, defensible as not-a-VAD but a design position
+to argue explicitly; real deployment leans on browser AEC to keep the
+client's own relay playback out of the uplink, threshold needs a
+field pass. (2) the ~1-in-6 first-utterance listen-lock (8cd) is
+untouched — head variance, not a relay issue. (3) human-eval client
+(app.js) already has `stopModelPlayback`/`activePlaybackSources` but
+does not yet wire the `interrupt` event; its ~2s buffer still self-
+drains, so barge works, just ~2s less crisply than the demo page —
+wiring it is a one-line client change, deferred (study client is the
+user's to touch). Deploys: gate-demo-duplex v27 (paced) → v28 (energy
+cut + interrupt emit) → v29 (client stopPlayback). Files: demo_duplex.py,
+_ws_relay_barge.py (new).
+
+### 8ce addendum — post-barge deafness: the cut must end the turn like a sampled turn_eos (2026-09-05)
+
+User-reported: after a successful cut, the model went deaf to the
+follow-up (reproduced ~2/7). Root cause chain: the cut dropped relay
+state but left the muted babble's utterance HALF-OPEN in the decoder
+context — `current_turn_ended` stayed False, so the head's own
+mid-turn listen bids kept being suppressed (the exact 8bk suppression
+path), and even after unlocking the flag the dangling utterance
+dragged the head's commit probability down (same shape as the
+first-utterance listen-lock). Fix: `MiniCPMODuplex.end_turn_now()`
+(in our instrumented `_model_src`) mirrors the natural end_of_turn
+branch — feed `<|turn_eos|>` so the context truly closes, set the
+flag, reset per-turn TTS/token2wav. The cut path calls it. Verified:
+barge → cut → pause → fresh question, 5/5 PASS (v38); uninterrupted
+multi-turn unaffected (the path only runs on a cut). Paper note: this
+is the missing half of the 8ce design — dropping injected frames
+handles TRANSPORT, ending the turn hands the FLOOR back; both are
+needed for the interruption to be complete. Ops (important): the live
+`gate-demo-duplex` app was concurrently re-deployed to v31-v35 by
+ANOTHER checkout (client 1.2.6, commits dd9cb01/f2c0716/... not in
+our history — collaborator or scheduled agent), reverting the demo to
+pre-8cb code mid-testing; 8cb-8ce are now committed (b7da740,
+a5f87c1) and re-deployed (v36-v38), but deployment ownership needs
+coordination or the next foreign deploy clobbers live again.
+
+### 8ce investigation — the post-barge listen-lock is the head's own turn-taking, not a harness bug (2026-09-05)
+
+User asked to understand the residual before deciding on a VAD net.
+Findings: (1) MECHANISM — the head's listen/speak choice is driven by
+its raw logits (utils.py decode(): a mid-turn <|listen|> is sampled
+from the head's own distribution). The "lock" is simply that
+distribution strongly favouring <|listen|> for that context; no VAD or
+energy gate is involved anywhere in the decision. (2) SAME SPECIES —
+the ~1/6 first-utterance lock (clean session, no cut) and the ~1/3
+post-barge lock are the same phenomenon; the barge case is worse
+because the post-cut context (stall + STALL_NOTE + aborted babble)
+further tilts the head toward listen. (3) NON-VAD LEVERS TESTED AND
+INSUFFICIENT — force_listen counter reset (real fix, made force_listen
+actually engage), turn_eos injection (end_turn_now), mid-stream
+unit-close (register_unit_end + window: neutral-to-worse), scoped
+allow_midturn_yield (never triggered — energy cut fires first), and
+the decode knob listen_prob_scale down to 0.15 (head still picks
+listen 36/36 in locked runs — even cutting the listen logit to 15%
+does not flip it). Measured ceiling: follow-up commit after a forced
+barge cut is ~60-65% across ~30 live runs; the barge AUDIO cut itself
+(relay stops ~2s + client stopPlayback) is reliable. CONCLUSION: the
+recovery ceiling is the duplex head's intrinsic turn-taking variance;
+the only lever that would guarantee a commit is a forced speak turn
+when the user has clearly spoken = a VAD-style harness, which is a
+paper-stance decision (deferred to the user). Live = v47 (= the v44
+build: end_turn + force_listen counter reset + paced relay + energy
+cut). Reverted experiments: listen_prob_scale recovery bias,
+allow_midturn_yield, mid-stream unit-close.
+
+## 8cf — stock-parity context: teacher-force what was played, delete the notes and the babble ⭐ (2026-09-05)
+
+**User's counter-diagnosis was right; 8ce's "intrinsic" verdict was
+half-wrong.** 8ce concluded the post-barge listen-lock (~1/3, vs ~1/6
+first-utterance baseline) was the head's own turn-taking because every
+DECODE-side lever failed (listen_prob_scale 0.15, force_listen,
+turn_eos injection, midturn yield). But stock MiniCPM-o 4.5 has no
+such inflation, and our diff vs stock is not in the decision chain
+(the head samples listen/speak from its own logits, unmodified) — it
+is in what the serving layer wrote into the context: (1)
+`[SYSTEM NOTE] Your answer so far is likely wrong…` +
+`…Do not repeat it` — bracketed text units the duplex head never saw
+in training, one more per fire, stacking "when you speak you are
+wrong"; (2) the muted babble — a phantom turn up to 30s the user
+never heard, holding current_turn_ended=False (so every mid-turn
+listen bid was suppressed, the 8bk path) and reading as "I just held
+the floor forever"; (3) at a barge cut, a half-sentence + externally
+injected turn_eos. Stock's post-interruption context is just "partial
+answer + self-sampled turn_eos". 8ce attacked decode; the poison was
+context.
+
+**Fix (v48): make every escalation leave the context stock-shaped.**
+`MiniCPMODuplex.speak_forced(text, end_turn)` teacher-forces text into
+the decoder as the head's OWN speech in normal speak-unit framing
+(`<unit><|speak|> t1..t18 <|chunk_eos|></unit>` …, last unit
+`<|turn_eos|><|chunk_tts_eos|>`), no TTS (audio ships separately);
+same per-turn resets as a sampled eos. demo_duplex then: fire = play
+canned stall pcm + speak_forced(onset-continuing stall line,
+end_turn) — turn closed at fire, STALL_NOTE deleted, muted-babble
+machinery deleted; thinking/relay window = per-chunk force_listen
+(counter reset + count 1 each iteration, self-releasing, steer mode
+exempt); relay = paced tts frames tagged by piece, and at playback end
+(8cb close) or barge cut, ONLY the pieces actually shipped are
+speak_forced as one closed turn — a cut leaves "half-said answer +
+eos", exactly a native yield. RELAY_NOTE deleted; the no-op
+force_listen_count=2 at the 8cb close deleted.
+
+**Live (v48):** `_ws_context_smoke.py` PASS (both fires, NVDA→AAPL
+reference resolution intact, gate reads normal on the teacher-forced
+context: turn-2 score .8873). `_ws_relay_barge.py` × 9: one run lost
+to a client-harness early exit (no server error); of the 8 completed,
+**follow-up recovery 8/8** (proper mid-relay cuts 6/6; the other two
+barged pre-relay and still recovered) vs the 8ce ceiling of ~60-65%
+over ~30 runs. Post-cut commit at ~3-6s (3s of which is the
+deliberate force-listen capture window); follow-ups escalate and
+relay correctly (.71-.87 gate reads). Zero `loop error (recovered)`.
+P(8/8 | true rate .65) ≈ 3% — small n, but every recovery lever 8ce
+tried had failed, and this one changed only the context. Paper:
+Limitations rewritten (discussion.tex) — the ~2/3 commit is now
+attributed to the harness's context pollution, fixed by
+teacher-forcing; the residual is the ~1/6 clean-session baseline.
+Files: _model_src/modeling_minicpmo.py (+speak_forced),
+demo_duplex.py (fire/relay/cut rewrite). Caveats to watch in the
+pilot: relay text now sits in context as the head's own words — no
+repetition observed in smokes (the closed turn carries stock
+semantics), fallback is a minimal neutral note; a synth-failed piece
+can leave its text in the committed turn (index alignment kept,
+audio skipped) — rare, logged.
+
+## 8cg — spontaneous speech on an open mic is head-native (silence-probe A/B) (2026-09-05)
+
+**User report (phone session):** the model starts lecturing with
+nobody talking — "This is a Hyperloop test track… we built it with
+the help of SpaceX" — and the turn-1 ASR snapshot comes back EMPTY
+(1.4s, no speech). A "Stop, stop." then gets answered with MORE
+lecture (turn 2 continues the Hyperloop topic).
+
+**A/B (`_ws_silence_probe.py`): 100s of mic-floor noise (RMS ~0.003,
+breath-like bumps to 0.008, no speech) into both arms.** Vanilla
+(stock config, zero gate machinery): **4 spontaneous commits**
+(17/48/78/94s), narrating a Hyperloop pod tour. Gate demo: 1 commit
+(16.6s), a SpaceX team-building lecture. Verdict: commit-on-noise is
+the HEAD's own behavior — the stock arm does it more, not less; our
+machinery neither causes nor (much) suppresses it. Mechanism: the
+listen/speak decision is sampled per second from the head's logits;
+on ambient noise the speak probability is small but nonzero, so an
+open mic eventually fires; with no real content in the audio the
+audio-LM free-associates spoken-corpus material (YouTube-lecture
+register; the Musk/SpaceX/Hyperloop theme recurred across all three
+independent sessions — plausibly anchored by the OFFICIAL default
+ref voice `assets/system_ref_audio.wav` + system prompt, same asset
+in both arms). Same family as Whisper's silence hallucinations.
+
+**Why "Stop, stop." made it lecture more:** turn 1's hallucinated
+monologue is in the context; the head hears speech, commits to
+respond, and self-conditions on its own lecture — it continues the
+topic instead of engaging the user. The escalation gate behaved
+correctly throughout the user's session: both commits were ruled
+floor turns (P(info)=.42/.11) and NOT escalated — no expert calls
+wasted on hallucinated turns.
+
+**Mitigation options (stance decision, deferred to the user):**
+(1) accept + disclose — it is stock behavior, the vanilla arm
+proves it, and a demo/limitations sentence covers it; (2) transport-
+side damper — if the head commits while the trailing ~2s uplink RMS
+is at the silence floor, end the turn and mute it (mirrors the 8ce
+energy cut: transport-only, but it DOES veto a head speak decision —
+same VAD-adjacent territory the paper stance argues against);
+(3) system-prompt nudge ("speak only when the user speaks") — cheap,
+but in-band imperatives have failed three times before (8bd/8bm).
+Files: _ws_silence_probe.py (new). No code change deployed.
+
+### 8cg repeats — the stock arm does it every run (2026-09-05)
+
+User asked to test 原版 directly. The vanilla arm IS stock: it loads
+the CHECKPOINT's own modeling sources (no _model_src overwrite;
+decode path byte-identical to OpenBMB/minicpm-o-4_5-pytorch-simple-
+demo) under the official serving config (top_k=20, force_listen 3,
+official prompt), bare loop. Three 100s-noise runs: 4, 1, 2
+spontaneous commits — every run produces a hallucinated Musk-register
+monologue (Hyperloop pod tour; energy crisis/EVs; a 36,000 km/h
+orbital "super-highway"). Detail: the FIRST commit lands at 16.4-17.0s
+in all four probe runs across both arms — right after the probe's
+first breath-like amplitude bump (~15.4s + latency), i.e. the head
+commits on the first marginally speech-like noise, then free-
+associates. Conclusion stands and is now n=3 on stock: commit-on-
+noise is 原版 MiniCPM-o 4.5 behavior, not ours.
+
+## 8ch — post-cut act-gate coverage: the barge follow-up was being ruled a floor turn (2026-09-05)
+
+**User report (live, post-8cf):** barge the relay, ask a new question,
+hear half a second of "Let me check the latest data for you." — then
+silence forever. Log: the follow-up "Stop, stop. What is the stock
+price of Apple today?" read P(fail)=.599 ✓ but P(info)=.336 < .512 →
+floor turn → gate bypassed → no thinker, and the head's promise (an
+in-context imitation of our own stall pattern) had nothing behind it.
+8cf UNCOVERED this: before it, the post-cut listen-lock usually
+prevented the commit entirely. Smoke tally agreed: 2/8 pre-fix barge
+runs had the follow-up act-blocked (is_info=False).
+
+**Root cause is the CONTEXT, not the prefix.** New stop-prefixed
+compound stims ("Stop, stop. <question>", 40) score median .988 on
+the OLD act head standalone — 0% blocked. The same act read after the
+8cf post-cut context (stall turn + partial relay + cut) is what
+collapses to ~.34. Fourth instance of the 8bj meta-lesson: every new
+REGIME re-opens calibration; the post-barge-cut context is a regime
+the act stims never covered.
+
+**Fix (8bj recipe + a new dump mode).** `modal_native_dump.py
+--postcut`: reproduce the exact 8cf post-cut context before the stim
+(carrier commit → stall teacher-forced onto the open turn → 4 forced-
+listen chunks → PARTIAL relay turn + eos → cut-path counter resets),
+then read at the stim's onset. Dumped official-config: stopq 40
+(standalone), stopqpc 37, reqqpc 38 (postcut positives), floorpc
+(postcut stop commands, negatives) — of which 71/72 NEVER COMMIT
+post-cut (no onset → no gate read), telling us the pure-stop
+exposure is tiny; the 1 that committed scores .76, inseparable from
+postcut questions, and is excluded from the fit as an n=1 singleton
+(it dragged the joint-gap threshold .51→.67, taxing live questions).
+Refit (scripts/24): n_pos 2505 / n_neg 263, OOF AUC .9999, thr
+.5507; postcut questions 0% blocked (stopqpc median .992, reqqpc
+.997); all floor categories still 0% residual false-fire at balanced
+(60% → 0% before/after act gate, unchanged protection).
+
+**Live (v49 + new gate_act.json):** barge → cut → follow-up, 4 runs:
+3 full PASS with the follow-up escalating and relaying the correct
+AAPL answer (act reads .70-.84 True); run 4 even shows the intended
+split within one session — "Stop, stop." remnant read is_info=False
+(held), Apple question read is_info=True (fired). The 4th run was the
+known ~1/6 first-utterance intrinsic lock (no commit at all, act not
+involved). NOTE for the study: this changes deployed gate behavior
+(act head + threshold) — the human-eval freeze question was raised
+and the user chose the refit (option A).
+
+## 8ci — stop-then-ask made reliable: the loop was running seconds behind the wall clock (2026-09-05)
+
+**User's acceptance script** (verified end to end, `_ws_stop_follow.py`):
+NVDA question → stall+relay → "Stop." (single word, mid-relay) → model
+stops → Google question → stall+relay with the GOOGL quote.
+
+**Diagnosis from full traces:** the act refit (8ch) was necessary but
+not sufficient — three stacked engineering faults remained:
+(1) LOOP LAG. Relay-piece TTS synth (2-4s each) runs inside the chunk
+loop; every synth backlogs the uplink, so cuts/commits/gate reads ran
+3-18s behind the wall clock ("falling behind realtime (18.3s
+queued)"). A phone user's "Stop" took ~4.6s to cut and their next
+question was chopped into fragment turns ("Up. What's the current
+stock?" / "Price of Google.") — perceived as the model going mute.
+Fix: drop backlogged SILENCE (keep any speechy suffix) whenever the
+queue exceeds 3s; the head never acts on silence, so nothing of
+value is lost and the loop stays realtime.
+(2) STALE CUT READ. The barge-energy test read user_win (processed
+audio) — lag made it fire on 4s-old sound. Fix: read the fresh tail
+(processed window + unprocessed backlog); cut now lands ~2s after
+the stop.
+(3) SNAPSHOT BOUNDARY LOSS. When the head briefly commits mid-
+question (hears "Stop. What's the" → floor reply), its end-of-turn
+cleared user_win, discarding the question's second half — the next
+fire went out with an EMPTY uplink ("turn 3 ASR heard: ''", thinker
+fed "\n", expert answered "What would you like to know?"). Fix: keep
+the last 2s of user_win across turn boundaries + .strip() the uplink
+before the thinker gate.
+
+**Live (v52, user's script × 5): 4/5 PASS.** Passing runs: cut
+~1.9-3.7s after the stop, question intact as ONE turn (act .84-.95,
+fire .68-.82), correct GOOGL relay; run 1 even survived a mid-
+question commit (empty-uplink fire blocked by the strip guard, full
+question re-captured via the kept tail, fired on the next commit).
+The one FAIL is the head never committing post-cut at all (zero gate
+reads) — the intrinsic listen-lock residue (8ce investigation), the
+same ~1/6-1/3 variance no non-VAD lever moves. v50→v52 deploys.
+Files: demo_duplex.py, _ws_stop_follow.py (new).
+
+## 8cj — three-arm A/B falsifies "intrinsic listen-lock"; paced in-schema relay closes the gap ⭐ (2026-09-05)
+
+**User challenged the 8ce/8cf residual ("原版没有这个问题") and was
+right — third time the stock-control discipline pays.** Same
+stop-then-ask flow (NVDA → mid-answer "Stop." → 4s → Google), three
+arms, `_ws_stop_compare.py`:
+
+| arm | post-stop follow-up commit ≤15s | latency |
+|---|---|---|
+| vanilla (stock sources, official cfg) | **6/6** | 0.9-2.0s |
+| ours, probe OFF | **6/6** | 0.8-2.3s |
+| ours, probe ON (pre-8cj) | **3/6** | 2.7-4.9s / NEVER |
+
+probe-off ≡ vanilla (8bl discipline holds — the bare loop is
+innocent). The lock was OUR escalation path: during relay delivery
+the context showed the head silently force-listening (10+ listen
+units) through its own audible answer, then a dense text turn at
+close — no stock session produces that shape, and the head's
+turn-taking prior pays for it. 8ce's "intrinsic" verdict tested only
+decode-side levers and never ran this control.
+
+**Fix: put the relay INSIDE the audio units as the head's own
+speech, at speech rate.** `_speak_forced_unit()` completes each
+audio-prefilled unit with `<|speak|>` + the due relay tokens
+(budgeted ≈ tokens_left/seconds_left, ≤18) + chunk terminator —
+context now shows a normal speaking chunk for every second the user
+hears, the exact stock self-answer shape; `turn_eos` rides the last
+shipped unit. A barge cut just closes the half-open turn
+(`_force_end_turn`) — literally the stock yield — and the post-cut
+`force_listen=3` is DELETED (stock heads are free immediately and
+commit in ~1-2s). Thinking-window per-chunk force_listen stays
+(quiet listening IS the stock shape for silence).
+
+**Live (v53): probe-on 6/6** (2.0-7.4s; the slower commits are runs
+where the "stop" landed in the STALL phase, exercising the known
+in-flight-escalation-not-cancelled limitation — separate, already
+disclosed). Full regression green per the new rule: user script
+`_ws_stop_follow` 3/3, `_ws_context_smoke` PASS (NVDA→Apple),
+off-arm 3/3. Paper: Limitations rewritten — the "intrinsic residual"
+claim replaced by the three-arm attribution + the general lesson
+(any context shape a native session cannot produce is paid for in
+floor behavior; "intrinsic to the head" claims must survive a
+stock-serving control). NEW STANDING RULE (user): every change runs
+the regression suite; every "model-intrinsic" claim needs the
+vanilla arm first. Files: demo_duplex.py, _ws_stop_compare.py (new).
+
+## 8cn — echo-guard, fire energy floor, cut precondition, starvation watchdog: the streaming-relay regressions closed (2026-09-05)
+
+**User's live phone trace exposed a FALSE BARGE:** rms .025 cut the
+relay with an EMPTY user transcript — the phone speaker's relay
+playback leaking past AEC (real barges measured down to rms .015, so
+no energy threshold separates leakage from soft speech). The head
+then committed on the leaked tail and ESCALATED with an empty
+snapshot ("market update…" + spurious stall; the 8ci strip guard
+stopped the thinker, not the theater).
+
+**Four fixes (one deploy):**
+(1) ECHO GUARD — we hold the reference signal (the last ~3s of
+shipped relay pcm): envelope cross-correlation between the uplink
+tail and the shipped audio; corr ≥.6 = our own playback, cut
+suppressed. Transport-layer, stance-compatible.
+(2) FIRE ENERGY FLOOR — escalation requires snapshot speech energy
+(rms >.008): blocks empty-snapshot fires and stops escalating the
+8cg hallucinated-commit turns.
+(3) CUT PRECONDITION — `rst["frames"]` non-empty went deaf under
+slow streaming synth (pacer ships as produced, queue hovers EMPTY;
+4/4 regression runs never even reached the energy test on "Stop.").
+Now: any active delivery (frames | synthing | next_at).
+(4) STARVATION WATCHDOG — synth at 0.45-0.7x realtime can hold
+relay_guard 20-40s (gate skipped = deaf to follow-ups). Playback
+starved >3s → kill the synth (gen bump), truncate the answer, hand
+the floor back.
+
+**Regression (instrumented build; gate events now carry
+snap_rms/guard/thinking):** stop-follow 6/7 across the last two
+batches with clean field traces (stop remnant held at act .007-.047,
+follow-ups fire .69-.90, snap_rms ~.05); compare-on 3/3, off 3/3,
+ctx PASS. Cut fires at the stop reliably again. Residuals on the
+books: synth throughput under GPU sharing (0.45-1.2x, the
+latency/smoothness/answer-length triangle — design decision pending),
+and the occasional missed cut on a single soft "Stop." (energy-window
+variance). Files: demo_duplex.py, _ws_stop_follow.py (field prints).
+
+### 8co — empty-ASR cascade: cut now resyncs the backlog to the wall clock (2026-09-05)
+
+**User trace:** empty ASR on every post-cut turn (turns 2/3/8/9),
+spurious local answers with stale relay numbers one turn later.
+Mechanism: GPU contention during streaming synth lags the loop 6-8s
+("dropped 7.4s of backlogged silence"); a cut clears user_win, which
+then REFILLS with relay-era audio from the backlog (leakage/silence,
+rms ~.02 — above the .008 fire floor) while the user's real follow-up
+sits deep in the queue → empty-transcript fire, question heard one
+turn late. Fix: the cut drops all backlog older than ~3s (everything
+before it is playback-era uplink) — the loop snaps back to realtime,
+the head hears the follow-up immediately, snapshots carry real
+speech. Cut logs now include the echo-correlation value (live barges
+measure corr .17-.49 vs the .6 suppression threshold; phone-leakage
+corr values wanted from the field to tune it). Suite green:
+stop-follow 4/4 (post-cut ASR hears the full question; one residual
+single empty turn immediately recovered), compare-on 3/3, ctx PASS.

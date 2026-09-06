@@ -67,7 +67,7 @@ async def run(q1: str = "", q2: str = ""):
     events = []
     FR = 2048
 
-    async with websockets.connect(f"{WS}?tier=aggressive&probe_on=1",
+    async with websockets.connect(f"{WS}?tier=aggressive&probe_on=1&tracker=0",
                                   max_size=2 ** 24,
                                   open_timeout=60) as sock:
         t0s = _t.time()
@@ -81,7 +81,9 @@ async def run(q1: str = "", q2: str = ""):
                     tag = e.get("type").upper()
                     val = (e.get("msg") or e.get("v")
                            or f"fired={e.get('fired')} "
-                              f"is_info={e.get('is_info')}")
+                              f"is_info={e.get('is_info')} "
+                              f"score={e.get('score')} "
+                              f"thr={e.get('thr')} ({e.get('thr_mode')})")
                     print(f"[{t}s] {tag}: {str(val)[:130]}")
 
         rt = asyncio.create_task(reader())
@@ -101,14 +103,42 @@ async def run(q1: str = "", q2: str = ""):
                                 .astype(np.int16).tobytes())
                 await asyncio.sleep(FR / 16000)
 
+        def turn_cleared(after):
+            # relay_guard clears at the relay turn's eot; that branch
+            # emits the "muted N chunks" log (and the muted-tail eot
+            # emits phase=listening). Wait for either, after `after`.
+            rt_ = [t for t, e in events
+                   if e.get("type") == "text" and e.get("relay")
+                   and t > after]
+            if not rt_:
+                return False
+            # phase=listening also fires at muted-chunk eots mid-relay,
+            # so key on the two logs that mark the relay turn closing.
+            return any(t > rt_[0] and e.get("type") == "log" and (
+                "chunks of local continuation" in e.get("msg", "")
+                or "closing turn early" in e.get("msg", ""))
+                for t, e in events)
+
         await say(wavs[0], turns[0])
-        # wait out the full escalation of turn 1 (stall+expert+relay)
-        await silence(30)
+        # wait out the full escalation of turn 1 (stall+expert+relay).
+        # 8bu made the relay turn longer than the old fixed 30s wait
+        # (TTS relay + muted tail can hold relay_guard past 50s), so
+        # wait event-driven with a 75s cap.
+        for _ in range(75):
+            await silence(1)
+            if turn_cleared(0.0):
+                break
+        await silence(4)
         n_relay_1 = sum(1 for _, e in events
                         if e.get("type") == "text" and e.get("relay"))
         print(f"=== turn 1 relay chunks: {n_relay_1} ===")
+        t2s = _t.time() - t0s
         await say(wavs[1], turns[1])
-        await silence(35)
+        for _ in range(75):
+            await silence(1)
+            if turn_cleared(t2s):
+                break
+        await silence(6)
 
         try:
             await sock.send(json.dumps({"type": "stop"}))
@@ -119,8 +149,9 @@ async def run(q1: str = "", q2: str = ""):
 
     # analysis: turn-2 uplink + relay
     logs = [e["msg"] for _, e in events
-            if e.get("type") == "log" and "uplink heard" in e.get("msg",
-                                                                   "")]
+            if e.get("type") == "log"
+            and ("uplink heard" in e.get("msg", "")
+                 or "ASR heard" in e.get("msg", ""))]
     relays = [e["v"] for _, e in events
               if e.get("type") == "text" and e.get("relay")]
     relay_txt = "".join(relays)

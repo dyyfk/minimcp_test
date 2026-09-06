@@ -100,22 +100,97 @@ gpu_image = (
 
 # proven wording (first escalate smoke: relayed + self-corrected);
 # free-text imperatives like "stop speaking and wait" made the head
-# swallow the relay, and "say X now" got followed one unit late — the
-# canned-stall + factual context note below avoids steering entirely.
+# swallow the relay, and "say X now" got followed one unit late.
 RELAY_TMPL = ("A verified answer came back: {ans}\n"
               "Relay it to the user in one or two spoken sentences.")
 RELAY_NUDGE = "Say the verified answer aloud to the user now."
+STALL = "Hmm, let me double-check that — one moment."
+# fired => paper-parity canned stall: the STALL line is synthesized ONCE
+# at load via the turn-based teacher-forcing path (talker's own voice)
+# and played to the user at fire time. The onset chunk's ~1 s of local
+# attempt has already been voiced when the gate reads — chunk
+# granularity is the regime's floor.
+#
+# 8cf stock-parity context: whatever pcm we ship out-of-band (canned
+# stall, paced relay tts) is teacher-forced into the duplex context as
+# the head's OWN speak tokens and the turn is closed with turn_eos —
+# the exact shape a natural stock yield leaves behind. The previous
+# design ([SYSTEM NOTE] text units + a muted local "babble" that
+# rambled to its own eot) put content in the context the duplex head
+# never saw in training ("Your answer so far is likely wrong" + a 30s
+# phantom turn) and measurably tilted it toward <|listen|> after
+# escalations and barge cuts (8ce: ~1/3 post-barge lock vs ~1/6
+# clean-session baseline). Stock MiniCPM-o 4.5 has no such lock
+# inflation — its post-interruption context is just "partial answer +
+# self-sampled turn_eos", which is what we now reproduce.
+#
 # 8bu relay mode. "steer": prefill RELAY_TMPL and let the talker voice the
 # answer itself (loses ~20-27 pts of correct expert answers: truncation,
 # self-answering, 99% nudges). "tts": speak the cleaned expert text
 # verbatim in the talker's own voice via the same teacher-forcing path
-# that synthesizes the canned stall, then hand the context a note. The
-# chunk loop keeps running, so the relay stays interruptible.
+# that synthesizes the canned stall. The chunk loop keeps running, so
+# the relay stays interruptible.
 RELAY_MODE = os.environ.get("RELAY_MODE", "tts")
-RELAY_NOTE = "[SYSTEM NOTE] You just told the user: \"{ans}\" Do not repeat it."
 
 
 import re
+
+
+_SENT_SPLIT = (r"(?<!\b[A-Z])(?<!\b[A-Z][a-z])(?<!\bU\.S)(?<!\bDr)"
+               r"(?<!\bMr)(?<!\bMrs)(?<!\bSt)(?<!\bNo)(?<=[.!?])\s+"
+               r"(?=[A-Z0-9一-鿿])")
+
+
+def _split_sents(t):
+    return [s for s in re.split(_SENT_SPLIT, t) if s.strip()]
+
+
+_CLAUSE_SPLIT = r"(?<=[,;:，；：])\s+"
+
+
+def _relay_pieces(t, first_max=50, piece_max=80):
+    """TTS piece list: a short first piece so playback starts fast,
+    then roughly piece_max-char pieces. Split at sentence bounds;
+    sentences longer than piece_max split again at clause marks, and
+    clauses still longer than piece_max split at word boundaries.
+    8cl: piece_max 110->80 and a HARD cap — synth runs ~0.73-0.85x
+    realtime, so the pipeline only stays ahead when every piece's
+    synth time (~0.8 x len) fits inside the previous piece's playback;
+    one 14.5s tail piece behind a 3.1s opener starved the buffer for
+    ~7s (the residual mid-relay stutter)."""
+    def _words(c):
+        if len(c) <= piece_max:
+            return [c]
+        out, cur = [], ""
+        for w in c.split(" "):
+            if cur and len(cur) + 1 + len(w) > piece_max:
+                out.append(cur)
+                cur = w
+            else:
+                cur = (cur + " " + w).strip()
+        if cur:
+            out.append(cur)
+        return out
+
+    parts = []
+    for s in (_split_sents(t) or [t]):
+        if len(s) <= piece_max:
+            parts.append(s)
+            continue
+        cur = ""
+        for c in re.split(_CLAUSE_SPLIT, s):
+            if cur and len(cur) + 1 + len(c) > piece_max:
+                parts.extend(_words(cur))
+                cur = c
+            else:
+                cur = (cur + " " + c).strip()
+        if cur:
+            parts.extend(_words(cur))
+    if parts and len(parts[0]) > first_max:
+        cut = re.split(_CLAUSE_SPLIT, parts[0])
+        if len(cut) > 1 and len(cut[0]) <= first_max:
+            parts = [cut[0], " ".join(cut[1:])] + parts[1:]
+    return parts
 
 
 def clean_expert(txt, max_chars=400):
@@ -133,7 +208,7 @@ def clean_expert(txt, max_chars=400):
     t = re.sub(r"\s*,\s*,+", ", ", t)
     t = re.sub(r":\s*,\s*", ": ", t)
     t = re.sub(r"\s+", " ", t).strip(" ,")
-    sents = re.split(r"(?<!\b[A-Z])(?<!\b[A-Z][a-z])(?<!\bU\.S)(?<!\bDr)(?<!\bMr)(?<!\bMrs)(?<!\bSt)(?<!\bNo)(?<=[.!?])\s+(?=[A-Z0-9\u4e00-\u9fff])", t)
+    sents = re.split(_SENT_SPLIT, t)
     out = ""
     for se in sents:
         if out and len(out) + 1 + len(se) > max_chars:
@@ -142,6 +217,42 @@ def clean_expert(txt, max_chars=400):
     if len(out) > max_chars + 80:
         out = out[:max_chars].rsplit(" ", 1)[0] + "."
     return out or t[:max_chars]
+
+
+def _env_blocks(x, sr, blk=0.08):
+    import numpy as np
+    n = max(1, int(sr * blk))
+    m = len(x) // n
+    if m < 4:
+        return None
+    return np.sqrt(np.mean(
+        x[:m * n].reshape(m, n).astype(np.float32) ** 2, axis=1))
+
+
+def _echo_corr(up16, ref24):
+    """8cn: max normalized envelope correlation between the uplink
+    tail (16 kHz) and the recently-shipped relay audio (24 kHz) —
+    high correlation means the mic is hearing OUR OWN playback
+    (speakerphone leakage past AEC), not the user. Live trace: leaked
+    relay read rms 0.025, above the 0.012 barge threshold, and cut
+    the relay with an EMPTY user transcript; real barges have been
+    measured down to rms 0.015, so no energy threshold separates the
+    two — the reference signal does."""
+    import numpy as np
+    eu = _env_blocks(up16, 16000)
+    er = _env_blocks(ref24, 24000)
+    if eu is None or er is None or len(er) < len(eu):
+        return 0.0
+    eu = eu - eu.mean()
+    su = float(np.sqrt((eu ** 2).sum())) + 1e-9
+    best = 0.0
+    for off in range(0, len(er) - len(eu) + 1):
+        w = er[off:off + len(eu)]
+        w = w - w.mean()
+        c = float((eu * w).sum()
+                  / (su * (float(np.sqrt((w ** 2).sum())) + 1e-9)))
+        best = max(best, c)
+    return best
 
 
 def _call_def(fn, /, **kw):
@@ -187,6 +298,23 @@ class DuplexVoice:
         # as_duplex() runs init_tts itself (default asset path) and owns
         # its token2wav stream cache via prepare(prompt_wav_path=...)
         self.duplex = self.model.as_duplex()
+        # 8cl: a SECOND instance dedicated to relay/stall TTS synthesis,
+        # so piece synth (0.8-2x realtime) runs on a worker thread and
+        # never stalls the chunk loop (the mid-relay stutter, 8ck).
+        # Isolation-tested: concurrent synth+duplex, 0 errors, chunk
+        # p50 0.10->0.46s worst-case; +16.5G VRAM, +5s load.
+        # init_tts() is MANDATORY here — as_duplex() calls it for the
+        # main model implicitly; skipping it on the bare instance left
+        # tts.audio_tokenizer=None, the load-time stall synth failed,
+        # tts_ok silently went False and the whole relay fell back to
+        # steer mode (the 8ck-2 outage).
+        self.smodel = AutoModel.from_pretrained(
+            MODEL_DIR, trust_remote_code=True, attn_implementation="sdpa",
+            torch_dtype=torch.bfloat16,
+            init_vision=False, init_audio=True,
+            init_tts=True).eval().cuda()
+        self.smodel.init_tts()
+        print(">>> synth model (B) loaded + init_tts", flush=True)
 
         # in-regime probe: 8be native-duplex refit (2310 rows, same
         # speak-onset read point as this app; scripts/22)
@@ -226,15 +354,19 @@ class DuplexVoice:
         try:
             import librosa as _lb
             ref, _ = _lb.load(PROMPT_WAV, sr=16000, mono=True)
-            self.model.init_token2wav_cache(ref)
+            self.smodel.init_token2wav_cache(ref)
             self.tts_ok = True
             self.stall_pcm = self._synth_pcm(STALL, max_new_tokens=64)
             if self.stall_pcm is not None:
                 print(f">>> canned stall: "
                       f"{len(self.stall_pcm) / 24000:.2f}s", flush=True)
         except Exception as e:
-            print(f">>> stall synth failed (no audio stall): {e}",
-                  flush=True)
+            # 8cl: this fallback also flips the RELAY to steer mode —
+            # make it impossible to miss in the logs.
+            import traceback as _tb
+            _tb.print_exc()
+            print(f">>> stall synth FAILED — tts_ok=False, RELAY WILL "
+                  f"FALL BACK TO STEER MODE: {e}", flush=True)
         self.load_s = round(time.time() - t0, 1)
         print(f">>> DuplexVoice ready in {self.load_s}s", flush=True)
 
@@ -242,16 +374,16 @@ class DuplexVoice:
         """Talker's own voice, verbatim `text`, via the turn-based
         teacher-forcing path (24 kHz float32 pcm or None)."""
         import numpy as _np
-        self.model.reset_session(reset_token2wav_cache=False)
-        sys_msg = _call_def(self.model.get_sys_prompt, mode="omni",
+        self.smodel.reset_session(reset_token2wav_cache=False)
+        sys_msg = _call_def(self.smodel.get_sys_prompt, mode="omni",
                             language="en")
-        _call_def(self.model.streaming_prefill, session_id="s1",
+        _call_def(self.smodel.streaming_prefill, session_id="s1",
                   msgs=[sys_msg], tokenizer=self.tok)
-        _call_def(self.model.streaming_prefill, session_id="s1",
+        _call_def(self.smodel.streaming_prefill, session_id="s1",
                   msgs=[{"role": "user",
                          "content": [_np.zeros(16000, dtype="float32")]}],
                   tokenizer=self.tok, is_last_chunk=True)
-        res = _call_def(self.model.streaming_generate,
+        res = _call_def(self.smodel.streaming_generate,
                         tokenizer=self.tok, temperature=0.1,
                         generate_audio=True, use_tts_template=True,
                         teacher_forcing=True, teacher_forcing_text=text,
@@ -262,6 +394,37 @@ class DuplexVoice:
             if wf is not None:
                 parts.append(wf.float().cpu().numpy().reshape(-1))
         return _np.concatenate(parts) if parts else None
+
+    def _synth_stream(self, text):
+        """8cm: STREAMING synth of the whole relay text in ONE
+        teacher-forced session, yielding 24 kHz float32 chunks as the
+        TTS produces them. Replaces per-piece synthesis: each piece
+        paid ~1-1.5s of fixed overhead (session reset + prompts) that
+        small pieces could not amortize (synth fell to >1x realtime,
+        the pacer waited at every sentence) and each splice was a
+        prosodic break the user heard as lengthened sentence gaps.
+        One session = one overhead, continuous prosody, first chunk
+        in ~2s."""
+        import numpy as _np
+        self.smodel.reset_session(reset_token2wav_cache=False)
+        sys_msg = _call_def(self.smodel.get_sys_prompt, mode="omni",
+                            language="en")
+        _call_def(self.smodel.streaming_prefill, session_id="s1",
+                  msgs=[sys_msg], tokenizer=self.tok)
+        _call_def(self.smodel.streaming_prefill, session_id="s1",
+                  msgs=[{"role": "user",
+                         "content": [_np.zeros(16000, dtype="float32")]}],
+                  tokenizer=self.tok, is_last_chunk=True)
+        res = _call_def(self.smodel.streaming_generate,
+                        tokenizer=self.tok, temperature=0.1,
+                        generate_audio=True, use_tts_template=True,
+                        teacher_forcing=True, teacher_forcing_text=text,
+                        max_new_tokens=min(2400, 120 + 2 * len(text)),
+                        session_id="s1")
+        for item in res:
+            wf = item[0] if isinstance(item, tuple) else None
+            if wf is not None:
+                yield wf.float().cpu().numpy().reshape(-1)
 
     def _feat_now(self):
         import torch
@@ -292,6 +455,148 @@ class DuplexVoice:
         z = float(v @ np.array(self.act["w"], dtype=v.dtype)) \
             + self.act["b"]
         return float(1.0 / (1.0 + np.exp(-z)))
+
+    def _force_end_turn(self):
+        """8ce: terminate an in-flight speak turn from the serving loop
+        (barge cut). Prefer the model method if the loaded modeling
+        sources carry it; otherwise inline the same steps using only
+        attributes the shipped class already has — a warm container may
+        have imported a pre-8ce MiniCPMODuplex even after @enter copied
+        newer sources, so we must not depend on the new method existing.
+        """
+        d = self.duplex
+        if getattr(d, "current_turn_ended", True):
+            return
+        fn = getattr(d, "end_turn_now", None)
+        if callable(fn):
+            fn()
+            return
+        # inline for a warm container running pre-8ce sources without the
+        # method: turn_eos (unlocks listen suppression) + per-turn TTS/
+        # token2wav reset + force-listen counter reset. No unit-close
+        # bookkeeping on purpose — it lowered the commit rate (see
+        # end_turn_now).
+        try:
+            d.decoder.feed(d.decoder.embed_token(d.turn_eos_token_id))
+            d.total_ids.append(d.turn_eos_token_id)
+        except Exception:
+            pass
+        d.current_turn_ended = True
+        d.tts_text_start_pos = 0
+        d.tts_past_key_values = None
+        d.tts_current_turn_start_time = None
+        try:
+            d._reset_token2wav_for_new_turn()
+        except Exception:
+            pass
+        d._streaming_generate_count = 0
+
+    def _speak_forced(self, text, end_turn=True):
+        """8cf: teacher-force `text` into the duplex context as the head's
+        own speech — normal speak units closed with turn_eos — for audio
+        the caller already shipped (canned stall / paced relay pcm). Keeps
+        the context aligned with what the user actually heard, replacing
+        the [SYSTEM NOTE] narration. Prefer the model method; inline
+        fallback for a warm container running pre-8cf modeling sources
+        (same caveat as _force_end_turn).
+        """
+        d = self.duplex
+        fn = getattr(d, "speak_forced", None)
+        if callable(fn):
+            fn(text, end_turn=end_turn)
+            return
+        tok = d.tokenizer
+        ids = tok.encode(text, add_special_tokens=False) if text else []
+        if not ids and not end_turn:
+            return
+        d.pending_logits = None
+        unit_end = tok.convert_tokens_to_ids("</unit>")
+
+        def _feed(tid):
+            d.decoder.feed(d.decoder.embed_token(tid))
+            d.total_ids.append(tid)
+
+        groups = [ids[i:i + 18] for i in range(0, len(ids), 18)] or [[]]
+        for gi, g in enumerate(groups):
+            last = gi == len(groups) - 1
+            d.decoder.register_unit_start()
+            gen = []
+            _feed(d.unit_token_id)
+            _feed(d.speak_token_id)
+            d.current_turn_ended = False
+            for tid in g:
+                _feed(tid)
+                gen.append(tid)
+                d.res_ids.append(tid)
+                d.speak_count += 1
+            if last and end_turn:
+                _feed(d.turn_eos_token_id)
+                gen.append(d.turn_eos_token_id)
+                d.current_turn_ended = True
+                _feed(d.chunk_tts_eos_token_id)
+            else:
+                _feed(d.chunk_eos_token_id)
+            _feed(unit_end)
+            d.decoder.register_unit_end(
+                input_type="text", generated_tokens=gen, is_listen=False,
+                generated_text=tok.decode(g, skip_special_tokens=True))
+            d.total_hidden.append([])
+        if end_turn:
+            d.tts_text_start_pos = 0
+            d.tts_past_key_values = None
+            d.tts_current_turn_start_time = None
+            try:
+                d._reset_token2wav_for_new_turn()
+            except Exception:
+                pass
+
+    def _speak_forced_unit(self, token_ids, end_turn=False):
+        """8cj: complete the CURRENT audio-prefilled unit with teacher-
+        forced speak tokens. The context then shows a normal speaking
+        chunk — audio embed + <|speak|> + text — for every second of
+        relay audio the user actually hears, the exact shape of the
+        stock head answering by itself (the 8cj three-arm A/B showed
+        vanilla and probe-off recover 6/6 after a stop while the old
+        forced-listen relay window recovered 3/6: a context that
+        "listened silently" through its own audible answer tilts the
+        head toward listen). No sampling, no TTS.
+        """
+        d = self.duplex
+        d.pending_logits = None
+
+        def _feed(tid):
+            d.decoder.feed(d.decoder.embed_token(tid))
+            d.total_ids.append(tid)
+
+        _feed(d.speak_token_id)
+        d.current_turn_ended = False
+        gen = []
+        for tid in token_ids:
+            _feed(tid)
+            gen.append(tid)
+            d.res_ids.append(tid)
+            d.speak_count += 1
+        if end_turn:
+            _feed(d.turn_eos_token_id)
+            gen.append(d.turn_eos_token_id)
+            d.current_turn_ended = True
+            _feed(d.chunk_tts_eos_token_id)
+        else:
+            _feed(d.chunk_eos_token_id)
+        _feed(d.tokenizer.convert_tokens_to_ids("</unit>"))
+        d.decoder.register_unit_end(
+            input_type="audio", generated_tokens=gen, is_listen=False,
+            generated_text=d.tokenizer.decode(
+                gen, skip_special_tokens=True))
+        d.total_hidden.append([])
+        if end_turn:
+            d.tts_text_start_pos = 0
+            d.tts_past_key_values = None
+            d.tts_current_turn_start_time = None
+            try:
+                d._reset_token2wav_for_new_turn()
+            except Exception:
+                pass
 
     def _session_reset(self):
         import librosa
@@ -365,6 +670,17 @@ class DuplexVoice:
             stop = _th.Event()
             inbox, ilock = [], _th.Lock()
             relay_box = []            # thinker -> chunk loop (one slot)
+            # 8ck: frames + schedule shared between the chunk loop and
+            # the pacer thread — frame delivery must not stall while
+            # the loop synthesizes a piece (2-4s), or the client's ~2s
+            # buffer drains and every piece boundary is an audible
+            # pause. MUST live at this scope (chunk_loop-local state
+            # would NameError the pacer).
+            rst = {"frames": [], "toks": [], "next_at": None,
+                   "gen": 0, "synthing": False, "est_rest": 0.0,
+                   "sent": []}   # 8cn: last ~3s shipped (echo ref)
+            relay_lock = _th.Lock()
+            synth_jobs = []           # (gen, piece text) for the worker
 
             def emit(m):
                 asyncio.run_coroutine_threadsafe(sock.send_json(m), loop)
@@ -389,7 +705,11 @@ class DuplexVoice:
                 turn_index = 0
                 turn_scores = []
                 relay_guard = False               # relay being delivered
-                muted = 0                         # 8bm: suppressed chunks
+                relay_deadline = None             # 8cb: tts playback end
+                relay_pause = 0                   # 8ce: head-yield seconds
+                echo_warned = False               # 8cn: once-per-relay log
+                relay_ctx_closed = False          # 8cj: relay turn eos fed
+                tts_relay = RELAY_MODE == "tts" and self.tts_ok
                 prev_listen = True
                 thinking = _th.Event()           # thinker in flight
                 n_chunk = 0
@@ -497,7 +817,7 @@ class DuplexVoice:
                     # the expert to resolve references against it.
                     try:
                         transcribe_turn(state)
-                        up = state.get("uplink_text")
+                        up = (state.get("uplink_text") or "").strip()
                         if not up:
                             raise RuntimeError(
                                 state.get("asr_error") or "empty ASR transcript")
@@ -541,6 +861,37 @@ class DuplexVoice:
                             if len(pend) < CH:
                                 time.sleep(0.02)
                                 continue
+                            # 8ci: relay-piece synth (2-4s each) runs
+                            # inside this loop, so during a relay the
+                            # inbound audio backlogs and every decision
+                            # (energy cut, commit, gate read) runs
+                            # seconds late — live, a "Stop" took ~4s to
+                            # cut and the follow-up question was chopped
+                            # into fragment turns; the model looks deaf.
+                            # Recover wall-clock by dropping backlogged
+                            # SILENCE (the head never acts on it); any
+                            # speechy suffix is kept, so user speech is
+                            # never discarded, just reached sooner.
+                            if len(pend) > 3 * CH:
+                                over, keep = pend[:-2 * CH], pend[-2 * CH:]
+                                cut_at = None
+                                for oi in range(0, len(over), CH):
+                                    seg = over[oi:oi + CH]
+                                    if float(np.sqrt(np.mean(
+                                            seg.astype(np.float32)
+                                            ** 2))) > 0.012:
+                                        cut_at = oi
+                                        break
+                                if cut_at is None:
+                                    emit({"type": "log",
+                                          "msg": f"dropped "
+                                                 f"{len(over) / CH:.1f}s "
+                                                 "of backlogged silence "
+                                                 "(staying realtime)"})
+                                    pend = keep
+                                else:
+                                    pend = np.concatenate(
+                                        [over[cut_at:], keep])
                             ch, pend = pend[:CH], pend[CH:]
                             if len(pend) > 6 * CH:
                                 emit({"type": "log",
@@ -554,52 +905,61 @@ class DuplexVoice:
                                 relay_turn = relay_box.pop(0)
                                 ans = relay_turn.get("expert_answer", "")
                                 relay_turn["relay_started_at"] = time.time()
-                                if muted:
-                                    emit({"type": "log",
-                                          "msg": f"muted {muted - 1} chunks "
-                                                 "of local continuation"})
-                                    muted = 0
                                 relay_guard = True   # no gate fire until
                                 #                      this delivery's eot
                                 emit({"type": "phase", "v": "relaying"})
-                                if RELAY_MODE == "tts" and self.tts_ok:
+                                if tts_relay:
                                     # 8bu: verbatim expert text in the
-                                    # talker's own voice; the duplex
-                                    # context only gets a note, and the
-                                    # local continuation stays muted to
-                                    # end_of_turn so nothing talks over it
+                                    # talker's own voice.
+                                    # 8ce: chunk-paced delivery. 8cd's
+                                    # eager emission handed the browser
+                                    # 7-10s of scheduled audio no one
+                                    # could stop — the classic half-
+                                    # duplex playback tail. Synthesize
+                                    # piece 1 now (answer still starts
+                                    # ~2.5s), queue the rest; the main
+                                    # loop synthesizes at most one piece
+                                    # per iteration and drips ~1s frames
+                                    # on a wall-clock pacer, so the
+                                    # client never holds more than ~2s
+                                    # and the duplex head keeps the
+                                    # floor decision every second.
+                                    # 8cf: no [SYSTEM NOTE] — the pieces
+                                    # actually shipped are teacher-forced
+                                    # into the context as the head's own
+                                    # closed turn at delivery end / cut.
                                     spoken = clean_expert(ans)
-                                    t_s = time.time()
-                                    pcm = None
-                                    try:
-                                        pcm = self._synth_pcm(spoken)
-                                    except Exception as se:
-                                        emit({"type": "log",
-                                              "msg": "relay synth failed: "
-                                                     + str(se)[:100]})
-                                    if pcm is not None:
-                                        i16r = (np.clip(pcm, -1, 1)
-                                                * 32767).astype("<i2")
-                                        emit({"type": "audio", "sr": 24000,
-                                              "pcm": base64.b64encode(
-                                                  i16r.tobytes()).decode()})
                                     emit({"type": "text", "v": " " + spoken,
                                           "relay": True})
                                     relay_turn["assistant_parts"].append(
                                         " " + spoken)
+                                    # 8cm: ONE streaming synth job
+                                    # for the whole answer (dedicated
+                                    # second model, worker thread) —
+                                    # per-piece sessions paid ~1-1.5s
+                                    # fixed overhead each and spliced
+                                    # prosody; the user heard both as
+                                    # lengthened sentence gaps. gen
+                                    # guards stale audio after a cut.
+                                    with relay_lock:
+                                        rst["gen"] += 1
+                                        rst["frames"] = []
+                                        rst["toks"] = self.tok.encode(
+                                            " " + spoken,
+                                            add_special_tokens=False)
+                                        rst["next_at"] = None
+                                        rst["synthing"] = True
+                                        rst["est_rest"] = max(
+                                            2.0, len(spoken) / 15.0)
+                                        synth_jobs[:] = [
+                                            (rst["gen"], spoken)]
+                                    relay_ctx_closed = False
+                                    echo_warned = False
                                     emit({"type": "log",
-                                          "msg": f"relay (tts) "
-                                                 f"{len(pcm) / 24000 if pcm is not None else 0:.1f}s "
-                                                 f"audio, synth "
-                                                 f"{time.time() - t_s:.1f}s"})
-                                    self.duplex.streaming_prefill(
-                                        text_list=[RELAY_NOTE.format(ans=spoken)])
-                                    r = self.duplex.streaming_generate(
-                                        prompt_wav_path=PROMPT_WAV,
-                                        top_k=GEN_TOP_K)
-                                    _emit_gen(r, mute=True)
-                                    muted = 1
-                                    prev_listen = r["is_listen"]
+                                          "msg": "relay: streaming "
+                                                 "synth started "
+                                                 f"({len(spoken)} chars)"})
+                                    relay_pause = 0
                                 else:
                                     self.duplex.streaming_prefill(
                                         text_list=[RELAY_TMPL.format(ans=ans)])
@@ -637,9 +997,50 @@ class DuplexVoice:
                                       "msg": f"prefill skipped: "
                                              f"{ok.get('reason', '')[:80]}"})
                                 continue
-                            r = self.duplex.streaming_generate(
-                                prompt_wav_path=PROMPT_WAV,
-                                top_k=GEN_TOP_K)
+                            # 8cj: while relay audio ships, the context
+                            # must show the head SPEAKING those words
+                            # (paced teacher-forced speak units), not
+                            # silently listening — the three-arm A/B
+                            # (vanilla 6/6, probe-off 6/6, old probe-on
+                            # 3/6) pinned the post-stop lock on the
+                            # forced-listen relay window, not the head.
+                            # While the thinker is out (silence, before
+                            # any audio) a per-chunk force_listen is the
+                            # stock quiet-listening shape and stays.
+                            forced_chunk = (relay_guard and tts_relay
+                                            and not relay_ctx_closed)
+                            if forced_chunk:
+                                with relay_lock:
+                                    sec_left = max(1, int(
+                                        len(rst["frames"])
+                                        + (rst["est_rest"]
+                                           if rst["synthing"] else 0)))
+                                    k = (min(18, max(2,
+                                             -(-len(rst["toks"])
+                                               // sec_left)))
+                                         if rst["toks"] else 0)
+                                    toks = rst["toks"][:k]
+                                    rst["toks"] = rst["toks"][k:]
+                                    end_now = (not rst["toks"]
+                                               and not rst["synthing"]
+                                               and len(rst["frames"])
+                                               <= 1)
+                                self._speak_forced_unit(
+                                    toks, end_turn=end_now)
+                                if end_now:
+                                    relay_ctx_closed = True
+                                r = {"is_listen": False, "text": "",
+                                     "end_of_turn": False,
+                                     "cost_all": 0.0}
+                            else:
+                                if thinking.is_set() or (relay_guard
+                                                         and tts_relay):
+                                    self.duplex \
+                                        ._streaming_generate_count = 0
+                                    self.duplex.force_listen_count = 1
+                                r = self.duplex.streaming_generate(
+                                    prompt_wav_path=PROMPT_WAV,
+                                    top_k=GEN_TOP_K)
                             n_chunk += 1
 
                             score = self._score_now()
@@ -649,8 +1050,238 @@ class DuplexVoice:
                                       "v": round(score, 4),
                                       "listen": bool(r["is_listen"])})
 
+                            # 8ce: paced relay delivery. One pending
+                            # piece synthesized per iteration; due ~1s
+                            # frames dripped on a wall-clock pacer so the
+                            # client never buffers more than ~2s. Barge-
+                            # in is gated on USER SPEECH ENERGY, not the
+                            # act/is_info probe: "wait, stop" reads as
+                            # floor-management (is_info False) yet is
+                            # exactly the interruption to honor. The
+                            # energy test gates transport only (dropping
+                            # injected frames) — every turn-taking and
+                            # escalation decision still belongs to the
+                            # duplex head; there is no VAD in the model
+                            # path and no client kill-switch.
+                            if relay_guard and (rst["frames"]
+                                                or rst["synthing"]
+                                                or rst["next_at"]
+                                                is not None):
+                                # 8cn: the old rst["frames"] precondition
+                                # went deaf under slow streaming synth —
+                                # the pacer ships frames as they arrive,
+                                # the queue hovers EMPTY, and a "Stop."
+                                # mid-relay never even reached the
+                                # energy test (4/4 regression runs).
+                                # user speech over the last ~2s (silence
+                                # RMS ~0.003, speech ~0.03+); relay-onset
+                                # window is post-thinker silence, so no
+                                # turn-1 residue. AEC keeps the client's
+                                # own relay playback out of this uplink.
+                                # 8ci: read the FRESH tail (processed
+                                # window + unprocessed backlog), not
+                                # just user_win — during relay synth
+                                # the loop lags the wall clock and a
+                                # user_win-only read fired the cut ~4s
+                                # after the actual "stop".
+                                recent = (np.concatenate(
+                                    user_win[-2:] + [pend])[-2 * CH:]
+                                    if (user_win or len(pend))
+                                    else np.zeros(1, np.float32))
+                                user_rms = float(np.sqrt(np.mean(
+                                    recent.astype(np.float32) ** 2)))
+                                with relay_lock:
+                                    ref = (np.concatenate(rst["sent"])
+                                           if rst["sent"]
+                                           else np.zeros(
+                                               1, np.float32))
+                                ec = (_echo_corr(recent, ref)
+                                      if user_rms > 0.012 else 0.0)
+                                if user_rms > 0.012 and ec >= 0.6:
+                                    if not echo_warned:
+                                        emit({"type": "log",
+                                              "msg": "barge energy "
+                                                     f"(rms {user_rms:.3f})"
+                                                     " suppressed as our "
+                                                     "own playback echo "
+                                                     f"(corr {ec:.2f})"})
+                                        echo_warned = True
+                                if user_rms > 0.012 and ec < 0.6:
+                                    emit({"type": "log",
+                                          "msg": "user takes the floor "
+                                                 f"mid-relay (rms "
+                                                 f"{user_rms:.3f}, echo "
+                                                 f"corr {ec:.2f}) — "
+                                                 "dropping "
+                                                 f"~{len(rst['frames'])}s"
+                                                 " of relay tail"})
+                                    # 8co: resync to the wall clock —
+                                    # GPU contention during synth lags
+                                    # the loop 6-8s; after a cut the
+                                    # rebuilt user_win was filling with
+                                    # STALE relay-era audio (leakage/
+                                    # silence) while the user's real
+                                    # follow-up sat deep in the backlog:
+                                    # empty-ASR fires, and the question
+                                    # surfaced one turn late. Everything
+                                    # older than ~3s is playback-era
+                                    # uplink; drop it.
+                                    if len(pend) > 3 * CH:
+                                        emit({"type": "log",
+                                              "msg": "cut resync: dropped "
+                                                     f"{(len(pend) - 3 * CH) / CH:.1f}s"
+                                                     " of stale pre-cut "
+                                                     "backlog"})
+                                        pend = pend[-3 * CH:]
+                                    emit({"type": "interrupt"})
+                                    with relay_lock:
+                                        rst["gen"] += 1
+                                        rst["frames"] = []
+                                        rst["toks"] = []
+                                        rst["next_at"] = None
+                                        rst["synthing"] = False
+                                        rst["est_rest"] = 0.0
+                                        synth_jobs[:] = []
+                                    if relay_turn is not None:
+                                        relay_turn["relay_cut"] = True
+                                        relay_turn["relay_ms"] = int(
+                                            (time.time()
+                                             - relay_turn.get(
+                                                 "relay_started_at",
+                                                 time.time())) * 1000)
+                                        finish_turn_async(relay_turn)
+                                        relay_turn = None
+                                    # 8cj: the relay turn is already IN
+                                    # the context as paced speak units
+                                    # (≈ what shipped); the cut just
+                                    # closes it with turn_eos below —
+                                    # "half-said answer + self-shaped
+                                    # eos", the exact stock yield.
+                                    relay_ctx_closed = True
+                                    active_turn = None
+                                    user_win = []
+                                    turn_text, turn_fired = [], False
+                                    turn_scores = []
+                                    relay_guard = False
+                                    relay_deadline = None
+                                    relay_pause = 0
+                                    self.st3.update(sum=None, cnt=0)
+                                    # 8cj: feed the turn_eos that closes
+                                    # the half-said relay turn. NO
+                                    # post-cut force_listen — the stock
+                                    # head is free immediately after a
+                                    # yield and commits on the follow-up
+                                    # in ~1-2s (vanilla arm A/B); the
+                                    # old 3-chunk forced listen only
+                                    # delayed and conditioned against
+                                    # that commit.
+                                    self._force_end_turn()
+                                    self.duplex.force_listen_count = 0
+                                    prev_listen = True
+                                    emit({"type": "phase",
+                                          "v": "listening"})
+                                    continue
+                                # (frame delivery lives in the 8ck
+                                # pacer thread — no in-loop drip)
+                            # 8cn: starvation watchdog — synth at
+                            # 0.45-0.7x realtime can hold relay_guard
+                            # for 20-40s (gate skipped the whole time =
+                            # deaf to follow-ups). If playback has been
+                            # starved >3s, kill the synth (gen bump),
+                            # truncate the answer, hand the floor back.
+                            if (relay_guard and rst["synthing"]
+                                    and not rst["frames"]
+                                    and rst["next_at"] is not None
+                                    and time.time()
+                                    > rst["next_at"] + 3.0):
+                                emit({"type": "log",
+                                      "msg": "relay starved >3s — "
+                                             "truncating answer, "
+                                             "closing early"})
+                                with relay_lock:
+                                    rst["gen"] += 1
+                                    rst["frames"] = []
+                                    rst["toks"] = []
+                                    rst["next_at"] = None
+                                    rst["synthing"] = False
+                                    rst["est_rest"] = 0.0
+                                    rst["sent"] = []
+                                    synth_jobs[:] = []
+                                relay_ctx_closed = True
+                                if relay_turn is not None:
+                                    relay_turn["relay_ms"] = int(
+                                        (time.time() - relay_turn.get(
+                                            "relay_started_at",
+                                            time.time())) * 1000)
+                                    finish_turn_async(relay_turn)
+                                    relay_turn = None
+                                active_turn = None
+                                user_win = user_win[-2:]
+                                turn_text, turn_fired = [], False
+                                turn_scores = []
+                                relay_guard = False
+                                relay_deadline = None
+                                self.st3.update(sum=None, cnt=0)
+                                self._force_end_turn()
+                                self.duplex.force_listen_count = 0
+                                prev_listen = True
+                                emit({"type": "phase", "v": "listening"})
+                            if (relay_guard and relay_deadline is None
+                                    and not rst["frames"]
+                                    and not rst["toks"]
+                                    and not rst["synthing"]):
+                                # queue drained: playback ends ~1s after
+                                # the last frame; the 8cb close below
+                                # finishes the bookkeeping.
+                                relay_deadline = ((rst["next_at"]
+                                                   or time.time()) + 1.0)
+
+                            # 8cb: close the relay turn when playback
+                            # ends. 8cf: this is also where the
+                            # delivered answer enters the context — as
+                            # the head's own closed speak turn
+                            # (teacher-forced), not a [SYSTEM NOTE].
+                            if (relay_guard and relay_deadline is not None
+                                    and time.time() > relay_deadline):
+                                emit({"type": "log",
+                                      "msg": "relay playback done — "
+                                             "closing relay turn"})
+                                # 8cj: the spoken turn is already in the
+                                # context (paced speak units); just make
+                                # sure it is closed (no-op if the last
+                                # forced unit carried the turn_eos), and
+                                # leave the head free — no forced listen
+                                # after a finished turn (stock parity).
+                                self._force_end_turn()
+                                self.duplex.force_listen_count = 0
+                                with relay_lock:
+                                    rst["toks"] = []
+                                    rst["synthing"] = False
+                                    rst["est_rest"] = 0.0
+                                relay_ctx_closed = False
+                                if relay_turn is not None:
+                                    relay_turn["relay_ms"] = int(
+                                        (time.time() - relay_turn.get(
+                                            "relay_started_at",
+                                            time.time())) * 1000)
+                                    finish_turn_async(relay_turn)
+                                    relay_turn = None
+                                active_turn = None
+                                user_win = user_win[-2:]   # 8ci
+                                turn_text, turn_fired = [], False
+                                turn_scores = []
+                                relay_guard = False
+                                relay_deadline = None
+                                with relay_lock:
+                                    rst["frames"] = []
+                                    rst["next_at"] = None
+                                relay_pause = 0
+                                self.st3.update(sum=None, cnt=0)
+                                emit({"type": "phase", "v": "listening"})
+
                             fired_now = False
-                            if prev_listen and not r["is_listen"]:
+                            if (prev_listen and not r["is_listen"]
+                                    and not forced_chunk):
                                 # the talker just decided to answer — the
                                 # gate reads exactly here. 8bh: floor-
                                 # management commits (stop words,
@@ -662,17 +1293,27 @@ class DuplexVoice:
                                 thr_eff, thr_mode = effective_thr()
                                 if score is not None and is_info:
                                     score_win.append(float(score))
-                                fired = bool(probe_on and score is not None
-                                             and score >= thr_eff and is_info
-                                             and not thinking.is_set()
-                                             and not relay_guard
-                                             and len(user_win) > 0)
-                                fired_now = fired
-                                turn_index += 1
                                 snap = (np.concatenate(user_win)
                                         if user_win else
                                         np.zeros(1600,
                                                  np.float32))[-30 * 16000:]
+                                # 8cn: escalation requires actual speech
+                                # energy in the recent snapshot — the
+                                # probe reads garbage confidently on
+                                # noise/hallucinated turns (8cg) and a
+                                # post-cut echo tail once fired with an
+                                # EMPTY transcript ("market update...").
+                                snap_rms = float(np.sqrt(np.mean(
+                                    snap[-3 * 16000:]
+                                    .astype(np.float32) ** 2)))
+                                fired = bool(probe_on and score is not None
+                                             and score >= thr_eff and is_info
+                                             and not thinking.is_set()
+                                             and not relay_guard
+                                             and len(user_win) > 0
+                                             and snap_rms > 0.008)
+                                fired_now = fired
+                                turn_index += 1
                                 active_turn = {
                                     "index": turn_index,
                                     "started_at": time.time(),
@@ -689,6 +1330,9 @@ class DuplexVoice:
                                     "asr_done": _th.Event(),
                                 }
                                 emit({"type": "gate",
+                                      "snap_rms": round(snap_rms, 4),
+                                      "guard": bool(relay_guard),
+                                      "thinking": thinking.is_set(),
                                       "score": (None if score is None
                                                 else round(score, 4)),
                                       "thr": round(thr_eff, 4),
@@ -711,10 +1355,8 @@ class DuplexVoice:
                                                args=(active_turn,),
                                                daemon=True).start()
 
-                            _emit_gen(r, mute=muted > 0)
-                            if muted:
-                                muted += 1
-                            if r.get("text") and not muted:
+                            _emit_gen(r)
+                            if r.get("text"):
                                 turn_text.append(r["text"])
                                 target_turn = (relay_turn if relay_guard
                                                and relay_turn is not None
@@ -733,23 +1375,29 @@ class DuplexVoice:
                                     emit({"type": "text", "v": " " + STALL})
                                     active_turn["assistant_parts"].append(
                                         " " + STALL)
+                                # 8cf: stock-parity context — the stall
+                                # line joins the onset words as the
+                                # head's OWN speech and the turn closes
+                                # with turn_eos, exactly the shape a
+                                # natural yield leaves. No [SYSTEM NOTE]
+                                # ("your answer is likely wrong" was
+                                # accumulating anti-speak bias), no
+                                # muted babble (a 30s phantom turn that
+                                # held current_turn_ended=False and
+                                # suppressed every listen bid). The head
+                                # is held in listen per-chunk while the
+                                # thinker is out (guard above).
                                 emit({"type": "log",
-                                      "msg": "canned stall + context note; "
-                                             "local continuation muted "
-                                             "until relay"})
-                                muted = 1
-                                self.duplex.streaming_prefill(
-                                    text_list=[STALL_NOTE])
-                                r = self.duplex.streaming_generate(
-                                    prompt_wav_path=PROMPT_WAV,
-                                    top_k=GEN_TOP_K)
-                                _emit_gen(r, mute=True)
+                                      "msg": "canned stall voiced + "
+                                             "teacher-forced; turn closed, "
+                                             "holding listen until relay"})
+                                self._speak_forced(" " + STALL,
+                                                   end_turn=True)
+                                turn_text = []
+                                # turn state is owned by thinker/relay
+                                # from here (no natural eot will come)
+                                active_turn = None
                             if r.get("end_of_turn"):
-                                if muted:
-                                    emit({"type": "log",
-                                          "msg": f"muted {muted - 1} chunks "
-                                                 "of local continuation"})
-                                    muted = 0
                                 ans = "".join(turn_text).strip()
                                 if relay_guard and relay_turn is not None:
                                     relay_turn["relay_ms"] = int(
@@ -765,13 +1413,20 @@ class DuplexVoice:
                                             active_turn["assistant_parts"].append(
                                                 ans)
                                         finish_turn_async(active_turn)
-                                    # Fired local continuation is intentionally
-                                    # muted; its state is owned by thinker/relay.
+                                    # (fired turns are closed at fire —
+                                    # state owned by thinker/relay)
                                     active_turn = None
-                                user_win = []
+                                # 8ci: keep the last 2s — user speech
+                                # that overlapped the model's turn (e.g.
+                                # a question spoken across a short floor
+                                # reply) belongs to the NEXT snapshot; a
+                                # full clear discarded it and the next
+                                # fire went out with an empty uplink.
+                                user_win = user_win[-2:]
                                 turn_text, turn_fired = [], False
                                 turn_scores = []
                                 relay_guard = False
+                                relay_deadline = None
                                 self.st3.update(sum=None, cnt=0)
                             prev_listen = r["is_listen"]
                         except Exception as ie:
@@ -793,20 +1448,103 @@ class DuplexVoice:
                 finally:
                     emit({"type": "bye"})
 
-            def _emit_gen(r, relay=False, mute=False):
-                if mute:
-                    # 8bm: thinker engaged — the condemned turn's
-                    # continuation is generated (context true,
-                    # perception intact, natively interruptible)
-                    # but not voiced
-                    emit({"type": "chunk",
-                          "listen": bool(r["is_listen"]),
-                          "eot": bool(r.get("end_of_turn")),
-                          "muted": True,
-                          "cost": round(r.get("cost_all", 0), 3)})
-                    if r.get("end_of_turn"):
-                        emit({"type": "phase", "v": "listening"})
-                    return
+            def synth_worker():
+                # 8cl: piece synthesis on the DEDICATED second model
+                # instance, fully off the chunk loop. Results append
+                # under the lock; a gen mismatch (barge cut happened
+                # while synthesizing) drops the stale audio.
+                while not stop.is_set():
+                    job = None
+                    with relay_lock:
+                        if synth_jobs:
+                            job = synth_jobs.pop(0)
+                    if job is None:
+                        time.sleep(0.05)
+                        continue
+                    gen, text_full = job
+                    t0s_ = time.time()
+                    produced = 0.0
+                    buf = np.zeros(0, dtype=np.float32)
+                    alive = True
+                    try:
+                        for wf in self._synth_stream(text_full):
+                            buf = np.concatenate([buf, wf])
+                            new = []
+                            while len(buf) >= 24000:
+                                new.append(buf[:24000])
+                                buf = buf[24000:]
+                            if not new:
+                                continue
+                            with relay_lock:
+                                if rst["gen"] != gen:
+                                    alive = False
+                                    break
+                                rst["frames"].extend(new)
+                                produced += len(new)
+                                rst["est_rest"] = max(
+                                    0.0, rst["est_rest"] - len(new))
+                                # 8cm: 2s warmup runway before playback
+                                # starts — the streaming generator's
+                                # chunk cadence is bursty (avg 0.8x
+                                # realtime but jittery) and a 1.2s lead
+                                # alone let every local slowdown surface
+                                # as a 0.2-1.5s mid-sentence stall.
+                                if (rst["next_at"] is None
+                                        and produced >= 2):
+                                    rst["next_at"] = time.time()
+                    except Exception as se:
+                        emit({"type": "log",
+                              "msg": "relay synth failed: "
+                                     + str(se)[:100]})
+                    with relay_lock:
+                        if rst["gen"] == gen:
+                            if alive and len(buf) > 2400:
+                                rst["frames"].append(buf)
+                                produced += len(buf) / 24000.0
+                            # stream over: release whatever we have,
+                            # even a sub-2s answer (the warmup gate
+                            # must not strand short answers)
+                            if (rst["next_at"] is None
+                                    and rst["frames"]):
+                                rst["next_at"] = time.time()
+                            rst["synthing"] = False
+                            rst["est_rest"] = 0.0
+                    if alive:
+                        emit({"type": "log",
+                              "msg": f"relay synth streamed "
+                                     f"{produced:.1f}s in "
+                                     f"{time.time() - t0s_:.1f}s"})
+
+            def relay_pacer():
+                # 8ck: frame delivery decoupled from the chunk loop.
+                # In-loop piece synth (2-4s each) used to stall the
+                # drip, draining the client's ~2s buffer mid-relay —
+                # an audible pause at every piece boundary (user-
+                # reported stutter). The pacer keeps shipping on the
+                # wall clock while the loop synthesizes; the 1.2s
+                # lead is unchanged, so barge tails stay as they were.
+                while not stop.is_set():
+                    fr = None
+                    with relay_lock:
+                        if (rst["frames"]
+                                and rst["next_at"] is not None
+                                and time.time()
+                                >= rst["next_at"] - 1.2):
+                            fr = rst["frames"].pop(0)
+                            rst["next_at"] = (max(rst["next_at"],
+                                                  time.time())
+                                              + len(fr) / 24000.0)
+                            rst["sent"].append(fr)
+                            rst["sent"] = rst["sent"][-3:]
+                    if fr is None:
+                        time.sleep(0.05)
+                        continue
+                    i16f = (np.clip(fr, -1, 1) * 32767).astype("<i2")
+                    emit({"type": "audio", "sr": 24000,
+                          "pcm": base64.b64encode(i16f.tobytes())
+                          .decode()})
+
+            def _emit_gen(r, relay=False):
                 wf = r.get("audio_waveform")
                 if not r["is_listen"] and wf is not None and len(wf):
                     i16 = (np.clip(np.asarray(wf, dtype=np.float32),
@@ -834,6 +1572,10 @@ class DuplexVoice:
                              "no soft barge-in harness"})
                 await loop.run_in_executor(None, self._session_reset)
                 await sock.send_json({"type": "phase", "v": "listening"})
+                pacer = _th.Thread(target=relay_pacer, daemon=True)
+                pacer.start()
+                synther = _th.Thread(target=synth_worker, daemon=True)
+                synther.start()
                 worker = _th.Thread(target=chunk_loop, daemon=True)
                 worker.start()
                 while True:
@@ -927,7 +1669,7 @@ const T="__TOKEN__";
 const VOICE="https://rhe9527--gate-duplex-voice.modal.run";
 const $=s=>document.querySelector(s);
 let probeOn=true,ws=null,ac=null,micStream=null,proc=null,talking=false;
-let playCtx=null,playT=0,gpuReady=false;
+let playCtx=null,playT=0,gpuReady=false,playSrcs=[];
 function log(m,c){const l=$("#log");
  l.innerHTML+=`<div class="${c||''}"><b>${new Date()
  .toLocaleTimeString()}</b> ${m}</div>`;l.scrollTop=l.scrollHeight;}
@@ -945,7 +1687,15 @@ function playPCM(b64,sr){
  const src=playCtx.createBufferSource();src.buffer=buf;
  src.connect(playCtx.destination);
  playT=Math.max(playT,playCtx.currentTime);
- src.start(playT);playT+=buf.duration;}
+ src.start(playT);playT+=buf.duration;
+ playSrcs.push(src);
+ src.onended=()=>{playSrcs=playSrcs.filter(s=>s!==src);};}
+// 8ce: server dropped the relay tail (user barged) — stop whatever
+// audio is still scheduled in the client so the ~2s buffer goes quiet
+// at once, matching the native interrupt of plain speech.
+function stopPlayback(){
+ playSrcs.forEach(s=>{try{s.stop();}catch(e){}});
+ playSrcs=[];playT=playCtx?playCtx.currentTime:0;}
 async function warm(){
  const t0=Date.now();let j=null;
  const tick=setInterval(()=>{if(!gpuReady)$("#state").textContent=
@@ -1005,6 +1755,7 @@ function handle(m){
   +`probe ${m.probe_on?"ON":"OFF"} — ${m.mode}`);
  else if(m.type==="phase")$("#phase").textContent=m.v;
  else if(m.type==="audio")playPCM(m.pcm,m.sr);
+ else if(m.type==="interrupt")stopPlayback();
  else if(m.type==="text"){turnText+=m.v;
   $("#text").textContent=turnText.slice(-300);
   log((m.relay?"[relay] ":"")+m.v,"txt");}

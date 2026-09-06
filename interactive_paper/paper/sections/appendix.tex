@@ -224,7 +224,8 @@ fit on the 360-query calibration split; every representational result
 this probe. The deployed probe adds two zero-latency
 pooled positions (an 8-token tail mean and the running user-audio
 mean; 12{,}288-d), refit on a calibration mix widened to 2{,}310 public-benchmark
-queries disjoint from every evaluation benchmark; a pre-registered
+queries sourced separately from every evaluation benchmark (overlap
+audit below); a pre-registered
 guard held (frozen internal test AUC 0.860$\to$0.879) and feature
 selection never saw the externals. It drives the turn-based live loop
 (\S\ref{sec:live}), the frozen transfer results (\S\ref{sec:transfer}),
@@ -783,9 +784,14 @@ itself decides listen/speak per chunk, and the gate reads L22 at the
 listen$\to$speak transition against the in-regime thresholds.
 Escalated turns play a canned stall (teacher-forced once, the talker's
 own voice), consult the expert (with a demo-only web-search tool for
-real-time queries), and the verified answer re-enters the stream as a
-text unit that the talker voices, an ordinary duplex turn, hence
-interruptible like any other. There is no VAD, no ASR barge-in
+real-time queries), and the verified answer is spoken verbatim in the
+talker's voice, paced on the duplex chunk cadence; whatever was
+actually played---the stall line, the answer up to any
+interruption---is teacher-forced into the head's context as its own
+completed speech turn, so the context the head takes its next
+listen/speak decision from matches what the user heard, the same
+shape a native turn leaves. The delivery is an ordinary duplex turn,
+hence interruptible like any other. There is no VAD, no ASR barge-in
 classifier, and no abort machinery: floor control is entirely the
 duplex head's own behavior (Appendix~\ref{app:native}). An earlier
 demo build approximated barge-in with an energy-VAD + burst-ASR
@@ -1393,6 +1399,21 @@ Reasoning-zh & 202 & .606 & .495 & .605 & \textbf{.621} \\
 \end{tabular}
 \end{table}
 
+\paragraph{Benchmark-overlap audit.} The calibration expansions and
+the external speech benchmarks both draw on public QA sources
+(TriviaQA appears on both sides of the ledger), so we audited every
+calibration query against the five external pools: normalized exact
+match plus a token-Jaccard $\ge 0.8$ near-duplicate screen. Eight
+collisions exist --- 4/250 Speech TriviaQA and 4/250 Llama Questions
+queries have a (near-)duplicate among the deployed 5{,}228
+calibration rows; the other three pools have none. Refitting the
+deployed gate with the seven colliding calibration rows removed moves
+external AUC by at most $.002$ (TriviaQA $.811\to.811$, Llama
+Questions $.743\to.741$ on the official-configuration dumps) and
+re-mixed delivered accuracy at the deployed tiers by less than half a
+point, so no transfer result rests on memorized test questions
+(\texttt{scripts/41\_leak\_audit.py}).
+
 \begin{table}[t]
 \centering\small
 \caption{Native-regime gated accuracy under the official serving
@@ -1575,7 +1596,32 @@ scored by the deployed head without refitting, gives AUC .861/.837
 against the two label sets, .011--.015 below the deployed read; the
 first $\approx$8 answer tokens are worth about one AUC point, and the
 pre-answer variant needs its own operating points (the deployed
-quantiles fire 0/1/20\% on it).
+quantiles fire 0/1/20\% on it). A hard-example check closes this
+route from the training side: at fixed regularization, upweighting
+the 711 calibration failures the out-of-fold probe misses at the
+widest tier drops external transfer from mean AUC .743 to .715
+($4{\times}$), below every draw in 100-subset random-failure null
+distributions, count-, weight-, and source-composition-matched
+(null means .737/.740, empirical $p<.01$) --- the harm is specific
+to those rows, not to extra positive mass. Retuning the
+regularizer per arm recovers most of the loss (.735 at $4{\times}$,
+with $C$ shrinking $3{\times}10^{-4}\to3{\times}10^{-5}$ at
+$8{\times}$): the solver's best response is to suppress the fit to
+the upweighted rows, and no weighting improves on the unweighted
+baseline. The missed failures are therefore not
+recoverable by emphasis at this read point --- consistent with the
+execution-slip class carrying no linearly readable signal at this
+read point (timestamp-limited predictability, not a claim of
+irreducibility in principle). This is the
+signature of emphasis on feature-indistinguishable positives rather
+than under-represented ones \citep{swayamdipta2020cartography,
+pleiss2020aum}, and matches the independent finding that
+internal-state probes read parametric-knowledge recall rather than
+output truthfulness, leaving association-driven confident errors
+undetectable \citep{cheang2025recall}; correctness of a reasoning
+chain becomes linearly readable only as generation proceeds
+\citep{david2025temporal}, which is what the read-point sweep above
+measures in the duplex regime.
 
 \paragraph{Live validation.} Full live runs on frozen test-240 (real
 raw-audio ASR uplink, real expert, wait paced at one chunk per second)
@@ -1632,6 +1678,23 @@ end of turn. The pattern across all three: the mid-layer signals
 separate cleanly every time, and what re-opens at each regime or
 domain shift is calibration coverage and thresholds: interactive
 use is itself an evaluation modality.
+
+The same lesson recurred with \emph{phatic} questions. Utterances
+that are question-shaped but carry no information need (``How are
+you?'', ``Can you hear me?'') pass an act gate trained on
+floor-\emph{command} negatives---grammatically they are
+questions---and the failure probe is again out-of-distribution: on
+88 TTS'd phatic stims (social openers, channel checks,
+assistant-meta; en+zh, two voices) it false-fires on 97--100\% of
+social and channel-check stims at the aggressive tier (37--44\% at
+balanced), i.e.\ it would escalate ``how are you'' to the expert,
+and live users hit exactly this. Adding the phatic stims to the
+act-gate negatives closes the category at no cost: the act read
+stays separable (OOF AUC 0.9999), all phatic categories score below
+threshold (0\% admitted, residual false-fire 0\%), and the
+question-side cost \emph{drops} from 0.5\% to 0.24\% of true
+escalations---the wider negative manifold moves the joint-gap
+threshold to a better operating point.
 
 \paragraph{Multi-turn grounding.} A stateless expert uplink breaks on
 follow-ups: ``what is NVDA trading at'' then ``what about Apple'' sends
