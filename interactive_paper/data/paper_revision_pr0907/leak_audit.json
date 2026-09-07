@@ -1,0 +1,129 @@
+{
+ "leak_check": {
+  "striviaqa": {
+   "n": 250,
+   "exact": [
+    [
+     "striviaqa0132",
+     "Which English town is home to the Stephen Joseph Theatre?",
+     [
+      [
+       "queries_expansion.jsonl",
+       "x0054",
+       "easy-fact"
+      ]
+     ]
+    ],
+    [
+     "striviaqa0156",
+     "What is the thick watery substance filling the space between the lens and the retina of the eye?",
+     [
+      [
+       "queries_expansion.jsonl",
+       "x0137",
+       "easy-fact"
+      ]
+     ]
+    ],
+    [
+     "striviaqa0172",
+     "Whose portrait replaced Michael Faraday on the back of a \u00a320 note?",
+     [
+      [
+       "queries_expansion.jsonl",
+       "x0114",
+       "easy-fact"
+      ]
+     ]
+    ],
+    [
+     "striviaqa0181",
+     "American singer Ernest Evans called himself Chubby Checker to emulate the name of which other musician?",
+     [
+      [
+       "queries_expansion.jsonl",
+       "x0113",
+       "easy-fact"
+      ]
+     ]
+    ]
+   ],
+   "near": []
+  },
+  "swebq": {
+   "n": 250,
+   "exact": [],
+   "near": []
+  },
+  "sllama": {
+   "n": 250,
+   "exact": [
+    [
+     "sllama0049",
+     "What is the smallest prime number? ",
+     [
+      [
+       "queries_gen.jsonl",
+       null,
+       "trap"
+      ]
+     ]
+    ],
+    [
+     "sllama0206",
+     "How many senses do humans have? ",
+     [
+      [
+       "queries_expansion3.jsonl",
+       "z0601",
+       "trap-truthful"
+      ]
+     ]
+    ]
+   ],
+   "near": [
+    [
+     "sllama0130",
+     "What is the capital of Israel?",
+     [
+      "queries_expansion2.jsonl",
+      "y0205",
+      "What is the capital of Kingdom of Israel?"
+     ],
+     0.86
+    ],
+    [
+     "sllama0170",
+     "Who was the first person to walk on the moon?",
+     [
+      "queries_expansion.jsonl",
+      "x0173",
+      "Who was the first human to walk on the moon?"
+     ],
+     0.8
+    ]
+   ]
+  },
+  "sdqa": {
+   "n": 200,
+   "exact": [],
+   "near": []
+  },
+  "sreason": {
+   "n": 202,
+   "exact": [],
+   "near": []
+  }
+ },
+ "leak_exclude": {
+  "x0054": "striviaqa0132 exact",
+  "x0137": "striviaqa0156 exact",
+  "x0114": "striviaqa0172 exact",
+  "x0113": "striviaqa0181 exact",
+  "x0173": "sllama0170 near .80",
+  "y0205": "sllama0130 near .86",
+  "z0601": "sllama0206 exact"
+ },
+ "script": "scripts/41_leak_audit.py",
+ "date": "2026-09-04 (8bz/8cb)"
+}

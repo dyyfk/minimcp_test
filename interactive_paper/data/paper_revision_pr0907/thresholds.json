@@ -1,0 +1,136 @@
+{
+ "rule": "per-language quantile of core-calibration OOF scores at 1-nominal_rate; core = DEPLOYED_PARTS rows (fresh train rows in the fit but excluded from the quantile base)",
+ "deployed_gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
+ "noleak_gate_sha256": "2b9b9d29188fd8dc68183a1d3dff2039ab5eb38eb4d93d0314edac1cdf001f80",
+ "deployed_tiers_nominal": {
+  "conservative": 0.15,
+  "balanced": 0.3,
+  "aggressive": 0.5
+ },
+ "proposed_8bz_tiers_nominal": {
+  "conservative": 0.15,
+  "balanced": 0.25,
+  "aggressive": 0.4
+ },
+ "deployed_eot_thresholds_lang": {
+  "en": {
+   "conservative": 0.9057239890098572,
+   "balanced": 0.7972545623779297,
+   "aggressive": 0.5533501505851746
+  },
+  "zh": {
+   "conservative": 0.485044926404953,
+   "balanced": 0.38618695735931396,
+   "aggressive": 0.2787056267261505
+  }
+ },
+ "noleak_eot_thresholds_lang": {
+  "en": {
+   "conservative": 0.9050160646438599,
+   "balanced": 0.794853687286377,
+   "aggressive": 0.5456203818321228
+  },
+  "zh": {
+   "conservative": 0.5048418641090393,
+   "balanced": 0.3695312440395355,
+   "aggressive": 0.26522931456565857
+  }
+ },
+ "noleak_eot_thresholds_8bz_lang": {
+  "en": {
+   "conservative": 0.9050160646438599,
+   "balanced": 0.8326082229614258,
+   "aggressive": 0.6864679455757141
+  },
+  "zh": {
+   "conservative": 0.5048418641090393,
+   "balanced": 0.4177033305168152,
+   "aggressive": 0.3144937753677368
+  }
+ },
+ "sweep_nominal_thresholds": {
+  "en": {
+   "0.05": 0.9721928238868713,
+   "0.1": 0.9442203640937805,
+   "0.15": 0.9113463163375854,
+   "0.2": 0.879021406173706,
+   "0.25": 0.8406654596328735,
+   "0.3": 0.7999656796455383,
+   "0.4": 0.6982501745223999,
+   "0.5": 0.5756409168243408
+  },
+  "zh": {
+   "0.05": 0.9669747948646545,
+   "0.1": 0.9250487685203552,
+   "0.15": 0.8853274583816528,
+   "0.2": 0.8450548648834229,
+   "0.25": 0.7998729944229126,
+   "0.3": 0.7515705227851868,
+   "0.4": 0.6459827423095703,
+   "0.5": 0.5373450517654419
+  }
+ },
+ "validation": {
+  "deployed": {
+   "en": {
+    "conservative": {
+     "recomputed": 0.9057239890098572,
+     "artifact": 0.9057239890098572
+    },
+    "balanced": {
+     "recomputed": 0.7972545623779297,
+     "artifact": 0.7972545623779297
+    },
+    "aggressive": {
+     "recomputed": 0.5533501505851746,
+     "artifact": 0.5533501505851746
+    }
+   },
+   "zh": {
+    "conservative": {
+     "recomputed": 0.485044926404953,
+     "artifact": 0.485044926404953
+    },
+    "balanced": {
+     "recomputed": 0.38618695735931396,
+     "artifact": 0.38618695735931396
+    },
+    "aggressive": {
+     "recomputed": 0.2787056267261505,
+     "artifact": 0.2787056267261505
+    }
+   }
+  },
+  "noleak": {
+   "en": {
+    "conservative": {
+     "recomputed": 0.9050160646438599,
+     "artifact": 0.9050160646438599
+    },
+    "balanced": {
+     "recomputed": 0.794853687286377,
+     "artifact": 0.794853687286377
+    },
+    "aggressive": {
+     "recomputed": 0.5456203818321228,
+     "artifact": 0.5456203818321228
+    }
+   },
+   "zh": {
+    "conservative": {
+     "recomputed": 0.5048418641090393,
+     "artifact": 0.5048418641090393
+    },
+    "balanced": {
+     "recomputed": 0.3695312440395355,
+     "artifact": 0.3695312440395355
+    },
+    "aggressive": {
+     "recomputed": 0.26522931456565857,
+     "artifact": 0.26522931456565857
+    }
+   }
+  }
+ },
+ "manifest_sha1_noleak_ids": "f604d2f8e4f11bf445dafde2c16c183aab138299"
+}

@@ -1,0 +1,1900 @@
+{
+ "experiment_id": "pr0907",
+ "created": "2026-09-07",
+ "purpose": "P0 inventory of existing native-bench runs (8bu line) for the RTCA paper revision; no new model runs",
+ "code": {
+  "commit": "51fdb4e",
+  "file": "interactive_paper/modal_native_bench.py",
+  "committed": "2026-09-02",
+  "n_commits": 1,
+  "note": "single commit, no local modifications - the reviewed snapshot e74ca0c IS the code that produced every run"
+ },
+ "serving": {
+  "artifact": "/data/gate_native.json (8bq, volume mtime 2026-09-01 22:59 PDT)",
+  "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
+  "layer": 22,
+  "k_eot": 8,
+  "sys_prompt": "You are a friendly assistant.",
+  "top_k": 20,
+  "force_listen_count": 3,
+  "rates_nominal": {
+   "conservative": 0.15,
+   "balanced": 0.3,
+   "aggressive": 0.5
+  },
+  "act_gate": "/data/gate_act.json (8bh dialogue-act floor filter)",
+  "expert": "gpt-5.5 web low effort (fallback: non-web)",
+  "uplink_asr": "gpt-transcribe",
+  "max_wait_s": 150
+ },
+ "judges": {
+  "striviaqa": "OpenAudioBench gpt-4o",
+  "swebq": "OpenAudioBench gpt-4o",
+  "sllama": "OpenAudioBench gpt-4o",
+  "valpaca": "VoiceBench gpt-4o-mini 1-5",
+  "frozen": "ours ref-anchored gpt-5.4-mini",
+  "sdqa": "ours ref-anchored gpt-5.4-mini",
+  "sreason": "ours ref-anchored gpt-5.4-mini"
+ },
+ "latency_definition": {
+  "formula": "escalated: onset_overrun_chunks + stall_ms + wait_chunks(s) + relay_synth_ms + relay_audio_s; local: onset_overrun_chunks + answer_ms",
+  "caveat": "server-side composite ESTIMATE. local arm runs as_duplex(generate_audio=False): answer_ms is TEXT generation wall time, no local audio is synthesized. relay audio duration comes from a separate teacher-forced TTS re-synthesis of the relay text. No client-side playback clock exists in any run."
+ },
+ "judge_field_definition": "field=delivered scores relay TEXT on fired turns / local answer TEXT otherwise - never an ASR transcript of produced audio",
+ "runs": [
+  {
+   "pool": "frozen",
+   "arm": "aggressive_tts",
+   "smoke_only": false,
+   "n_shards": 8,
+   "shard_dates": [
+    "2026-09-02 18:20 Pacific Daylight Time",
+    "2026-09-02 18:21 Pacific Daylight Time",
+    "2026-09-02 18:22 Pacific Daylight Time",
+    "2026-09-02 18:24 Pacific Daylight Time",
+    "2026-09-02 18:28 Pacific Daylight Time",
+    "2026-09-02 18:41 Pacific Daylight Time"
+   ],
+   "raw_shards": [
+    "native_bench/frozen/aggressive_tts.jsonl.shard7",
+    "native_bench/frozen/aggressive_tts.jsonl.shard4",
+    "native_bench/frozen/aggressive_tts.jsonl.shard3",
+    "native_bench/frozen/aggressive_tts.jsonl.shard6",
+    "native_bench/frozen/aggressive_tts.jsonl.shard5",
+    "native_bench/frozen/aggressive_tts.jsonl.shard2",
+    "native_bench/frozen/aggressive_tts.jsonl.shard1",
+    "native_bench/frozen/aggressive_tts.jsonl.shard0"
+   ],
+   "judged_parquet": "native_bench/frozen_aggressive_tts_judged.parquet",
+   "judge": "ours ref-anchored gpt-5.4-mini",
+   "code": "51fdb4e",
+   "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
+   "relay_variant": "tts",
+   "cached_remix": false,
+   "executed": true,
+   "stats": {
+    "n": 240,
+    "escalation_rate": 0.5166666666666667,
+    "acc_or_score": 0.6291666666666667,
+    "acc_n_judged": 240,
+    "expert_error_rows": 0,
+    "expert_timeout_rows": 0,
+    "onset_before_last_chunk_fired": 18,
+    "audio_gt_30s": 46,
+    "lat_mean_s": 27.2906875,
+    "lat_p50_s": 10.9325,
+    "lat_p95_s": 103.15899999999984
+   }
+  },
+  {
+   "pool": "frozen",
+   "arm": "always_tts",
+   "smoke_only": false,
+   "n_shards": 8,
+   "shard_dates": [
+    "2026-09-02 16:20 Pacific Daylight Time",
+    "2026-09-02 16:22 Pacific Daylight Time",
+    "2026-09-02 16:23 Pacific Daylight Time",
+    "2026-09-02 16:26 Pacific Daylight Time",
+    "2026-09-02 16:29 Pacific Daylight Time",
+    "2026-09-02 16:32 Pacific Daylight Time"
+   ],
+   "raw_shards": [
+    "native_bench/frozen/always_tts.jsonl.shard6",
+    "native_bench/frozen/always_tts.jsonl.shard7",
+    "native_bench/frozen/always_tts.jsonl.shard3",
+    "native_bench/frozen/always_tts.jsonl.shard4",
+    "native_bench/frozen/always_tts.jsonl.shard5",
+    "native_bench/frozen/always_tts.jsonl.shard0",
+    "native_bench/frozen/always_tts.jsonl.shard2",
+    "native_bench/frozen/always_tts.jsonl.shard1"
+   ],
+   "judged_parquet": "native_bench/frozen_always_tts_judged.parquet",
+   "judge": "ours ref-anchored gpt-5.4-mini",
+   "code": "51fdb4e",
+   "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
+   "relay_variant": "tts",
+   "cached_remix": false,
+   "executed": true,
+   "stats": {
+    "n": 240,
+    "escalation_rate": 0.9916666666666667,
+    "acc_or_score": 0.7041666666666667,
+    "acc_n_judged": 240,
+    "expert_error_rows": 0,
+    "expert_timeout_rows": 0,
+    "onset_before_last_chunk_fired": 26,
+    "audio_gt_30s": 46,
+    "lat_mean_s": 45.1344458333333,
+    "lat_p50_s": 20.8195,
+    "lat_p95_s": 210.07694999999964
+   }
+  },
+  {
+   "pool": "frozen",
+   "arm": "balanced_tts",
+   "smoke_only": false,
+   "n_shards": 8,
+   "shard_dates": [
+    "2026-09-02 18:08 Pacific Daylight Time",
+    "2026-09-02 18:09 Pacific Daylight Time",
+    "2026-09-02 18:10 Pacific Daylight Time",
+    "2026-09-02 18:11 Pacific Daylight Time",
+    "2026-09-02 18:12 Pacific Daylight Time"
+   ],
+   "raw_shards": [
+    "native_bench/frozen/balanced_tts.jsonl.shard0",
+    "native_bench/frozen/balanced_tts.jsonl.shard6",
+    "native_bench/frozen/balanced_tts.jsonl.shard3",
+    "native_bench/frozen/balanced_tts.jsonl.shard7",
+    "native_bench/frozen/balanced_tts.jsonl.shard4",
+    "native_bench/frozen/balanced_tts.jsonl.shard5",
+    "native_bench/frozen/balanced_tts.jsonl.shard2",
+    "native_bench/frozen/balanced_tts.jsonl.shard1"
+   ],
+   "judged_parquet": "native_bench/frozen_balanced_tts_judged.parquet",
+   "judge": "ours ref-anchored gpt-5.4-mini",
+   "code": "51fdb4e",
+   "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
+   "relay_variant": "tts",
+   "cached_remix": false,
+   "executed": true,
+   "stats": {
+    "n": 240,
+    "escalation_rate": 0.25,
+    "acc_or_score": 0.5416666666666666,
+    "acc_n_judged": 240,
+    "expert_error_rows": 0,
+    "expert_timeout_rows": 0,
+    "onset_before_last_chunk_fired": 10,
+    "audio_gt_30s": 46,
+    "lat_mean_s": 15.275212500000002,
+    "lat_p50_s": 5.582000000000001,
+    "lat_p95_s": 39.91384999999994
+   }
+  },
+  {
+   "pool": "frozen",
+   "arm": "conservative_tts",
+   "smoke_only": false,
+   "n_shards": 8,
+   "shard_dates": [
+    "2026-09-02 18:47 Pacific Daylight Time",
+    "2026-09-02 18:48 Pacific Daylight Time",
+    "2026-09-02 18:50 Pacific Daylight Time"
+   ],
+   "raw_shards": [
+    "native_bench/frozen/conservative_tts.jsonl.shard6",
+    "native_bench/frozen/conservative_tts.jsonl.shard3",
+    "native_bench/frozen/conservative_tts.jsonl.shard4",
+    "native_bench/frozen/conservative_tts.jsonl.shard7",
+    "native_bench/frozen/conservative_tts.jsonl.shard5",
+    "native_bench/frozen/conservative_tts.jsonl.shard0",
+    "native_bench/frozen/conservative_tts.jsonl.shard2",
+    "native_bench/frozen/conservative_tts.jsonl.shard1"
+   ],
+   "judged_parquet": "native_bench/frozen_conservative_tts_judged.parquet",
+   "judge": "ours ref-anchored gpt-5.4-mini",
+   "code": "51fdb4e",
+   "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
+   "relay_variant": "tts",
+   "cached_remix": false,
+   "executed": true,
+   "stats": {
+    "n": 240,
+    "escalation_rate": 0.08333333333333333,
+    "acc_or_score": 0.4666666666666667,
+    "acc_n_judged": 240,
+    "expert_error_rows": 0,
+    "expert_timeout_rows": 0,
+    "onset_before_last_chunk_fired": 1,
+    "audio_gt_30s": 46,
+    "lat_mean_s": 12.0140625,
+    "lat_p50_s": 4.291499999999999,
+    "lat_p95_s": 22.27685
+   }
+  },
+  {
+   "pool": "frozen",
+   "arm": "never",
+   "smoke_only": false,
+   "n_shards": 8,
+   "shard_dates": [
+    "2026-09-02 10:41 Pacific Daylight Time",
+    "2026-09-02 10:42 Pacific Daylight Time"
+   ],
+   "raw_shards": [
+    "native_bench/frozen/never.jsonl.shard6",
+    "native_bench/frozen/never.jsonl.shard3",
+    "native_bench/frozen/never.jsonl.shard7",
+    "native_bench/frozen/never.jsonl.shard1",
+    "native_bench/frozen/never.jsonl.shard4",
+    "native_bench/frozen/never.jsonl.shard5",
+    "native_bench/frozen/never.jsonl.shard2",
+    "native_bench/frozen/never.jsonl.shard0"
+   ],
+   "judged_parquet": "native_bench/frozen_never_judged.parquet",
+   "judge": "ours ref-anchored gpt-5.4-mini",
+   "code": "51fdb4e",
+   "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
+   "relay_variant": null,
+   "cached_remix": false,
+   "executed": true,
+   "stats": {
+    "n": 240,
+    "escalation_rate": 0.0,
+    "acc_or_score": 0.4083333333333333,
+    "acc_n_judged": 240,
+    "expert_error_rows": 0,
+    "expert_timeout_rows": 0,
+    "onset_before_last_chunk_fired": 0,
+    "audio_gt_30s": 46,
+    "lat_mean_s": 5.703583333333335,
+    "lat_p50_s": 3.599,
+    "lat_p95_s": 17.31815
+   }
+  },
+  {
+   "pool": "striviaqa",
+   "arm": "agg0",
+   "smoke_only": false,
+   "n_shards": 1,
+   "shard_dates": [
+    "2026-09-07 15:32 Pacific Daylight Time"
+   ],
+   "raw_shards": [
+    "native_bench/striviaqa/agg0.jsonl.shard0"
+   ],
+   "judged_parquet": "native_bench/striviaqa_agg0_judged.parquet",
+   "judge": "OpenAudioBench gpt-4o",
+   "code": "51fdb4e",
+   "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
+   "relay_variant": null,
+   "cached_remix": false,
+   "executed": true,
+   "stats": {
+    "n": 250,
+    "escalation_rate": 0.0,
+    "acc_or_score": 0.612,
+    "acc_n_judged": 250,
+    "expert_error_rows": 0,
+    "expert_timeout_rows": 0,
+    "onset_before_last_chunk_fired": 0,
+    "audio_gt_30s": 0
+   }
+  },
+  {
+   "pool": "striviaqa",
+   "arm": "aggmlp",
+   "smoke_only": false,
+   "n_shards": 1,
+   "shard_dates": [
+    "2026-09-07 15:32 Pacific Daylight Time"
+   ],
+   "raw_shards": [
+    "native_bench/striviaqa/aggmlp.jsonl.shard0"
+   ],
+   "judged_parquet": "native_bench/striviaqa_aggmlp_judged.parquet",
+   "judge": "OpenAudioBench gpt-4o",
+   "code": "51fdb4e",
+   "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
+   "relay_variant": null,
+   "cached_remix": false,
+   "executed": true,
+   "stats": {
+    "n": 250,
+    "escalation_rate": 0.0,
+    "acc_or_score": 0.5,
+    "acc_n_judged": 250,
+    "expert_error_rows": 0,
+    "expert_timeout_rows": 0,
+    "onset_before_last_chunk_fired": 0,
+    "audio_gt_30s": 0
+   }
+  },
+  {
+   "pool": "striviaqa",
+   "arm": "aggressive",
+   "smoke_only": false,
+   "n_shards": 8,
+   "shard_dates": [
+    "2026-09-02 14:30 Pacific Daylight Time",
+    "2026-09-02 14:31 Pacific Daylight Time",
+    "2026-09-02 14:32 Pacific Daylight Time",
+    "2026-09-02 14:33 Pacific Daylight Time",
+    "2026-09-02 14:34 Pacific Daylight Time",
+    "2026-09-02 14:35 Pacific Daylight Time"
+   ],
+   "raw_shards": [
+    "native_bench/striviaqa/aggressive.jsonl.shard6",
+    "native_bench/striviaqa/aggressive.jsonl.shard7",
+    "native_bench/striviaqa/aggressive.jsonl.shard4",
+    "native_bench/striviaqa/aggressive.jsonl.shard5",
+    "native_bench/striviaqa/aggressive.jsonl.shard0",
+    "native_bench/striviaqa/aggressive.jsonl.shard1",
+    "native_bench/striviaqa/aggressive.jsonl.shard2",
+    "native_bench/striviaqa/aggressive.jsonl.shard3"
+   ],
+   "judged_parquet": "native_bench/striviaqa_aggressive_judged.parquet",
+   "judge": "OpenAudioBench gpt-4o",
+   "code": "51fdb4e",
+   "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
+   "relay_variant": "steer",
+   "cached_remix": false,
+   "executed": true,
+   "stats": {
+    "n": 250,
+    "escalation_rate": 0.556,
+    "acc_or_score": 0.7402597402597403,
+    "acc_n_judged": 231,
+    "expert_error_rows": 0,
+    "expert_timeout_rows": 0,
+    "onset_before_last_chunk_fired": 0,
+    "audio_gt_30s": 1,
+    "lat_mean_s": 8.551320000000002,
+    "lat_p50_s": 6.429500000000001,
+    "lat_p95_s": 24.000999999999998
+   }
+  },
+  {
+   "pool": "striviaqa",
+   "arm": "aggressive_tts",
+   "smoke_only": false,
+   "n_shards": 8,
+   "shard_dates": [
+    "2026-09-02 14:59 Pacific Daylight Time",
+    "2026-09-02 15:00 Pacific Daylight Time"
+   ],
+   "raw_shards": [
+    "native_bench/striviaqa/aggressive_tts.jsonl.shard6",
+    "native_bench/striviaqa/aggressive_tts.jsonl.shard2",
+    "native_bench/striviaqa/aggressive_tts.jsonl.shard5",
+    "native_bench/striviaqa/aggressive_tts.jsonl.shard1",
+    "native_bench/striviaqa/aggressive_tts.jsonl.shard4",
+    "native_bench/striviaqa/aggressive_tts.jsonl.shard7",
+    "native_bench/striviaqa/aggressive_tts.jsonl.shard0",
+    "native_bench/striviaqa/aggressive_tts.jsonl.shard3"
+   ],
+   "judged_parquet": "native_bench/striviaqa_aggressive_tts_judged.parquet",
+   "judge": "OpenAudioBench gpt-4o",
+   "code": "51fdb4e",
+   "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
+   "relay_variant": "tts",
+   "cached_remix": false,
+   "executed": true,
+   "stats": {
+    "n": 250,
+    "escalation_rate": 0.564,
+    "acc_or_score": 0.884,
+    "acc_n_judged": 250,
+    "expert_error_rows": 0,
+    "expert_timeout_rows": 0,
+    "onset_before_last_chunk_fired": 0,
+    "audio_gt_30s": 1,
+    "lat_mean_s": 8.551320000000002,
+    "lat_p50_s": 6.429500000000001,
+    "lat_p95_s": 24.000999999999998
+   }
+  },
+  {
+   "pool": "striviaqa",
+   "arm": "always",
+   "smoke_only": false,
+   "n_shards": 8,
+   "shard_dates": [
+    "2026-09-02 09:38 Pacific Daylight Time",
+    "2026-09-02 09:52 Pacific Daylight Time",
+    "2026-09-02 09:53 Pacific Daylight Time",
+    "2026-09-02 09:54 Pacific Daylight Time",
+    "2026-09-02 09:56 Pacific Daylight Time",
+    "2026-09-02 09:58 Pacific Daylight Time",
+    "2026-09-02 10:05 Pacific Daylight Time"
+   ],
+   "raw_shards": [
+    "native_bench/striviaqa/always.jsonl.shard7",
+    "native_bench/striviaqa/always.jsonl.shard5",
+    "native_bench/striviaqa/always.jsonl.shard4",
+    "native_bench/striviaqa/always.jsonl.shard0",
+    "native_bench/striviaqa/always.jsonl.shard6",
+    "native_bench/striviaqa/always.jsonl.shard1",
+    "native_bench/striviaqa/always.jsonl.shard2",
+    "native_bench/striviaqa/always.jsonl.shard3",
+    "native_bench/striviaqa/always.jsonl.smoke"
+   ],
+   "judged_parquet": "native_bench/striviaqa_always_judged.parquet",
+   "judge": "OpenAudioBench gpt-4o",
+   "code": "51fdb4e",
+   "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
+   "relay_variant": "steer",
+   "cached_remix": false,
+   "executed": true,
+   "stats": {
+    "n": 250,
+    "escalation_rate": 1.0,
+    "acc_or_score": 0.728,
+    "acc_n_judged": 250,
+    "expert_error_rows": 0,
+    "expert_timeout_rows": 1,
+    "onset_before_last_chunk_fired": 1,
+    "audio_gt_30s": 1,
+    "lat_mean_s": 12.595923999999997,
+    "lat_p50_s": 10.153,
+    "lat_p95_s": 28.008999999999993
+   }
+  },
+  {
+   "pool": "striviaqa",
+   "arm": "always_tts",
+   "smoke_only": false,
+   "n_shards": 8,
+   "shard_dates": [
+    "2026-09-02 14:30 Pacific Daylight Time",
+    "2026-09-02 14:48 Pacific Daylight Time",
+    "2026-09-02 14:49 Pacific Daylight Time",
+    "2026-09-02 14:50 Pacific Daylight Time",
+    "2026-09-02 14:51 Pacific Daylight Time",
+    "2026-09-02 14:52 Pacific Daylight Time"
+   ],
+   "raw_shards": [
+    "native_bench/striviaqa/always_tts.jsonl.shard7",
+    "native_bench/striviaqa/always_tts.jsonl.shard6",
+    "native_bench/striviaqa/always_tts.jsonl.shard5",
+    "native_bench/striviaqa/always_tts.jsonl.shard2",
+    "native_bench/striviaqa/always_tts.jsonl.shard4",
+    "native_bench/striviaqa/always_tts.jsonl.shard1",
+    "native_bench/striviaqa/always_tts.jsonl.shard3",
+    "native_bench/striviaqa/always_tts.jsonl.shard0",
+    "native_bench/striviaqa/always_tts.jsonl.smoke"
+   ],
+   "judged_parquet": "native_bench/striviaqa_always_tts_judged.parquet",
+   "judge": "OpenAudioBench gpt-4o",
+   "code": "51fdb4e",
+   "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
+   "relay_variant": "tts",
+   "cached_remix": false,
+   "executed": true,
+   "stats": {
+    "n": 250,
+    "escalation_rate": 1.0,
+    "acc_or_score": 0.96,
+    "acc_n_judged": 250,
+    "expert_error_rows": 0,
+    "expert_timeout_rows": 0,
+    "onset_before_last_chunk_fired": 0,
+    "audio_gt_30s": 1,
+    "lat_mean_s": 12.595923999999997,
+    "lat_p50_s": 10.153,
+    "lat_p95_s": 28.008999999999993
+   }
+  },
+  {
+   "pool": "striviaqa",
+   "arm": "balanced",
+   "smoke_only": false,
+   "n_shards": 8,
+   "shard_dates": [
+    "2026-09-02 10:09 Pacific Daylight Time",
+    "2026-09-02 14:19 Pacific Daylight Time",
+    "2026-09-02 14:20 Pacific Daylight Time",
+    "2026-09-02 14:22 Pacific Daylight Time",
+    "2026-09-02 14:23 Pacific Daylight Time",
+    "2026-09-02 14:24 Pacific Daylight Time"
+   ],
+   "raw_shards": [
+    "native_bench/striviaqa/balanced.jsonl.shard5",
+    "native_bench/striviaqa/balanced.jsonl.shard4",
+    "native_bench/striviaqa/balanced.jsonl.shard6",
+    "native_bench/striviaqa/balanced.jsonl.shard7",
+    "native_bench/striviaqa/balanced.jsonl.shard0",
+    "native_bench/striviaqa/balanced.jsonl.shard2",
+    "native_bench/striviaqa/balanced.jsonl.shard3",
+    "native_bench/striviaqa/balanced.jsonl.shard1",
+    "native_bench/striviaqa/balanced.jsonl.smoke"
+   ],
+   "judged_parquet": "native_bench/striviaqa_balanced_judged.parquet",
+   "judge": "OpenAudioBench gpt-4o",
+   "code": "51fdb4e",
+   "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
+   "relay_variant": "steer",
+   "cached_remix": false,
+   "executed": true,
+   "stats": {
+    "n": 250,
+    "escalation_rate": 0.188,
+    "acc_or_score": 0.644,
+    "acc_n_judged": 250,
+    "expert_error_rows": 0,
+    "expert_timeout_rows": 0,
+    "onset_before_last_chunk_fired": 0,
+    "audio_gt_30s": 1,
+    "lat_mean_s": 5.57032,
+    "lat_p50_s": 2.597,
+    "lat_p95_s": 21.0667
+   }
+  },
+  {
+   "pool": "striviaqa",
+   "arm": "balanced_tts",
+   "smoke_only": false,
+   "n_shards": 8,
+   "shard_dates": [
+    "2026-09-02 14:47 Pacific Daylight Time",
+    "2026-09-02 14:48 Pacific Daylight Time",
+    "2026-09-02 14:50 Pacific Daylight Time",
+    "2026-09-02 14:51 Pacific Daylight Time",
+    "2026-09-02 14:53 Pacific Daylight Time"
+   ],
+   "raw_shards": [
+    "native_bench/striviaqa/balanced_tts.jsonl.shard6",
+    "native_bench/striviaqa/balanced_tts.jsonl.shard7",
+    "native_bench/striviaqa/balanced_tts.jsonl.shard5",
+    "native_bench/striviaqa/balanced_tts.jsonl.shard2",
+    "native_bench/striviaqa/balanced_tts.jsonl.shard1",
+    "native_bench/striviaqa/balanced_tts.jsonl.shard4",
+    "native_bench/striviaqa/balanced_tts.jsonl.shard3",
+    "native_bench/striviaqa/balanced_tts.jsonl.shard0"
+   ],
+   "judged_parquet": "native_bench/striviaqa_balanced_tts_judged.parquet",
+   "judge": "OpenAudioBench gpt-4o",
+   "code": "51fdb4e",
+   "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
+   "relay_variant": "tts",
+   "cached_remix": false,
+   "executed": true,
+   "stats": {
+    "n": 250,
+    "escalation_rate": 0.184,
+    "acc_or_score": 0.7,
+    "acc_n_judged": 250,
+    "expert_error_rows": 0,
+    "expert_timeout_rows": 0,
+    "onset_before_last_chunk_fired": 0,
+    "audio_gt_30s": 1,
+    "lat_mean_s": 5.57032,
+    "lat_p50_s": 2.597,
+    "lat_p95_s": 21.0667
+   }
+  },
+  {
+   "pool": "striviaqa",
+   "arm": "conservative_tts",
+   "smoke_only": false,
+   "n_shards": 8,
+   "shard_dates": [
+    "2026-09-02 15:05 Pacific Daylight Time",
+    "2026-09-02 15:06 Pacific Daylight Time",
+    "2026-09-02 15:07 Pacific Daylight Time",
+    "2026-09-02 15:08 Pacific Daylight Time",
+    "2026-09-02 15:09 Pacific Daylight Time",
+    "2026-09-02 15:10 Pacific Daylight Time",
+    "2026-09-02 15:11 Pacific Daylight Time"
+   ],
+   "raw_shards": [
+    "native_bench/striviaqa/conservative_tts.jsonl.shard7",
+    "native_bench/striviaqa/conservative_tts.jsonl.shard6",
+    "native_bench/striviaqa/conservative_tts.jsonl.shard5",
+    "native_bench/striviaqa/conservative_tts.jsonl.shard4",
+    "native_bench/striviaqa/conservative_tts.jsonl.shard3",
+    "native_bench/striviaqa/conservative_tts.jsonl.shard2",
+    "native_bench/striviaqa/conservative_tts.jsonl.shard1",
+    "native_bench/striviaqa/conservative_tts.jsonl.shard0"
+   ],
+   "judged_parquet": "native_bench/striviaqa_conservative_tts_judged.parquet",
+   "judge": "OpenAudioBench gpt-4o",
+   "code": "51fdb4e",
+   "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
+   "relay_variant": "tts",
+   "cached_remix": false,
+   "executed": true,
+   "stats": {
+    "n": 250,
+    "escalation_rate": 0.04,
+    "acc_or_score": 0.604,
+    "acc_n_judged": 250,
+    "expert_error_rows": 0,
+    "expert_timeout_rows": 0,
+    "onset_before_last_chunk_fired": 0,
+    "audio_gt_30s": 1,
+    "lat_mean_s": 3.0761279999999998,
+    "lat_p50_s": 1.825,
+    "lat_p95_s": 5.4008499999999975
+   }
+  },
+  {
+   "pool": "striviaqa",
+   "arm": "never",
+   "smoke_only": false,
+   "n_shards": 8,
+   "shard_dates": [
+    "2026-09-02 09:39 Pacific Daylight Time",
+    "2026-09-02 09:42 Pacific Daylight Time",
+    "2026-09-02 09:43 Pacific Daylight Time",
+    "2026-09-02 09:45 Pacific Daylight Time"
+   ],
+   "raw_shards": [
+    "native_bench/striviaqa/never.jsonl.shard4",
+    "native_bench/striviaqa/never.jsonl.shard5",
+    "native_bench/striviaqa/never.jsonl.shard3",
+    "native_bench/striviaqa/never.jsonl.shard7",
+    "native_bench/striviaqa/never.jsonl.shard0",
+    "native_bench/striviaqa/never.jsonl.shard6",
+    "native_bench/striviaqa/never.jsonl.shard1",
+    "native_bench/striviaqa/never.jsonl.shard2",
+    "native_bench/striviaqa/never.jsonl.smoke"
+   ],
+   "judged_parquet": "native_bench/striviaqa_never_judged.parquet",
+   "judge": "OpenAudioBench gpt-4o",
+   "code": "51fdb4e",
+   "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
+   "relay_variant": null,
+   "cached_remix": false,
+   "executed": true,
+   "stats": {
+    "n": 250,
+    "escalation_rate": 0.0,
+    "acc_or_score": 0.628,
+    "acc_n_judged": 250,
+    "expert_error_rows": 0,
+    "expert_timeout_rows": 0,
+    "onset_before_last_chunk_fired": 0,
+    "audio_gt_30s": 1,
+    "lat_mean_s": 2.2791120000000005,
+    "lat_p50_s": 1.7575,
+    "lat_p95_s": 5.7204999999999995
+   }
+  },
+  {
+   "pool": "swebq",
+   "arm": "agg0",
+   "smoke_only": false,
+   "n_shards": 1,
+   "shard_dates": [
+    "2026-09-07 15:32 Pacific Daylight Time"
+   ],
+   "raw_shards": [
+    "native_bench/swebq/agg0.jsonl.shard0"
+   ],
+   "judged_parquet": "native_bench/swebq_agg0_judged.parquet",
+   "judge": "OpenAudioBench gpt-4o",
+   "code": "51fdb4e",
+   "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
+   "relay_variant": null,
+   "cached_remix": false,
+   "executed": true,
+   "stats": {
+    "n": 250,
+    "escalation_rate": 0.0,
+    "acc_or_score": 0.564,
+    "acc_n_judged": 250,
+    "expert_error_rows": 0,
+    "expert_timeout_rows": 0,
+    "onset_before_last_chunk_fired": 0,
+    "audio_gt_30s": 0
+   }
+  },
+  {
+   "pool": "swebq",
+   "arm": "aggmlp",
+   "smoke_only": false,
+   "n_shards": 1,
+   "shard_dates": [
+    "2026-09-07 15:32 Pacific Daylight Time"
+   ],
+   "raw_shards": [
+    "native_bench/swebq/aggmlp.jsonl.shard0"
+   ],
+   "judged_parquet": "native_bench/swebq_aggmlp_judged.parquet",
+   "judge": "OpenAudioBench gpt-4o",
+   "code": "51fdb4e",
+   "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
+   "relay_variant": null,
+   "cached_remix": false,
+   "executed": true,
+   "stats": {
+    "n": 250,
+    "escalation_rate": 0.0,
+    "acc_or_score": 0.584,
+    "acc_n_judged": 250,
+    "expert_error_rows": 0,
+    "expert_timeout_rows": 0,
+    "onset_before_last_chunk_fired": 0,
+    "audio_gt_30s": 0
+   }
+  },
+  {
+   "pool": "swebq",
+   "arm": "aggressive_tts",
+   "smoke_only": false,
+   "n_shards": 8,
+   "shard_dates": [
+    "2026-09-02 15:42 Pacific Daylight Time",
+    "2026-09-02 15:43 Pacific Daylight Time",
+    "2026-09-02 15:44 Pacific Daylight Time",
+    "2026-09-02 15:45 Pacific Daylight Time",
+    "2026-09-02 15:59 Pacific Daylight Time"
+   ],
+   "raw_shards": [
+    "native_bench/swebq/aggressive_tts.jsonl.shard1",
+    "native_bench/swebq/aggressive_tts.jsonl.shard3",
+    "native_bench/swebq/aggressive_tts.jsonl.shard5",
+    "native_bench/swebq/aggressive_tts.jsonl.shard2",
+    "native_bench/swebq/aggressive_tts.jsonl.shard7",
+    "native_bench/swebq/aggressive_tts.jsonl.shard6",
+    "native_bench/swebq/aggressive_tts.jsonl.shard4",
+    "native_bench/swebq/aggressive_tts.jsonl.shard0"
+   ],
+   "judged_parquet": "native_bench/swebq_aggressive_tts_judged.parquet",
+   "judge": "OpenAudioBench gpt-4o",
+   "code": "51fdb4e",
+   "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
+   "relay_variant": "tts",
+   "cached_remix": false,
+   "executed": true,
+   "stats": {
+    "n": 250,
+    "escalation_rate": 0.6,
+    "acc_or_score": 0.752,
+    "acc_n_judged": 250,
+    "expert_error_rows": 0,
+    "expert_timeout_rows": 1,
+    "onset_before_last_chunk_fired": 0,
+    "audio_gt_30s": 0,
+    "lat_mean_s": 19.187596,
+    "lat_p50_s": 11.328500000000002,
+    "lat_p95_s": 56.61194999999999
+   }
+  },
+  {
+   "pool": "swebq",
+   "arm": "always",
+   "smoke_only": false,
+   "n_shards": 8,
+   "shard_dates": [
+    "2026-09-02 14:23 Pacific Daylight Time",
+    "2026-09-02 14:24 Pacific Daylight Time",
+    "2026-09-02 14:25 Pacific Daylight Time",
+    "2026-09-02 14:29 Pacific Daylight Time",
+    "2026-09-02 14:33 Pacific Daylight Time"
+   ],
+   "raw_shards": [
+    "native_bench/swebq/always.jsonl.shard7",
+    "native_bench/swebq/always.jsonl.shard5",
+    "native_bench/swebq/always.jsonl.shard3",
+    "native_bench/swebq/always.jsonl.shard6",
+    "native_bench/swebq/always.jsonl.shard0",
+    "native_bench/swebq/always.jsonl.shard1",
+    "native_bench/swebq/always.jsonl.shard4",
+    "native_bench/swebq/always.jsonl.shard2"
+   ],
+   "judged_parquet": "native_bench/swebq_always_judged.parquet",
+   "judge": "OpenAudioBench gpt-4o",
+   "code": "51fdb4e",
+   "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
+   "relay_variant": "steer",
+   "cached_remix": false,
+   "executed": true,
+   "stats": {
+    "n": 250,
+    "escalation_rate": 0.976,
+    "acc_or_score": 0.564,
+    "acc_n_judged": 250,
+    "expert_error_rows": 0,
+    "expert_timeout_rows": 0,
+    "onset_before_last_chunk_fired": 0,
+    "audio_gt_30s": 0,
+    "lat_mean_s": 24.709419999999994,
+    "lat_p50_s": 20.3545,
+    "lat_p95_s": 55.0787
+   }
+  },
+  {
+   "pool": "swebq",
+   "arm": "always_tts",
+   "smoke_only": false,
+   "n_shards": 8,
+   "shard_dates": [
+    "2026-09-02 15:31 Pacific Daylight Time",
+    "2026-09-02 15:35 Pacific Daylight Time",
+    "2026-09-02 15:36 Pacific Daylight Time",
+    "2026-09-02 15:37 Pacific Daylight Time",
+    "2026-09-02 15:38 Pacific Daylight Time",
+    "2026-09-02 15:40 Pacific Daylight Time"
+   ],
+   "raw_shards": [
+    "native_bench/swebq/always_tts.jsonl.shard6",
+    "native_bench/swebq/always_tts.jsonl.shard5",
+    "native_bench/swebq/always_tts.jsonl.shard7",
+    "native_bench/swebq/always_tts.jsonl.shard3",
+    "native_bench/swebq/always_tts.jsonl.shard2",
+    "native_bench/swebq/always_tts.jsonl.shard1",
+    "native_bench/swebq/always_tts.jsonl.shard4",
+    "native_bench/swebq/always_tts.jsonl.shard0"
+   ],
+   "judged_parquet": "native_bench/swebq_always_tts_judged.parquet",
+   "judge": "OpenAudioBench gpt-4o",
+   "code": "51fdb4e",
+   "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
+   "relay_variant": "tts",
+   "cached_remix": false,
+   "executed": true,
+   "stats": {
+    "n": 250,
+    "escalation_rate": 0.992,
+    "acc_or_score": 0.796,
+    "acc_n_judged": 250,
+    "expert_error_rows": 0,
+    "expert_timeout_rows": 0,
+    "onset_before_last_chunk_fired": 0,
+    "audio_gt_30s": 0,
+    "lat_mean_s": 24.709419999999994,
+    "lat_p50_s": 20.3545,
+    "lat_p95_s": 55.0787
+   }
+  },
+  {
+   "pool": "swebq",
+   "arm": "balanced_tts",
+   "smoke_only": false,
+   "n_shards": 8,
+   "shard_dates": [
+    "2026-09-02 15:25 Pacific Daylight Time",
+    "2026-09-02 15:27 Pacific Daylight Time",
+    "2026-09-02 15:29 Pacific Daylight Time",
+    "2026-09-02 15:30 Pacific Daylight Time",
+    "2026-09-02 15:31 Pacific Daylight Time",
+    "2026-09-02 15:32 Pacific Daylight Time",
+    "2026-09-02 15:34 Pacific Daylight Time"
+   ],
+   "raw_shards": [
+    "native_bench/swebq/balanced_tts.jsonl.shard6",
+    "native_bench/swebq/balanced_tts.jsonl.shard7",
+    "native_bench/swebq/balanced_tts.jsonl.shard5",
+    "native_bench/swebq/balanced_tts.jsonl.shard3",
+    "native_bench/swebq/balanced_tts.jsonl.shard4",
+    "native_bench/swebq/balanced_tts.jsonl.shard2",
+    "native_bench/swebq/balanced_tts.jsonl.shard1",
+    "native_bench/swebq/balanced_tts.jsonl.shard0"
+   ],
+   "judged_parquet": "native_bench/swebq_balanced_tts_judged.parquet",
+   "judge": "OpenAudioBench gpt-4o",
+   "code": "51fdb4e",
+   "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
+   "relay_variant": "tts",
+   "cached_remix": false,
+   "executed": true,
+   "stats": {
+    "n": 250,
+    "escalation_rate": 0.22,
+    "acc_or_score": 0.624,
+    "acc_n_judged": 250,
+    "expert_error_rows": 0,
+    "expert_timeout_rows": 0,
+    "onset_before_last_chunk_fired": 0,
+    "audio_gt_30s": 0,
+    "lat_mean_s": 8.6681,
+    "lat_p50_s": 3.6574999999999998,
+    "lat_p95_s": 35.47864999999997
+   }
+  },
+  {
+   "pool": "swebq",
+   "arm": "conservative_tts",
+   "smoke_only": false,
+   "n_shards": 8,
+   "shard_dates": [
+    "2026-09-02 16:06 Pacific Daylight Time",
+    "2026-09-02 16:07 Pacific Daylight Time",
+    "2026-09-02 16:08 Pacific Daylight Time",
+    "2026-09-02 16:10 Pacific Daylight Time",
+    "2026-09-02 16:11 Pacific Daylight Time",
+    "2026-09-02 16:17 Pacific Daylight Time"
+   ],
+   "raw_shards": [
+    "native_bench/swebq/conservative_tts.jsonl.shard7",
+    "native_bench/swebq/conservative_tts.jsonl.shard6",
+    "native_bench/swebq/conservative_tts.jsonl.shard3",
+    "native_bench/swebq/conservative_tts.jsonl.shard4",
+    "native_bench/swebq/conservative_tts.jsonl.shard5",
+    "native_bench/swebq/conservative_tts.jsonl.shard2",
+    "native_bench/swebq/conservative_tts.jsonl.shard1",
+    "native_bench/swebq/conservative_tts.jsonl.shard0"
+   ],
+   "judged_parquet": "native_bench/swebq_conservative_tts_judged.parquet",
+   "judge": "OpenAudioBench gpt-4o",
+   "code": "51fdb4e",
+   "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
+   "relay_variant": "tts",
+   "cached_remix": false,
+   "executed": true,
+   "stats": {
+    "n": 250,
+    "escalation_rate": 0.048,
+    "acc_or_score": 0.592,
+    "acc_n_judged": 250,
+    "expert_error_rows": 0,
+    "expert_timeout_rows": 0,
+    "onset_before_last_chunk_fired": 0,
+    "audio_gt_30s": 0,
+    "lat_mean_s": 6.60426,
+    "lat_p50_s": 2.9875,
+    "lat_p95_s": 15.365449999999997
+   }
+  },
+  {
+   "pool": "swebq",
+   "arm": "never",
+   "smoke_only": false,
+   "n_shards": 8,
+   "shard_dates": [
+    "2026-09-02 10:11 Pacific Daylight Time",
+    "2026-09-02 10:12 Pacific Daylight Time",
+    "2026-09-02 10:15 Pacific Daylight Time",
+    "2026-09-02 10:16 Pacific Daylight Time"
+   ],
+   "raw_shards": [
+    "native_bench/swebq/never.jsonl.shard7",
+    "native_bench/swebq/never.jsonl.shard1",
+    "native_bench/swebq/never.jsonl.shard3",
+    "native_bench/swebq/never.jsonl.shard4",
+    "native_bench/swebq/never.jsonl.shard2",
+    "native_bench/swebq/never.jsonl.shard0",
+    "native_bench/swebq/never.jsonl.shard6",
+    "native_bench/swebq/never.jsonl.shard5"
+   ],
+   "judged_parquet": "native_bench/swebq_never_judged.parquet",
+   "judge": "OpenAudioBench gpt-4o",
+   "code": "51fdb4e",
+   "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
+   "relay_variant": null,
+   "cached_remix": false,
+   "executed": true,
+   "stats": {
+    "n": 250,
+    "escalation_rate": 0.0,
+    "acc_or_score": 0.528,
+    "acc_n_judged": 250,
+    "expert_error_rows": 0,
+    "expert_timeout_rows": 0,
+    "onset_before_last_chunk_fired": 0,
+    "audio_gt_30s": 0,
+    "lat_mean_s": 5.908204000000002,
+    "lat_p50_s": 3.1355000000000004,
+    "lat_p95_s": 10.068449999999999
+   }
+  },
+  {
+   "pool": "swebq",
+   "arm": "old_cleaner_always_tts",
+   "smoke_only": false,
+   "n_shards": 8,
+   "shard_dates": [
+    "2026-09-02 15:19 Pacific Daylight Time"
+   ],
+   "raw_shards": [
+    "native_bench/swebq/old_cleaner_always_tts.jsonl.shard7",
+    "native_bench/swebq/old_cleaner_always_tts.jsonl.shard6",
+    "native_bench/swebq/old_cleaner_always_tts.jsonl.shard5",
+    "native_bench/swebq/old_cleaner_always_tts.jsonl.shard1",
+    "native_bench/swebq/old_cleaner_always_tts.jsonl.shard0",
+    "native_bench/swebq/old_cleaner_always_tts.jsonl.shard3",
+    "native_bench/swebq/old_cleaner_always_tts.jsonl.shard4",
+    "native_bench/swebq/old_cleaner_always_tts.jsonl.shard2"
+   ],
+   "judged_parquet": null,
+   "judge": "OpenAudioBench gpt-4o",
+   "code": "51fdb4e",
+   "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
+   "relay_variant": "tts",
+   "cached_remix": false,
+   "executed": true
+  },
+  {
+   "pool": "sllama",
+   "arm": "agg0",
+   "smoke_only": false,
+   "n_shards": 1,
+   "shard_dates": [
+    "2026-09-07 15:32 Pacific Daylight Time"
+   ],
+   "raw_shards": [
+    "native_bench/sllama/agg0.jsonl.shard0"
+   ],
+   "judged_parquet": "native_bench/sllama_agg0_judged.parquet",
+   "judge": "OpenAudioBench gpt-4o",
+   "code": "51fdb4e",
+   "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
+   "relay_variant": null,
+   "cached_remix": false,
+   "executed": true,
+   "stats": {
+    "n": 250,
+    "escalation_rate": 0.0,
+    "acc_or_score": 0.796,
+    "acc_n_judged": 250,
+    "expert_error_rows": 0,
+    "expert_timeout_rows": 0,
+    "onset_before_last_chunk_fired": 0,
+    "audio_gt_30s": 0
+   }
+  },
+  {
+   "pool": "sllama",
+   "arm": "aggmlp",
+   "smoke_only": false,
+   "n_shards": 1,
+   "shard_dates": [
+    "2026-09-07 15:32 Pacific Daylight Time"
+   ],
+   "raw_shards": [
+    "native_bench/sllama/aggmlp.jsonl.shard0"
+   ],
+   "judged_parquet": "native_bench/sllama_aggmlp_judged.parquet",
+   "judge": "OpenAudioBench gpt-4o",
+   "code": "51fdb4e",
+   "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
+   "relay_variant": null,
+   "cached_remix": false,
+   "executed": true,
+   "stats": {
+    "n": 250,
+    "escalation_rate": 0.0,
+    "acc_or_score": 0.744,
+    "acc_n_judged": 250,
+    "expert_error_rows": 0,
+    "expert_timeout_rows": 0,
+    "onset_before_last_chunk_fired": 0,
+    "audio_gt_30s": 0
+   }
+  },
+  {
+   "pool": "sllama",
+   "arm": "aggressive_tts",
+   "smoke_only": false,
+   "n_shards": 8,
+   "shard_dates": [
+    "2026-09-02 16:35 Pacific Daylight Time",
+    "2026-09-02 16:36 Pacific Daylight Time",
+    "2026-09-02 16:37 Pacific Daylight Time"
+   ],
+   "raw_shards": [
+    "native_bench/sllama/aggressive_tts.jsonl.shard7",
+    "native_bench/sllama/aggressive_tts.jsonl.shard4",
+    "native_bench/sllama/aggressive_tts.jsonl.shard5",
+    "native_bench/sllama/aggressive_tts.jsonl.shard0",
+    "native_bench/sllama/aggressive_tts.jsonl.shard6",
+    "native_bench/sllama/aggressive_tts.jsonl.shard3",
+    "native_bench/sllama/aggressive_tts.jsonl.shard2",
+    "native_bench/sllama/aggressive_tts.jsonl.shard1"
+   ],
+   "judged_parquet": "native_bench/sllama_aggressive_tts_judged.parquet",
+   "judge": "OpenAudioBench gpt-4o",
+   "code": "51fdb4e",
+   "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
+   "relay_variant": "tts",
+   "cached_remix": false,
+   "executed": true,
+   "stats": {
+    "n": 250,
+    "escalation_rate": 0.188,
+    "acc_or_score": 0.856,
+    "acc_n_judged": 250,
+    "expert_error_rows": 0,
+    "expert_timeout_rows": 0,
+    "onset_before_last_chunk_fired": 4,
+    "audio_gt_30s": 0,
+    "lat_mean_s": 5.972716,
+    "lat_p50_s": 3.002,
+    "lat_p95_s": 26.036799999999975
+   }
+  },
+  {
+   "pool": "sllama",
+   "arm": "always_tts",
+   "smoke_only": false,
+   "n_shards": 8,
+   "shard_dates": [
+    "2026-09-02 15:21 Pacific Daylight Time",
+    "2026-09-02 15:22 Pacific Daylight Time",
+    "2026-09-02 15:25 Pacific Daylight Time",
+    "2026-09-02 15:26 Pacific Daylight Time",
+    "2026-09-02 15:27 Pacific Daylight Time",
+    "2026-09-02 15:28 Pacific Daylight Time",
+    "2026-09-02 15:29 Pacific Daylight Time"
+   ],
+   "raw_shards": [
+    "native_bench/sllama/always_tts.jsonl.shard7",
+    "native_bench/sllama/always_tts.jsonl.shard4",
+    "native_bench/sllama/always_tts.jsonl.shard6",
+    "native_bench/sllama/always_tts.jsonl.shard5",
+    "native_bench/sllama/always_tts.jsonl.shard3",
+    "native_bench/sllama/always_tts.jsonl.shard2",
+    "native_bench/sllama/always_tts.jsonl.shard1",
+    "native_bench/sllama/always_tts.jsonl.shard0"
+   ],
+   "judged_parquet": "native_bench/sllama_always_tts_judged.parquet",
+   "judge": "OpenAudioBench gpt-4o",
+   "code": "51fdb4e",
+   "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
+   "relay_variant": "tts",
+   "cached_remix": false,
+   "executed": true,
+   "stats": {
+    "n": 250,
+    "escalation_rate": 1.0,
+    "acc_or_score": 0.916,
+    "acc_n_judged": 250,
+    "expert_error_rows": 0,
+    "expert_timeout_rows": 0,
+    "onset_before_last_chunk_fired": 10,
+    "audio_gt_30s": 0,
+    "lat_mean_s": 12.404188,
+    "lat_p50_s": 9.047,
+    "lat_p95_s": 31.50454999999999
+   }
+  },
+  {
+   "pool": "sllama",
+   "arm": "balanced_tts",
+   "smoke_only": false,
+   "n_shards": 8,
+   "shard_dates": [
+    "2026-09-02 16:26 Pacific Daylight Time",
+    "2026-09-02 16:27 Pacific Daylight Time",
+    "2026-09-02 16:28 Pacific Daylight Time",
+    "2026-09-02 16:29 Pacific Daylight Time",
+    "2026-09-02 16:30 Pacific Daylight Time"
+   ],
+   "raw_shards": [
+    "native_bench/sllama/balanced_tts.jsonl.shard7",
+    "native_bench/sllama/balanced_tts.jsonl.shard4",
+    "native_bench/sllama/balanced_tts.jsonl.shard5",
+    "native_bench/sllama/balanced_tts.jsonl.shard6",
+    "native_bench/sllama/balanced_tts.jsonl.shard3",
+    "native_bench/sllama/balanced_tts.jsonl.shard2",
+    "native_bench/sllama/balanced_tts.jsonl.shard0",
+    "native_bench/sllama/balanced_tts.jsonl.shard1"
+   ],
+   "judged_parquet": "native_bench/sllama_balanced_tts_judged.parquet",
+   "judge": "OpenAudioBench gpt-4o",
+   "code": "51fdb4e",
+   "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
+   "relay_variant": "tts",
+   "cached_remix": false,
+   "executed": true,
+   "stats": {
+    "n": 250,
+    "escalation_rate": 0.036,
+    "acc_or_score": 0.824,
+    "acc_n_judged": 250,
+    "expert_error_rows": 0,
+    "expert_timeout_rows": 0,
+    "onset_before_last_chunk_fired": 0,
+    "audio_gt_30s": 0,
+    "lat_mean_s": 5.202088,
+    "lat_p50_s": 2.7615,
+    "lat_p95_s": 8.3466
+   }
+  },
+  {
+   "pool": "sllama",
+   "arm": "conservative_tts",
+   "smoke_only": false,
+   "n_shards": 8,
+   "shard_dates": [
+    "2026-09-02 16:42 Pacific Daylight Time",
+    "2026-09-02 16:44 Pacific Daylight Time",
+    "2026-09-02 16:46 Pacific Daylight Time",
+    "2026-09-02 16:50 Pacific Daylight Time",
+    "2026-09-02 16:51 Pacific Daylight Time",
+    "2026-09-02 16:52 Pacific Daylight Time"
+   ],
+   "raw_shards": [
+    "native_bench/sllama/conservative_tts.jsonl.shard5",
+    "native_bench/sllama/conservative_tts.jsonl.shard7",
+    "native_bench/sllama/conservative_tts.jsonl.shard6",
+    "native_bench/sllama/conservative_tts.jsonl.shard4",
+    "native_bench/sllama/conservative_tts.jsonl.shard3",
+    "native_bench/sllama/conservative_tts.jsonl.shard2",
+    "native_bench/sllama/conservative_tts.jsonl.shard1",
+    "native_bench/sllama/conservative_tts.jsonl.shard0"
+   ],
+   "judged_parquet": "native_bench/sllama_conservative_tts_judged.parquet",
+   "judge": "OpenAudioBench gpt-4o",
+   "code": "51fdb4e",
+   "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
+   "relay_variant": "tts",
+   "cached_remix": false,
+   "executed": true,
+   "stats": {
+    "n": 250,
+    "escalation_rate": 0.004,
+    "acc_or_score": 0.788,
+    "acc_n_judged": 250,
+    "expert_error_rows": 0,
+    "expert_timeout_rows": 0,
+    "onset_before_last_chunk_fired": 0,
+    "audio_gt_30s": 0,
+    "lat_mean_s": 2.93292,
+    "lat_p50_s": 2.501,
+    "lat_p95_s": 6.010999999999998
+   }
+  },
+  {
+   "pool": "sllama",
+   "arm": "never",
+   "smoke_only": false,
+   "n_shards": 8,
+   "shard_dates": [
+    "2026-09-02 10:19 Pacific Daylight Time",
+    "2026-09-02 10:20 Pacific Daylight Time",
+    "2026-09-02 10:21 Pacific Daylight Time"
+   ],
+   "raw_shards": [
+    "native_bench/sllama/never.jsonl.shard2",
+    "native_bench/sllama/never.jsonl.shard3",
+    "native_bench/sllama/never.jsonl.shard7",
+    "native_bench/sllama/never.jsonl.shard6",
+    "native_bench/sllama/never.jsonl.shard4",
+    "native_bench/sllama/never.jsonl.shard5",
+    "native_bench/sllama/never.jsonl.shard0",
+    "native_bench/sllama/never.jsonl.shard1"
+   ],
+   "judged_parquet": "native_bench/sllama_never_judged.parquet",
+   "judge": "OpenAudioBench gpt-4o",
+   "code": "51fdb4e",
+   "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
+   "relay_variant": null,
+   "cached_remix": false,
+   "executed": true,
+   "stats": {
+    "n": 250,
+    "escalation_rate": 0.0,
+    "acc_or_score": 0.824,
+    "acc_n_judged": 250,
+    "expert_error_rows": 0,
+    "expert_timeout_rows": 0,
+    "onset_before_last_chunk_fired": 0,
+    "audio_gt_30s": 0,
+    "lat_mean_s": 3.1970599999999996,
+    "lat_p50_s": 2.8040000000000003,
+    "lat_p95_s": 7.017549999999997
+   }
+  },
+  {
+   "pool": "sdqa",
+   "arm": "aggressive_tts",
+   "smoke_only": false,
+   "n_shards": 8,
+   "shard_dates": [
+    "2026-09-02 17:12 Pacific Daylight Time",
+    "2026-09-02 17:13 Pacific Daylight Time"
+   ],
+   "raw_shards": [
+    "native_bench/sdqa/aggressive_tts.jsonl.shard2",
+    "native_bench/sdqa/aggressive_tts.jsonl.shard6",
+    "native_bench/sdqa/aggressive_tts.jsonl.shard4",
+    "native_bench/sdqa/aggressive_tts.jsonl.shard7",
+    "native_bench/sdqa/aggressive_tts.jsonl.shard0",
+    "native_bench/sdqa/aggressive_tts.jsonl.shard3",
+    "native_bench/sdqa/aggressive_tts.jsonl.shard1",
+    "native_bench/sdqa/aggressive_tts.jsonl.shard5"
+   ],
+   "judged_parquet": "native_bench/sdqa_aggressive_tts_judged.parquet",
+   "judge": "ours ref-anchored gpt-5.4-mini",
+   "code": "51fdb4e",
+   "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
+   "relay_variant": "tts",
+   "cached_remix": false,
+   "executed": true,
+   "stats": {
+    "n": 200,
+    "escalation_rate": 0.66,
+    "acc_or_score": 0.825,
+    "acc_n_judged": 200,
+    "expert_error_rows": 0,
+    "expert_timeout_rows": 0,
+    "onset_before_last_chunk_fired": 5,
+    "audio_gt_30s": 0,
+    "lat_mean_s": 14.726795,
+    "lat_p50_s": 12.8805,
+    "lat_p95_s": 36.954699999999995
+   }
+  },
+  {
+   "pool": "sdqa",
+   "arm": "always_tts",
+   "smoke_only": false,
+   "n_shards": 8,
+   "shard_dates": [
+    "2026-09-02 15:49 Pacific Daylight Time",
+    "2026-09-02 15:50 Pacific Daylight Time",
+    "2026-09-02 15:51 Pacific Daylight Time",
+    "2026-09-02 15:52 Pacific Daylight Time",
+    "2026-09-02 15:54 Pacific Daylight Time"
+   ],
+   "raw_shards": [
+    "native_bench/sdqa/always_tts.jsonl.shard7",
+    "native_bench/sdqa/always_tts.jsonl.shard6",
+    "native_bench/sdqa/always_tts.jsonl.shard2",
+    "native_bench/sdqa/always_tts.jsonl.shard5",
+    "native_bench/sdqa/always_tts.jsonl.shard1",
+    "native_bench/sdqa/always_tts.jsonl.shard4",
+    "native_bench/sdqa/always_tts.jsonl.shard3",
+    "native_bench/sdqa/always_tts.jsonl.shard0"
+   ],
+   "judged_parquet": "native_bench/sdqa_always_tts_judged.parquet",
+   "judge": "ours ref-anchored gpt-5.4-mini",
+   "code": "51fdb4e",
+   "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
+   "relay_variant": "tts",
+   "cached_remix": false,
+   "executed": true,
+   "stats": {
+    "n": 200,
+    "escalation_rate": 1.0,
+    "acc_or_score": 0.87,
+    "acc_n_judged": 200,
+    "expert_error_rows": 0,
+    "expert_timeout_rows": 0,
+    "onset_before_last_chunk_fired": 13,
+    "audio_gt_30s": 0,
+    "lat_mean_s": 20.859984999999984,
+    "lat_p50_s": 18.7495,
+    "lat_p95_s": 40.049099999999974
+   }
+  },
+  {
+   "pool": "sdqa",
+   "arm": "balanced_tts",
+   "smoke_only": false,
+   "n_shards": 8,
+   "shard_dates": [
+    "2026-09-02 16:57 Pacific Daylight Time",
+    "2026-09-02 16:58 Pacific Daylight Time",
+    "2026-09-02 16:59 Pacific Daylight Time",
+    "2026-09-02 17:05 Pacific Daylight Time"
+   ],
+   "raw_shards": [
+    "native_bench/sdqa/balanced_tts.jsonl.shard7",
+    "native_bench/sdqa/balanced_tts.jsonl.shard2",
+    "native_bench/sdqa/balanced_tts.jsonl.shard0",
+    "native_bench/sdqa/balanced_tts.jsonl.shard4",
+    "native_bench/sdqa/balanced_tts.jsonl.shard5",
+    "native_bench/sdqa/balanced_tts.jsonl.shard6",
+    "native_bench/sdqa/balanced_tts.jsonl.shard3",
+    "native_bench/sdqa/balanced_tts.jsonl.shard1"
+   ],
+   "judged_parquet": "native_bench/sdqa_balanced_tts_judged.parquet",
+   "judge": "ours ref-anchored gpt-5.4-mini",
+   "code": "51fdb4e",
+   "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
+   "relay_variant": "tts",
+   "cached_remix": false,
+   "executed": true,
+   "stats": {
+    "n": 200,
+    "escalation_rate": 0.27,
+    "acc_or_score": 0.65,
+    "acc_n_judged": 200,
+    "expert_error_rows": 0,
+    "expert_timeout_rows": 0,
+    "onset_before_last_chunk_fired": 2,
+    "audio_gt_30s": 0,
+    "lat_mean_s": 8.476405,
+    "lat_p50_s": 3.2845,
+    "lat_p95_s": 32.234349999999985
+   }
+  },
+  {
+   "pool": "sdqa",
+   "arm": "conservative_tts",
+   "smoke_only": false,
+   "n_shards": 8,
+   "shard_dates": [
+    "2026-09-02 17:16 Pacific Daylight Time",
+    "2026-09-02 17:17 Pacific Daylight Time"
+   ],
+   "raw_shards": [
+    "native_bench/sdqa/conservative_tts.jsonl.shard2",
+    "native_bench/sdqa/conservative_tts.jsonl.shard4",
+    "native_bench/sdqa/conservative_tts.jsonl.shard5",
+    "native_bench/sdqa/conservative_tts.jsonl.shard7",
+    "native_bench/sdqa/conservative_tts.jsonl.shard0",
+    "native_bench/sdqa/conservative_tts.jsonl.shard6",
+    "native_bench/sdqa/conservative_tts.jsonl.shard3",
+    "native_bench/sdqa/conservative_tts.jsonl.shard1"
+   ],
+   "judged_parquet": "native_bench/sdqa_conservative_tts_judged.parquet",
+   "judge": "ours ref-anchored gpt-5.4-mini",
+   "code": "51fdb4e",
+   "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
+   "relay_variant": "tts",
+   "cached_remix": false,
+   "executed": true,
+   "stats": {
+    "n": 200,
+    "escalation_rate": 0.065,
+    "acc_or_score": 0.54,
+    "acc_n_judged": 200,
+    "expert_error_rows": 0,
+    "expert_timeout_rows": 0,
+    "onset_before_last_chunk_fired": 0,
+    "audio_gt_30s": 0,
+    "lat_mean_s": 3.7442,
+    "lat_p50_s": 2.198,
+    "lat_p95_s": 12.514649999999984
+   }
+  },
+  {
+   "pool": "sdqa",
+   "arm": "never",
+   "smoke_only": false,
+   "n_shards": 8,
+   "shard_dates": [
+    "2026-09-02 10:25 Pacific Daylight Time",
+    "2026-09-02 10:26 Pacific Daylight Time",
+    "2026-09-02 10:27 Pacific Daylight Time"
+   ],
+   "raw_shards": [
+    "native_bench/sdqa/never.jsonl.shard7",
+    "native_bench/sdqa/never.jsonl.shard1",
+    "native_bench/sdqa/never.jsonl.shard2",
+    "native_bench/sdqa/never.jsonl.shard5",
+    "native_bench/sdqa/never.jsonl.shard0",
+    "native_bench/sdqa/never.jsonl.shard3",
+    "native_bench/sdqa/never.jsonl.shard4",
+    "native_bench/sdqa/never.jsonl.shard6"
+   ],
+   "judged_parquet": "native_bench/sdqa_never_judged.parquet",
+   "judge": "ours ref-anchored gpt-5.4-mini",
+   "code": "51fdb4e",
+   "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
+   "relay_variant": null,
+   "cached_remix": false,
+   "executed": true,
+   "stats": {
+    "n": 200,
+    "escalation_rate": 0.0,
+    "acc_or_score": 0.48,
+    "acc_n_judged": 200,
+    "expert_error_rows": 0,
+    "expert_timeout_rows": 0,
+    "onset_before_last_chunk_fired": 0,
+    "audio_gt_30s": 0,
+    "lat_mean_s": 2.7842500000000014,
+    "lat_p50_s": 2.363,
+    "lat_p95_s": 6.5324
+   }
+  },
+  {
+   "pool": "sreason",
+   "arm": "aggressive_tts",
+   "smoke_only": false,
+   "n_shards": 8,
+   "shard_dates": [
+    "2026-09-02 17:33 Pacific Daylight Time",
+    "2026-09-02 17:34 Pacific Daylight Time",
+    "2026-09-02 17:35 Pacific Daylight Time",
+    "2026-09-02 17:51 Pacific Daylight Time"
+   ],
+   "raw_shards": [
+    "native_bench/sreason/aggressive_tts.jsonl.shard7",
+    "native_bench/sreason/aggressive_tts.jsonl.shard4",
+    "native_bench/sreason/aggressive_tts.jsonl.shard1",
+    "native_bench/sreason/aggressive_tts.jsonl.shard0",
+    "native_bench/sreason/aggressive_tts.jsonl.shard2",
+    "native_bench/sreason/aggressive_tts.jsonl.shard5",
+    "native_bench/sreason/aggressive_tts.jsonl.shard6",
+    "native_bench/sreason/aggressive_tts.jsonl.shard3"
+   ],
+   "judged_parquet": "native_bench/sreason_aggressive_tts_judged.parquet",
+   "judge": "ours ref-anchored gpt-5.4-mini",
+   "code": "51fdb4e",
+   "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
+   "relay_variant": "tts",
+   "cached_remix": false,
+   "executed": true,
+   "stats": {
+    "n": 202,
+    "escalation_rate": 0.504950495049505,
+    "acc_or_score": 0.7277227722772277,
+    "acc_n_judged": 202,
+    "expert_error_rows": 0,
+    "expert_timeout_rows": 1,
+    "onset_before_last_chunk_fired": 13,
+    "audio_gt_30s": 17,
+    "lat_mean_s": 26.9870099009901,
+    "lat_p50_s": 11.873999999999999,
+    "lat_p95_s": 88.55104999999999
+   }
+  },
+  {
+   "pool": "sreason",
+   "arm": "always_tts",
+   "smoke_only": false,
+   "n_shards": 8,
+   "shard_dates": [
+    "2026-09-02 16:04 Pacific Daylight Time",
+    "2026-09-02 16:05 Pacific Daylight Time",
+    "2026-09-02 16:06 Pacific Daylight Time",
+    "2026-09-02 16:07 Pacific Daylight Time",
+    "2026-09-02 16:08 Pacific Daylight Time",
+    "2026-09-02 16:09 Pacific Daylight Time"
+   ],
+   "raw_shards": [
+    "native_bench/sreason/always_tts.jsonl.shard5",
+    "native_bench/sreason/always_tts.jsonl.shard6",
+    "native_bench/sreason/always_tts.jsonl.shard4",
+    "native_bench/sreason/always_tts.jsonl.shard1",
+    "native_bench/sreason/always_tts.jsonl.shard7",
+    "native_bench/sreason/always_tts.jsonl.shard0",
+    "native_bench/sreason/always_tts.jsonl.shard2",
+    "native_bench/sreason/always_tts.jsonl.shard3"
+   ],
+   "judged_parquet": "native_bench/sreason_always_tts_judged.parquet",
+   "judge": "ours ref-anchored gpt-5.4-mini",
+   "code": "51fdb4e",
+   "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
+   "relay_variant": "tts",
+   "cached_remix": false,
+   "executed": true,
+   "stats": {
+    "n": 202,
+    "escalation_rate": 1.0,
+    "acc_or_score": 0.8366336633663366,
+    "acc_n_judged": 202,
+    "expert_error_rows": 0,
+    "expert_timeout_rows": 0,
+    "onset_before_last_chunk_fired": 18,
+    "audio_gt_30s": 17,
+    "lat_mean_s": 39.01002475247526,
+    "lat_p50_s": 26.926000000000002,
+    "lat_p95_s": 115.29549999999983
+   }
+  },
+  {
+   "pool": "sreason",
+   "arm": "balanced_tts",
+   "smoke_only": false,
+   "n_shards": 8,
+   "shard_dates": [
+    "2026-09-02 17:23 Pacific Daylight Time",
+    "2026-09-02 17:24 Pacific Daylight Time",
+    "2026-09-02 17:25 Pacific Daylight Time"
+   ],
+   "raw_shards": [
+    "native_bench/sreason/balanced_tts.jsonl.shard6",
+    "native_bench/sreason/balanced_tts.jsonl.shard0",
+    "native_bench/sreason/balanced_tts.jsonl.shard7",
+    "native_bench/sreason/balanced_tts.jsonl.shard1",
+    "native_bench/sreason/balanced_tts.jsonl.shard4",
+    "native_bench/sreason/balanced_tts.jsonl.shard3",
+    "native_bench/sreason/balanced_tts.jsonl.shard2",
+    "native_bench/sreason/balanced_tts.jsonl.shard5"
+   ],
+   "judged_parquet": "native_bench/sreason_balanced_tts_judged.parquet",
+   "judge": "ours ref-anchored gpt-5.4-mini",
+   "code": "51fdb4e",
+   "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
+   "relay_variant": "tts",
+   "cached_remix": false,
+   "executed": true,
+   "stats": {
+    "n": 202,
+    "escalation_rate": 0.3316831683168317,
+    "acc_or_score": 0.6633663366336634,
+    "acc_n_judged": 202,
+    "expert_error_rows": 0,
+    "expert_timeout_rows": 0,
+    "onset_before_last_chunk_fired": 8,
+    "audio_gt_30s": 17,
+    "lat_mean_s": 16.788529702970294,
+    "lat_p50_s": 6.1905,
+    "lat_p95_s": 64.72709999999991
+   }
+  },
+  {
+   "pool": "sreason",
+   "arm": "conservative_tts",
+   "smoke_only": false,
+   "n_shards": 8,
+   "shard_dates": [
+    "2026-09-02 17:57 Pacific Daylight Time",
+    "2026-09-02 17:58 Pacific Daylight Time",
+    "2026-09-02 17:59 Pacific Daylight Time",
+    "2026-09-02 18:00 Pacific Daylight Time",
+    "2026-09-02 18:02 Pacific Daylight Time"
+   ],
+   "raw_shards": [
+    "native_bench/sreason/conservative_tts.jsonl.shard1",
+    "native_bench/sreason/conservative_tts.jsonl.shard4",
+    "native_bench/sreason/conservative_tts.jsonl.shard0",
+    "native_bench/sreason/conservative_tts.jsonl.shard6",
+    "native_bench/sreason/conservative_tts.jsonl.shard2",
+    "native_bench/sreason/conservative_tts.jsonl.shard3",
+    "native_bench/sreason/conservative_tts.jsonl.shard7",
+    "native_bench/sreason/conservative_tts.jsonl.shard5"
+   ],
+   "judged_parquet": "native_bench/sreason_conservative_tts_judged.parquet",
+   "judge": "ours ref-anchored gpt-5.4-mini",
+   "code": "51fdb4e",
+   "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
+   "relay_variant": "tts",
+   "cached_remix": false,
+   "executed": true,
+   "stats": {
+    "n": 202,
+    "escalation_rate": 0.19801980198019803,
+    "acc_or_score": 0.6237623762376238,
+    "acc_n_judged": 202,
+    "expert_error_rows": 0,
+    "expert_timeout_rows": 0,
+    "onset_before_last_chunk_fired": 5,
+    "audio_gt_30s": 17,
+    "lat_mean_s": 14.162732673267328,
+    "lat_p50_s": 6.3294999999999995,
+    "lat_p95_s": 50.22979999999996
+   }
+  },
+  {
+   "pool": "sreason",
+   "arm": "never",
+   "smoke_only": false,
+   "n_shards": 8,
+   "shard_dates": [
+    "2026-09-02 10:32 Pacific Daylight Time",
+    "2026-09-02 10:33 Pacific Daylight Time",
+    "2026-09-02 10:34 Pacific Daylight Time",
+    "2026-09-02 10:35 Pacific Daylight Time"
+   ],
+   "raw_shards": [
+    "native_bench/sreason/never.jsonl.shard4",
+    "native_bench/sreason/never.jsonl.shard5",
+    "native_bench/sreason/never.jsonl.shard2",
+    "native_bench/sreason/never.jsonl.shard0",
+    "native_bench/sreason/never.jsonl.shard7",
+    "native_bench/sreason/never.jsonl.shard1",
+    "native_bench/sreason/never.jsonl.shard3",
+    "native_bench/sreason/never.jsonl.shard6"
+   ],
+   "judged_parquet": "native_bench/sreason_never_judged.parquet",
+   "judge": "ours ref-anchored gpt-5.4-mini",
+   "code": "51fdb4e",
+   "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
+   "relay_variant": null,
+   "cached_remix": false,
+   "executed": true,
+   "stats": {
+    "n": 202,
+    "escalation_rate": 0.0,
+    "acc_or_score": 0.5099009900990099,
+    "acc_n_judged": 202,
+    "expert_error_rows": 0,
+    "expert_timeout_rows": 0,
+    "onset_before_last_chunk_fired": 0,
+    "audio_gt_30s": 17,
+    "lat_mean_s": 6.8683019801980185,
+    "lat_p50_s": 5.0815,
+    "lat_p95_s": 17.27925
+   }
+  },
+  {
+   "pool": "valpaca",
+   "arm": "aggressive_tts",
+   "smoke_only": false,
+   "n_shards": 8,
+   "shard_dates": [
+    "2026-09-02 19:14 Pacific Daylight Time",
+    "2026-09-02 19:15 Pacific Daylight Time",
+    "2026-09-02 19:16 Pacific Daylight Time",
+    "2026-09-02 19:17 Pacific Daylight Time"
+   ],
+   "raw_shards": [
+    "native_bench/valpaca/aggressive_tts.jsonl.shard4",
+    "native_bench/valpaca/aggressive_tts.jsonl.shard2",
+    "native_bench/valpaca/aggressive_tts.jsonl.shard6",
+    "native_bench/valpaca/aggressive_tts.jsonl.shard0",
+    "native_bench/valpaca/aggressive_tts.jsonl.shard1",
+    "native_bench/valpaca/aggressive_tts.jsonl.shard5",
+    "native_bench/valpaca/aggressive_tts.jsonl.shard3",
+    "native_bench/valpaca/aggressive_tts.jsonl.shard7"
+   ],
+   "judged_parquet": "native_bench/valpaca_aggressive_tts_judged.parquet",
+   "judge": "VoiceBench gpt-4o-mini 1-5",
+   "code": "51fdb4e",
+   "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
+   "relay_variant": "tts",
+   "cached_remix": false,
+   "executed": true,
+   "stats": {
+    "n": 199,
+    "escalation_rate": 0.4371859296482412,
+    "acc_or_score": 4.010050251256281,
+    "acc_n_judged": 199,
+    "expert_error_rows": 0,
+    "expert_timeout_rows": 0,
+    "onset_before_last_chunk_fired": 16,
+    "audio_gt_30s": 0
+   }
+  },
+  {
+   "pool": "valpaca",
+   "arm": "always_tts",
+   "smoke_only": false,
+   "n_shards": 8,
+   "shard_dates": [
+    "2026-09-02 16:46 Pacific Daylight Time",
+    "2026-09-02 16:47 Pacific Daylight Time",
+    "2026-09-02 16:48 Pacific Daylight Time",
+    "2026-09-02 16:49 Pacific Daylight Time",
+    "2026-09-02 16:50 Pacific Daylight Time"
+   ],
+   "raw_shards": [
+    "native_bench/valpaca/always_tts.jsonl.shard6",
+    "native_bench/valpaca/always_tts.jsonl.shard4",
+    "native_bench/valpaca/always_tts.jsonl.shard7",
+    "native_bench/valpaca/always_tts.jsonl.shard5",
+    "native_bench/valpaca/always_tts.jsonl.shard2",
+    "native_bench/valpaca/always_tts.jsonl.shard0",
+    "native_bench/valpaca/always_tts.jsonl.shard3",
+    "native_bench/valpaca/always_tts.jsonl.shard1"
+   ],
+   "judged_parquet": "native_bench/valpaca_always_tts_judged.parquet",
+   "judge": "VoiceBench gpt-4o-mini 1-5",
+   "code": "51fdb4e",
+   "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
+   "relay_variant": "tts",
+   "cached_remix": false,
+   "executed": true,
+   "stats": {
+    "n": 199,
+    "escalation_rate": 1.0,
+    "acc_or_score": 4.1959798994974875,
+    "acc_n_judged": 199,
+    "expert_error_rows": 0,
+    "expert_timeout_rows": 0,
+    "onset_before_last_chunk_fired": 38,
+    "audio_gt_30s": 0
+   }
+  },
+  {
+   "pool": "valpaca",
+   "arm": "balanced_tts",
+   "smoke_only": false,
+   "n_shards": 8,
+   "shard_dates": [
+    "2026-09-02 18:55 Pacific Daylight Time",
+    "2026-09-02 18:56 Pacific Daylight Time",
+    "2026-09-02 18:58 Pacific Daylight Time",
+    "2026-09-02 19:03 Pacific Daylight Time",
+    "2026-09-02 19:07 Pacific Daylight Time"
+   ],
+   "raw_shards": [
+    "native_bench/valpaca/balanced_tts.jsonl.shard4",
+    "native_bench/valpaca/balanced_tts.jsonl.shard5",
+    "native_bench/valpaca/balanced_tts.jsonl.shard6",
+    "native_bench/valpaca/balanced_tts.jsonl.shard7",
+    "native_bench/valpaca/balanced_tts.jsonl.shard2",
+    "native_bench/valpaca/balanced_tts.jsonl.shard1",
+    "native_bench/valpaca/balanced_tts.jsonl.shard0",
+    "native_bench/valpaca/balanced_tts.jsonl.shard3"
+   ],
+   "judged_parquet": "native_bench/valpaca_balanced_tts_judged.parquet",
+   "judge": "VoiceBench gpt-4o-mini 1-5",
+   "code": "51fdb4e",
+   "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
+   "relay_variant": "tts",
+   "cached_remix": false,
+   "executed": true,
+   "stats": {
+    "n": 199,
+    "escalation_rate": 0.04522613065326633,
+    "acc_or_score": 3.7738693467336684,
+    "acc_n_judged": 199,
+    "expert_error_rows": 0,
+    "expert_timeout_rows": 0,
+    "onset_before_last_chunk_fired": 2,
+    "audio_gt_30s": 0
+   }
+  },
+  {
+   "pool": "valpaca",
+   "arm": "conservative_tts",
+   "smoke_only": false,
+   "n_shards": 8,
+   "shard_dates": [
+    "2026-09-02 19:21 Pacific Daylight Time",
+    "2026-09-02 19:22 Pacific Daylight Time",
+    "2026-09-02 19:23 Pacific Daylight Time",
+    "2026-09-02 19:24 Pacific Daylight Time",
+    "2026-09-02 19:28 Pacific Daylight Time"
+   ],
+   "raw_shards": [
+    "native_bench/valpaca/conservative_tts.jsonl.shard6",
+    "native_bench/valpaca/conservative_tts.jsonl.shard7",
+    "native_bench/valpaca/conservative_tts.jsonl.shard4",
+    "native_bench/valpaca/conservative_tts.jsonl.shard0",
+    "native_bench/valpaca/conservative_tts.jsonl.shard2",
+    "native_bench/valpaca/conservative_tts.jsonl.shard1",
+    "native_bench/valpaca/conservative_tts.jsonl.shard3",
+    "native_bench/valpaca/conservative_tts.jsonl.shard5"
+   ],
+   "judged_parquet": "native_bench/valpaca_conservative_tts_judged.parquet",
+   "judge": "VoiceBench gpt-4o-mini 1-5",
+   "code": "51fdb4e",
+   "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
+   "relay_variant": "tts",
+   "cached_remix": false,
+   "executed": true,
+   "stats": {
+    "n": 199,
+    "escalation_rate": 0.01507537688442211,
+    "acc_or_score": 3.6331658291457285,
+    "acc_n_judged": 199,
+    "expert_error_rows": 0,
+    "expert_timeout_rows": 0,
+    "onset_before_last_chunk_fired": 2,
+    "audio_gt_30s": 0
+   }
+  },
+  {
+   "pool": "valpaca",
+   "arm": "never",
+   "smoke_only": false,
+   "n_shards": 8,
+   "shard_dates": [
+    "2026-09-02 10:47 Pacific Daylight Time",
+    "2026-09-02 10:48 Pacific Daylight Time",
+    "2026-09-02 10:49 Pacific Daylight Time",
+    "2026-09-02 10:50 Pacific Daylight Time"
+   ],
+   "raw_shards": [
+    "native_bench/valpaca/never.jsonl.shard1",
+    "native_bench/valpaca/never.jsonl.shard6",
+    "native_bench/valpaca/never.jsonl.shard2",
+    "native_bench/valpaca/never.jsonl.shard5",
+    "native_bench/valpaca/never.jsonl.shard3",
+    "native_bench/valpaca/never.jsonl.shard0",
+    "native_bench/valpaca/never.jsonl.shard7",
+    "native_bench/valpaca/never.jsonl.shard4"
+   ],
+   "judged_parquet": "native_bench/valpaca_never_judged.parquet",
+   "judge": "VoiceBench gpt-4o-mini 1-5",
+   "code": "51fdb4e",
+   "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
+   "relay_variant": null,
+   "cached_remix": false,
+   "executed": true,
+   "stats": {
+    "n": 199,
+    "escalation_rate": 0.0,
+    "acc_or_score": 3.678391959798995,
+    "acc_n_judged": 199,
+    "expert_error_rows": 0,
+    "expert_timeout_rows": 0,
+    "onset_before_last_chunk_fired": 0,
+    "audio_gt_30s": 0
+   }
+  }
+ ]
+}

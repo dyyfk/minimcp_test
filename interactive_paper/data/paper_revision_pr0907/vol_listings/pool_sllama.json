@@ -1,0 +1,494 @@
+[
+  {
+    "filename": "native_bench/sllama/aggmlp.jsonl.shard0",
+    "type": "file",
+    "created_modified": "2026-09-07 15:32 Pacific Daylight Time",
+    "size": "115.2 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/agg0.jsonl.shard0",
+    "type": "file",
+    "created_modified": "2026-09-07 15:32 Pacific Daylight Time",
+    "size": "80.7 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/conservative_tts_feats.shard5.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 16:52 Pacific Daylight Time",
+    "size": "651.2 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/conservative_tts.jsonl.shard5",
+    "type": "file",
+    "created_modified": "2026-09-02 16:52 Pacific Daylight Time",
+    "size": "20.9 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/conservative_tts_feats.shard7.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 16:51 Pacific Daylight Time",
+    "size": "673.1 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/conservative_tts.jsonl.shard7",
+    "type": "file",
+    "created_modified": "2026-09-02 16:51 Pacific Daylight Time",
+    "size": "22.5 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/conservative_tts_feats.shard6.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 16:51 Pacific Daylight Time",
+    "size": "673.2 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/conservative_tts.jsonl.shard6",
+    "type": "file",
+    "created_modified": "2026-09-02 16:51 Pacific Daylight Time",
+    "size": "21.5 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/conservative_tts_feats.shard4.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 16:50 Pacific Daylight Time",
+    "size": "651.5 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/conservative_tts.jsonl.shard4",
+    "type": "file",
+    "created_modified": "2026-09-02 16:50 Pacific Daylight Time",
+    "size": "23.0 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/conservative_tts_feats.shard3.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 16:50 Pacific Daylight Time",
+    "size": "651.9 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/conservative_tts.jsonl.shard3",
+    "type": "file",
+    "created_modified": "2026-09-02 16:50 Pacific Daylight Time",
+    "size": "21.2 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/conservative_tts_feats.shard2.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 16:46 Pacific Daylight Time",
+    "size": "673.2 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/conservative_tts.jsonl.shard2",
+    "type": "file",
+    "created_modified": "2026-09-02 16:46 Pacific Daylight Time",
+    "size": "22.1 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/conservative_tts_feats.shard1.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 16:44 Pacific Daylight Time",
+    "size": "673.2 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/conservative_tts.jsonl.shard1",
+    "type": "file",
+    "created_modified": "2026-09-02 16:44 Pacific Daylight Time",
+    "size": "21.7 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/conservative_tts_feats.shard0.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 16:42 Pacific Daylight Time",
+    "size": "694.9 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/conservative_tts.jsonl.shard0",
+    "type": "file",
+    "created_modified": "2026-09-02 16:42 Pacific Daylight Time",
+    "size": "23.9 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/aggressive_tts_feats.shard7.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 16:37 Pacific Daylight Time",
+    "size": "651.5 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/aggressive_tts.jsonl.shard7",
+    "type": "file",
+    "created_modified": "2026-09-02 16:37 Pacific Daylight Time",
+    "size": "25.0 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/aggressive_tts_feats.shard4.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 16:36 Pacific Daylight Time",
+    "size": "673.0 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/aggressive_tts.jsonl.shard4",
+    "type": "file",
+    "created_modified": "2026-09-02 16:36 Pacific Daylight Time",
+    "size": "27.2 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/aggressive_tts_feats.shard5.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 16:36 Pacific Daylight Time",
+    "size": "673.0 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/aggressive_tts.jsonl.shard5",
+    "type": "file",
+    "created_modified": "2026-09-02 16:36 Pacific Daylight Time",
+    "size": "24.9 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/aggressive_tts_feats.shard0.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 16:36 Pacific Daylight Time",
+    "size": "694.8 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/aggressive_tts.jsonl.shard0",
+    "type": "file",
+    "created_modified": "2026-09-02 16:36 Pacific Daylight Time",
+    "size": "27.2 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/aggressive_tts_feats.shard6.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 16:35 Pacific Daylight Time",
+    "size": "673.2 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/aggressive_tts.jsonl.shard6",
+    "type": "file",
+    "created_modified": "2026-09-02 16:35 Pacific Daylight Time",
+    "size": "23.9 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/aggressive_tts_feats.shard3.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 16:35 Pacific Daylight Time",
+    "size": "673.1 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/aggressive_tts.jsonl.shard3",
+    "type": "file",
+    "created_modified": "2026-09-02 16:35 Pacific Daylight Time",
+    "size": "22.5 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/aggressive_tts_feats.shard2.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 16:35 Pacific Daylight Time",
+    "size": "673.2 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/aggressive_tts.jsonl.shard2",
+    "type": "file",
+    "created_modified": "2026-09-02 16:35 Pacific Daylight Time",
+    "size": "23.5 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/aggressive_tts_feats.shard1.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 16:35 Pacific Daylight Time",
+    "size": "694.8 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/aggressive_tts.jsonl.shard1",
+    "type": "file",
+    "created_modified": "2026-09-02 16:35 Pacific Daylight Time",
+    "size": "23.5 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/balanced_tts_feats.shard7.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 16:30 Pacific Daylight Time",
+    "size": "673.3 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/balanced_tts.jsonl.shard7",
+    "type": "file",
+    "created_modified": "2026-09-02 16:30 Pacific Daylight Time",
+    "size": "24.4 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/balanced_tts_feats.shard4.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 16:30 Pacific Daylight Time",
+    "size": "673.1 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/balanced_tts.jsonl.shard4",
+    "type": "file",
+    "created_modified": "2026-09-02 16:30 Pacific Daylight Time",
+    "size": "23.4 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/balanced_tts_feats.shard5.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 16:30 Pacific Daylight Time",
+    "size": "651.6 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/balanced_tts.jsonl.shard5",
+    "type": "file",
+    "created_modified": "2026-09-02 16:30 Pacific Daylight Time",
+    "size": "21.7 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/balanced_tts_feats.shard6.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 16:29 Pacific Daylight Time",
+    "size": "673.1 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/balanced_tts.jsonl.shard6",
+    "type": "file",
+    "created_modified": "2026-09-02 16:29 Pacific Daylight Time",
+    "size": "22.3 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/balanced_tts_feats.shard3.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 16:29 Pacific Daylight Time",
+    "size": "673.2 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/balanced_tts.jsonl.shard3",
+    "type": "file",
+    "created_modified": "2026-09-02 16:29 Pacific Daylight Time",
+    "size": "21.8 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/balanced_tts_feats.shard2.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 16:28 Pacific Daylight Time",
+    "size": "673.1 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/balanced_tts.jsonl.shard2",
+    "type": "file",
+    "created_modified": "2026-09-02 16:28 Pacific Daylight Time",
+    "size": "23.3 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/balanced_tts_feats.shard0.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 16:27 Pacific Daylight Time",
+    "size": "694.9 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/balanced_tts.jsonl.shard0",
+    "type": "file",
+    "created_modified": "2026-09-02 16:27 Pacific Daylight Time",
+    "size": "24.0 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/balanced_tts_feats.shard1.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 16:26 Pacific Daylight Time",
+    "size": "694.8 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/balanced_tts.jsonl.shard1",
+    "type": "file",
+    "created_modified": "2026-09-02 16:26 Pacific Daylight Time",
+    "size": "22.0 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/always_tts_feats.shard7.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 15:29 Pacific Daylight Time",
+    "size": "673.2 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/always_tts.jsonl.shard7",
+    "type": "file",
+    "created_modified": "2026-09-02 15:29 Pacific Daylight Time",
+    "size": "28.7 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/always_tts_feats.shard4.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 15:28 Pacific Daylight Time",
+    "size": "673.1 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/always_tts.jsonl.shard4",
+    "type": "file",
+    "created_modified": "2026-09-02 15:28 Pacific Daylight Time",
+    "size": "29.8 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/always_tts_feats.shard6.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 15:28 Pacific Daylight Time",
+    "size": "673.5 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/always_tts.jsonl.shard6",
+    "type": "file",
+    "created_modified": "2026-09-02 15:28 Pacific Daylight Time",
+    "size": "28.6 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/always_tts_feats.shard5.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 15:27 Pacific Daylight Time",
+    "size": "673.1 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/always_tts.jsonl.shard5",
+    "type": "file",
+    "created_modified": "2026-09-02 15:27 Pacific Daylight Time",
+    "size": "27.4 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/always_tts_feats.shard3.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 15:26 Pacific Daylight Time",
+    "size": "673.3 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/always_tts.jsonl.shard3",
+    "type": "file",
+    "created_modified": "2026-09-02 15:26 Pacific Daylight Time",
+    "size": "26.2 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/always_tts_feats.shard2.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 15:25 Pacific Daylight Time",
+    "size": "673.2 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/always_tts.jsonl.shard2",
+    "type": "file",
+    "created_modified": "2026-09-02 15:25 Pacific Daylight Time",
+    "size": "27.2 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/always_tts_feats.shard1.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 15:22 Pacific Daylight Time",
+    "size": "695.1 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/always_tts.jsonl.shard1",
+    "type": "file",
+    "created_modified": "2026-09-02 15:22 Pacific Daylight Time",
+    "size": "27.8 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/always_tts_feats.shard0.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 15:21 Pacific Daylight Time",
+    "size": "694.8 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/always_tts.jsonl.shard0",
+    "type": "file",
+    "created_modified": "2026-09-02 15:21 Pacific Daylight Time",
+    "size": "31.3 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/never_feats.shard2.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 10:21 Pacific Daylight Time",
+    "size": "651.4 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/never.jsonl.shard2",
+    "type": "file",
+    "created_modified": "2026-09-02 10:21 Pacific Daylight Time",
+    "size": "22.2 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/never_feats.shard3.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 10:21 Pacific Daylight Time",
+    "size": "651.3 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/never.jsonl.shard3",
+    "type": "file",
+    "created_modified": "2026-09-02 10:21 Pacific Daylight Time",
+    "size": "21.2 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/never_feats.shard7.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 10:21 Pacific Daylight Time",
+    "size": "673.1 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/never.jsonl.shard7",
+    "type": "file",
+    "created_modified": "2026-09-02 10:21 Pacific Daylight Time",
+    "size": "23.3 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/never_feats.shard6.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 10:20 Pacific Daylight Time",
+    "size": "673.0 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/never.jsonl.shard6",
+    "type": "file",
+    "created_modified": "2026-09-02 10:20 Pacific Daylight Time",
+    "size": "22.1 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/never_feats.shard4.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 10:20 Pacific Daylight Time",
+    "size": "672.8 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/never.jsonl.shard4",
+    "type": "file",
+    "created_modified": "2026-09-02 10:20 Pacific Daylight Time",
+    "size": "22.9 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/never_feats.shard5.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 10:20 Pacific Daylight Time",
+    "size": "673.2 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/never.jsonl.shard5",
+    "type": "file",
+    "created_modified": "2026-09-02 10:20 Pacific Daylight Time",
+    "size": "21.8 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/never_feats.shard0.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 10:19 Pacific Daylight Time",
+    "size": "694.9 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/never.jsonl.shard0",
+    "type": "file",
+    "created_modified": "2026-09-02 10:19 Pacific Daylight Time",
+    "size": "23.8 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/never_feats.shard1.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 10:19 Pacific Daylight Time",
+    "size": "694.8 KiB"
+  },
+  {
+    "filename": "native_bench/sllama/never.jsonl.shard1",
+    "type": "file",
+    "created_modified": "2026-09-02 10:19 Pacific Daylight Time",
+    "size": "21.9 KiB"
+  }
+]

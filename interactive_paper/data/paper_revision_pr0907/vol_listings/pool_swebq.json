@@ -1,0 +1,686 @@
+[
+  {
+    "filename": "native_bench/swebq/aggmlp.jsonl.shard0",
+    "type": "file",
+    "created_modified": "2026-09-07 15:32 Pacific Daylight Time",
+    "size": "135.4 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/agg0.jsonl.shard0",
+    "type": "file",
+    "created_modified": "2026-09-07 15:32 Pacific Daylight Time",
+    "size": "90.5 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/conservative_tts_feats.shard7.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 16:17 Pacific Daylight Time",
+    "size": "651.9 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/conservative_tts.jsonl.shard7",
+    "type": "file",
+    "created_modified": "2026-09-02 16:17 Pacific Daylight Time",
+    "size": "23.4 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/conservative_tts_feats.shard6.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 16:11 Pacific Daylight Time",
+    "size": "673.7 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/conservative_tts.jsonl.shard6",
+    "type": "file",
+    "created_modified": "2026-09-02 16:11 Pacific Daylight Time",
+    "size": "23.7 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/conservative_tts_feats.shard3.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 16:10 Pacific Daylight Time",
+    "size": "608.5 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/conservative_tts.jsonl.shard3",
+    "type": "file",
+    "created_modified": "2026-09-02 16:10 Pacific Daylight Time",
+    "size": "24.0 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/conservative_tts_feats.shard4.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 16:10 Pacific Daylight Time",
+    "size": "673.6 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/conservative_tts.jsonl.shard4",
+    "type": "file",
+    "created_modified": "2026-09-02 16:10 Pacific Daylight Time",
+    "size": "23.0 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/conservative_tts_feats.shard5.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 16:10 Pacific Daylight Time",
+    "size": "673.8 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/conservative_tts.jsonl.shard5",
+    "type": "file",
+    "created_modified": "2026-09-02 16:10 Pacific Daylight Time",
+    "size": "24.8 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/conservative_tts_feats.shard2.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 16:08 Pacific Daylight Time",
+    "size": "673.4 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/conservative_tts.jsonl.shard2",
+    "type": "file",
+    "created_modified": "2026-09-02 16:08 Pacific Daylight Time",
+    "size": "24.4 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/conservative_tts_feats.shard1.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 16:07 Pacific Daylight Time",
+    "size": "695.2 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/conservative_tts.jsonl.shard1",
+    "type": "file",
+    "created_modified": "2026-09-02 16:07 Pacific Daylight Time",
+    "size": "26.2 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/conservative_tts_feats.shard0.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 16:06 Pacific Daylight Time",
+    "size": "695.3 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/conservative_tts.jsonl.shard0",
+    "type": "file",
+    "created_modified": "2026-09-02 16:06 Pacific Daylight Time",
+    "size": "25.4 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/aggressive_tts_feats.shard1.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 15:59 Pacific Daylight Time",
+    "size": "695.3 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/aggressive_tts.jsonl.shard1",
+    "type": "file",
+    "created_modified": "2026-09-02 15:59 Pacific Daylight Time",
+    "size": "37.0 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/aggressive_tts_feats.shard3.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 15:45 Pacific Daylight Time",
+    "size": "673.7 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/aggressive_tts.jsonl.shard3",
+    "type": "file",
+    "created_modified": "2026-09-02 15:45 Pacific Daylight Time",
+    "size": "39.1 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/aggressive_tts_feats.shard5.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 15:44 Pacific Daylight Time",
+    "size": "652.0 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/aggressive_tts.jsonl.shard5",
+    "type": "file",
+    "created_modified": "2026-09-02 15:44 Pacific Daylight Time",
+    "size": "39.2 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/aggressive_tts_feats.shard2.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 15:44 Pacific Daylight Time",
+    "size": "673.7 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/aggressive_tts.jsonl.shard2",
+    "type": "file",
+    "created_modified": "2026-09-02 15:44 Pacific Daylight Time",
+    "size": "35.8 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/aggressive_tts_feats.shard7.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 15:43 Pacific Daylight Time",
+    "size": "673.5 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/aggressive_tts.jsonl.shard7",
+    "type": "file",
+    "created_modified": "2026-09-02 15:43 Pacific Daylight Time",
+    "size": "32.8 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/aggressive_tts_feats.shard6.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 15:43 Pacific Daylight Time",
+    "size": "673.4 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/aggressive_tts.jsonl.shard6",
+    "type": "file",
+    "created_modified": "2026-09-02 15:43 Pacific Daylight Time",
+    "size": "33.9 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/aggressive_tts_feats.shard4.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 15:43 Pacific Daylight Time",
+    "size": "673.7 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/aggressive_tts.jsonl.shard4",
+    "type": "file",
+    "created_modified": "2026-09-02 15:43 Pacific Daylight Time",
+    "size": "31.8 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/aggressive_tts_feats.shard0.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 15:42 Pacific Daylight Time",
+    "size": "695.3 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/aggressive_tts.jsonl.shard0",
+    "type": "file",
+    "created_modified": "2026-09-02 15:42 Pacific Daylight Time",
+    "size": "37.5 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/always_tts_feats.shard6.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 15:40 Pacific Daylight Time",
+    "size": "651.9 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/always_tts.jsonl.shard6",
+    "type": "file",
+    "created_modified": "2026-09-02 15:40 Pacific Daylight Time",
+    "size": "44.4 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/always_tts_feats.shard5.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 15:38 Pacific Daylight Time",
+    "size": "673.6 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/always_tts.jsonl.shard5",
+    "type": "file",
+    "created_modified": "2026-09-02 15:38 Pacific Daylight Time",
+    "size": "40.9 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/always_tts_feats.shard7.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 15:38 Pacific Daylight Time",
+    "size": "673.6 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/always_tts.jsonl.shard7",
+    "type": "file",
+    "created_modified": "2026-09-02 15:38 Pacific Daylight Time",
+    "size": "37.8 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/always_tts_feats.shard3.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 15:37 Pacific Daylight Time",
+    "size": "673.7 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/always_tts.jsonl.shard3",
+    "type": "file",
+    "created_modified": "2026-09-02 15:37 Pacific Daylight Time",
+    "size": "45.8 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/always_tts_feats.shard2.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 15:36 Pacific Daylight Time",
+    "size": "673.4 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/always_tts.jsonl.shard2",
+    "type": "file",
+    "created_modified": "2026-09-02 15:36 Pacific Daylight Time",
+    "size": "42.8 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/always_tts_feats.shard1.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 15:36 Pacific Daylight Time",
+    "size": "673.6 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/always_tts.jsonl.shard1",
+    "type": "file",
+    "created_modified": "2026-09-02 15:36 Pacific Daylight Time",
+    "size": "39.1 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/always_tts_feats.shard4.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 15:35 Pacific Daylight Time",
+    "size": "673.5 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/always_tts.jsonl.shard4",
+    "type": "file",
+    "created_modified": "2026-09-02 15:35 Pacific Daylight Time",
+    "size": "39.2 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/balanced_tts_feats.shard6.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 15:34 Pacific Daylight Time",
+    "size": "651.9 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/balanced_tts.jsonl.shard6",
+    "type": "file",
+    "created_modified": "2026-09-02 15:34 Pacific Daylight Time",
+    "size": "30.4 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/balanced_tts_feats.shard7.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 15:32 Pacific Daylight Time",
+    "size": "673.5 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/balanced_tts.jsonl.shard7",
+    "type": "file",
+    "created_modified": "2026-09-02 15:32 Pacific Daylight Time",
+    "size": "27.6 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/always_tts_feats.shard0.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 15:31 Pacific Daylight Time",
+    "size": "695.4 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/always_tts.jsonl.shard0",
+    "type": "file",
+    "created_modified": "2026-09-02 15:31 Pacific Daylight Time",
+    "size": "45.8 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/balanced_tts_feats.shard5.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 15:31 Pacific Daylight Time",
+    "size": "630.5 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/balanced_tts.jsonl.shard5",
+    "type": "file",
+    "created_modified": "2026-09-02 15:31 Pacific Daylight Time",
+    "size": "25.5 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/balanced_tts_feats.shard3.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 15:30 Pacific Daylight Time",
+    "size": "608.7 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/balanced_tts.jsonl.shard3",
+    "type": "file",
+    "created_modified": "2026-09-02 15:30 Pacific Daylight Time",
+    "size": "30.5 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/balanced_tts_feats.shard4.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 15:29 Pacific Daylight Time",
+    "size": "673.3 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/balanced_tts.jsonl.shard4",
+    "type": "file",
+    "created_modified": "2026-09-02 15:29 Pacific Daylight Time",
+    "size": "27.3 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/balanced_tts_feats.shard2.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 15:29 Pacific Daylight Time",
+    "size": "652.1 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/balanced_tts.jsonl.shard2",
+    "type": "file",
+    "created_modified": "2026-09-02 15:29 Pacific Daylight Time",
+    "size": "28.6 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/balanced_tts_feats.shard1.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 15:27 Pacific Daylight Time",
+    "size": "1.3 MiB"
+  },
+  {
+    "filename": "native_bench/swebq/balanced_tts.jsonl.shard1",
+    "type": "file",
+    "created_modified": "2026-09-02 15:27 Pacific Daylight Time",
+    "size": "58.7 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/balanced_tts_feats.shard0.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 15:25 Pacific Daylight Time",
+    "size": "673.4 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/balanced_tts.jsonl.shard0",
+    "type": "file",
+    "created_modified": "2026-09-02 15:25 Pacific Daylight Time",
+    "size": "26.9 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/old_cleaner_always_tts.jsonl.shard7",
+    "type": "file",
+    "created_modified": "2026-09-02 15:19 Pacific Daylight Time",
+    "size": "36.8 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/old_cleaner_always_tts_feats.shard7.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 15:19 Pacific Daylight Time",
+    "size": "673.6 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/old_cleaner_always_tts.jsonl.shard6",
+    "type": "file",
+    "created_modified": "2026-09-02 15:19 Pacific Daylight Time",
+    "size": "44.0 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/old_cleaner_always_tts_feats.shard6.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 15:19 Pacific Daylight Time",
+    "size": "673.5 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/old_cleaner_always_tts.jsonl.shard5",
+    "type": "file",
+    "created_modified": "2026-09-02 15:19 Pacific Daylight Time",
+    "size": "42.2 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/old_cleaner_always_tts_feats.shard5.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 15:19 Pacific Daylight Time",
+    "size": "673.7 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/old_cleaner_always_tts.jsonl.shard1",
+    "type": "file",
+    "created_modified": "2026-09-02 15:19 Pacific Daylight Time",
+    "size": "42.6 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/old_cleaner_always_tts_feats.shard1.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 15:19 Pacific Daylight Time",
+    "size": "695.6 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/old_cleaner_always_tts.jsonl.shard0",
+    "type": "file",
+    "created_modified": "2026-09-02 15:19 Pacific Daylight Time",
+    "size": "42.5 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/old_cleaner_always_tts_feats.shard0.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 15:19 Pacific Daylight Time",
+    "size": "695.3 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/old_cleaner_always_tts.jsonl.shard3",
+    "type": "file",
+    "created_modified": "2026-09-02 15:19 Pacific Daylight Time",
+    "size": "44.2 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/old_cleaner_always_tts_feats.shard3.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 15:19 Pacific Daylight Time",
+    "size": "673.6 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/old_cleaner_always_tts.jsonl.shard4",
+    "type": "file",
+    "created_modified": "2026-09-02 15:19 Pacific Daylight Time",
+    "size": "40.7 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/old_cleaner_always_tts_feats.shard4.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 15:19 Pacific Daylight Time",
+    "size": "673.5 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/old_cleaner_always_tts.jsonl.shard2",
+    "type": "file",
+    "created_modified": "2026-09-02 15:19 Pacific Daylight Time",
+    "size": "43.1 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/old_cleaner_always_tts_feats.shard2.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 15:19 Pacific Daylight Time",
+    "size": "673.8 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/always_feats.shard7.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 14:33 Pacific Daylight Time",
+    "size": "673.7 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/always.jsonl.shard7",
+    "type": "file",
+    "created_modified": "2026-09-02 14:33 Pacific Daylight Time",
+    "size": "31.6 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/always_feats.shard5.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 14:33 Pacific Daylight Time",
+    "size": "651.9 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/always.jsonl.shard5",
+    "type": "file",
+    "created_modified": "2026-09-02 14:33 Pacific Daylight Time",
+    "size": "33.3 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/always_feats.shard3.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 14:29 Pacific Daylight Time",
+    "size": "651.9 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/always.jsonl.shard3",
+    "type": "file",
+    "created_modified": "2026-09-02 14:29 Pacific Daylight Time",
+    "size": "36.7 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/always_feats.shard6.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 14:29 Pacific Daylight Time",
+    "size": "673.7 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/always.jsonl.shard6",
+    "type": "file",
+    "created_modified": "2026-09-02 14:29 Pacific Daylight Time",
+    "size": "34.3 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/always_feats.shard0.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 14:25 Pacific Daylight Time",
+    "size": "673.6 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/always.jsonl.shard0",
+    "type": "file",
+    "created_modified": "2026-09-02 14:25 Pacific Daylight Time",
+    "size": "36.5 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/always_feats.shard1.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 14:24 Pacific Daylight Time",
+    "size": "651.9 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/always.jsonl.shard1",
+    "type": "file",
+    "created_modified": "2026-09-02 14:24 Pacific Daylight Time",
+    "size": "32.6 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/always_feats.shard4.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 14:24 Pacific Daylight Time",
+    "size": "673.5 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/always.jsonl.shard4",
+    "type": "file",
+    "created_modified": "2026-09-02 14:24 Pacific Daylight Time",
+    "size": "32.1 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/always_feats.shard2.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 14:23 Pacific Daylight Time",
+    "size": "651.8 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/always.jsonl.shard2",
+    "type": "file",
+    "created_modified": "2026-09-02 14:23 Pacific Daylight Time",
+    "size": "34.2 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/never_feats.shard7.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 10:16 Pacific Daylight Time",
+    "size": "738.7 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/never.jsonl.shard7",
+    "type": "file",
+    "created_modified": "2026-09-02 10:16 Pacific Daylight Time",
+    "size": "24.9 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/never_feats.shard1.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 10:16 Pacific Daylight Time",
+    "size": "760.6 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/never.jsonl.shard1",
+    "type": "file",
+    "created_modified": "2026-09-02 10:16 Pacific Daylight Time",
+    "size": "27.1 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/never_feats.shard3.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 10:16 Pacific Daylight Time",
+    "size": "695.4 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/never.jsonl.shard3",
+    "type": "file",
+    "created_modified": "2026-09-02 10:16 Pacific Daylight Time",
+    "size": "26.9 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/never_feats.shard4.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 10:16 Pacific Daylight Time",
+    "size": "760.3 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/never.jsonl.shard4",
+    "type": "file",
+    "created_modified": "2026-09-02 10:16 Pacific Daylight Time",
+    "size": "25.2 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/never_feats.shard2.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 10:16 Pacific Daylight Time",
+    "size": "760.8 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/never.jsonl.shard2",
+    "type": "file",
+    "created_modified": "2026-09-02 10:16 Pacific Daylight Time",
+    "size": "26.6 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/never_feats.shard0.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 10:15 Pacific Daylight Time",
+    "size": "782.2 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/never.jsonl.shard0",
+    "type": "file",
+    "created_modified": "2026-09-02 10:15 Pacific Daylight Time",
+    "size": "28.4 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/never_feats.shard6.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 10:12 Pacific Daylight Time",
+    "size": "651.8 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/never.jsonl.shard6",
+    "type": "file",
+    "created_modified": "2026-09-02 10:12 Pacific Daylight Time",
+    "size": "24.4 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/never_feats.shard5.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 10:11 Pacific Daylight Time",
+    "size": "673.7 KiB"
+  },
+  {
+    "filename": "native_bench/swebq/never.jsonl.shard5",
+    "type": "file",
+    "created_modified": "2026-09-02 10:11 Pacific Daylight Time",
+    "size": "24.6 KiB"
+  }
+]

@@ -1,0 +1,326 @@
+[
+  {
+    "filename": "native_bench/sdqa",
+    "type": "dir",
+    "created_modified": "2026-09-02 17:17 Pacific Daylight Time",
+    "size": "1.6 KiB"
+  },
+  {
+    "filename": "native_bench/sreason",
+    "type": "dir",
+    "created_modified": "2026-09-02 18:02 Pacific Daylight Time",
+    "size": "1.6 KiB"
+  },
+  {
+    "filename": "native_bench/frozen",
+    "type": "dir",
+    "created_modified": "2026-09-02 18:50 Pacific Daylight Time",
+    "size": "1.6 KiB"
+  },
+  {
+    "filename": "native_bench/valpaca",
+    "type": "dir",
+    "created_modified": "2026-09-02 19:28 Pacific Daylight Time",
+    "size": "1.7 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa",
+    "type": "dir",
+    "created_modified": "2026-09-07 15:32 Pacific Daylight Time",
+    "size": "4.0 KiB"
+  },
+  {
+    "filename": "native_bench/swebq",
+    "type": "dir",
+    "created_modified": "2026-09-07 15:32 Pacific Daylight Time",
+    "size": "4.0 KiB"
+  },
+  {
+    "filename": "native_bench/sllama",
+    "type": "dir",
+    "created_modified": "2026-09-07 15:32 Pacific Daylight Time",
+    "size": "4.0 KiB"
+  },
+  {
+    "filename": "native_bench/sllama_aggmlp_judged.parquet",
+    "type": "file",
+    "created_modified": "2026-09-07 15:46 Pacific Daylight Time",
+    "size": "111.1 KiB"
+  },
+  {
+    "filename": "native_bench/sllama_agg0_judged.parquet",
+    "type": "file",
+    "created_modified": "2026-09-07 15:43 Pacific Daylight Time",
+    "size": "67.2 KiB"
+  },
+  {
+    "filename": "native_bench/swebq_aggmlp_judged.parquet",
+    "type": "file",
+    "created_modified": "2026-09-07 15:41 Pacific Daylight Time",
+    "size": "130.1 KiB"
+  },
+  {
+    "filename": "native_bench/swebq_agg0_judged.parquet",
+    "type": "file",
+    "created_modified": "2026-09-07 15:39 Pacific Daylight Time",
+    "size": "79.6 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa_aggmlp_judged.parquet",
+    "type": "file",
+    "created_modified": "2026-09-07 15:37 Pacific Daylight Time",
+    "size": "158.6 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa_agg0_judged.parquet",
+    "type": "file",
+    "created_modified": "2026-09-07 15:34 Pacific Daylight Time",
+    "size": "92.3 KiB"
+  },
+  {
+    "filename": "native_bench/failure_types.parquet",
+    "type": "file",
+    "created_modified": "2026-09-03 11:31 Pacific Daylight Time",
+    "size": "293.6 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa_always_tts_judged.parquet",
+    "type": "file",
+    "created_modified": "2026-09-02 19:40 Pacific Daylight Time",
+    "size": "151.5 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa_conservative_tts_judged.parquet",
+    "type": "file",
+    "created_modified": "2026-09-02 19:30 Pacific Daylight Time",
+    "size": "122.4 KiB"
+  },
+  {
+    "filename": "native_bench/valpaca_conservative_tts_judged.parquet",
+    "type": "file",
+    "created_modified": "2026-09-02 19:29 Pacific Daylight Time",
+    "size": "162.4 KiB"
+  },
+  {
+    "filename": "native_bench/valpaca_aggressive_tts_judged.parquet",
+    "type": "file",
+    "created_modified": "2026-09-02 19:18 Pacific Daylight Time",
+    "size": "261.2 KiB"
+  },
+  {
+    "filename": "native_bench/valpaca_balanced_tts_judged.parquet",
+    "type": "file",
+    "created_modified": "2026-09-02 19:08 Pacific Daylight Time",
+    "size": "172.6 KiB"
+  },
+  {
+    "filename": "native_bench/frozen_conservative_tts_judged.parquet",
+    "type": "file",
+    "created_modified": "2026-09-02 18:51 Pacific Daylight Time",
+    "size": "202.9 KiB"
+  },
+  {
+    "filename": "native_bench/frozen_aggressive_tts_judged.parquet",
+    "type": "file",
+    "created_modified": "2026-09-02 18:43 Pacific Daylight Time",
+    "size": "228.9 KiB"
+  },
+  {
+    "filename": "native_bench/frozen_balanced_tts_judged.parquet",
+    "type": "file",
+    "created_modified": "2026-09-02 18:13 Pacific Daylight Time",
+    "size": "209.8 KiB"
+  },
+  {
+    "filename": "native_bench/sreason_conservative_tts_judged.parquet",
+    "type": "file",
+    "created_modified": "2026-09-02 18:03 Pacific Daylight Time",
+    "size": "183.7 KiB"
+  },
+  {
+    "filename": "native_bench/sreason_aggressive_tts_judged.parquet",
+    "type": "file",
+    "created_modified": "2026-09-02 17:53 Pacific Daylight Time",
+    "size": "205.9 KiB"
+  },
+  {
+    "filename": "native_bench/sreason_balanced_tts_judged.parquet",
+    "type": "file",
+    "created_modified": "2026-09-02 17:26 Pacific Daylight Time",
+    "size": "194.2 KiB"
+  },
+  {
+    "filename": "native_bench/sdqa_conservative_tts_judged.parquet",
+    "type": "file",
+    "created_modified": "2026-09-02 17:18 Pacific Daylight Time",
+    "size": "104.5 KiB"
+  },
+  {
+    "filename": "native_bench/sdqa_aggressive_tts_judged.parquet",
+    "type": "file",
+    "created_modified": "2026-09-02 17:14 Pacific Daylight Time",
+    "size": "138.8 KiB"
+  },
+  {
+    "filename": "native_bench/sdqa_balanced_tts_judged.parquet",
+    "type": "file",
+    "created_modified": "2026-09-02 17:08 Pacific Daylight Time",
+    "size": "120.2 KiB"
+  },
+  {
+    "filename": "native_bench/sllama_conservative_tts_judged.parquet",
+    "type": "file",
+    "created_modified": "2026-09-02 16:53 Pacific Daylight Time",
+    "size": "86.7 KiB"
+  },
+  {
+    "filename": "native_bench/valpaca_always_tts_judged.parquet",
+    "type": "file",
+    "created_modified": "2026-09-02 16:52 Pacific Daylight Time",
+    "size": "370.6 KiB"
+  },
+  {
+    "filename": "native_bench/sllama_aggressive_tts_judged.parquet",
+    "type": "file",
+    "created_modified": "2026-09-02 16:39 Pacific Daylight Time",
+    "size": "103.0 KiB"
+  },
+  {
+    "filename": "native_bench/frozen_always_tts_judged.parquet",
+    "type": "file",
+    "created_modified": "2026-09-02 16:34 Pacific Daylight Time",
+    "size": "292.9 KiB"
+  },
+  {
+    "filename": "native_bench/sllama_balanced_tts_judged.parquet",
+    "type": "file",
+    "created_modified": "2026-09-02 16:32 Pacific Daylight Time",
+    "size": "94.7 KiB"
+  },
+  {
+    "filename": "native_bench/swebq_conservative_tts_judged.parquet",
+    "type": "file",
+    "created_modified": "2026-09-02 16:18 Pacific Daylight Time",
+    "size": "108.0 KiB"
+  },
+  {
+    "filename": "native_bench/sreason_always_tts_judged.parquet",
+    "type": "file",
+    "created_modified": "2026-09-02 16:11 Pacific Daylight Time",
+    "size": "239.9 KiB"
+  },
+  {
+    "filename": "native_bench/sllama_always_tts_judged.parquet",
+    "type": "file",
+    "created_modified": "2026-09-02 16:06 Pacific Daylight Time",
+    "size": "107.0 KiB"
+  },
+  {
+    "filename": "native_bench/swebq_aggressive_tts_judged.parquet",
+    "type": "file",
+    "created_modified": "2026-09-02 16:02 Pacific Daylight Time",
+    "size": "167.1 KiB"
+  },
+  {
+    "filename": "native_bench/sdqa_always_tts_judged.parquet",
+    "type": "file",
+    "created_modified": "2026-09-02 15:55 Pacific Daylight Time",
+    "size": "166.3 KiB"
+  },
+  {
+    "filename": "native_bench/swebq_always_tts_judged.parquet",
+    "type": "file",
+    "created_modified": "2026-09-02 15:44 Pacific Daylight Time",
+    "size": "200.1 KiB"
+  },
+  {
+    "filename": "native_bench/swebq_balanced_tts_judged.parquet",
+    "type": "file",
+    "created_modified": "2026-09-02 15:35 Pacific Daylight Time",
+    "size": "134.8 KiB"
+  },
+  {
+    "filename": "native_bench/old_cleaner_swebq_always_tts_judged.parquet",
+    "type": "file",
+    "created_modified": "2026-09-02 15:20 Pacific Daylight Time",
+    "size": "197.9 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa_aggressive_tts_judged.parquet",
+    "type": "file",
+    "created_modified": "2026-09-02 15:02 Pacific Daylight Time",
+    "size": "144.1 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa_balanced_tts_judged.parquet",
+    "type": "file",
+    "created_modified": "2026-09-02 14:56 Pacific Daylight Time",
+    "size": "128.2 KiB"
+  },
+  {
+    "filename": "native_bench/swebq_always_judged.parquet",
+    "type": "file",
+    "created_modified": "2026-09-02 14:41 Pacific Daylight Time",
+    "size": "153.5 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa_aggressive_judged.parquet",
+    "type": "file",
+    "created_modified": "2026-09-02 14:40 Pacific Daylight Time",
+    "size": "130.4 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa_balanced_judged.parquet",
+    "type": "file",
+    "created_modified": "2026-09-02 14:26 Pacific Daylight Time",
+    "size": "127.3 KiB"
+  },
+  {
+    "filename": "native_bench/valpaca_never_judged.parquet",
+    "type": "file",
+    "created_modified": "2026-09-02 10:51 Pacific Daylight Time",
+    "size": "161.2 KiB"
+  },
+  {
+    "filename": "native_bench/frozen_never_judged.parquet",
+    "type": "file",
+    "created_modified": "2026-09-02 10:43 Pacific Daylight Time",
+    "size": "192.7 KiB"
+  },
+  {
+    "filename": "native_bench/sreason_never_judged.parquet",
+    "type": "file",
+    "created_modified": "2026-09-02 10:36 Pacific Daylight Time",
+    "size": "160.8 KiB"
+  },
+  {
+    "filename": "native_bench/sdqa_never_judged.parquet",
+    "type": "file",
+    "created_modified": "2026-09-02 10:27 Pacific Daylight Time",
+    "size": "101.4 KiB"
+  },
+  {
+    "filename": "native_bench/sllama_never_judged.parquet",
+    "type": "file",
+    "created_modified": "2026-09-02 10:23 Pacific Daylight Time",
+    "size": "90.4 KiB"
+  },
+  {
+    "filename": "native_bench/swebq_never_judged.parquet",
+    "type": "file",
+    "created_modified": "2026-09-02 10:16 Pacific Daylight Time",
+    "size": "102.8 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa_always_judged.parquet",
+    "type": "file",
+    "created_modified": "2026-09-02 10:13 Pacific Daylight Time",
+    "size": "127.6 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa_never_judged.parquet",
+    "type": "file",
+    "created_modified": "2026-09-02 09:47 Pacific Daylight Time",
+    "size": "105.4 KiB"
+  }
+]

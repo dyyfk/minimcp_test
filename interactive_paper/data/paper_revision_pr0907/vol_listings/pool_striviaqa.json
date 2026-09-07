@@ -1,0 +1,722 @@
+[
+  {
+    "filename": "native_bench/striviaqa/aggmlp.jsonl.shard0",
+    "type": "file",
+    "created_modified": "2026-09-07 15:32 Pacific Daylight Time",
+    "size": "181.2 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/agg0.jsonl.shard0",
+    "type": "file",
+    "created_modified": "2026-09-07 15:32 Pacific Daylight Time",
+    "size": "124.7 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/conservative_tts_feats.shard7.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 15:11 Pacific Daylight Time",
+    "size": "673.6 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/conservative_tts.jsonl.shard7",
+    "type": "file",
+    "created_modified": "2026-09-02 15:11 Pacific Daylight Time",
+    "size": "27.8 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/conservative_tts_feats.shard6.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 15:10 Pacific Daylight Time",
+    "size": "673.3 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/conservative_tts.jsonl.shard6",
+    "type": "file",
+    "created_modified": "2026-09-02 15:10 Pacific Daylight Time",
+    "size": "28.4 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/conservative_tts_feats.shard5.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 15:09 Pacific Daylight Time",
+    "size": "673.5 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/conservative_tts.jsonl.shard5",
+    "type": "file",
+    "created_modified": "2026-09-02 15:09 Pacific Daylight Time",
+    "size": "29.4 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/conservative_tts_feats.shard4.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 15:08 Pacific Daylight Time",
+    "size": "673.5 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/conservative_tts.jsonl.shard4",
+    "type": "file",
+    "created_modified": "2026-09-02 15:08 Pacific Daylight Time",
+    "size": "28.8 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/conservative_tts_feats.shard3.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 15:07 Pacific Daylight Time",
+    "size": "673.5 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/conservative_tts.jsonl.shard3",
+    "type": "file",
+    "created_modified": "2026-09-02 15:07 Pacific Daylight Time",
+    "size": "29.2 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/conservative_tts_feats.shard2.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 15:06 Pacific Daylight Time",
+    "size": "673.4 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/conservative_tts.jsonl.shard2",
+    "type": "file",
+    "created_modified": "2026-09-02 15:06 Pacific Daylight Time",
+    "size": "28.5 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/conservative_tts_feats.shard1.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 15:05 Pacific Daylight Time",
+    "size": "695.3 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/conservative_tts.jsonl.shard1",
+    "type": "file",
+    "created_modified": "2026-09-02 15:05 Pacific Daylight Time",
+    "size": "29.6 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/conservative_tts_feats.shard0.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 15:05 Pacific Daylight Time",
+    "size": "695.3 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/conservative_tts.jsonl.shard0",
+    "type": "file",
+    "created_modified": "2026-09-02 15:05 Pacific Daylight Time",
+    "size": "28.3 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/aggressive_tts_feats.shard6.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 15:00 Pacific Daylight Time",
+    "size": "673.4 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/aggressive_tts.jsonl.shard6",
+    "type": "file",
+    "created_modified": "2026-09-02 15:00 Pacific Daylight Time",
+    "size": "32.9 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/aggressive_tts_feats.shard2.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 15:00 Pacific Daylight Time",
+    "size": "673.8 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/aggressive_tts.jsonl.shard2",
+    "type": "file",
+    "created_modified": "2026-09-02 15:00 Pacific Daylight Time",
+    "size": "32.9 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/aggressive_tts_feats.shard5.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 15:00 Pacific Daylight Time",
+    "size": "673.5 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/aggressive_tts.jsonl.shard5",
+    "type": "file",
+    "created_modified": "2026-09-02 15:00 Pacific Daylight Time",
+    "size": "34.1 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/aggressive_tts_feats.shard1.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 15:00 Pacific Daylight Time",
+    "size": "695.3 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/aggressive_tts.jsonl.shard1",
+    "type": "file",
+    "created_modified": "2026-09-02 15:00 Pacific Daylight Time",
+    "size": "33.6 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/aggressive_tts_feats.shard4.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 15:00 Pacific Daylight Time",
+    "size": "673.5 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/aggressive_tts.jsonl.shard4",
+    "type": "file",
+    "created_modified": "2026-09-02 15:00 Pacific Daylight Time",
+    "size": "34.8 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/aggressive_tts_feats.shard7.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 15:00 Pacific Daylight Time",
+    "size": "673.7 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/aggressive_tts.jsonl.shard7",
+    "type": "file",
+    "created_modified": "2026-09-02 15:00 Pacific Daylight Time",
+    "size": "32.0 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/aggressive_tts_feats.shard0.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 15:00 Pacific Daylight Time",
+    "size": "695.3 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/aggressive_tts.jsonl.shard0",
+    "type": "file",
+    "created_modified": "2026-09-02 15:00 Pacific Daylight Time",
+    "size": "32.7 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/aggressive_tts_feats.shard3.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 14:59 Pacific Daylight Time",
+    "size": "673.4 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/aggressive_tts.jsonl.shard3",
+    "type": "file",
+    "created_modified": "2026-09-02 14:59 Pacific Daylight Time",
+    "size": "32.9 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/balanced_tts_feats.shard6.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 14:53 Pacific Daylight Time",
+    "size": "673.2 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/balanced_tts.jsonl.shard6",
+    "type": "file",
+    "created_modified": "2026-09-02 14:53 Pacific Daylight Time",
+    "size": "29.7 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/always_tts_feats.shard7.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 14:52 Pacific Daylight Time",
+    "size": "499.8 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/always_tts.jsonl.shard7",
+    "type": "file",
+    "created_modified": "2026-09-02 14:52 Pacific Daylight Time",
+    "size": "26.5 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/always_tts_feats.shard6.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 14:52 Pacific Daylight Time",
+    "size": "500.1 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/always_tts.jsonl.shard6",
+    "type": "file",
+    "created_modified": "2026-09-02 14:52 Pacific Daylight Time",
+    "size": "26.9 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/always_tts_feats.shard5.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 14:51 Pacific Daylight Time",
+    "size": "521.7 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/always_tts.jsonl.shard5",
+    "type": "file",
+    "created_modified": "2026-09-02 14:51 Pacific Daylight Time",
+    "size": "25.7 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/balanced_tts_feats.shard7.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 14:51 Pacific Daylight Time",
+    "size": "673.7 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/balanced_tts.jsonl.shard7",
+    "type": "file",
+    "created_modified": "2026-09-02 14:51 Pacific Daylight Time",
+    "size": "29.8 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/balanced_tts_feats.shard5.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 14:50 Pacific Daylight Time",
+    "size": "673.5 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/balanced_tts.jsonl.shard5",
+    "type": "file",
+    "created_modified": "2026-09-02 14:50 Pacific Daylight Time",
+    "size": "30.8 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/always_tts_feats.shard2.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 14:50 Pacific Daylight Time",
+    "size": "847.4 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/always_tts.jsonl.shard2",
+    "type": "file",
+    "created_modified": "2026-09-02 14:50 Pacific Daylight Time",
+    "size": "46.4 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/always_tts_feats.shard4.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 14:49 Pacific Daylight Time",
+    "size": "521.7 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/always_tts.jsonl.shard4",
+    "type": "file",
+    "created_modified": "2026-09-02 14:49 Pacific Daylight Time",
+    "size": "27.1 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/always_tts_feats.shard1.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 14:49 Pacific Daylight Time",
+    "size": "847.5 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/always_tts.jsonl.shard1",
+    "type": "file",
+    "created_modified": "2026-09-02 14:49 Pacific Daylight Time",
+    "size": "45.6 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/always_tts_feats.shard3.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 14:48 Pacific Daylight Time",
+    "size": "847.5 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/always_tts.jsonl.shard3",
+    "type": "file",
+    "created_modified": "2026-09-02 14:48 Pacific Daylight Time",
+    "size": "44.4 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/always_tts_feats.shard0.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 14:48 Pacific Daylight Time",
+    "size": "847.3 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/always_tts.jsonl.shard0",
+    "type": "file",
+    "created_modified": "2026-09-02 14:48 Pacific Daylight Time",
+    "size": "46.1 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/balanced_tts_feats.shard2.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 14:48 Pacific Daylight Time",
+    "size": "673.7 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/balanced_tts.jsonl.shard2",
+    "type": "file",
+    "created_modified": "2026-09-02 14:48 Pacific Daylight Time",
+    "size": "30.7 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/balanced_tts_feats.shard1.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 14:48 Pacific Daylight Time",
+    "size": "695.1 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/balanced_tts.jsonl.shard1",
+    "type": "file",
+    "created_modified": "2026-09-02 14:48 Pacific Daylight Time",
+    "size": "31.0 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/balanced_tts_feats.shard4.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 14:48 Pacific Daylight Time",
+    "size": "673.7 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/balanced_tts.jsonl.shard4",
+    "type": "file",
+    "created_modified": "2026-09-02 14:48 Pacific Daylight Time",
+    "size": "29.2 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/balanced_tts_feats.shard3.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 14:48 Pacific Daylight Time",
+    "size": "673.5 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/balanced_tts.jsonl.shard3",
+    "type": "file",
+    "created_modified": "2026-09-02 14:48 Pacific Daylight Time",
+    "size": "28.3 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/balanced_tts_feats.shard0.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 14:47 Pacific Daylight Time",
+    "size": "695.0 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/balanced_tts.jsonl.shard0",
+    "type": "file",
+    "created_modified": "2026-09-02 14:47 Pacific Daylight Time",
+    "size": "29.9 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/aggressive_feats.shard6.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 14:35 Pacific Daylight Time",
+    "size": "673.2 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/aggressive.jsonl.shard6",
+    "type": "file",
+    "created_modified": "2026-09-02 14:35 Pacific Daylight Time",
+    "size": "30.7 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/aggressive_feats.shard7.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 14:35 Pacific Daylight Time",
+    "size": "673.6 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/aggressive.jsonl.shard7",
+    "type": "file",
+    "created_modified": "2026-09-02 14:35 Pacific Daylight Time",
+    "size": "29.6 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/aggressive_feats.shard4.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 14:34 Pacific Daylight Time",
+    "size": "673.5 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/aggressive.jsonl.shard4",
+    "type": "file",
+    "created_modified": "2026-09-02 14:34 Pacific Daylight Time",
+    "size": "31.9 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/aggressive_feats.shard5.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 14:33 Pacific Daylight Time",
+    "size": "673.7 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/aggressive.jsonl.shard5",
+    "type": "file",
+    "created_modified": "2026-09-02 14:33 Pacific Daylight Time",
+    "size": "31.2 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/aggressive_feats.shard0.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 14:33 Pacific Daylight Time",
+    "size": "695.5 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/aggressive.jsonl.shard0",
+    "type": "file",
+    "created_modified": "2026-09-02 14:33 Pacific Daylight Time",
+    "size": "30.5 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/aggressive_feats.shard1.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 14:32 Pacific Daylight Time",
+    "size": "695.1 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/aggressive.jsonl.shard1",
+    "type": "file",
+    "created_modified": "2026-09-02 14:32 Pacific Daylight Time",
+    "size": "30.7 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/aggressive_feats.shard2.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 14:31 Pacific Daylight Time",
+    "size": "673.4 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/aggressive.jsonl.shard2",
+    "type": "file",
+    "created_modified": "2026-09-02 14:31 Pacific Daylight Time",
+    "size": "31.7 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/aggressive_feats.shard3.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 14:30 Pacific Daylight Time",
+    "size": "673.5 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/aggressive.jsonl.shard3",
+    "type": "file",
+    "created_modified": "2026-09-02 14:30 Pacific Daylight Time",
+    "size": "29.5 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/always_tts_feats.smoke.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 14:30 Pacific Daylight Time",
+    "size": "65.4 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/always_tts.jsonl.smoke",
+    "type": "file",
+    "created_modified": "2026-09-02 14:30 Pacific Daylight Time",
+    "size": "3.5 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/balanced_feats.shard5.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 14:24 Pacific Daylight Time",
+    "size": "673.6 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/balanced.jsonl.shard5",
+    "type": "file",
+    "created_modified": "2026-09-02 14:24 Pacific Daylight Time",
+    "size": "30.3 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/balanced_feats.shard4.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 14:24 Pacific Daylight Time",
+    "size": "673.5 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/balanced.jsonl.shard4",
+    "type": "file",
+    "created_modified": "2026-09-02 14:24 Pacific Daylight Time",
+    "size": "29.5 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/balanced_feats.shard6.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 14:23 Pacific Daylight Time",
+    "size": "673.4 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/balanced.jsonl.shard6",
+    "type": "file",
+    "created_modified": "2026-09-02 14:23 Pacific Daylight Time",
+    "size": "28.5 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/balanced_feats.shard7.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 14:22 Pacific Daylight Time",
+    "size": "673.3 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/balanced.jsonl.shard7",
+    "type": "file",
+    "created_modified": "2026-09-02 14:22 Pacific Daylight Time",
+    "size": "28.9 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/balanced_feats.shard0.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 14:20 Pacific Daylight Time",
+    "size": "695.1 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/balanced.jsonl.shard0",
+    "type": "file",
+    "created_modified": "2026-09-02 14:20 Pacific Daylight Time",
+    "size": "29.1 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/balanced_feats.shard2.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 14:20 Pacific Daylight Time",
+    "size": "673.7 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/balanced.jsonl.shard2",
+    "type": "file",
+    "created_modified": "2026-09-02 14:20 Pacific Daylight Time",
+    "size": "30.1 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/balanced_feats.shard3.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 14:20 Pacific Daylight Time",
+    "size": "673.4 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/balanced.jsonl.shard3",
+    "type": "file",
+    "created_modified": "2026-09-02 14:20 Pacific Daylight Time",
+    "size": "29.3 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/balanced_feats.shard1.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 14:19 Pacific Daylight Time",
+    "size": "695.1 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/balanced.jsonl.shard1",
+    "type": "file",
+    "created_modified": "2026-09-02 14:19 Pacific Daylight Time",
+    "size": "29.6 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/balanced_feats.smoke.npz",
+    "type": "file",
+    "created_modified": "2026-09-02 10:09 Pacific Daylight Time",
+    "size": "21.9 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/balanced.jsonl.smoke",
+    "type": "file",
+    "created_modified": "2026-09-02 10:09 Pacific Daylight Time",
+    "size": "899 B"
+  },
+  {
+    "filename": "native_bench/striviaqa/always.jsonl.shard7",
+    "type": "file",
+    "created_modified": "2026-09-02 10:05 Pacific Daylight Time",
+    "size": "29.7 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/always.jsonl.shard5",
+    "type": "file",
+    "created_modified": "2026-09-02 09:58 Pacific Daylight Time",
+    "size": "30.6 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/always.jsonl.shard4",
+    "type": "file",
+    "created_modified": "2026-09-02 09:56 Pacific Daylight Time",
+    "size": "31.1 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/always.jsonl.shard0",
+    "type": "file",
+    "created_modified": "2026-09-02 09:54 Pacific Daylight Time",
+    "size": "30.3 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/always.jsonl.shard6",
+    "type": "file",
+    "created_modified": "2026-09-02 09:54 Pacific Daylight Time",
+    "size": "30.5 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/always.jsonl.shard1",
+    "type": "file",
+    "created_modified": "2026-09-02 09:53 Pacific Daylight Time",
+    "size": "30.7 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/always.jsonl.shard2",
+    "type": "file",
+    "created_modified": "2026-09-02 09:53 Pacific Daylight Time",
+    "size": "31.7 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/always.jsonl.shard3",
+    "type": "file",
+    "created_modified": "2026-09-02 09:52 Pacific Daylight Time",
+    "size": "29.6 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/never.jsonl.shard4",
+    "type": "file",
+    "created_modified": "2026-09-02 09:45 Pacific Daylight Time",
+    "size": "27.4 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/never.jsonl.shard5",
+    "type": "file",
+    "created_modified": "2026-09-02 09:43 Pacific Daylight Time",
+    "size": "25.9 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/never.jsonl.shard3",
+    "type": "file",
+    "created_modified": "2026-09-02 09:43 Pacific Daylight Time",
+    "size": "25.8 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/never.jsonl.shard7",
+    "type": "file",
+    "created_modified": "2026-09-02 09:42 Pacific Daylight Time",
+    "size": "25.9 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/never.jsonl.shard0",
+    "type": "file",
+    "created_modified": "2026-09-02 09:42 Pacific Daylight Time",
+    "size": "26.5 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/never.jsonl.shard6",
+    "type": "file",
+    "created_modified": "2026-09-02 09:42 Pacific Daylight Time",
+    "size": "25.5 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/never.jsonl.shard1",
+    "type": "file",
+    "created_modified": "2026-09-02 09:42 Pacific Daylight Time",
+    "size": "26.6 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/never.jsonl.shard2",
+    "type": "file",
+    "created_modified": "2026-09-02 09:42 Pacific Daylight Time",
+    "size": "26.5 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/never.jsonl.smoke",
+    "type": "file",
+    "created_modified": "2026-09-02 09:39 Pacific Daylight Time",
+    "size": "2.8 KiB"
+  },
+  {
+    "filename": "native_bench/striviaqa/always.jsonl.smoke",
+    "type": "file",
+    "created_modified": "2026-09-02 09:38 Pacific Daylight Time",
+    "size": "3.4 KiB"
+  }
+]
