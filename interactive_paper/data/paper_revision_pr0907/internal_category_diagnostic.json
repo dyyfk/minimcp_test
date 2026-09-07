@@ -1,0 +1,357 @@
+{
+ "decoder": "duplex.streaming_generate(top_k=20) - stochastic; each arm is an independent sample per query",
+ "table": {
+  "easy-chat": {
+   "n": 60,
+   "local_acc": 0.65,
+   "aggressive_acc": 0.7,
+   "always_acc": 0.7,
+   "aggressive_esc_rate": 0.35
+  },
+  "easy-fact": {
+   "n": 40,
+   "local_acc": 0.325,
+   "aggressive_acc": 0.85,
+   "always_acc": 0.925,
+   "aggressive_esc_rate": 0.625
+  },
+  "hard-knowledge": {
+   "n": 60,
+   "local_acc": 0.15,
+   "aggressive_acc": 0.31666666666666665,
+   "always_acc": 0.38333333333333336,
+   "aggressive_esc_rate": 0.7166666666666667
+  },
+  "hard-math": {
+   "n": 60,
+   "local_acc": 0.6166666666666667,
+   "aggressive_acc": 0.6166666666666667,
+   "always_acc": 0.7833333333333333,
+   "aggressive_esc_rate": 0.25
+  },
+  "trap": {
+   "n": 20,
+   "local_acc": 0.0,
+   "aggressive_acc": 0.95,
+   "always_acc": 1.0,
+   "aggressive_esc_rate": 1.0
+  }
+ },
+ "unfired_flips": {
+  "conservative": {
+   "easy-chat": {
+    "n_unfired": 59,
+    "never_acc": 0.661,
+    "tier_acc": 0.661,
+    "flip_wrong_to_right": 7,
+    "flip_right_to_wrong": 7,
+    "identical_answer_text": 2
+   },
+   "easy-fact": {
+    "n_unfired": 37,
+    "never_acc": 0.3514,
+    "tier_acc": 0.4865,
+    "flip_wrong_to_right": 5,
+    "flip_right_to_wrong": 0,
+    "identical_answer_text": 2
+   },
+   "hard-knowledge": {
+    "n_unfired": 53,
+    "never_acc": 0.1509,
+    "tier_acc": 0.1698,
+    "flip_wrong_to_right": 4,
+    "flip_right_to_wrong": 3,
+    "identical_answer_text": 1
+   },
+   "hard-math": {
+    "n_unfired": 55,
+    "never_acc": 0.6727,
+    "tier_acc": 0.6727,
+    "flip_wrong_to_right": 4,
+    "flip_right_to_wrong": 4,
+    "identical_answer_text": 0
+   },
+   "trap": {
+    "n_unfired": 16,
+    "never_acc": 0.0,
+    "tier_acc": 0.0,
+    "flip_wrong_to_right": 0,
+    "flip_right_to_wrong": 0,
+    "identical_answer_text": 0
+   },
+   "ALL": {
+    "n_unfired": 220,
+    "never_acc": 0.4409,
+    "tier_acc": 0.4682,
+    "flip_wrong_to_right": 20,
+    "flip_right_to_wrong": 14,
+    "identical_answer_text": 5
+   }
+  },
+  "balanced": {
+   "easy-chat": {
+    "n_unfired": 56,
+    "never_acc": 0.6786,
+    "tier_acc": 0.6786,
+    "flip_wrong_to_right": 5,
+    "flip_right_to_wrong": 5,
+    "identical_answer_text": 3
+   },
+   "easy-fact": {
+    "n_unfired": 30,
+    "never_acc": 0.4333,
+    "tier_acc": 0.6333,
+    "flip_wrong_to_right": 6,
+    "flip_right_to_wrong": 0,
+    "identical_answer_text": 0
+   },
+   "hard-knowledge": {
+    "n_unfired": 40,
+    "never_acc": 0.175,
+    "tier_acc": 0.225,
+    "flip_wrong_to_right": 5,
+    "flip_right_to_wrong": 3,
+    "identical_answer_text": 3
+   },
+   "hard-math": {
+    "n_unfired": 51,
+    "never_acc": 0.7255,
+    "tier_acc": 0.6275,
+    "flip_wrong_to_right": 5,
+    "flip_right_to_wrong": 10,
+    "identical_answer_text": 0
+   },
+   "trap": {
+    "n_unfired": 3,
+    "never_acc": 0.0,
+    "tier_acc": 0.0,
+    "flip_wrong_to_right": 0,
+    "flip_right_to_wrong": 0,
+    "identical_answer_text": 0
+   },
+   "ALL": {
+    "n_unfired": 180,
+    "never_acc": 0.5278,
+    "tier_acc": 0.5444,
+    "flip_wrong_to_right": 21,
+    "flip_right_to_wrong": 18,
+    "identical_answer_text": 6
+   }
+  },
+  "aggressive": {
+   "easy-chat": {
+    "n_unfired": 39,
+    "never_acc": 0.7436,
+    "tier_acc": 0.7179,
+    "flip_wrong_to_right": 4,
+    "flip_right_to_wrong": 5,
+    "identical_answer_text": 1
+   },
+   "easy-fact": {
+    "n_unfired": 15,
+    "never_acc": 0.5333,
+    "tier_acc": 0.6667,
+    "flip_wrong_to_right": 4,
+    "flip_right_to_wrong": 2,
+    "identical_answer_text": 2
+   },
+   "hard-knowledge": {
+    "n_unfired": 17,
+    "never_acc": 0.3529,
+    "tier_acc": 0.2941,
+    "flip_wrong_to_right": 2,
+    "flip_right_to_wrong": 3,
+    "identical_answer_text": 1
+   },
+   "hard-math": {
+    "n_unfired": 45,
+    "never_acc": 0.8222,
+    "tier_acc": 0.7111,
+    "flip_wrong_to_right": 3,
+    "flip_right_to_wrong": 8,
+    "identical_answer_text": 0
+   },
+   "trap": {
+    "n_unfired": 0,
+    "never_acc": null,
+    "tier_acc": null,
+    "flip_wrong_to_right": 0,
+    "flip_right_to_wrong": 0,
+    "identical_answer_text": 0
+   },
+   "ALL": {
+    "n_unfired": 116,
+    "never_acc": 0.6897,
+    "tier_acc": 0.6466,
+    "flip_wrong_to_right": 13,
+    "flip_right_to_wrong": 18,
+    "identical_answer_text": 4
+   }
+  }
+ },
+ "taxonomy": {
+  "easy-chat": {
+   "n": 60,
+   "fired": 21,
+   "unfired_local_wrong_always_right_fixable_miss": 6,
+   "unfired_local_wrong_always_wrong_no_headroom": 4,
+   "fired_delivered_right": 14,
+   "fired_delivered_wrong_always_wrong_expert_limit": 5,
+   "fired_delivered_wrong_always_right_relay_or_var": 2,
+   "fired_but_local_was_right_no_benefit_risk": 10
+  },
+  "easy-fact": {
+   "n": 40,
+   "fired": 25,
+   "unfired_local_wrong_always_right_fixable_miss": 5,
+   "unfired_local_wrong_always_wrong_no_headroom": 2,
+   "fired_delivered_right": 24,
+   "fired_delivered_wrong_always_wrong_expert_limit": 0,
+   "fired_delivered_wrong_always_right_relay_or_var": 1,
+   "fired_but_local_was_right_no_benefit_risk": 5
+  },
+  "hard-knowledge": {
+   "n": 60,
+   "fired": 43,
+   "unfired_local_wrong_always_right_fixable_miss": 8,
+   "unfired_local_wrong_always_wrong_no_headroom": 3,
+   "fired_delivered_right": 14,
+   "fired_delivered_wrong_always_wrong_expert_limit": 27,
+   "fired_delivered_wrong_always_right_relay_or_var": 2,
+   "fired_but_local_was_right_no_benefit_risk": 3
+  },
+  "hard-math": {
+   "n": 60,
+   "fired": 15,
+   "unfired_local_wrong_always_right_fixable_miss": 6,
+   "unfired_local_wrong_always_wrong_no_headroom": 2,
+   "fired_delivered_right": 5,
+   "fired_delivered_wrong_always_wrong_expert_limit": 10,
+   "fired_delivered_wrong_always_right_relay_or_var": 0,
+   "fired_but_local_was_right_no_benefit_risk": 0
+  },
+  "trap": {
+   "n": 20,
+   "fired": 20,
+   "unfired_local_wrong_always_right_fixable_miss": 0,
+   "unfired_local_wrong_always_wrong_no_headroom": 0,
+   "fired_delivered_right": 19,
+   "fired_delivered_wrong_always_wrong_expert_limit": 0,
+   "fired_delivered_wrong_always_right_relay_or_var": 1,
+   "fired_but_local_was_right_no_benefit_risk": 0
+  },
+  "ALL": {
+   "n": 240,
+   "fired": 124,
+   "unfired_local_wrong_always_right_fixable_miss": 25,
+   "unfired_local_wrong_always_wrong_no_headroom": 11,
+   "fired_delivered_right": 76,
+   "fired_delivered_wrong_always_wrong_expert_limit": 42,
+   "fired_delivered_wrong_always_right_relay_or_var": 6,
+   "fired_but_local_was_right_no_benefit_risk": 18
+  }
+ },
+ "gsm8k_focus": {
+  "sources": {
+   "gsm8k": 43,
+   "math500": 2
+  },
+  "n_unfired": 45,
+  "never_acc_on_these": 0.8222,
+  "aggressive_acc_on_these": 0.7111,
+  "flips_w2r": 3,
+  "flips_r2w": 8,
+  "identical_text": 0,
+  "flip_ids_r2w": [
+   "q0024",
+   "q0044",
+   "q0067",
+   "q0115",
+   "q0069",
+   "q0016",
+   "q0034",
+   "q0091"
+  ]
+ },
+ "expert_field_judge": {
+  "aggressive": {
+   "fired": 124,
+   "expert_right": 79,
+   "delivered_right_on_fired": 76,
+   "relay_loss_expert_right_delivered_wrong": 4,
+   "expert_wrong_capability_limit": 45,
+   "by_cat": {
+    "easy-chat": {
+     "fired": 21,
+     "expert_acc": 0.857,
+     "delivered_acc": 0.667,
+     "relay_loss": 4
+    },
+    "easy-fact": {
+     "fired": 25,
+     "expert_acc": 0.96,
+     "delivered_acc": 0.96,
+     "relay_loss": 0
+    },
+    "hard-knowledge": {
+     "fired": 43,
+     "expert_acc": 0.302,
+     "delivered_acc": 0.326,
+     "relay_loss": 0
+    },
+    "hard-math": {
+     "fired": 15,
+     "expert_acc": 0.333,
+     "delivered_acc": 0.333,
+     "relay_loss": 0
+    },
+    "trap": {
+     "fired": 20,
+     "expert_acc": 0.95,
+     "delivered_acc": 0.95,
+     "relay_loss": 0
+    }
+   }
+  },
+  "always": {
+   "fired": 238,
+   "expert_right": 182,
+   "delivered_right_on_fired": 169,
+   "relay_loss_expert_right_delivered_wrong": 14,
+   "expert_wrong_capability_limit": 56,
+   "by_cat": {
+    "easy-chat": {
+     "fired": 59,
+     "expert_acc": 0.898,
+     "delivered_acc": 0.712,
+     "relay_loss": 11
+    },
+    "easy-fact": {
+     "fired": 40,
+     "expert_acc": 0.925,
+     "delivered_acc": 0.925,
+     "relay_loss": 0
+    },
+    "hard-knowledge": {
+     "fired": 59,
+     "expert_acc": 0.39,
+     "delivered_acc": 0.39,
+     "relay_loss": 1
+    },
+    "hard-math": {
+     "fired": 60,
+     "expert_acc": 0.817,
+     "delivered_acc": 0.783,
+     "relay_loss": 2
+    },
+    "trap": {
+     "fired": 20,
+     "expert_acc": 1.0,
+     "delivered_acc": 1.0,
+     "relay_loss": 0
+    }
+   }
+  }
+ },
+ "expert_field_judge_note": "adequate_expert = gpt-5.4-mini judge on the expert's own text (field=expert rejudge 2026-09-07); relay loss is small (agg 4/124, always 14/238) and concentrated in easy-chat; hard-knowledge + gate-fired hard-math are expert-capability-limited (expert acc .30-.39 / .33 on fired rows)"
+}

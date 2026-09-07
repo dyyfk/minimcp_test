@@ -125,7 +125,7 @@ def _load_queries(pool):
               volumes={"/workspace/models": weights, DATA: gate_data},
               secrets=[OPENAI], timeout=60 * 60 * 5)
 def live_shard(shard: list, pool: str, tier: str, shard_id: int = -1,
-               relay: str = "steer") -> list:
+               relay: str = "steer", run_id: str = "") -> list:
     import glob as _glob
     import shutil
     import sys
@@ -281,6 +281,7 @@ def live_shard(shard: list, pool: str, tier: str, shard_id: int = -1,
         st3.update(tail=None, sum=None, cnt=0, accum=False)
 
         rec = {"id": q["id"], "pool": pool, "tier": tier, "lang": lang,
+               "run_id": run_id or "r0",
                "query": q.get("query"),
                "reference_answer": q.get("reference_answer"),
                "audio_s": round(len(au) / 16000, 2),
@@ -456,15 +457,16 @@ def live_shard(shard: list, pool: str, tier: str, shard_id: int = -1,
               f"txt={full[:60]!r}", flush=True)
 
     hh.remove()
-    os.makedirs(f"{OUT_DIR}/{pool}", exist_ok=True)
+    base = OUT_DIR if not run_id else f"{DATA}/native_bench_repeats/{run_id}"
+    os.makedirs(f"{base}/{pool}", exist_ok=True)
     sfx = "smoke" if shard_id < 0 else f"shard{shard_id}"
     tier_out = tier if relay == "steer" else f"{tier}_{relay}"
-    with open(f"{OUT_DIR}/{pool}/{tier_out}.jsonl.{sfx}", "a",
+    with open(f"{base}/{pool}/{tier_out}.jsonl.{sfx}", "a",
               encoding="utf-8") as fh:
         for r in results:
             fh.write(json.dumps(r, ensure_ascii=False) + "\n")
     if feats:
-        fp = f"{OUT_DIR}/{pool}/{tier_out}_feats.{sfx}.npz"
+        fp = f"{base}/{pool}/{tier_out}_feats.{sfx}.npz"
         old = (dict(np.load(fp, allow_pickle=True)) if os.path.exists(fp) else None)
         ids = list(feats.keys()); X = np.stack([feats[i] for i in ids])
         if old is not None:
@@ -475,12 +477,14 @@ def live_shard(shard: list, pool: str, tier: str, shard_id: int = -1,
 
 
 @app.function(image=util_img, volumes={DATA: gate_data}, timeout=60 * 5)
-def _todo(pool: str, tier: str, relay: str = "steer") -> list:
+def _todo(pool: str, tier: str, relay: str = "steer",
+          run_id: str = "") -> list:
     import glob as _glob
     qs = _load_queries(pool)
     done = set()
+    base = OUT_DIR if not run_id else f"{DATA}/native_bench_repeats/{run_id}"
     tier_out = tier if relay == "steer" else f"{tier}_{relay}"
-    for p in _glob.glob(f"{OUT_DIR}/{pool}/{tier_out}.jsonl.shard*"):
+    for p in _glob.glob(f"{base}/{pool}/{tier_out}.jsonl.shard*"):
         for ln in open(p, encoding="utf-8"):
             if ln.strip():
                 done.add(json.loads(ln)["id"])
@@ -490,7 +494,7 @@ def _todo(pool: str, tier: str, relay: str = "steer") -> list:
 @app.function(image=judge_img, volumes={DATA: gate_data},
               secrets=[OPENAI], timeout=60 * 90)
 def judge_pool(pool: str, tier: str, field: str = "delivered",
-               relay: str = "steer") -> int:
+               relay: str = "steer", run_id: str = "") -> int:
     """Score one (pool, tier) run with that pool's judge ->
     /data/native_bench/{pool}_{tier}_judged.parquet (all trace fields +
     oab_ok / adequate / vb_score). field="delivered" scores what the
@@ -510,13 +514,14 @@ def judge_pool(pool: str, tier: str, field: str = "delivered",
 
     _, _, _, jkind = POOLS[pool]
     rows = {}
+    base = OUT_DIR if not run_id else f"{DATA}/native_bench_repeats/{run_id}"
     tier_out = tier if relay == "steer" else f"{tier}_{relay}"
-    for p in sorted(_glob.glob(f"{OUT_DIR}/{pool}/{tier_out}.jsonl.shard*")):
+    for p in sorted(_glob.glob(f"{base}/{pool}/{tier_out}.jsonl.shard*")):
         for ln in open(p, encoding="utf-8"):
             if ln.strip():
                 r = json.loads(ln)
                 rows[r["id"]] = r
-    out_p = f"{OUT_DIR}/{pool}_{tier_out}_judged.parquet"
+    out_p = f"{base}/{pool}_{tier_out}_judged.parquet"
     old = (pd.read_parquet(out_p) if os.path.exists(out_p)
            else pd.DataFrame(columns=["id"]))
     sfx = "" if field == "delivered" else "_expert"
@@ -625,24 +630,26 @@ def judge_pool(pool: str, tier: str, field: str = "delivered",
 
 @app.local_entrypoint()
 def run_bench(pool: str = "striviaqa", tier: str = "never",
-              workers: int = 6, limit: int = 0, relay: str = "steer"):
-    qs = _todo.remote(pool, tier, relay)
+              workers: int = 6, limit: int = 0, relay: str = "steer",
+              run_id: str = ""):
+    qs = _todo.remote(pool, tier, relay, run_id)
     smoke = bool(limit) and limit <= 8
     if limit:
         qs = qs[:limit]
         if smoke:
             workers = 1
     shards = [qs[i::workers] for i in range(workers)]
-    print(f">>> native bench [{pool}/{tier}/{relay}]: {len(qs)} queries, "
+    print(f">>> native bench [{pool}/{tier}/{relay}"
+          f"{'/' + run_id if run_id else ''}]: {len(qs)} queries, "
           f"{workers} workers{' (smoke)' if smoke else ''}", flush=True)
     done = list(live_shard.starmap(
-        [(shards[i], pool, tier, i if not smoke else -1, relay)
+        [(shards[i], pool, tier, i if not smoke else -1, relay, run_id)
          for i in range(workers) if shards[i]]))
     print(f">>> complete: {sum(len(d) for d in done)}")
 
 
 @app.local_entrypoint()
 def judge(pool: str = "striviaqa", tier: str = "never", field: str = "delivered",
-          relay: str = "steer"):
-    n = judge_pool.remote(pool, tier, field, relay)
+          relay: str = "steer", run_id: str = ""):
+    n = judge_pool.remote(pool, tier, field, relay, run_id)
     print(f">>> judged {n}")
