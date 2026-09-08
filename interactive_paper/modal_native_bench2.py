@@ -168,7 +168,8 @@ def live_shard(shard: list, pool: str, tier: str, shard_id: int = -1,
     art_sha = hashlib.sha256(open(art_path, "rb").read()).hexdigest()
     w = np.array(art["w"], dtype=np.float32)
     b = float(art["b"])
-    thr_tab = art.get("eot_thresholds_lang", {}).get(lang, art["eot_thresholds"])
+    thr_tab = (art.get("eot_thresholds_lang", {}).get(lang)
+               or art.get("eot_thresholds", {}))
     thr = {"never": 1e9, "always": -1e9}.get(tier, thr_tab.get(tier, 1e9))
     act = json.load(open(ACT)) if os.path.exists(ACT) else None
     aw = np.array(act["w"], dtype=np.float32) if act else None
