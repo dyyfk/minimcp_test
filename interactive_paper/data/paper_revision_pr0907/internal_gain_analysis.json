@@ -733,5 +733,20 @@
    "relay_capped_at_400": 6,
    "note": "clean_expert max_chars=400 sentence-capped relay"
   }
+ },
+ "trunc1_result": {
+  "run": "trunc1 (v2 always arm, 43 >30s hard-knowledge ids, causal consumed-prefix expert input, pre-relay-fix image)",
+  "v1_baseline": {
+   "delivered": 0.326,
+   "expert_field": 0.31
+  },
+  "v2_result": {
+   "delivered": 0.512,
+   "expert_field": 0.512
+  },
+  "delta_pp": 18.6,
+  "n": 43,
+  "noise_note": "single run; binomial SE ~7.5pp -> ~2.5 sigma; one confirm repeat would firm it",
+  "projection": "always ceiling on internal ~.717 -> ~.75; aggressive gains ~+2.5-3pp from these rows alone (they fire at high rate)"
  }
 }
