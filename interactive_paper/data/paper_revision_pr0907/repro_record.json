@@ -1,0 +1,23 @@
+{
+ "python": "3.11.3",
+ "sklearn": "1.9.0",
+ "numpy": "2.4.6",
+ "pandas": "3.0.5",
+ "pyarrow": "25.0.1",
+ "platform": "Windows 10 (win32)",
+ "worktree": "git worktree add ../minimcp_pr0907_repro 9c117b7",
+ "inputs": "84 non-git files injected after sha256 verification: 38 feature shards per input_manifest.jsonl (volume gate-data root), 46 judged parquets per artifact_index.jsonl sha256_local",
+ "commands": [
+  "PYTHONUTF8=1 python scripts/48_paper_revision_export.py",
+  "PYTHONUTF8=1 python scripts/49_paper_revision_manifest.py"
+ ],
+ "result": {
+  "threshold_validation": "passed (fail-hard enabled; all 12 thresholds match artifacts)",
+  "calibration_manifest.jsonl": "byte-identical",
+  "thresholds.json": "byte-identical",
+  "manifest.json": "byte-identical",
+  "summary.json": "byte-identical",
+  "artifact_index.jsonl": "byte-identical",
+  "calibration_oof.parquet": "value-identical (DataFrame.equals)"
+ }
+}

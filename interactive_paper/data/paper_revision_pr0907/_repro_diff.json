@@ -1,0 +1,8 @@
+{
+ "calibration_manifest.jsonl": "byte-identical",
+ "thresholds.json": "byte-identical",
+ "manifest.json": "byte-identical",
+ "summary.json": "byte-identical",
+ "artifact_index.jsonl": "byte-identical",
+ "calibration_oof.parquet": "value-identical (parquet bytes may differ)"
+}
