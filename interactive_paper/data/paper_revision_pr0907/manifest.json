@@ -1,15 +1,16 @@
 {
  "experiment_id": "pr0907",
  "created": "2026-09-07",
- "purpose": "P0 inventory of existing native-bench runs (8bu line) for the RTCA paper revision; no new model runs",
- "code": {
+ "revision": 2,
+ "purpose": "P0 inventory of existing native-bench runs for the RTCA paper revision; no new model runs",
+ "code_native_v1": {
   "commit": "51fdb4e",
   "file": "interactive_paper/modal_native_bench.py",
   "committed": "2026-09-02",
-  "n_commits": 1,
-  "note": "single commit, no local modifications - the reviewed snapshot e74ca0c IS the code that produced every run"
+  "n_commits_at_run_time": 1,
+  "note": "single commit, unmodified through e74ca0c - the reviewed snapshot is the code that produced every native_v1 run"
  },
- "serving": {
+ "serving_native_v1": {
   "artifact": "/data/gate_native.json (8bq, volume mtime 2026-09-01 22:59 PDT)",
   "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
   "layer": 22,
@@ -36,16 +37,25 @@
   "sdqa": "ours ref-anchored gpt-5.4-mini",
   "sreason": "ours ref-anchored gpt-5.4-mini"
  },
- "latency_definition": {
-  "formula": "escalated: onset_overrun_chunks + stall_ms + wait_chunks(s) + relay_synth_ms + relay_audio_s; local: onset_overrun_chunks + answer_ms",
-  "caveat": "server-side composite ESTIMATE. local arm runs as_duplex(generate_audio=False): answer_ms is TEXT generation wall time, no local audio is synthesized. relay audio duration comes from a separate teacher-forced TTS re-synthesis of the relay text. No client-side playback clock exists in any run."
+ "timing_definition": {
+  "name": "reconstructed timing diagnostic",
+  "units": "all reported values in SECONDS; *_ms trace fields divided by 1000",
+  "per_protocol_endpoints": {
+   "local_only": "onset_overrun_s (answer-onset chunks past end of query audio, 1 s/chunk) + answer_ms/1000 (TEXT generation wall time; generate_audio=False, no audio synthesized)",
+   "tts_relay": "local rows as local_only; escalated rows: onset_overrun_s + stall_ms/1000 + wait_chunks*1s + relay_synth_ms/1000 (teacher-forced re-synthesis wall time) + relay_audio_s (synthesized relay duration)",
+   "steer_relay": "local rows as local_only; escalated rows: onset_overrun_s + stall_ms/1000 + wait_chunks*1s + relay_ms/1000 (relay TEXT generation wall time; no relay audio was synthesized in steer runs)"
+  },
+  "caveat": "server-side reconstruction from per-turn trace fields. The local path never synthesizes audio (generate_audio=False) and no client-side clock, playback timestamp, or produced-audio recording exists in any v1 run. These numbers are NOT audible latency and the arms' endpoints are NOT symmetric - do not present them as a single 'audio-ready time'."
  },
  "judge_field_definition": "field=delivered scores relay TEXT on fired turns / local answer TEXT otherwise - never an ASR transcript of produced audio",
  "runs": [
   {
    "pool": "frozen",
    "arm": "aggressive_tts",
-   "smoke_only": false,
+   "experiment_family": "native_v1",
+   "protocol_version": "tts_relay",
+   "in_paper": true,
+   "provenance_basis": "inferred, not a per-run record: bench script has a single commit (51fdb4e, 2026-09-02); volume gate_native.json mtime 2026-09-01 22:59 PDT and unchanged since; runs dated 2026-09-02/03 by shard mtime",
    "n_shards": 8,
    "shard_dates": [
     "2026-09-02 18:20 Pacific Daylight Time",
@@ -65,31 +75,45 @@
     "native_bench/frozen/aggressive_tts.jsonl.shard1",
     "native_bench/frozen/aggressive_tts.jsonl.shard0"
    ],
+   "smoke_files": [],
+   "smoke_note": null,
    "judged_parquet": "native_bench/frozen_aggressive_tts_judged.parquet",
    "judge": "ours ref-anchored gpt-5.4-mini",
    "code": "51fdb4e",
    "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
-   "relay_variant": "tts",
    "cached_remix": false,
    "executed": true,
    "stats": {
-    "n": 240,
+    "n_total": 240,
+    "n_scored": 240,
+    "missing_scores": 0,
+    "missing_scores_reason": null,
+    "metric": "adequate",
+    "acc_or_score_over_scored": 0.6291666666666667,
     "escalation_rate": 0.5166666666666667,
-    "acc_or_score": 0.6291666666666667,
-    "acc_n_judged": 240,
     "expert_error_rows": 0,
-    "expert_timeout_rows": 0,
+    "timeout_proxy_rows_wait_ge_145": 0,
+    "timeout_proxy_rule": "PROXY: wait_chunks >= 145 of MAX_WAIT_S=150; no explicit timeout status or timestamp was logged in v1",
     "onset_before_last_chunk_fired": 18,
-    "audio_gt_30s": 46,
-    "lat_mean_s": 27.2906875,
-    "lat_p50_s": 10.9325,
-    "lat_p95_s": 103.15899999999984
-   }
+    "audio_gt_30s": 46
+   },
+   "timing": {
+    "reconstructed_t_mean_s": 27.2906875,
+    "reconstructed_t_p50_s": 10.9325,
+    "reconstructed_t_p95_s": 103.15899999999984
+   },
+   "timing_missing_reason": null,
+   "timing_source": "data/native_bench/frozen_aggressive_tts_judged.parquet",
+   "timing_source_sha256": "d7be2d6bbcdd54a4223a210341c0e7a502e8ae350543cc2313e57fb49f5c42fd",
+   "timing_endpoints": "local rows as local_only; escalated rows: onset_overrun_s + stall_ms/1000 + wait_chunks*1s + relay_synth_ms/1000 (teacher-forced re-synthesis wall time) + relay_audio_s (synthesized relay duration)"
   },
   {
    "pool": "frozen",
    "arm": "always_tts",
-   "smoke_only": false,
+   "experiment_family": "native_v1",
+   "protocol_version": "tts_relay",
+   "in_paper": true,
+   "provenance_basis": "inferred, not a per-run record: bench script has a single commit (51fdb4e, 2026-09-02); volume gate_native.json mtime 2026-09-01 22:59 PDT and unchanged since; runs dated 2026-09-02/03 by shard mtime",
    "n_shards": 8,
    "shard_dates": [
     "2026-09-02 16:20 Pacific Daylight Time",
@@ -109,31 +133,45 @@
     "native_bench/frozen/always_tts.jsonl.shard2",
     "native_bench/frozen/always_tts.jsonl.shard1"
    ],
+   "smoke_files": [],
+   "smoke_note": null,
    "judged_parquet": "native_bench/frozen_always_tts_judged.parquet",
    "judge": "ours ref-anchored gpt-5.4-mini",
    "code": "51fdb4e",
    "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
-   "relay_variant": "tts",
    "cached_remix": false,
    "executed": true,
    "stats": {
-    "n": 240,
+    "n_total": 240,
+    "n_scored": 240,
+    "missing_scores": 0,
+    "missing_scores_reason": null,
+    "metric": "adequate",
+    "acc_or_score_over_scored": 0.7041666666666667,
     "escalation_rate": 0.9916666666666667,
-    "acc_or_score": 0.7041666666666667,
-    "acc_n_judged": 240,
     "expert_error_rows": 0,
-    "expert_timeout_rows": 0,
+    "timeout_proxy_rows_wait_ge_145": 0,
+    "timeout_proxy_rule": "PROXY: wait_chunks >= 145 of MAX_WAIT_S=150; no explicit timeout status or timestamp was logged in v1",
     "onset_before_last_chunk_fired": 26,
-    "audio_gt_30s": 46,
-    "lat_mean_s": 45.1344458333333,
-    "lat_p50_s": 20.8195,
-    "lat_p95_s": 210.07694999999964
-   }
+    "audio_gt_30s": 46
+   },
+   "timing": {
+    "reconstructed_t_mean_s": 45.1344458333333,
+    "reconstructed_t_p50_s": 20.8195,
+    "reconstructed_t_p95_s": 210.07694999999964
+   },
+   "timing_missing_reason": null,
+   "timing_source": "data/native_bench/frozen_always_tts_judged.parquet",
+   "timing_source_sha256": "9ac19665fbc00c80e83986ca8d42f030d880ac9cc160bf70589071df0cdd05c8",
+   "timing_endpoints": "local rows as local_only; escalated rows: onset_overrun_s + stall_ms/1000 + wait_chunks*1s + relay_synth_ms/1000 (teacher-forced re-synthesis wall time) + relay_audio_s (synthesized relay duration)"
   },
   {
    "pool": "frozen",
    "arm": "balanced_tts",
-   "smoke_only": false,
+   "experiment_family": "native_v1",
+   "protocol_version": "tts_relay",
+   "in_paper": true,
+   "provenance_basis": "inferred, not a per-run record: bench script has a single commit (51fdb4e, 2026-09-02); volume gate_native.json mtime 2026-09-01 22:59 PDT and unchanged since; runs dated 2026-09-02/03 by shard mtime",
    "n_shards": 8,
    "shard_dates": [
     "2026-09-02 18:08 Pacific Daylight Time",
@@ -152,31 +190,45 @@
     "native_bench/frozen/balanced_tts.jsonl.shard2",
     "native_bench/frozen/balanced_tts.jsonl.shard1"
    ],
+   "smoke_files": [],
+   "smoke_note": null,
    "judged_parquet": "native_bench/frozen_balanced_tts_judged.parquet",
    "judge": "ours ref-anchored gpt-5.4-mini",
    "code": "51fdb4e",
    "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
-   "relay_variant": "tts",
    "cached_remix": false,
    "executed": true,
    "stats": {
-    "n": 240,
+    "n_total": 240,
+    "n_scored": 240,
+    "missing_scores": 0,
+    "missing_scores_reason": null,
+    "metric": "adequate",
+    "acc_or_score_over_scored": 0.5416666666666666,
     "escalation_rate": 0.25,
-    "acc_or_score": 0.5416666666666666,
-    "acc_n_judged": 240,
     "expert_error_rows": 0,
-    "expert_timeout_rows": 0,
+    "timeout_proxy_rows_wait_ge_145": 0,
+    "timeout_proxy_rule": "PROXY: wait_chunks >= 145 of MAX_WAIT_S=150; no explicit timeout status or timestamp was logged in v1",
     "onset_before_last_chunk_fired": 10,
-    "audio_gt_30s": 46,
-    "lat_mean_s": 15.275212500000002,
-    "lat_p50_s": 5.582000000000001,
-    "lat_p95_s": 39.91384999999994
-   }
+    "audio_gt_30s": 46
+   },
+   "timing": {
+    "reconstructed_t_mean_s": 15.275212500000002,
+    "reconstructed_t_p50_s": 5.582000000000001,
+    "reconstructed_t_p95_s": 39.91384999999994
+   },
+   "timing_missing_reason": null,
+   "timing_source": "data/native_bench/frozen_balanced_tts_judged.parquet",
+   "timing_source_sha256": "5f7846ec52ca5eef09b566cb70ebfa85d5f8d4c853f885833ddf58411592739f",
+   "timing_endpoints": "local rows as local_only; escalated rows: onset_overrun_s + stall_ms/1000 + wait_chunks*1s + relay_synth_ms/1000 (teacher-forced re-synthesis wall time) + relay_audio_s (synthesized relay duration)"
   },
   {
    "pool": "frozen",
    "arm": "conservative_tts",
-   "smoke_only": false,
+   "experiment_family": "native_v1",
+   "protocol_version": "tts_relay",
+   "in_paper": true,
+   "provenance_basis": "inferred, not a per-run record: bench script has a single commit (51fdb4e, 2026-09-02); volume gate_native.json mtime 2026-09-01 22:59 PDT and unchanged since; runs dated 2026-09-02/03 by shard mtime",
    "n_shards": 8,
    "shard_dates": [
     "2026-09-02 18:47 Pacific Daylight Time",
@@ -193,31 +245,45 @@
     "native_bench/frozen/conservative_tts.jsonl.shard2",
     "native_bench/frozen/conservative_tts.jsonl.shard1"
    ],
+   "smoke_files": [],
+   "smoke_note": null,
    "judged_parquet": "native_bench/frozen_conservative_tts_judged.parquet",
    "judge": "ours ref-anchored gpt-5.4-mini",
    "code": "51fdb4e",
    "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
-   "relay_variant": "tts",
    "cached_remix": false,
    "executed": true,
    "stats": {
-    "n": 240,
+    "n_total": 240,
+    "n_scored": 240,
+    "missing_scores": 0,
+    "missing_scores_reason": null,
+    "metric": "adequate",
+    "acc_or_score_over_scored": 0.4666666666666667,
     "escalation_rate": 0.08333333333333333,
-    "acc_or_score": 0.4666666666666667,
-    "acc_n_judged": 240,
     "expert_error_rows": 0,
-    "expert_timeout_rows": 0,
+    "timeout_proxy_rows_wait_ge_145": 0,
+    "timeout_proxy_rule": "PROXY: wait_chunks >= 145 of MAX_WAIT_S=150; no explicit timeout status or timestamp was logged in v1",
     "onset_before_last_chunk_fired": 1,
-    "audio_gt_30s": 46,
-    "lat_mean_s": 12.0140625,
-    "lat_p50_s": 4.291499999999999,
-    "lat_p95_s": 22.27685
-   }
+    "audio_gt_30s": 46
+   },
+   "timing": {
+    "reconstructed_t_mean_s": 12.0140625,
+    "reconstructed_t_p50_s": 4.291499999999999,
+    "reconstructed_t_p95_s": 22.27685
+   },
+   "timing_missing_reason": null,
+   "timing_source": "data/native_bench/frozen_conservative_tts_judged.parquet",
+   "timing_source_sha256": "e42abdd53deebf54012d36d3097f5cacac6d0a0cedbb0a48b2bee198175f2d33",
+   "timing_endpoints": "local rows as local_only; escalated rows: onset_overrun_s + stall_ms/1000 + wait_chunks*1s + relay_synth_ms/1000 (teacher-forced re-synthesis wall time) + relay_audio_s (synthesized relay duration)"
   },
   {
    "pool": "frozen",
    "arm": "never",
-   "smoke_only": false,
+   "experiment_family": "native_v1",
+   "protocol_version": "local_only",
+   "in_paper": true,
+   "provenance_basis": "inferred, not a per-run record: bench script has a single commit (51fdb4e, 2026-09-02); volume gate_native.json mtime 2026-09-01 22:59 PDT and unchanged since; runs dated 2026-09-02/03 by shard mtime",
    "n_shards": 8,
    "shard_dates": [
     "2026-09-02 10:41 Pacific Daylight Time",
@@ -233,31 +299,45 @@
     "native_bench/frozen/never.jsonl.shard2",
     "native_bench/frozen/never.jsonl.shard0"
    ],
+   "smoke_files": [],
+   "smoke_note": null,
    "judged_parquet": "native_bench/frozen_never_judged.parquet",
    "judge": "ours ref-anchored gpt-5.4-mini",
    "code": "51fdb4e",
    "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
-   "relay_variant": null,
    "cached_remix": false,
    "executed": true,
    "stats": {
-    "n": 240,
+    "n_total": 240,
+    "n_scored": 240,
+    "missing_scores": 0,
+    "missing_scores_reason": null,
+    "metric": "adequate",
+    "acc_or_score_over_scored": 0.4083333333333333,
     "escalation_rate": 0.0,
-    "acc_or_score": 0.4083333333333333,
-    "acc_n_judged": 240,
     "expert_error_rows": 0,
-    "expert_timeout_rows": 0,
+    "timeout_proxy_rows_wait_ge_145": 0,
+    "timeout_proxy_rule": "PROXY: wait_chunks >= 145 of MAX_WAIT_S=150; no explicit timeout status or timestamp was logged in v1",
     "onset_before_last_chunk_fired": 0,
-    "audio_gt_30s": 46,
-    "lat_mean_s": 5.703583333333335,
-    "lat_p50_s": 3.599,
-    "lat_p95_s": 17.31815
-   }
+    "audio_gt_30s": 46
+   },
+   "timing": {
+    "reconstructed_t_mean_s": 5.7035833333333334,
+    "reconstructed_t_p50_s": 3.599,
+    "reconstructed_t_p95_s": 17.31815
+   },
+   "timing_missing_reason": null,
+   "timing_source": "data/native_bench/frozen_never_judged.parquet",
+   "timing_source_sha256": "082df3b3ae133a5c871d9ad97812c9ce206140caa26cb95f4616b4e42023a825",
+   "timing_endpoints": "onset_overrun_s (answer-onset chunks past end of query audio, 1 s/chunk) + answer_ms/1000 (TEXT generation wall time; generate_audio=False, no audio synthesized)"
   },
   {
    "pool": "striviaqa",
    "arm": "agg0",
-   "smoke_only": false,
+   "experiment_family": "8cu_official_rejudge",
+   "protocol_version": "trace_dump(no serving loop)",
+   "in_paper": false,
+   "provenance_basis": "concurrent 8cu experiment (RESULTS 8cu-1..4); NOT part of this revision task; gate/serving fields not applicable",
    "n_shards": 1,
    "shard_dates": [
     "2026-09-07 15:32 Pacific Daylight Time"
@@ -265,28 +345,41 @@
    "raw_shards": [
     "native_bench/striviaqa/agg0.jsonl.shard0"
    ],
+   "smoke_files": [],
+   "smoke_note": null,
    "judged_parquet": "native_bench/striviaqa_agg0_judged.parquet",
    "judge": "OpenAudioBench gpt-4o",
-   "code": "51fdb4e",
-   "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
-   "relay_variant": null,
+   "code": "modal_native_dump.py (8cu line, 2026-09-07)",
+   "gate_sha256": null,
    "cached_remix": false,
    "executed": true,
    "stats": {
-    "n": 250,
+    "n_total": 250,
+    "n_scored": 250,
+    "missing_scores": 0,
+    "missing_scores_reason": null,
+    "metric": "oab_ok",
+    "acc_or_score_over_scored": 0.612,
     "escalation_rate": 0.0,
-    "acc_or_score": 0.612,
-    "acc_n_judged": 250,
-    "expert_error_rows": 0,
-    "expert_timeout_rows": 0,
-    "onset_before_last_chunk_fired": 0,
-    "audio_gt_30s": 0
-   }
+    "expert_error_rows": null,
+    "timeout_proxy_rows_wait_ge_145": null,
+    "timeout_proxy_rule": "PROXY: wait_chunks >= 145 of MAX_WAIT_S=150; no explicit timeout status or timestamp was logged in v1",
+    "onset_before_last_chunk_fired": null,
+    "audio_gt_30s": null
+   },
+   "timing": null,
+   "timing_missing_reason": "no timing definition for protocol trace_dump(no serving loop)",
+   "timing_source": "data/native_bench/striviaqa_agg0_judged.parquet",
+   "timing_source_sha256": "17d1a95b8277329d974fc7af3961273e49b96a8f4aad87e22c3aec6dc5a48fd7",
+   "timing_endpoints": null
   },
   {
    "pool": "striviaqa",
    "arm": "aggmlp",
-   "smoke_only": false,
+   "experiment_family": "8cu_official_rejudge",
+   "protocol_version": "trace_dump(no serving loop)",
+   "in_paper": false,
+   "provenance_basis": "concurrent 8cu experiment (RESULTS 8cu-1..4); NOT part of this revision task; gate/serving fields not applicable",
    "n_shards": 1,
    "shard_dates": [
     "2026-09-07 15:32 Pacific Daylight Time"
@@ -294,28 +387,41 @@
    "raw_shards": [
     "native_bench/striviaqa/aggmlp.jsonl.shard0"
    ],
+   "smoke_files": [],
+   "smoke_note": null,
    "judged_parquet": "native_bench/striviaqa_aggmlp_judged.parquet",
    "judge": "OpenAudioBench gpt-4o",
-   "code": "51fdb4e",
-   "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
-   "relay_variant": null,
+   "code": "modal_native_dump.py (8cu line, 2026-09-07)",
+   "gate_sha256": null,
    "cached_remix": false,
    "executed": true,
    "stats": {
-    "n": 250,
+    "n_total": 250,
+    "n_scored": 250,
+    "missing_scores": 0,
+    "missing_scores_reason": null,
+    "metric": "oab_ok",
+    "acc_or_score_over_scored": 0.5,
     "escalation_rate": 0.0,
-    "acc_or_score": 0.5,
-    "acc_n_judged": 250,
-    "expert_error_rows": 0,
-    "expert_timeout_rows": 0,
-    "onset_before_last_chunk_fired": 0,
-    "audio_gt_30s": 0
-   }
+    "expert_error_rows": null,
+    "timeout_proxy_rows_wait_ge_145": null,
+    "timeout_proxy_rule": "PROXY: wait_chunks >= 145 of MAX_WAIT_S=150; no explicit timeout status or timestamp was logged in v1",
+    "onset_before_last_chunk_fired": null,
+    "audio_gt_30s": null
+   },
+   "timing": null,
+   "timing_missing_reason": "no timing definition for protocol trace_dump(no serving loop)",
+   "timing_source": "data/native_bench/striviaqa_aggmlp_judged.parquet",
+   "timing_source_sha256": "2a011203fa8f698fbcc18d16d2ae7ab8ccff3cd0477922eea031ea8e64125d2e",
+   "timing_endpoints": null
   },
   {
    "pool": "striviaqa",
    "arm": "aggressive",
-   "smoke_only": false,
+   "experiment_family": "native_v1_steer",
+   "protocol_version": "steer_relay",
+   "in_paper": false,
+   "provenance_basis": "inferred, not a per-run record: bench script has a single commit (51fdb4e, 2026-09-02); volume gate_native.json mtime 2026-09-01 22:59 PDT and unchanged since; runs dated 2026-09-02/03 by shard mtime",
    "n_shards": 8,
    "shard_dates": [
     "2026-09-02 14:30 Pacific Daylight Time",
@@ -335,31 +441,45 @@
     "native_bench/striviaqa/aggressive.jsonl.shard2",
     "native_bench/striviaqa/aggressive.jsonl.shard3"
    ],
+   "smoke_files": [],
+   "smoke_note": null,
    "judged_parquet": "native_bench/striviaqa_aggressive_judged.parquet",
    "judge": "OpenAudioBench gpt-4o",
    "code": "51fdb4e",
    "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
-   "relay_variant": "steer",
    "cached_remix": false,
    "executed": true,
    "stats": {
-    "n": 250,
+    "n_total": 250,
+    "n_scored": 231,
+    "missing_scores": 19,
+    "missing_scores_reason": "judge returned no parseable verdict after retries; rows kept, NOT scored as 0",
+    "metric": "oab_ok",
+    "acc_or_score_over_scored": 0.7402597402597403,
     "escalation_rate": 0.556,
-    "acc_or_score": 0.7402597402597403,
-    "acc_n_judged": 231,
     "expert_error_rows": 0,
-    "expert_timeout_rows": 0,
+    "timeout_proxy_rows_wait_ge_145": 0,
+    "timeout_proxy_rule": "PROXY: wait_chunks >= 145 of MAX_WAIT_S=150; no explicit timeout status or timestamp was logged in v1",
     "onset_before_last_chunk_fired": 0,
-    "audio_gt_30s": 1,
-    "lat_mean_s": 8.551320000000002,
-    "lat_p50_s": 6.429500000000001,
-    "lat_p95_s": 24.000999999999998
-   }
+    "audio_gt_30s": 1
+   },
+   "timing": {
+    "reconstructed_t_mean_s": 6.966208000000001,
+    "reconstructed_t_p50_s": 3.581,
+    "reconstructed_t_p95_s": 49.78509999999992
+   },
+   "timing_missing_reason": null,
+   "timing_source": "data/native_bench/striviaqa_aggressive_judged.parquet",
+   "timing_source_sha256": "15dbc8d0457ef50495f946c64642bce14e706b37fa8a2b6a0e6790c695779338",
+   "timing_endpoints": "local rows as local_only; escalated rows: onset_overrun_s + stall_ms/1000 + wait_chunks*1s + relay_ms/1000 (relay TEXT generation wall time; no relay audio was synthesized in steer runs)"
   },
   {
    "pool": "striviaqa",
    "arm": "aggressive_tts",
-   "smoke_only": false,
+   "experiment_family": "native_v1",
+   "protocol_version": "tts_relay",
+   "in_paper": true,
+   "provenance_basis": "inferred, not a per-run record: bench script has a single commit (51fdb4e, 2026-09-02); volume gate_native.json mtime 2026-09-01 22:59 PDT and unchanged since; runs dated 2026-09-02/03 by shard mtime",
    "n_shards": 8,
    "shard_dates": [
     "2026-09-02 14:59 Pacific Daylight Time",
@@ -375,34 +495,47 @@
     "native_bench/striviaqa/aggressive_tts.jsonl.shard0",
     "native_bench/striviaqa/aggressive_tts.jsonl.shard3"
    ],
+   "smoke_files": [],
+   "smoke_note": null,
    "judged_parquet": "native_bench/striviaqa_aggressive_tts_judged.parquet",
    "judge": "OpenAudioBench gpt-4o",
    "code": "51fdb4e",
    "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
-   "relay_variant": "tts",
    "cached_remix": false,
    "executed": true,
    "stats": {
-    "n": 250,
+    "n_total": 250,
+    "n_scored": 250,
+    "missing_scores": 0,
+    "missing_scores_reason": null,
+    "metric": "oab_ok",
+    "acc_or_score_over_scored": 0.884,
     "escalation_rate": 0.564,
-    "acc_or_score": 0.884,
-    "acc_n_judged": 250,
     "expert_error_rows": 0,
-    "expert_timeout_rows": 0,
+    "timeout_proxy_rows_wait_ge_145": 0,
+    "timeout_proxy_rule": "PROXY: wait_chunks >= 145 of MAX_WAIT_S=150; no explicit timeout status or timestamp was logged in v1",
     "onset_before_last_chunk_fired": 0,
-    "audio_gt_30s": 1,
-    "lat_mean_s": 8.551320000000002,
-    "lat_p50_s": 6.429500000000001,
-    "lat_p95_s": 24.000999999999998
-   }
+    "audio_gt_30s": 1
+   },
+   "timing": {
+    "reconstructed_t_mean_s": 8.551320000000002,
+    "reconstructed_t_p50_s": 6.429500000000001,
+    "reconstructed_t_p95_s": 24.000999999999998
+   },
+   "timing_missing_reason": null,
+   "timing_source": "data/native_bench/striviaqa_aggressive_tts_judged.parquet",
+   "timing_source_sha256": "95c00310adaf40b29fa0fa0275d4b114367bfab93f9f88e357b796b9ce6b8952",
+   "timing_endpoints": "local rows as local_only; escalated rows: onset_overrun_s + stall_ms/1000 + wait_chunks*1s + relay_synth_ms/1000 (teacher-forced re-synthesis wall time) + relay_audio_s (synthesized relay duration)"
   },
   {
    "pool": "striviaqa",
    "arm": "always",
-   "smoke_only": false,
+   "experiment_family": "native_v1_steer",
+   "protocol_version": "steer_relay",
+   "in_paper": false,
+   "provenance_basis": "inferred, not a per-run record: bench script has a single commit (51fdb4e, 2026-09-02); volume gate_native.json mtime 2026-09-01 22:59 PDT and unchanged since; runs dated 2026-09-02/03 by shard mtime",
    "n_shards": 8,
    "shard_dates": [
-    "2026-09-02 09:38 Pacific Daylight Time",
     "2026-09-02 09:52 Pacific Daylight Time",
     "2026-09-02 09:53 Pacific Daylight Time",
     "2026-09-02 09:54 Pacific Daylight Time",
@@ -418,37 +551,51 @@
     "native_bench/striviaqa/always.jsonl.shard6",
     "native_bench/striviaqa/always.jsonl.shard1",
     "native_bench/striviaqa/always.jsonl.shard2",
-    "native_bench/striviaqa/always.jsonl.shard3",
+    "native_bench/striviaqa/always.jsonl.shard3"
+   ],
+   "smoke_files": [
     "native_bench/striviaqa/always.jsonl.smoke"
    ],
+   "smoke_note": "smoke files are implementation checks; never part of formal samples",
    "judged_parquet": "native_bench/striviaqa_always_judged.parquet",
    "judge": "OpenAudioBench gpt-4o",
    "code": "51fdb4e",
    "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
-   "relay_variant": "steer",
    "cached_remix": false,
    "executed": true,
    "stats": {
-    "n": 250,
+    "n_total": 250,
+    "n_scored": 250,
+    "missing_scores": 0,
+    "missing_scores_reason": null,
+    "metric": "oab_ok",
+    "acc_or_score_over_scored": 0.728,
     "escalation_rate": 1.0,
-    "acc_or_score": 0.728,
-    "acc_n_judged": 250,
     "expert_error_rows": 0,
-    "expert_timeout_rows": 1,
+    "timeout_proxy_rows_wait_ge_145": 1,
+    "timeout_proxy_rule": "PROXY: wait_chunks >= 145 of MAX_WAIT_S=150; no explicit timeout status or timestamp was logged in v1",
     "onset_before_last_chunk_fired": 1,
-    "audio_gt_30s": 1,
-    "lat_mean_s": 12.595923999999997,
-    "lat_p50_s": 10.153,
-    "lat_p95_s": 28.008999999999993
-   }
+    "audio_gt_30s": 1
+   },
+   "timing": {
+    "reconstructed_t_mean_s": 12.762540000000005,
+    "reconstructed_t_p50_s": 4.63,
+    "reconstructed_t_p95_s": 55.93659999999997
+   },
+   "timing_missing_reason": null,
+   "timing_source": "data/native_bench/striviaqa_always_judged.parquet",
+   "timing_source_sha256": "4767bee1138eacf4b8c4d36dc3ffa0663cbef8571ede64b08bfc2a7d208c10e2",
+   "timing_endpoints": "local rows as local_only; escalated rows: onset_overrun_s + stall_ms/1000 + wait_chunks*1s + relay_ms/1000 (relay TEXT generation wall time; no relay audio was synthesized in steer runs)"
   },
   {
    "pool": "striviaqa",
    "arm": "always_tts",
-   "smoke_only": false,
+   "experiment_family": "native_v1",
+   "protocol_version": "tts_relay",
+   "in_paper": true,
+   "provenance_basis": "inferred, not a per-run record: bench script has a single commit (51fdb4e, 2026-09-02); volume gate_native.json mtime 2026-09-01 22:59 PDT and unchanged since; runs dated 2026-09-02/03 by shard mtime",
    "n_shards": 8,
    "shard_dates": [
-    "2026-09-02 14:30 Pacific Daylight Time",
     "2026-09-02 14:48 Pacific Daylight Time",
     "2026-09-02 14:49 Pacific Daylight Time",
     "2026-09-02 14:50 Pacific Daylight Time",
@@ -463,37 +610,51 @@
     "native_bench/striviaqa/always_tts.jsonl.shard4",
     "native_bench/striviaqa/always_tts.jsonl.shard1",
     "native_bench/striviaqa/always_tts.jsonl.shard3",
-    "native_bench/striviaqa/always_tts.jsonl.shard0",
+    "native_bench/striviaqa/always_tts.jsonl.shard0"
+   ],
+   "smoke_files": [
     "native_bench/striviaqa/always_tts.jsonl.smoke"
    ],
+   "smoke_note": "smoke files are implementation checks; never part of formal samples",
    "judged_parquet": "native_bench/striviaqa_always_tts_judged.parquet",
    "judge": "OpenAudioBench gpt-4o",
    "code": "51fdb4e",
    "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
-   "relay_variant": "tts",
    "cached_remix": false,
    "executed": true,
    "stats": {
-    "n": 250,
+    "n_total": 250,
+    "n_scored": 250,
+    "missing_scores": 0,
+    "missing_scores_reason": null,
+    "metric": "oab_ok",
+    "acc_or_score_over_scored": 0.96,
     "escalation_rate": 1.0,
-    "acc_or_score": 0.96,
-    "acc_n_judged": 250,
     "expert_error_rows": 0,
-    "expert_timeout_rows": 0,
+    "timeout_proxy_rows_wait_ge_145": 0,
+    "timeout_proxy_rule": "PROXY: wait_chunks >= 145 of MAX_WAIT_S=150; no explicit timeout status or timestamp was logged in v1",
     "onset_before_last_chunk_fired": 0,
-    "audio_gt_30s": 1,
-    "lat_mean_s": 12.595923999999997,
-    "lat_p50_s": 10.153,
-    "lat_p95_s": 28.008999999999993
-   }
+    "audio_gt_30s": 1
+   },
+   "timing": {
+    "reconstructed_t_mean_s": 12.595923999999997,
+    "reconstructed_t_p50_s": 10.153,
+    "reconstructed_t_p95_s": 28.008999999999993
+   },
+   "timing_missing_reason": null,
+   "timing_source": "data/native_bench/striviaqa_always_tts_judged.parquet",
+   "timing_source_sha256": "6b4c30876c50f4e7b518296f51e38b73c3315db78f9924ca583dab1aa6023396",
+   "timing_endpoints": "local rows as local_only; escalated rows: onset_overrun_s + stall_ms/1000 + wait_chunks*1s + relay_synth_ms/1000 (teacher-forced re-synthesis wall time) + relay_audio_s (synthesized relay duration)"
   },
   {
    "pool": "striviaqa",
    "arm": "balanced",
-   "smoke_only": false,
+   "experiment_family": "native_v1_steer",
+   "protocol_version": "steer_relay",
+   "in_paper": false,
+   "provenance_basis": "inferred, not a per-run record: bench script has a single commit (51fdb4e, 2026-09-02); volume gate_native.json mtime 2026-09-01 22:59 PDT and unchanged since; runs dated 2026-09-02/03 by shard mtime",
    "n_shards": 8,
    "shard_dates": [
-    "2026-09-02 10:09 Pacific Daylight Time",
     "2026-09-02 14:19 Pacific Daylight Time",
     "2026-09-02 14:20 Pacific Daylight Time",
     "2026-09-02 14:22 Pacific Daylight Time",
@@ -508,34 +669,49 @@
     "native_bench/striviaqa/balanced.jsonl.shard0",
     "native_bench/striviaqa/balanced.jsonl.shard2",
     "native_bench/striviaqa/balanced.jsonl.shard3",
-    "native_bench/striviaqa/balanced.jsonl.shard1",
+    "native_bench/striviaqa/balanced.jsonl.shard1"
+   ],
+   "smoke_files": [
     "native_bench/striviaqa/balanced.jsonl.smoke"
    ],
+   "smoke_note": "smoke files are implementation checks; never part of formal samples",
    "judged_parquet": "native_bench/striviaqa_balanced_judged.parquet",
    "judge": "OpenAudioBench gpt-4o",
    "code": "51fdb4e",
    "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
-   "relay_variant": "steer",
    "cached_remix": false,
    "executed": true,
    "stats": {
-    "n": 250,
+    "n_total": 250,
+    "n_scored": 250,
+    "missing_scores": 0,
+    "missing_scores_reason": null,
+    "metric": "oab_ok",
+    "acc_or_score_over_scored": 0.644,
     "escalation_rate": 0.188,
-    "acc_or_score": 0.644,
-    "acc_n_judged": 250,
     "expert_error_rows": 0,
-    "expert_timeout_rows": 0,
+    "timeout_proxy_rows_wait_ge_145": 0,
+    "timeout_proxy_rule": "PROXY: wait_chunks >= 145 of MAX_WAIT_S=150; no explicit timeout status or timestamp was logged in v1",
     "onset_before_last_chunk_fired": 0,
-    "audio_gt_30s": 1,
-    "lat_mean_s": 5.57032,
-    "lat_p50_s": 2.597,
-    "lat_p95_s": 21.0667
-   }
+    "audio_gt_30s": 1
+   },
+   "timing": {
+    "reconstructed_t_mean_s": 4.715896,
+    "reconstructed_t_p50_s": 2.972,
+    "reconstructed_t_p95_s": 10.521149999999999
+   },
+   "timing_missing_reason": null,
+   "timing_source": "data/native_bench/striviaqa_balanced_judged.parquet",
+   "timing_source_sha256": "f318685de1c9f58d2300ea3a73c74b02cad37e359f805fa4418b2b8f9387e263",
+   "timing_endpoints": "local rows as local_only; escalated rows: onset_overrun_s + stall_ms/1000 + wait_chunks*1s + relay_ms/1000 (relay TEXT generation wall time; no relay audio was synthesized in steer runs)"
   },
   {
    "pool": "striviaqa",
    "arm": "balanced_tts",
-   "smoke_only": false,
+   "experiment_family": "native_v1",
+   "protocol_version": "tts_relay",
+   "in_paper": true,
+   "provenance_basis": "inferred, not a per-run record: bench script has a single commit (51fdb4e, 2026-09-02); volume gate_native.json mtime 2026-09-01 22:59 PDT and unchanged since; runs dated 2026-09-02/03 by shard mtime",
    "n_shards": 8,
    "shard_dates": [
     "2026-09-02 14:47 Pacific Daylight Time",
@@ -554,31 +730,45 @@
     "native_bench/striviaqa/balanced_tts.jsonl.shard3",
     "native_bench/striviaqa/balanced_tts.jsonl.shard0"
    ],
+   "smoke_files": [],
+   "smoke_note": null,
    "judged_parquet": "native_bench/striviaqa_balanced_tts_judged.parquet",
    "judge": "OpenAudioBench gpt-4o",
    "code": "51fdb4e",
    "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
-   "relay_variant": "tts",
    "cached_remix": false,
    "executed": true,
    "stats": {
-    "n": 250,
+    "n_total": 250,
+    "n_scored": 250,
+    "missing_scores": 0,
+    "missing_scores_reason": null,
+    "metric": "oab_ok",
+    "acc_or_score_over_scored": 0.7,
     "escalation_rate": 0.184,
-    "acc_or_score": 0.7,
-    "acc_n_judged": 250,
     "expert_error_rows": 0,
-    "expert_timeout_rows": 0,
+    "timeout_proxy_rows_wait_ge_145": 0,
+    "timeout_proxy_rule": "PROXY: wait_chunks >= 145 of MAX_WAIT_S=150; no explicit timeout status or timestamp was logged in v1",
     "onset_before_last_chunk_fired": 0,
-    "audio_gt_30s": 1,
-    "lat_mean_s": 5.57032,
-    "lat_p50_s": 2.597,
-    "lat_p95_s": 21.0667
-   }
+    "audio_gt_30s": 1
+   },
+   "timing": {
+    "reconstructed_t_mean_s": 5.57032,
+    "reconstructed_t_p50_s": 2.597,
+    "reconstructed_t_p95_s": 21.0667
+   },
+   "timing_missing_reason": null,
+   "timing_source": "data/native_bench/striviaqa_balanced_tts_judged.parquet",
+   "timing_source_sha256": "f0379ce8d865d5b185e8918af23882d08fa65484f14b58e5b3bcd4871185467e",
+   "timing_endpoints": "local rows as local_only; escalated rows: onset_overrun_s + stall_ms/1000 + wait_chunks*1s + relay_synth_ms/1000 (teacher-forced re-synthesis wall time) + relay_audio_s (synthesized relay duration)"
   },
   {
    "pool": "striviaqa",
    "arm": "conservative_tts",
-   "smoke_only": false,
+   "experiment_family": "native_v1",
+   "protocol_version": "tts_relay",
+   "in_paper": true,
+   "provenance_basis": "inferred, not a per-run record: bench script has a single commit (51fdb4e, 2026-09-02); volume gate_native.json mtime 2026-09-01 22:59 PDT and unchanged since; runs dated 2026-09-02/03 by shard mtime",
    "n_shards": 8,
    "shard_dates": [
     "2026-09-02 15:05 Pacific Daylight Time",
@@ -599,34 +789,47 @@
     "native_bench/striviaqa/conservative_tts.jsonl.shard1",
     "native_bench/striviaqa/conservative_tts.jsonl.shard0"
    ],
+   "smoke_files": [],
+   "smoke_note": null,
    "judged_parquet": "native_bench/striviaqa_conservative_tts_judged.parquet",
    "judge": "OpenAudioBench gpt-4o",
    "code": "51fdb4e",
    "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
-   "relay_variant": "tts",
    "cached_remix": false,
    "executed": true,
    "stats": {
-    "n": 250,
+    "n_total": 250,
+    "n_scored": 250,
+    "missing_scores": 0,
+    "missing_scores_reason": null,
+    "metric": "oab_ok",
+    "acc_or_score_over_scored": 0.604,
     "escalation_rate": 0.04,
-    "acc_or_score": 0.604,
-    "acc_n_judged": 250,
     "expert_error_rows": 0,
-    "expert_timeout_rows": 0,
+    "timeout_proxy_rows_wait_ge_145": 0,
+    "timeout_proxy_rule": "PROXY: wait_chunks >= 145 of MAX_WAIT_S=150; no explicit timeout status or timestamp was logged in v1",
     "onset_before_last_chunk_fired": 0,
-    "audio_gt_30s": 1,
-    "lat_mean_s": 3.0761279999999998,
-    "lat_p50_s": 1.825,
-    "lat_p95_s": 5.4008499999999975
-   }
+    "audio_gt_30s": 1
+   },
+   "timing": {
+    "reconstructed_t_mean_s": 3.0761279999999998,
+    "reconstructed_t_p50_s": 1.825,
+    "reconstructed_t_p95_s": 5.4008499999999975
+   },
+   "timing_missing_reason": null,
+   "timing_source": "data/native_bench/striviaqa_conservative_tts_judged.parquet",
+   "timing_source_sha256": "e3499afd5cb25da8beb169bf0765e66e0271e2b593e0734e508fa75c37ae6a14",
+   "timing_endpoints": "local rows as local_only; escalated rows: onset_overrun_s + stall_ms/1000 + wait_chunks*1s + relay_synth_ms/1000 (teacher-forced re-synthesis wall time) + relay_audio_s (synthesized relay duration)"
   },
   {
    "pool": "striviaqa",
    "arm": "never",
-   "smoke_only": false,
+   "experiment_family": "native_v1",
+   "protocol_version": "local_only",
+   "in_paper": true,
+   "provenance_basis": "inferred, not a per-run record: bench script has a single commit (51fdb4e, 2026-09-02); volume gate_native.json mtime 2026-09-01 22:59 PDT and unchanged since; runs dated 2026-09-02/03 by shard mtime",
    "n_shards": 8,
    "shard_dates": [
-    "2026-09-02 09:39 Pacific Daylight Time",
     "2026-09-02 09:42 Pacific Daylight Time",
     "2026-09-02 09:43 Pacific Daylight Time",
     "2026-09-02 09:45 Pacific Daylight Time"
@@ -639,34 +842,49 @@
     "native_bench/striviaqa/never.jsonl.shard0",
     "native_bench/striviaqa/never.jsonl.shard6",
     "native_bench/striviaqa/never.jsonl.shard1",
-    "native_bench/striviaqa/never.jsonl.shard2",
+    "native_bench/striviaqa/never.jsonl.shard2"
+   ],
+   "smoke_files": [
     "native_bench/striviaqa/never.jsonl.smoke"
    ],
+   "smoke_note": "smoke files are implementation checks; never part of formal samples",
    "judged_parquet": "native_bench/striviaqa_never_judged.parquet",
    "judge": "OpenAudioBench gpt-4o",
    "code": "51fdb4e",
    "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
-   "relay_variant": null,
    "cached_remix": false,
    "executed": true,
    "stats": {
-    "n": 250,
+    "n_total": 250,
+    "n_scored": 250,
+    "missing_scores": 0,
+    "missing_scores_reason": null,
+    "metric": "oab_ok",
+    "acc_or_score_over_scored": 0.628,
     "escalation_rate": 0.0,
-    "acc_or_score": 0.628,
-    "acc_n_judged": 250,
     "expert_error_rows": 0,
-    "expert_timeout_rows": 0,
+    "timeout_proxy_rows_wait_ge_145": 0,
+    "timeout_proxy_rule": "PROXY: wait_chunks >= 145 of MAX_WAIT_S=150; no explicit timeout status or timestamp was logged in v1",
     "onset_before_last_chunk_fired": 0,
-    "audio_gt_30s": 1,
-    "lat_mean_s": 2.2791120000000005,
-    "lat_p50_s": 1.7575,
-    "lat_p95_s": 5.7204999999999995
-   }
+    "audio_gt_30s": 1
+   },
+   "timing": {
+    "reconstructed_t_mean_s": 2.279112,
+    "reconstructed_t_p50_s": 1.7575,
+    "reconstructed_t_p95_s": 5.7204999999999995
+   },
+   "timing_missing_reason": null,
+   "timing_source": "data/native_bench/striviaqa_never_judged.parquet",
+   "timing_source_sha256": "89c899c15c711e008ab0a46b354dfdd1b645f5cdec574086795eb9355ab35188",
+   "timing_endpoints": "onset_overrun_s (answer-onset chunks past end of query audio, 1 s/chunk) + answer_ms/1000 (TEXT generation wall time; generate_audio=False, no audio synthesized)"
   },
   {
    "pool": "swebq",
    "arm": "agg0",
-   "smoke_only": false,
+   "experiment_family": "8cu_official_rejudge",
+   "protocol_version": "trace_dump(no serving loop)",
+   "in_paper": false,
+   "provenance_basis": "concurrent 8cu experiment (RESULTS 8cu-1..4); NOT part of this revision task; gate/serving fields not applicable",
    "n_shards": 1,
    "shard_dates": [
     "2026-09-07 15:32 Pacific Daylight Time"
@@ -674,28 +892,41 @@
    "raw_shards": [
     "native_bench/swebq/agg0.jsonl.shard0"
    ],
+   "smoke_files": [],
+   "smoke_note": null,
    "judged_parquet": "native_bench/swebq_agg0_judged.parquet",
    "judge": "OpenAudioBench gpt-4o",
-   "code": "51fdb4e",
-   "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
-   "relay_variant": null,
+   "code": "modal_native_dump.py (8cu line, 2026-09-07)",
+   "gate_sha256": null,
    "cached_remix": false,
    "executed": true,
    "stats": {
-    "n": 250,
+    "n_total": 250,
+    "n_scored": 250,
+    "missing_scores": 0,
+    "missing_scores_reason": null,
+    "metric": "oab_ok",
+    "acc_or_score_over_scored": 0.564,
     "escalation_rate": 0.0,
-    "acc_or_score": 0.564,
-    "acc_n_judged": 250,
-    "expert_error_rows": 0,
-    "expert_timeout_rows": 0,
-    "onset_before_last_chunk_fired": 0,
-    "audio_gt_30s": 0
-   }
+    "expert_error_rows": null,
+    "timeout_proxy_rows_wait_ge_145": null,
+    "timeout_proxy_rule": "PROXY: wait_chunks >= 145 of MAX_WAIT_S=150; no explicit timeout status or timestamp was logged in v1",
+    "onset_before_last_chunk_fired": null,
+    "audio_gt_30s": null
+   },
+   "timing": null,
+   "timing_missing_reason": "no timing definition for protocol trace_dump(no serving loop)",
+   "timing_source": "data/native_bench/swebq_agg0_judged.parquet",
+   "timing_source_sha256": "d599f62421907c2362b92c0f2e6367898071e7acd665acc0f71de61c143b0c16",
+   "timing_endpoints": null
   },
   {
    "pool": "swebq",
    "arm": "aggmlp",
-   "smoke_only": false,
+   "experiment_family": "8cu_official_rejudge",
+   "protocol_version": "trace_dump(no serving loop)",
+   "in_paper": false,
+   "provenance_basis": "concurrent 8cu experiment (RESULTS 8cu-1..4); NOT part of this revision task; gate/serving fields not applicable",
    "n_shards": 1,
    "shard_dates": [
     "2026-09-07 15:32 Pacific Daylight Time"
@@ -703,28 +934,41 @@
    "raw_shards": [
     "native_bench/swebq/aggmlp.jsonl.shard0"
    ],
+   "smoke_files": [],
+   "smoke_note": null,
    "judged_parquet": "native_bench/swebq_aggmlp_judged.parquet",
    "judge": "OpenAudioBench gpt-4o",
-   "code": "51fdb4e",
-   "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
-   "relay_variant": null,
+   "code": "modal_native_dump.py (8cu line, 2026-09-07)",
+   "gate_sha256": null,
    "cached_remix": false,
    "executed": true,
    "stats": {
-    "n": 250,
+    "n_total": 250,
+    "n_scored": 250,
+    "missing_scores": 0,
+    "missing_scores_reason": null,
+    "metric": "oab_ok",
+    "acc_or_score_over_scored": 0.584,
     "escalation_rate": 0.0,
-    "acc_or_score": 0.584,
-    "acc_n_judged": 250,
-    "expert_error_rows": 0,
-    "expert_timeout_rows": 0,
-    "onset_before_last_chunk_fired": 0,
-    "audio_gt_30s": 0
-   }
+    "expert_error_rows": null,
+    "timeout_proxy_rows_wait_ge_145": null,
+    "timeout_proxy_rule": "PROXY: wait_chunks >= 145 of MAX_WAIT_S=150; no explicit timeout status or timestamp was logged in v1",
+    "onset_before_last_chunk_fired": null,
+    "audio_gt_30s": null
+   },
+   "timing": null,
+   "timing_missing_reason": "no timing definition for protocol trace_dump(no serving loop)",
+   "timing_source": "data/native_bench/swebq_aggmlp_judged.parquet",
+   "timing_source_sha256": "324d9e1215eb0cea47674734b3f3c3f008f18a0d26beab35c205d40fc41e909e",
+   "timing_endpoints": null
   },
   {
    "pool": "swebq",
    "arm": "aggressive_tts",
-   "smoke_only": false,
+   "experiment_family": "native_v1",
+   "protocol_version": "tts_relay",
+   "in_paper": true,
+   "provenance_basis": "inferred, not a per-run record: bench script has a single commit (51fdb4e, 2026-09-02); volume gate_native.json mtime 2026-09-01 22:59 PDT and unchanged since; runs dated 2026-09-02/03 by shard mtime",
    "n_shards": 8,
    "shard_dates": [
     "2026-09-02 15:42 Pacific Daylight Time",
@@ -743,31 +987,45 @@
     "native_bench/swebq/aggressive_tts.jsonl.shard4",
     "native_bench/swebq/aggressive_tts.jsonl.shard0"
    ],
+   "smoke_files": [],
+   "smoke_note": null,
    "judged_parquet": "native_bench/swebq_aggressive_tts_judged.parquet",
    "judge": "OpenAudioBench gpt-4o",
    "code": "51fdb4e",
    "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
-   "relay_variant": "tts",
    "cached_remix": false,
    "executed": true,
    "stats": {
-    "n": 250,
+    "n_total": 250,
+    "n_scored": 250,
+    "missing_scores": 0,
+    "missing_scores_reason": null,
+    "metric": "oab_ok",
+    "acc_or_score_over_scored": 0.752,
     "escalation_rate": 0.6,
-    "acc_or_score": 0.752,
-    "acc_n_judged": 250,
     "expert_error_rows": 0,
-    "expert_timeout_rows": 1,
+    "timeout_proxy_rows_wait_ge_145": 1,
+    "timeout_proxy_rule": "PROXY: wait_chunks >= 145 of MAX_WAIT_S=150; no explicit timeout status or timestamp was logged in v1",
     "onset_before_last_chunk_fired": 0,
-    "audio_gt_30s": 0,
-    "lat_mean_s": 19.187596,
-    "lat_p50_s": 11.328500000000002,
-    "lat_p95_s": 56.61194999999999
-   }
+    "audio_gt_30s": 0
+   },
+   "timing": {
+    "reconstructed_t_mean_s": 19.187596,
+    "reconstructed_t_p50_s": 11.328500000000002,
+    "reconstructed_t_p95_s": 56.61194999999999
+   },
+   "timing_missing_reason": null,
+   "timing_source": "data/native_bench/swebq_aggressive_tts_judged.parquet",
+   "timing_source_sha256": "76b424713925774289c684933511d3ed5b4046e0fafecb73129dbba0697347b7",
+   "timing_endpoints": "local rows as local_only; escalated rows: onset_overrun_s + stall_ms/1000 + wait_chunks*1s + relay_synth_ms/1000 (teacher-forced re-synthesis wall time) + relay_audio_s (synthesized relay duration)"
   },
   {
    "pool": "swebq",
    "arm": "always",
-   "smoke_only": false,
+   "experiment_family": "native_v1_steer",
+   "protocol_version": "steer_relay",
+   "in_paper": false,
+   "provenance_basis": "inferred, not a per-run record: bench script has a single commit (51fdb4e, 2026-09-02); volume gate_native.json mtime 2026-09-01 22:59 PDT and unchanged since; runs dated 2026-09-02/03 by shard mtime",
    "n_shards": 8,
    "shard_dates": [
     "2026-09-02 14:23 Pacific Daylight Time",
@@ -786,31 +1044,45 @@
     "native_bench/swebq/always.jsonl.shard4",
     "native_bench/swebq/always.jsonl.shard2"
    ],
+   "smoke_files": [],
+   "smoke_note": null,
    "judged_parquet": "native_bench/swebq_always_judged.parquet",
    "judge": "OpenAudioBench gpt-4o",
    "code": "51fdb4e",
    "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
-   "relay_variant": "steer",
    "cached_remix": false,
    "executed": true,
    "stats": {
-    "n": 250,
+    "n_total": 250,
+    "n_scored": 250,
+    "missing_scores": 0,
+    "missing_scores_reason": null,
+    "metric": "oab_ok",
+    "acc_or_score_over_scored": 0.564,
     "escalation_rate": 0.976,
-    "acc_or_score": 0.564,
-    "acc_n_judged": 250,
     "expert_error_rows": 0,
-    "expert_timeout_rows": 0,
+    "timeout_proxy_rows_wait_ge_145": 0,
+    "timeout_proxy_rule": "PROXY: wait_chunks >= 145 of MAX_WAIT_S=150; no explicit timeout status or timestamp was logged in v1",
     "onset_before_last_chunk_fired": 0,
-    "audio_gt_30s": 0,
-    "lat_mean_s": 24.709419999999994,
-    "lat_p50_s": 20.3545,
-    "lat_p95_s": 55.0787
-   }
+    "audio_gt_30s": 0
+   },
+   "timing": {
+    "reconstructed_t_mean_s": 14.502904,
+    "reconstructed_t_p50_s": 6.348,
+    "reconstructed_t_p95_s": 59.40075
+   },
+   "timing_missing_reason": null,
+   "timing_source": "data/native_bench/swebq_always_judged.parquet",
+   "timing_source_sha256": "8e45b83c6283a8c3cf705aaa28d9ca740c4ff99801f0ece8f7821236aa5181ca",
+   "timing_endpoints": "local rows as local_only; escalated rows: onset_overrun_s + stall_ms/1000 + wait_chunks*1s + relay_ms/1000 (relay TEXT generation wall time; no relay audio was synthesized in steer runs)"
   },
   {
    "pool": "swebq",
    "arm": "always_tts",
-   "smoke_only": false,
+   "experiment_family": "native_v1",
+   "protocol_version": "tts_relay",
+   "in_paper": true,
+   "provenance_basis": "inferred, not a per-run record: bench script has a single commit (51fdb4e, 2026-09-02); volume gate_native.json mtime 2026-09-01 22:59 PDT and unchanged since; runs dated 2026-09-02/03 by shard mtime",
    "n_shards": 8,
    "shard_dates": [
     "2026-09-02 15:31 Pacific Daylight Time",
@@ -830,31 +1102,45 @@
     "native_bench/swebq/always_tts.jsonl.shard4",
     "native_bench/swebq/always_tts.jsonl.shard0"
    ],
+   "smoke_files": [],
+   "smoke_note": null,
    "judged_parquet": "native_bench/swebq_always_tts_judged.parquet",
    "judge": "OpenAudioBench gpt-4o",
    "code": "51fdb4e",
    "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
-   "relay_variant": "tts",
    "cached_remix": false,
    "executed": true,
    "stats": {
-    "n": 250,
+    "n_total": 250,
+    "n_scored": 250,
+    "missing_scores": 0,
+    "missing_scores_reason": null,
+    "metric": "oab_ok",
+    "acc_or_score_over_scored": 0.796,
     "escalation_rate": 0.992,
-    "acc_or_score": 0.796,
-    "acc_n_judged": 250,
     "expert_error_rows": 0,
-    "expert_timeout_rows": 0,
+    "timeout_proxy_rows_wait_ge_145": 0,
+    "timeout_proxy_rule": "PROXY: wait_chunks >= 145 of MAX_WAIT_S=150; no explicit timeout status or timestamp was logged in v1",
     "onset_before_last_chunk_fired": 0,
-    "audio_gt_30s": 0,
-    "lat_mean_s": 24.709419999999994,
-    "lat_p50_s": 20.3545,
-    "lat_p95_s": 55.0787
-   }
+    "audio_gt_30s": 0
+   },
+   "timing": {
+    "reconstructed_t_mean_s": 24.709419999999994,
+    "reconstructed_t_p50_s": 20.3545,
+    "reconstructed_t_p95_s": 55.0787
+   },
+   "timing_missing_reason": null,
+   "timing_source": "data/native_bench/swebq_always_tts_judged.parquet",
+   "timing_source_sha256": "6cfd758fab83bd3f3c1dd48d71abd799ad070eade55c6a411b7091d9115d473f",
+   "timing_endpoints": "local rows as local_only; escalated rows: onset_overrun_s + stall_ms/1000 + wait_chunks*1s + relay_synth_ms/1000 (teacher-forced re-synthesis wall time) + relay_audio_s (synthesized relay duration)"
   },
   {
    "pool": "swebq",
    "arm": "balanced_tts",
-   "smoke_only": false,
+   "experiment_family": "native_v1",
+   "protocol_version": "tts_relay",
+   "in_paper": true,
+   "provenance_basis": "inferred, not a per-run record: bench script has a single commit (51fdb4e, 2026-09-02); volume gate_native.json mtime 2026-09-01 22:59 PDT and unchanged since; runs dated 2026-09-02/03 by shard mtime",
    "n_shards": 8,
    "shard_dates": [
     "2026-09-02 15:25 Pacific Daylight Time",
@@ -875,31 +1161,45 @@
     "native_bench/swebq/balanced_tts.jsonl.shard1",
     "native_bench/swebq/balanced_tts.jsonl.shard0"
    ],
+   "smoke_files": [],
+   "smoke_note": null,
    "judged_parquet": "native_bench/swebq_balanced_tts_judged.parquet",
    "judge": "OpenAudioBench gpt-4o",
    "code": "51fdb4e",
    "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
-   "relay_variant": "tts",
    "cached_remix": false,
    "executed": true,
    "stats": {
-    "n": 250,
+    "n_total": 250,
+    "n_scored": 250,
+    "missing_scores": 0,
+    "missing_scores_reason": null,
+    "metric": "oab_ok",
+    "acc_or_score_over_scored": 0.624,
     "escalation_rate": 0.22,
-    "acc_or_score": 0.624,
-    "acc_n_judged": 250,
     "expert_error_rows": 0,
-    "expert_timeout_rows": 0,
+    "timeout_proxy_rows_wait_ge_145": 0,
+    "timeout_proxy_rule": "PROXY: wait_chunks >= 145 of MAX_WAIT_S=150; no explicit timeout status or timestamp was logged in v1",
     "onset_before_last_chunk_fired": 0,
-    "audio_gt_30s": 0,
-    "lat_mean_s": 8.6681,
-    "lat_p50_s": 3.6574999999999998,
-    "lat_p95_s": 35.47864999999997
-   }
+    "audio_gt_30s": 0
+   },
+   "timing": {
+    "reconstructed_t_mean_s": 8.6681,
+    "reconstructed_t_p50_s": 3.6574999999999998,
+    "reconstructed_t_p95_s": 35.47864999999997
+   },
+   "timing_missing_reason": null,
+   "timing_source": "data/native_bench/swebq_balanced_tts_judged.parquet",
+   "timing_source_sha256": "9386c25b03348db75e559583010fe09f53551a5502c697c9a831031a4ea1900f",
+   "timing_endpoints": "local rows as local_only; escalated rows: onset_overrun_s + stall_ms/1000 + wait_chunks*1s + relay_synth_ms/1000 (teacher-forced re-synthesis wall time) + relay_audio_s (synthesized relay duration)"
   },
   {
    "pool": "swebq",
    "arm": "conservative_tts",
-   "smoke_only": false,
+   "experiment_family": "native_v1",
+   "protocol_version": "tts_relay",
+   "in_paper": true,
+   "provenance_basis": "inferred, not a per-run record: bench script has a single commit (51fdb4e, 2026-09-02); volume gate_native.json mtime 2026-09-01 22:59 PDT and unchanged since; runs dated 2026-09-02/03 by shard mtime",
    "n_shards": 8,
    "shard_dates": [
     "2026-09-02 16:06 Pacific Daylight Time",
@@ -919,31 +1219,45 @@
     "native_bench/swebq/conservative_tts.jsonl.shard1",
     "native_bench/swebq/conservative_tts.jsonl.shard0"
    ],
+   "smoke_files": [],
+   "smoke_note": null,
    "judged_parquet": "native_bench/swebq_conservative_tts_judged.parquet",
    "judge": "OpenAudioBench gpt-4o",
    "code": "51fdb4e",
    "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
-   "relay_variant": "tts",
    "cached_remix": false,
    "executed": true,
    "stats": {
-    "n": 250,
+    "n_total": 250,
+    "n_scored": 250,
+    "missing_scores": 0,
+    "missing_scores_reason": null,
+    "metric": "oab_ok",
+    "acc_or_score_over_scored": 0.592,
     "escalation_rate": 0.048,
-    "acc_or_score": 0.592,
-    "acc_n_judged": 250,
     "expert_error_rows": 0,
-    "expert_timeout_rows": 0,
+    "timeout_proxy_rows_wait_ge_145": 0,
+    "timeout_proxy_rule": "PROXY: wait_chunks >= 145 of MAX_WAIT_S=150; no explicit timeout status or timestamp was logged in v1",
     "onset_before_last_chunk_fired": 0,
-    "audio_gt_30s": 0,
-    "lat_mean_s": 6.60426,
-    "lat_p50_s": 2.9875,
-    "lat_p95_s": 15.365449999999997
-   }
+    "audio_gt_30s": 0
+   },
+   "timing": {
+    "reconstructed_t_mean_s": 6.60426,
+    "reconstructed_t_p50_s": 2.9875,
+    "reconstructed_t_p95_s": 15.365449999999997
+   },
+   "timing_missing_reason": null,
+   "timing_source": "data/native_bench/swebq_conservative_tts_judged.parquet",
+   "timing_source_sha256": "83717f59af33575e62d9c846fd07405397303ab340c92b5fd10e9a8409eda740",
+   "timing_endpoints": "local rows as local_only; escalated rows: onset_overrun_s + stall_ms/1000 + wait_chunks*1s + relay_synth_ms/1000 (teacher-forced re-synthesis wall time) + relay_audio_s (synthesized relay duration)"
   },
   {
    "pool": "swebq",
    "arm": "never",
-   "smoke_only": false,
+   "experiment_family": "native_v1",
+   "protocol_version": "local_only",
+   "in_paper": true,
+   "provenance_basis": "inferred, not a per-run record: bench script has a single commit (51fdb4e, 2026-09-02); volume gate_native.json mtime 2026-09-01 22:59 PDT and unchanged since; runs dated 2026-09-02/03 by shard mtime",
    "n_shards": 8,
    "shard_dates": [
     "2026-09-02 10:11 Pacific Daylight Time",
@@ -961,31 +1275,45 @@
     "native_bench/swebq/never.jsonl.shard6",
     "native_bench/swebq/never.jsonl.shard5"
    ],
+   "smoke_files": [],
+   "smoke_note": null,
    "judged_parquet": "native_bench/swebq_never_judged.parquet",
    "judge": "OpenAudioBench gpt-4o",
    "code": "51fdb4e",
    "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
-   "relay_variant": null,
    "cached_remix": false,
    "executed": true,
    "stats": {
-    "n": 250,
+    "n_total": 250,
+    "n_scored": 250,
+    "missing_scores": 0,
+    "missing_scores_reason": null,
+    "metric": "oab_ok",
+    "acc_or_score_over_scored": 0.528,
     "escalation_rate": 0.0,
-    "acc_or_score": 0.528,
-    "acc_n_judged": 250,
     "expert_error_rows": 0,
-    "expert_timeout_rows": 0,
+    "timeout_proxy_rows_wait_ge_145": 0,
+    "timeout_proxy_rule": "PROXY: wait_chunks >= 145 of MAX_WAIT_S=150; no explicit timeout status or timestamp was logged in v1",
     "onset_before_last_chunk_fired": 0,
-    "audio_gt_30s": 0,
-    "lat_mean_s": 5.908204000000002,
-    "lat_p50_s": 3.1355000000000004,
-    "lat_p95_s": 10.068449999999999
-   }
+    "audio_gt_30s": 0
+   },
+   "timing": {
+    "reconstructed_t_mean_s": 5.908204,
+    "reconstructed_t_p50_s": 3.1355000000000004,
+    "reconstructed_t_p95_s": 10.068449999999999
+   },
+   "timing_missing_reason": null,
+   "timing_source": "data/native_bench/swebq_never_judged.parquet",
+   "timing_source_sha256": "46debc70d24b885dbb001a1b5f4bb60842616375ffc57c23667e0e56dcc9aa71",
+   "timing_endpoints": "onset_overrun_s (answer-onset chunks past end of query audio, 1 s/chunk) + answer_ms/1000 (TEXT generation wall time; generate_audio=False, no audio synthesized)"
   },
   {
    "pool": "swebq",
    "arm": "old_cleaner_always_tts",
-   "smoke_only": false,
+   "experiment_family": "legacy_old_cleaner",
+   "protocol_version": "tts_relay(pre-cleaner-fix)",
+   "in_paper": false,
+   "provenance_basis": "filename prefix only; producing code version not recorded",
    "n_shards": 8,
    "shard_dates": [
     "2026-09-02 15:19 Pacific Daylight Time"
@@ -1000,18 +1328,22 @@
     "native_bench/swebq/old_cleaner_always_tts.jsonl.shard4",
     "native_bench/swebq/old_cleaner_always_tts.jsonl.shard2"
    ],
+   "smoke_files": [],
+   "smoke_note": null,
    "judged_parquet": null,
    "judge": "OpenAudioBench gpt-4o",
-   "code": "51fdb4e",
-   "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
-   "relay_variant": "tts",
+   "code": null,
+   "gate_sha256": null,
    "cached_remix": false,
    "executed": true
   },
   {
    "pool": "sllama",
    "arm": "agg0",
-   "smoke_only": false,
+   "experiment_family": "8cu_official_rejudge",
+   "protocol_version": "trace_dump(no serving loop)",
+   "in_paper": false,
+   "provenance_basis": "concurrent 8cu experiment (RESULTS 8cu-1..4); NOT part of this revision task; gate/serving fields not applicable",
    "n_shards": 1,
    "shard_dates": [
     "2026-09-07 15:32 Pacific Daylight Time"
@@ -1019,28 +1351,41 @@
    "raw_shards": [
     "native_bench/sllama/agg0.jsonl.shard0"
    ],
+   "smoke_files": [],
+   "smoke_note": null,
    "judged_parquet": "native_bench/sllama_agg0_judged.parquet",
    "judge": "OpenAudioBench gpt-4o",
-   "code": "51fdb4e",
-   "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
-   "relay_variant": null,
+   "code": "modal_native_dump.py (8cu line, 2026-09-07)",
+   "gate_sha256": null,
    "cached_remix": false,
    "executed": true,
    "stats": {
-    "n": 250,
+    "n_total": 250,
+    "n_scored": 250,
+    "missing_scores": 0,
+    "missing_scores_reason": null,
+    "metric": "oab_ok",
+    "acc_or_score_over_scored": 0.796,
     "escalation_rate": 0.0,
-    "acc_or_score": 0.796,
-    "acc_n_judged": 250,
-    "expert_error_rows": 0,
-    "expert_timeout_rows": 0,
-    "onset_before_last_chunk_fired": 0,
-    "audio_gt_30s": 0
-   }
+    "expert_error_rows": null,
+    "timeout_proxy_rows_wait_ge_145": null,
+    "timeout_proxy_rule": "PROXY: wait_chunks >= 145 of MAX_WAIT_S=150; no explicit timeout status or timestamp was logged in v1",
+    "onset_before_last_chunk_fired": null,
+    "audio_gt_30s": null
+   },
+   "timing": null,
+   "timing_missing_reason": "no timing definition for protocol trace_dump(no serving loop)",
+   "timing_source": "data/native_bench/sllama_agg0_judged.parquet",
+   "timing_source_sha256": "087c48cec8c3220a1f0a121bd12c5afa0fc52d317c1875269245b82739b7a4e2",
+   "timing_endpoints": null
   },
   {
    "pool": "sllama",
    "arm": "aggmlp",
-   "smoke_only": false,
+   "experiment_family": "8cu_official_rejudge",
+   "protocol_version": "trace_dump(no serving loop)",
+   "in_paper": false,
+   "provenance_basis": "concurrent 8cu experiment (RESULTS 8cu-1..4); NOT part of this revision task; gate/serving fields not applicable",
    "n_shards": 1,
    "shard_dates": [
     "2026-09-07 15:32 Pacific Daylight Time"
@@ -1048,28 +1393,41 @@
    "raw_shards": [
     "native_bench/sllama/aggmlp.jsonl.shard0"
    ],
+   "smoke_files": [],
+   "smoke_note": null,
    "judged_parquet": "native_bench/sllama_aggmlp_judged.parquet",
    "judge": "OpenAudioBench gpt-4o",
-   "code": "51fdb4e",
-   "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
-   "relay_variant": null,
+   "code": "modal_native_dump.py (8cu line, 2026-09-07)",
+   "gate_sha256": null,
    "cached_remix": false,
    "executed": true,
    "stats": {
-    "n": 250,
+    "n_total": 250,
+    "n_scored": 250,
+    "missing_scores": 0,
+    "missing_scores_reason": null,
+    "metric": "oab_ok",
+    "acc_or_score_over_scored": 0.744,
     "escalation_rate": 0.0,
-    "acc_or_score": 0.744,
-    "acc_n_judged": 250,
-    "expert_error_rows": 0,
-    "expert_timeout_rows": 0,
-    "onset_before_last_chunk_fired": 0,
-    "audio_gt_30s": 0
-   }
+    "expert_error_rows": null,
+    "timeout_proxy_rows_wait_ge_145": null,
+    "timeout_proxy_rule": "PROXY: wait_chunks >= 145 of MAX_WAIT_S=150; no explicit timeout status or timestamp was logged in v1",
+    "onset_before_last_chunk_fired": null,
+    "audio_gt_30s": null
+   },
+   "timing": null,
+   "timing_missing_reason": "no timing definition for protocol trace_dump(no serving loop)",
+   "timing_source": "data/native_bench/sllama_aggmlp_judged.parquet",
+   "timing_source_sha256": "3b317240d0870dcc868170fe0dfe926df13d9feb3729593c84d38d49a4f4906d",
+   "timing_endpoints": null
   },
   {
    "pool": "sllama",
    "arm": "aggressive_tts",
-   "smoke_only": false,
+   "experiment_family": "native_v1",
+   "protocol_version": "tts_relay",
+   "in_paper": true,
+   "provenance_basis": "inferred, not a per-run record: bench script has a single commit (51fdb4e, 2026-09-02); volume gate_native.json mtime 2026-09-01 22:59 PDT and unchanged since; runs dated 2026-09-02/03 by shard mtime",
    "n_shards": 8,
    "shard_dates": [
     "2026-09-02 16:35 Pacific Daylight Time",
@@ -1086,31 +1444,45 @@
     "native_bench/sllama/aggressive_tts.jsonl.shard2",
     "native_bench/sllama/aggressive_tts.jsonl.shard1"
    ],
+   "smoke_files": [],
+   "smoke_note": null,
    "judged_parquet": "native_bench/sllama_aggressive_tts_judged.parquet",
    "judge": "OpenAudioBench gpt-4o",
    "code": "51fdb4e",
    "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
-   "relay_variant": "tts",
    "cached_remix": false,
    "executed": true,
    "stats": {
-    "n": 250,
+    "n_total": 250,
+    "n_scored": 250,
+    "missing_scores": 0,
+    "missing_scores_reason": null,
+    "metric": "oab_ok",
+    "acc_or_score_over_scored": 0.856,
     "escalation_rate": 0.188,
-    "acc_or_score": 0.856,
-    "acc_n_judged": 250,
     "expert_error_rows": 0,
-    "expert_timeout_rows": 0,
+    "timeout_proxy_rows_wait_ge_145": 0,
+    "timeout_proxy_rule": "PROXY: wait_chunks >= 145 of MAX_WAIT_S=150; no explicit timeout status or timestamp was logged in v1",
     "onset_before_last_chunk_fired": 4,
-    "audio_gt_30s": 0,
-    "lat_mean_s": 5.972716,
-    "lat_p50_s": 3.002,
-    "lat_p95_s": 26.036799999999975
-   }
+    "audio_gt_30s": 0
+   },
+   "timing": {
+    "reconstructed_t_mean_s": 5.972716,
+    "reconstructed_t_p50_s": 3.002,
+    "reconstructed_t_p95_s": 26.036799999999975
+   },
+   "timing_missing_reason": null,
+   "timing_source": "data/native_bench/sllama_aggressive_tts_judged.parquet",
+   "timing_source_sha256": "3e8317c8b9d45c6a86c09b3beece3bca150313314181bff0d33069e343659731",
+   "timing_endpoints": "local rows as local_only; escalated rows: onset_overrun_s + stall_ms/1000 + wait_chunks*1s + relay_synth_ms/1000 (teacher-forced re-synthesis wall time) + relay_audio_s (synthesized relay duration)"
   },
   {
    "pool": "sllama",
    "arm": "always_tts",
-   "smoke_only": false,
+   "experiment_family": "native_v1",
+   "protocol_version": "tts_relay",
+   "in_paper": true,
+   "provenance_basis": "inferred, not a per-run record: bench script has a single commit (51fdb4e, 2026-09-02); volume gate_native.json mtime 2026-09-01 22:59 PDT and unchanged since; runs dated 2026-09-02/03 by shard mtime",
    "n_shards": 8,
    "shard_dates": [
     "2026-09-02 15:21 Pacific Daylight Time",
@@ -1131,31 +1503,45 @@
     "native_bench/sllama/always_tts.jsonl.shard1",
     "native_bench/sllama/always_tts.jsonl.shard0"
    ],
+   "smoke_files": [],
+   "smoke_note": null,
    "judged_parquet": "native_bench/sllama_always_tts_judged.parquet",
    "judge": "OpenAudioBench gpt-4o",
    "code": "51fdb4e",
    "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
-   "relay_variant": "tts",
    "cached_remix": false,
    "executed": true,
    "stats": {
-    "n": 250,
+    "n_total": 250,
+    "n_scored": 250,
+    "missing_scores": 0,
+    "missing_scores_reason": null,
+    "metric": "oab_ok",
+    "acc_or_score_over_scored": 0.916,
     "escalation_rate": 1.0,
-    "acc_or_score": 0.916,
-    "acc_n_judged": 250,
     "expert_error_rows": 0,
-    "expert_timeout_rows": 0,
+    "timeout_proxy_rows_wait_ge_145": 0,
+    "timeout_proxy_rule": "PROXY: wait_chunks >= 145 of MAX_WAIT_S=150; no explicit timeout status or timestamp was logged in v1",
     "onset_before_last_chunk_fired": 10,
-    "audio_gt_30s": 0,
-    "lat_mean_s": 12.404188,
-    "lat_p50_s": 9.047,
-    "lat_p95_s": 31.50454999999999
-   }
+    "audio_gt_30s": 0
+   },
+   "timing": {
+    "reconstructed_t_mean_s": 12.404188,
+    "reconstructed_t_p50_s": 9.047,
+    "reconstructed_t_p95_s": 31.50454999999999
+   },
+   "timing_missing_reason": null,
+   "timing_source": "data/native_bench/sllama_always_tts_judged.parquet",
+   "timing_source_sha256": "a82d74aed1db32228cc9e8d787f70655bd0c943f0c1bb38afe95b01275b04a8f",
+   "timing_endpoints": "local rows as local_only; escalated rows: onset_overrun_s + stall_ms/1000 + wait_chunks*1s + relay_synth_ms/1000 (teacher-forced re-synthesis wall time) + relay_audio_s (synthesized relay duration)"
   },
   {
    "pool": "sllama",
    "arm": "balanced_tts",
-   "smoke_only": false,
+   "experiment_family": "native_v1",
+   "protocol_version": "tts_relay",
+   "in_paper": true,
+   "provenance_basis": "inferred, not a per-run record: bench script has a single commit (51fdb4e, 2026-09-02); volume gate_native.json mtime 2026-09-01 22:59 PDT and unchanged since; runs dated 2026-09-02/03 by shard mtime",
    "n_shards": 8,
    "shard_dates": [
     "2026-09-02 16:26 Pacific Daylight Time",
@@ -1174,31 +1560,45 @@
     "native_bench/sllama/balanced_tts.jsonl.shard0",
     "native_bench/sllama/balanced_tts.jsonl.shard1"
    ],
+   "smoke_files": [],
+   "smoke_note": null,
    "judged_parquet": "native_bench/sllama_balanced_tts_judged.parquet",
    "judge": "OpenAudioBench gpt-4o",
    "code": "51fdb4e",
    "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
-   "relay_variant": "tts",
    "cached_remix": false,
    "executed": true,
    "stats": {
-    "n": 250,
+    "n_total": 250,
+    "n_scored": 250,
+    "missing_scores": 0,
+    "missing_scores_reason": null,
+    "metric": "oab_ok",
+    "acc_or_score_over_scored": 0.824,
     "escalation_rate": 0.036,
-    "acc_or_score": 0.824,
-    "acc_n_judged": 250,
     "expert_error_rows": 0,
-    "expert_timeout_rows": 0,
+    "timeout_proxy_rows_wait_ge_145": 0,
+    "timeout_proxy_rule": "PROXY: wait_chunks >= 145 of MAX_WAIT_S=150; no explicit timeout status or timestamp was logged in v1",
     "onset_before_last_chunk_fired": 0,
-    "audio_gt_30s": 0,
-    "lat_mean_s": 5.202088,
-    "lat_p50_s": 2.7615,
-    "lat_p95_s": 8.3466
-   }
+    "audio_gt_30s": 0
+   },
+   "timing": {
+    "reconstructed_t_mean_s": 5.202088,
+    "reconstructed_t_p50_s": 2.7615,
+    "reconstructed_t_p95_s": 8.3466
+   },
+   "timing_missing_reason": null,
+   "timing_source": "data/native_bench/sllama_balanced_tts_judged.parquet",
+   "timing_source_sha256": "260bcbb47ff5dd4e2eb1bfa37c84905bd3dcca0ea6fbbd0b86d5044605212008",
+   "timing_endpoints": "local rows as local_only; escalated rows: onset_overrun_s + stall_ms/1000 + wait_chunks*1s + relay_synth_ms/1000 (teacher-forced re-synthesis wall time) + relay_audio_s (synthesized relay duration)"
   },
   {
    "pool": "sllama",
    "arm": "conservative_tts",
-   "smoke_only": false,
+   "experiment_family": "native_v1",
+   "protocol_version": "tts_relay",
+   "in_paper": true,
+   "provenance_basis": "inferred, not a per-run record: bench script has a single commit (51fdb4e, 2026-09-02); volume gate_native.json mtime 2026-09-01 22:59 PDT and unchanged since; runs dated 2026-09-02/03 by shard mtime",
    "n_shards": 8,
    "shard_dates": [
     "2026-09-02 16:42 Pacific Daylight Time",
@@ -1218,31 +1618,45 @@
     "native_bench/sllama/conservative_tts.jsonl.shard1",
     "native_bench/sllama/conservative_tts.jsonl.shard0"
    ],
+   "smoke_files": [],
+   "smoke_note": null,
    "judged_parquet": "native_bench/sllama_conservative_tts_judged.parquet",
    "judge": "OpenAudioBench gpt-4o",
    "code": "51fdb4e",
    "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
-   "relay_variant": "tts",
    "cached_remix": false,
    "executed": true,
    "stats": {
-    "n": 250,
+    "n_total": 250,
+    "n_scored": 250,
+    "missing_scores": 0,
+    "missing_scores_reason": null,
+    "metric": "oab_ok",
+    "acc_or_score_over_scored": 0.788,
     "escalation_rate": 0.004,
-    "acc_or_score": 0.788,
-    "acc_n_judged": 250,
     "expert_error_rows": 0,
-    "expert_timeout_rows": 0,
+    "timeout_proxy_rows_wait_ge_145": 0,
+    "timeout_proxy_rule": "PROXY: wait_chunks >= 145 of MAX_WAIT_S=150; no explicit timeout status or timestamp was logged in v1",
     "onset_before_last_chunk_fired": 0,
-    "audio_gt_30s": 0,
-    "lat_mean_s": 2.93292,
-    "lat_p50_s": 2.501,
-    "lat_p95_s": 6.010999999999998
-   }
+    "audio_gt_30s": 0
+   },
+   "timing": {
+    "reconstructed_t_mean_s": 2.93292,
+    "reconstructed_t_p50_s": 2.501,
+    "reconstructed_t_p95_s": 6.010999999999998
+   },
+   "timing_missing_reason": null,
+   "timing_source": "data/native_bench/sllama_conservative_tts_judged.parquet",
+   "timing_source_sha256": "98564f869adbd1ceb53a91e7943e9544e4448ff5d095cc13cc2e702729f36d0b",
+   "timing_endpoints": "local rows as local_only; escalated rows: onset_overrun_s + stall_ms/1000 + wait_chunks*1s + relay_synth_ms/1000 (teacher-forced re-synthesis wall time) + relay_audio_s (synthesized relay duration)"
   },
   {
    "pool": "sllama",
    "arm": "never",
-   "smoke_only": false,
+   "experiment_family": "native_v1",
+   "protocol_version": "local_only",
+   "in_paper": true,
+   "provenance_basis": "inferred, not a per-run record: bench script has a single commit (51fdb4e, 2026-09-02); volume gate_native.json mtime 2026-09-01 22:59 PDT and unchanged since; runs dated 2026-09-02/03 by shard mtime",
    "n_shards": 8,
    "shard_dates": [
     "2026-09-02 10:19 Pacific Daylight Time",
@@ -1259,31 +1673,45 @@
     "native_bench/sllama/never.jsonl.shard0",
     "native_bench/sllama/never.jsonl.shard1"
    ],
+   "smoke_files": [],
+   "smoke_note": null,
    "judged_parquet": "native_bench/sllama_never_judged.parquet",
    "judge": "OpenAudioBench gpt-4o",
    "code": "51fdb4e",
    "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
-   "relay_variant": null,
    "cached_remix": false,
    "executed": true,
    "stats": {
-    "n": 250,
+    "n_total": 250,
+    "n_scored": 250,
+    "missing_scores": 0,
+    "missing_scores_reason": null,
+    "metric": "oab_ok",
+    "acc_or_score_over_scored": 0.824,
     "escalation_rate": 0.0,
-    "acc_or_score": 0.824,
-    "acc_n_judged": 250,
     "expert_error_rows": 0,
-    "expert_timeout_rows": 0,
+    "timeout_proxy_rows_wait_ge_145": 0,
+    "timeout_proxy_rule": "PROXY: wait_chunks >= 145 of MAX_WAIT_S=150; no explicit timeout status or timestamp was logged in v1",
     "onset_before_last_chunk_fired": 0,
-    "audio_gt_30s": 0,
-    "lat_mean_s": 3.1970599999999996,
-    "lat_p50_s": 2.8040000000000003,
-    "lat_p95_s": 7.017549999999997
-   }
+    "audio_gt_30s": 0
+   },
+   "timing": {
+    "reconstructed_t_mean_s": 3.1970600000000005,
+    "reconstructed_t_p50_s": 2.8040000000000003,
+    "reconstructed_t_p95_s": 7.017549999999997
+   },
+   "timing_missing_reason": null,
+   "timing_source": "data/native_bench/sllama_never_judged.parquet",
+   "timing_source_sha256": "e5be47e932cf9ed9e0a61e379b6b7659eef02da946dc0455231338e0e4023a1a",
+   "timing_endpoints": "onset_overrun_s (answer-onset chunks past end of query audio, 1 s/chunk) + answer_ms/1000 (TEXT generation wall time; generate_audio=False, no audio synthesized)"
   },
   {
    "pool": "sdqa",
    "arm": "aggressive_tts",
-   "smoke_only": false,
+   "experiment_family": "native_v1",
+   "protocol_version": "tts_relay",
+   "in_paper": true,
+   "provenance_basis": "inferred, not a per-run record: bench script has a single commit (51fdb4e, 2026-09-02); volume gate_native.json mtime 2026-09-01 22:59 PDT and unchanged since; runs dated 2026-09-02/03 by shard mtime",
    "n_shards": 8,
    "shard_dates": [
     "2026-09-02 17:12 Pacific Daylight Time",
@@ -1299,31 +1727,45 @@
     "native_bench/sdqa/aggressive_tts.jsonl.shard1",
     "native_bench/sdqa/aggressive_tts.jsonl.shard5"
    ],
+   "smoke_files": [],
+   "smoke_note": null,
    "judged_parquet": "native_bench/sdqa_aggressive_tts_judged.parquet",
    "judge": "ours ref-anchored gpt-5.4-mini",
    "code": "51fdb4e",
    "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
-   "relay_variant": "tts",
    "cached_remix": false,
    "executed": true,
    "stats": {
-    "n": 200,
+    "n_total": 200,
+    "n_scored": 200,
+    "missing_scores": 0,
+    "missing_scores_reason": null,
+    "metric": "adequate",
+    "acc_or_score_over_scored": 0.825,
     "escalation_rate": 0.66,
-    "acc_or_score": 0.825,
-    "acc_n_judged": 200,
     "expert_error_rows": 0,
-    "expert_timeout_rows": 0,
+    "timeout_proxy_rows_wait_ge_145": 0,
+    "timeout_proxy_rule": "PROXY: wait_chunks >= 145 of MAX_WAIT_S=150; no explicit timeout status or timestamp was logged in v1",
     "onset_before_last_chunk_fired": 5,
-    "audio_gt_30s": 0,
-    "lat_mean_s": 14.726795,
-    "lat_p50_s": 12.8805,
-    "lat_p95_s": 36.954699999999995
-   }
+    "audio_gt_30s": 0
+   },
+   "timing": {
+    "reconstructed_t_mean_s": 14.726795,
+    "reconstructed_t_p50_s": 12.8805,
+    "reconstructed_t_p95_s": 36.954699999999995
+   },
+   "timing_missing_reason": null,
+   "timing_source": "data/native_bench/sdqa_aggressive_tts_judged.parquet",
+   "timing_source_sha256": "e8a1b9e09f3da86c08954733b161e31bb13bbfd6afd4fedb8e58ed82e10fcd76",
+   "timing_endpoints": "local rows as local_only; escalated rows: onset_overrun_s + stall_ms/1000 + wait_chunks*1s + relay_synth_ms/1000 (teacher-forced re-synthesis wall time) + relay_audio_s (synthesized relay duration)"
   },
   {
    "pool": "sdqa",
    "arm": "always_tts",
-   "smoke_only": false,
+   "experiment_family": "native_v1",
+   "protocol_version": "tts_relay",
+   "in_paper": true,
+   "provenance_basis": "inferred, not a per-run record: bench script has a single commit (51fdb4e, 2026-09-02); volume gate_native.json mtime 2026-09-01 22:59 PDT and unchanged since; runs dated 2026-09-02/03 by shard mtime",
    "n_shards": 8,
    "shard_dates": [
     "2026-09-02 15:49 Pacific Daylight Time",
@@ -1342,31 +1784,45 @@
     "native_bench/sdqa/always_tts.jsonl.shard3",
     "native_bench/sdqa/always_tts.jsonl.shard0"
    ],
+   "smoke_files": [],
+   "smoke_note": null,
    "judged_parquet": "native_bench/sdqa_always_tts_judged.parquet",
    "judge": "ours ref-anchored gpt-5.4-mini",
    "code": "51fdb4e",
    "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
-   "relay_variant": "tts",
    "cached_remix": false,
    "executed": true,
    "stats": {
-    "n": 200,
+    "n_total": 200,
+    "n_scored": 200,
+    "missing_scores": 0,
+    "missing_scores_reason": null,
+    "metric": "adequate",
+    "acc_or_score_over_scored": 0.87,
     "escalation_rate": 1.0,
-    "acc_or_score": 0.87,
-    "acc_n_judged": 200,
     "expert_error_rows": 0,
-    "expert_timeout_rows": 0,
+    "timeout_proxy_rows_wait_ge_145": 0,
+    "timeout_proxy_rule": "PROXY: wait_chunks >= 145 of MAX_WAIT_S=150; no explicit timeout status or timestamp was logged in v1",
     "onset_before_last_chunk_fired": 13,
-    "audio_gt_30s": 0,
-    "lat_mean_s": 20.859984999999984,
-    "lat_p50_s": 18.7495,
-    "lat_p95_s": 40.049099999999974
-   }
+    "audio_gt_30s": 0
+   },
+   "timing": {
+    "reconstructed_t_mean_s": 20.859984999999984,
+    "reconstructed_t_p50_s": 18.7495,
+    "reconstructed_t_p95_s": 40.049099999999974
+   },
+   "timing_missing_reason": null,
+   "timing_source": "data/native_bench/sdqa_always_tts_judged.parquet",
+   "timing_source_sha256": "dc74452608123570f9a2b1748bc21a0822c0bc686505673c217e8bab6fbf32b7",
+   "timing_endpoints": "local rows as local_only; escalated rows: onset_overrun_s + stall_ms/1000 + wait_chunks*1s + relay_synth_ms/1000 (teacher-forced re-synthesis wall time) + relay_audio_s (synthesized relay duration)"
   },
   {
    "pool": "sdqa",
    "arm": "balanced_tts",
-   "smoke_only": false,
+   "experiment_family": "native_v1",
+   "protocol_version": "tts_relay",
+   "in_paper": true,
+   "provenance_basis": "inferred, not a per-run record: bench script has a single commit (51fdb4e, 2026-09-02); volume gate_native.json mtime 2026-09-01 22:59 PDT and unchanged since; runs dated 2026-09-02/03 by shard mtime",
    "n_shards": 8,
    "shard_dates": [
     "2026-09-02 16:57 Pacific Daylight Time",
@@ -1384,31 +1840,45 @@
     "native_bench/sdqa/balanced_tts.jsonl.shard3",
     "native_bench/sdqa/balanced_tts.jsonl.shard1"
    ],
+   "smoke_files": [],
+   "smoke_note": null,
    "judged_parquet": "native_bench/sdqa_balanced_tts_judged.parquet",
    "judge": "ours ref-anchored gpt-5.4-mini",
    "code": "51fdb4e",
    "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
-   "relay_variant": "tts",
    "cached_remix": false,
    "executed": true,
    "stats": {
-    "n": 200,
+    "n_total": 200,
+    "n_scored": 200,
+    "missing_scores": 0,
+    "missing_scores_reason": null,
+    "metric": "adequate",
+    "acc_or_score_over_scored": 0.65,
     "escalation_rate": 0.27,
-    "acc_or_score": 0.65,
-    "acc_n_judged": 200,
     "expert_error_rows": 0,
-    "expert_timeout_rows": 0,
+    "timeout_proxy_rows_wait_ge_145": 0,
+    "timeout_proxy_rule": "PROXY: wait_chunks >= 145 of MAX_WAIT_S=150; no explicit timeout status or timestamp was logged in v1",
     "onset_before_last_chunk_fired": 2,
-    "audio_gt_30s": 0,
-    "lat_mean_s": 8.476405,
-    "lat_p50_s": 3.2845,
-    "lat_p95_s": 32.234349999999985
-   }
+    "audio_gt_30s": 0
+   },
+   "timing": {
+    "reconstructed_t_mean_s": 8.476405,
+    "reconstructed_t_p50_s": 3.2845,
+    "reconstructed_t_p95_s": 32.234349999999985
+   },
+   "timing_missing_reason": null,
+   "timing_source": "data/native_bench/sdqa_balanced_tts_judged.parquet",
+   "timing_source_sha256": "3007bc12214ac175b43f13134e5801f7e3d8a0f9303d32de9412547fbe88767d",
+   "timing_endpoints": "local rows as local_only; escalated rows: onset_overrun_s + stall_ms/1000 + wait_chunks*1s + relay_synth_ms/1000 (teacher-forced re-synthesis wall time) + relay_audio_s (synthesized relay duration)"
   },
   {
    "pool": "sdqa",
    "arm": "conservative_tts",
-   "smoke_only": false,
+   "experiment_family": "native_v1",
+   "protocol_version": "tts_relay",
+   "in_paper": true,
+   "provenance_basis": "inferred, not a per-run record: bench script has a single commit (51fdb4e, 2026-09-02); volume gate_native.json mtime 2026-09-01 22:59 PDT and unchanged since; runs dated 2026-09-02/03 by shard mtime",
    "n_shards": 8,
    "shard_dates": [
     "2026-09-02 17:16 Pacific Daylight Time",
@@ -1424,31 +1894,45 @@
     "native_bench/sdqa/conservative_tts.jsonl.shard3",
     "native_bench/sdqa/conservative_tts.jsonl.shard1"
    ],
+   "smoke_files": [],
+   "smoke_note": null,
    "judged_parquet": "native_bench/sdqa_conservative_tts_judged.parquet",
    "judge": "ours ref-anchored gpt-5.4-mini",
    "code": "51fdb4e",
    "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
-   "relay_variant": "tts",
    "cached_remix": false,
    "executed": true,
    "stats": {
-    "n": 200,
+    "n_total": 200,
+    "n_scored": 200,
+    "missing_scores": 0,
+    "missing_scores_reason": null,
+    "metric": "adequate",
+    "acc_or_score_over_scored": 0.54,
     "escalation_rate": 0.065,
-    "acc_or_score": 0.54,
-    "acc_n_judged": 200,
     "expert_error_rows": 0,
-    "expert_timeout_rows": 0,
+    "timeout_proxy_rows_wait_ge_145": 0,
+    "timeout_proxy_rule": "PROXY: wait_chunks >= 145 of MAX_WAIT_S=150; no explicit timeout status or timestamp was logged in v1",
     "onset_before_last_chunk_fired": 0,
-    "audio_gt_30s": 0,
-    "lat_mean_s": 3.7442,
-    "lat_p50_s": 2.198,
-    "lat_p95_s": 12.514649999999984
-   }
+    "audio_gt_30s": 0
+   },
+   "timing": {
+    "reconstructed_t_mean_s": 3.7442,
+    "reconstructed_t_p50_s": 2.198,
+    "reconstructed_t_p95_s": 12.514649999999984
+   },
+   "timing_missing_reason": null,
+   "timing_source": "data/native_bench/sdqa_conservative_tts_judged.parquet",
+   "timing_source_sha256": "02e78ac9f9be8ebc8ba1863c40c4ee86aeae7949733fcddfac66cdaac294a389",
+   "timing_endpoints": "local rows as local_only; escalated rows: onset_overrun_s + stall_ms/1000 + wait_chunks*1s + relay_synth_ms/1000 (teacher-forced re-synthesis wall time) + relay_audio_s (synthesized relay duration)"
   },
   {
    "pool": "sdqa",
    "arm": "never",
-   "smoke_only": false,
+   "experiment_family": "native_v1",
+   "protocol_version": "local_only",
+   "in_paper": true,
+   "provenance_basis": "inferred, not a per-run record: bench script has a single commit (51fdb4e, 2026-09-02); volume gate_native.json mtime 2026-09-01 22:59 PDT and unchanged since; runs dated 2026-09-02/03 by shard mtime",
    "n_shards": 8,
    "shard_dates": [
     "2026-09-02 10:25 Pacific Daylight Time",
@@ -1465,31 +1949,45 @@
     "native_bench/sdqa/never.jsonl.shard4",
     "native_bench/sdqa/never.jsonl.shard6"
    ],
+   "smoke_files": [],
+   "smoke_note": null,
    "judged_parquet": "native_bench/sdqa_never_judged.parquet",
    "judge": "ours ref-anchored gpt-5.4-mini",
    "code": "51fdb4e",
    "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
-   "relay_variant": null,
    "cached_remix": false,
    "executed": true,
    "stats": {
-    "n": 200,
+    "n_total": 200,
+    "n_scored": 200,
+    "missing_scores": 0,
+    "missing_scores_reason": null,
+    "metric": "adequate",
+    "acc_or_score_over_scored": 0.48,
     "escalation_rate": 0.0,
-    "acc_or_score": 0.48,
-    "acc_n_judged": 200,
     "expert_error_rows": 0,
-    "expert_timeout_rows": 0,
+    "timeout_proxy_rows_wait_ge_145": 0,
+    "timeout_proxy_rule": "PROXY: wait_chunks >= 145 of MAX_WAIT_S=150; no explicit timeout status or timestamp was logged in v1",
     "onset_before_last_chunk_fired": 0,
-    "audio_gt_30s": 0,
-    "lat_mean_s": 2.7842500000000014,
-    "lat_p50_s": 2.363,
-    "lat_p95_s": 6.5324
-   }
+    "audio_gt_30s": 0
+   },
+   "timing": {
+    "reconstructed_t_mean_s": 2.7842499999999997,
+    "reconstructed_t_p50_s": 2.363,
+    "reconstructed_t_p95_s": 6.5324
+   },
+   "timing_missing_reason": null,
+   "timing_source": "data/native_bench/sdqa_never_judged.parquet",
+   "timing_source_sha256": "27b5cb3f89a8b33594787fa15498bb84874c56427bd7f4ce2c91a69f38ea7a34",
+   "timing_endpoints": "onset_overrun_s (answer-onset chunks past end of query audio, 1 s/chunk) + answer_ms/1000 (TEXT generation wall time; generate_audio=False, no audio synthesized)"
   },
   {
    "pool": "sreason",
    "arm": "aggressive_tts",
-   "smoke_only": false,
+   "experiment_family": "native_v1",
+   "protocol_version": "tts_relay",
+   "in_paper": true,
+   "provenance_basis": "inferred, not a per-run record: bench script has a single commit (51fdb4e, 2026-09-02); volume gate_native.json mtime 2026-09-01 22:59 PDT and unchanged since; runs dated 2026-09-02/03 by shard mtime",
    "n_shards": 8,
    "shard_dates": [
     "2026-09-02 17:33 Pacific Daylight Time",
@@ -1507,31 +2005,45 @@
     "native_bench/sreason/aggressive_tts.jsonl.shard6",
     "native_bench/sreason/aggressive_tts.jsonl.shard3"
    ],
+   "smoke_files": [],
+   "smoke_note": null,
    "judged_parquet": "native_bench/sreason_aggressive_tts_judged.parquet",
    "judge": "ours ref-anchored gpt-5.4-mini",
    "code": "51fdb4e",
    "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
-   "relay_variant": "tts",
    "cached_remix": false,
    "executed": true,
    "stats": {
-    "n": 202,
+    "n_total": 202,
+    "n_scored": 202,
+    "missing_scores": 0,
+    "missing_scores_reason": null,
+    "metric": "adequate",
+    "acc_or_score_over_scored": 0.7277227722772277,
     "escalation_rate": 0.504950495049505,
-    "acc_or_score": 0.7277227722772277,
-    "acc_n_judged": 202,
     "expert_error_rows": 0,
-    "expert_timeout_rows": 1,
+    "timeout_proxy_rows_wait_ge_145": 1,
+    "timeout_proxy_rule": "PROXY: wait_chunks >= 145 of MAX_WAIT_S=150; no explicit timeout status or timestamp was logged in v1",
     "onset_before_last_chunk_fired": 13,
-    "audio_gt_30s": 17,
-    "lat_mean_s": 26.9870099009901,
-    "lat_p50_s": 11.873999999999999,
-    "lat_p95_s": 88.55104999999999
-   }
+    "audio_gt_30s": 17
+   },
+   "timing": {
+    "reconstructed_t_mean_s": 26.9870099009901,
+    "reconstructed_t_p50_s": 11.873999999999999,
+    "reconstructed_t_p95_s": 88.55104999999999
+   },
+   "timing_missing_reason": null,
+   "timing_source": "data/native_bench/sreason_aggressive_tts_judged.parquet",
+   "timing_source_sha256": "e91d1f02e728fd565d041ebdb38bd583ec7ad06eac2af38f0ca16b1c14634832",
+   "timing_endpoints": "local rows as local_only; escalated rows: onset_overrun_s + stall_ms/1000 + wait_chunks*1s + relay_synth_ms/1000 (teacher-forced re-synthesis wall time) + relay_audio_s (synthesized relay duration)"
   },
   {
    "pool": "sreason",
    "arm": "always_tts",
-   "smoke_only": false,
+   "experiment_family": "native_v1",
+   "protocol_version": "tts_relay",
+   "in_paper": true,
+   "provenance_basis": "inferred, not a per-run record: bench script has a single commit (51fdb4e, 2026-09-02); volume gate_native.json mtime 2026-09-01 22:59 PDT and unchanged since; runs dated 2026-09-02/03 by shard mtime",
    "n_shards": 8,
    "shard_dates": [
     "2026-09-02 16:04 Pacific Daylight Time",
@@ -1551,31 +2063,45 @@
     "native_bench/sreason/always_tts.jsonl.shard2",
     "native_bench/sreason/always_tts.jsonl.shard3"
    ],
+   "smoke_files": [],
+   "smoke_note": null,
    "judged_parquet": "native_bench/sreason_always_tts_judged.parquet",
    "judge": "ours ref-anchored gpt-5.4-mini",
    "code": "51fdb4e",
    "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
-   "relay_variant": "tts",
    "cached_remix": false,
    "executed": true,
    "stats": {
-    "n": 202,
+    "n_total": 202,
+    "n_scored": 202,
+    "missing_scores": 0,
+    "missing_scores_reason": null,
+    "metric": "adequate",
+    "acc_or_score_over_scored": 0.8366336633663366,
     "escalation_rate": 1.0,
-    "acc_or_score": 0.8366336633663366,
-    "acc_n_judged": 202,
     "expert_error_rows": 0,
-    "expert_timeout_rows": 0,
+    "timeout_proxy_rows_wait_ge_145": 0,
+    "timeout_proxy_rule": "PROXY: wait_chunks >= 145 of MAX_WAIT_S=150; no explicit timeout status or timestamp was logged in v1",
     "onset_before_last_chunk_fired": 18,
-    "audio_gt_30s": 17,
-    "lat_mean_s": 39.01002475247526,
-    "lat_p50_s": 26.926000000000002,
-    "lat_p95_s": 115.29549999999983
-   }
+    "audio_gt_30s": 17
+   },
+   "timing": {
+    "reconstructed_t_mean_s": 39.01002475247526,
+    "reconstructed_t_p50_s": 26.926000000000002,
+    "reconstructed_t_p95_s": 115.29549999999983
+   },
+   "timing_missing_reason": null,
+   "timing_source": "data/native_bench/sreason_always_tts_judged.parquet",
+   "timing_source_sha256": "32418c464a1219111124992e5b5b787916c62982d8072d2aa18762266f80d647",
+   "timing_endpoints": "local rows as local_only; escalated rows: onset_overrun_s + stall_ms/1000 + wait_chunks*1s + relay_synth_ms/1000 (teacher-forced re-synthesis wall time) + relay_audio_s (synthesized relay duration)"
   },
   {
    "pool": "sreason",
    "arm": "balanced_tts",
-   "smoke_only": false,
+   "experiment_family": "native_v1",
+   "protocol_version": "tts_relay",
+   "in_paper": true,
+   "provenance_basis": "inferred, not a per-run record: bench script has a single commit (51fdb4e, 2026-09-02); volume gate_native.json mtime 2026-09-01 22:59 PDT and unchanged since; runs dated 2026-09-02/03 by shard mtime",
    "n_shards": 8,
    "shard_dates": [
     "2026-09-02 17:23 Pacific Daylight Time",
@@ -1592,31 +2118,45 @@
     "native_bench/sreason/balanced_tts.jsonl.shard2",
     "native_bench/sreason/balanced_tts.jsonl.shard5"
    ],
+   "smoke_files": [],
+   "smoke_note": null,
    "judged_parquet": "native_bench/sreason_balanced_tts_judged.parquet",
    "judge": "ours ref-anchored gpt-5.4-mini",
    "code": "51fdb4e",
    "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
-   "relay_variant": "tts",
    "cached_remix": false,
    "executed": true,
    "stats": {
-    "n": 202,
+    "n_total": 202,
+    "n_scored": 202,
+    "missing_scores": 0,
+    "missing_scores_reason": null,
+    "metric": "adequate",
+    "acc_or_score_over_scored": 0.6633663366336634,
     "escalation_rate": 0.3316831683168317,
-    "acc_or_score": 0.6633663366336634,
-    "acc_n_judged": 202,
     "expert_error_rows": 0,
-    "expert_timeout_rows": 0,
+    "timeout_proxy_rows_wait_ge_145": 0,
+    "timeout_proxy_rule": "PROXY: wait_chunks >= 145 of MAX_WAIT_S=150; no explicit timeout status or timestamp was logged in v1",
     "onset_before_last_chunk_fired": 8,
-    "audio_gt_30s": 17,
-    "lat_mean_s": 16.788529702970294,
-    "lat_p50_s": 6.1905,
-    "lat_p95_s": 64.72709999999991
-   }
+    "audio_gt_30s": 17
+   },
+   "timing": {
+    "reconstructed_t_mean_s": 16.788529702970294,
+    "reconstructed_t_p50_s": 6.1905,
+    "reconstructed_t_p95_s": 64.72709999999991
+   },
+   "timing_missing_reason": null,
+   "timing_source": "data/native_bench/sreason_balanced_tts_judged.parquet",
+   "timing_source_sha256": "46f3d8b83df0b0ed94cc6258b6c44a2560a71f590fafa6a0adcca5d26fb224b0",
+   "timing_endpoints": "local rows as local_only; escalated rows: onset_overrun_s + stall_ms/1000 + wait_chunks*1s + relay_synth_ms/1000 (teacher-forced re-synthesis wall time) + relay_audio_s (synthesized relay duration)"
   },
   {
    "pool": "sreason",
    "arm": "conservative_tts",
-   "smoke_only": false,
+   "experiment_family": "native_v1",
+   "protocol_version": "tts_relay",
+   "in_paper": true,
+   "provenance_basis": "inferred, not a per-run record: bench script has a single commit (51fdb4e, 2026-09-02); volume gate_native.json mtime 2026-09-01 22:59 PDT and unchanged since; runs dated 2026-09-02/03 by shard mtime",
    "n_shards": 8,
    "shard_dates": [
     "2026-09-02 17:57 Pacific Daylight Time",
@@ -1635,31 +2175,45 @@
     "native_bench/sreason/conservative_tts.jsonl.shard7",
     "native_bench/sreason/conservative_tts.jsonl.shard5"
    ],
+   "smoke_files": [],
+   "smoke_note": null,
    "judged_parquet": "native_bench/sreason_conservative_tts_judged.parquet",
    "judge": "ours ref-anchored gpt-5.4-mini",
    "code": "51fdb4e",
    "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
-   "relay_variant": "tts",
    "cached_remix": false,
    "executed": true,
    "stats": {
-    "n": 202,
+    "n_total": 202,
+    "n_scored": 202,
+    "missing_scores": 0,
+    "missing_scores_reason": null,
+    "metric": "adequate",
+    "acc_or_score_over_scored": 0.6237623762376238,
     "escalation_rate": 0.19801980198019803,
-    "acc_or_score": 0.6237623762376238,
-    "acc_n_judged": 202,
     "expert_error_rows": 0,
-    "expert_timeout_rows": 0,
+    "timeout_proxy_rows_wait_ge_145": 0,
+    "timeout_proxy_rule": "PROXY: wait_chunks >= 145 of MAX_WAIT_S=150; no explicit timeout status or timestamp was logged in v1",
     "onset_before_last_chunk_fired": 5,
-    "audio_gt_30s": 17,
-    "lat_mean_s": 14.162732673267328,
-    "lat_p50_s": 6.3294999999999995,
-    "lat_p95_s": 50.22979999999996
-   }
+    "audio_gt_30s": 17
+   },
+   "timing": {
+    "reconstructed_t_mean_s": 14.162732673267328,
+    "reconstructed_t_p50_s": 6.3294999999999995,
+    "reconstructed_t_p95_s": 50.22979999999996
+   },
+   "timing_missing_reason": null,
+   "timing_source": "data/native_bench/sreason_conservative_tts_judged.parquet",
+   "timing_source_sha256": "31062ffec3dbeefe8c1fc5fa6f046003e9e0005316ddb5d99540b806c09f6e99",
+   "timing_endpoints": "local rows as local_only; escalated rows: onset_overrun_s + stall_ms/1000 + wait_chunks*1s + relay_synth_ms/1000 (teacher-forced re-synthesis wall time) + relay_audio_s (synthesized relay duration)"
   },
   {
    "pool": "sreason",
    "arm": "never",
-   "smoke_only": false,
+   "experiment_family": "native_v1",
+   "protocol_version": "local_only",
+   "in_paper": true,
+   "provenance_basis": "inferred, not a per-run record: bench script has a single commit (51fdb4e, 2026-09-02); volume gate_native.json mtime 2026-09-01 22:59 PDT and unchanged since; runs dated 2026-09-02/03 by shard mtime",
    "n_shards": 8,
    "shard_dates": [
     "2026-09-02 10:32 Pacific Daylight Time",
@@ -1677,31 +2231,45 @@
     "native_bench/sreason/never.jsonl.shard3",
     "native_bench/sreason/never.jsonl.shard6"
    ],
+   "smoke_files": [],
+   "smoke_note": null,
    "judged_parquet": "native_bench/sreason_never_judged.parquet",
    "judge": "ours ref-anchored gpt-5.4-mini",
    "code": "51fdb4e",
    "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
-   "relay_variant": null,
    "cached_remix": false,
    "executed": true,
    "stats": {
-    "n": 202,
+    "n_total": 202,
+    "n_scored": 202,
+    "missing_scores": 0,
+    "missing_scores_reason": null,
+    "metric": "adequate",
+    "acc_or_score_over_scored": 0.5099009900990099,
     "escalation_rate": 0.0,
-    "acc_or_score": 0.5099009900990099,
-    "acc_n_judged": 202,
     "expert_error_rows": 0,
-    "expert_timeout_rows": 0,
+    "timeout_proxy_rows_wait_ge_145": 0,
+    "timeout_proxy_rule": "PROXY: wait_chunks >= 145 of MAX_WAIT_S=150; no explicit timeout status or timestamp was logged in v1",
     "onset_before_last_chunk_fired": 0,
-    "audio_gt_30s": 17,
-    "lat_mean_s": 6.8683019801980185,
-    "lat_p50_s": 5.0815,
-    "lat_p95_s": 17.27925
-   }
+    "audio_gt_30s": 17
+   },
+   "timing": {
+    "reconstructed_t_mean_s": 6.868301980198019,
+    "reconstructed_t_p50_s": 5.0815,
+    "reconstructed_t_p95_s": 17.27925
+   },
+   "timing_missing_reason": null,
+   "timing_source": "data/native_bench/sreason_never_judged.parquet",
+   "timing_source_sha256": "cc7616fea82a0c23760025e68590ed86e40cf5264eeba6b77f493e5d9c611182",
+   "timing_endpoints": "onset_overrun_s (answer-onset chunks past end of query audio, 1 s/chunk) + answer_ms/1000 (TEXT generation wall time; generate_audio=False, no audio synthesized)"
   },
   {
    "pool": "valpaca",
    "arm": "aggressive_tts",
-   "smoke_only": false,
+   "experiment_family": "native_v1",
+   "protocol_version": "tts_relay",
+   "in_paper": true,
+   "provenance_basis": "inferred, not a per-run record: bench script has a single commit (51fdb4e, 2026-09-02); volume gate_native.json mtime 2026-09-01 22:59 PDT and unchanged since; runs dated 2026-09-02/03 by shard mtime",
    "n_shards": 8,
    "shard_dates": [
     "2026-09-02 19:14 Pacific Daylight Time",
@@ -1719,28 +2287,45 @@
     "native_bench/valpaca/aggressive_tts.jsonl.shard3",
     "native_bench/valpaca/aggressive_tts.jsonl.shard7"
    ],
+   "smoke_files": [],
+   "smoke_note": null,
    "judged_parquet": "native_bench/valpaca_aggressive_tts_judged.parquet",
    "judge": "VoiceBench gpt-4o-mini 1-5",
    "code": "51fdb4e",
    "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
-   "relay_variant": "tts",
    "cached_remix": false,
    "executed": true,
    "stats": {
-    "n": 199,
+    "n_total": 199,
+    "n_scored": 199,
+    "missing_scores": 0,
+    "missing_scores_reason": null,
+    "metric": "vb_score",
+    "acc_or_score_over_scored": 4.010050251256281,
     "escalation_rate": 0.4371859296482412,
-    "acc_or_score": 4.010050251256281,
-    "acc_n_judged": 199,
     "expert_error_rows": 0,
-    "expert_timeout_rows": 0,
+    "timeout_proxy_rows_wait_ge_145": 0,
+    "timeout_proxy_rule": "PROXY: wait_chunks >= 145 of MAX_WAIT_S=150; no explicit timeout status or timestamp was logged in v1",
     "onset_before_last_chunk_fired": 16,
     "audio_gt_30s": 0
-   }
+   },
+   "timing": {
+    "reconstructed_t_mean_s": 24.34898994974874,
+    "reconstructed_t_p50_s": 13.797,
+    "reconstructed_t_p95_s": 60.33119999999999
+   },
+   "timing_missing_reason": null,
+   "timing_source": "data/native_bench/valpaca_aggressive_tts_judged.parquet",
+   "timing_source_sha256": "5c285968c861f4e576fc81f15c46697ff2632ac9c1d52d6031b8e0f751bbff76",
+   "timing_endpoints": "local rows as local_only; escalated rows: onset_overrun_s + stall_ms/1000 + wait_chunks*1s + relay_synth_ms/1000 (teacher-forced re-synthesis wall time) + relay_audio_s (synthesized relay duration)"
   },
   {
    "pool": "valpaca",
    "arm": "always_tts",
-   "smoke_only": false,
+   "experiment_family": "native_v1",
+   "protocol_version": "tts_relay",
+   "in_paper": true,
+   "provenance_basis": "inferred, not a per-run record: bench script has a single commit (51fdb4e, 2026-09-02); volume gate_native.json mtime 2026-09-01 22:59 PDT and unchanged since; runs dated 2026-09-02/03 by shard mtime",
    "n_shards": 8,
    "shard_dates": [
     "2026-09-02 16:46 Pacific Daylight Time",
@@ -1759,28 +2344,45 @@
     "native_bench/valpaca/always_tts.jsonl.shard3",
     "native_bench/valpaca/always_tts.jsonl.shard1"
    ],
+   "smoke_files": [],
+   "smoke_note": null,
    "judged_parquet": "native_bench/valpaca_always_tts_judged.parquet",
    "judge": "VoiceBench gpt-4o-mini 1-5",
    "code": "51fdb4e",
    "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
-   "relay_variant": "tts",
    "cached_remix": false,
    "executed": true,
    "stats": {
-    "n": 199,
+    "n_total": 199,
+    "n_scored": 199,
+    "missing_scores": 0,
+    "missing_scores_reason": null,
+    "metric": "vb_score",
+    "acc_or_score_over_scored": 4.1959798994974875,
     "escalation_rate": 1.0,
-    "acc_or_score": 4.1959798994974875,
-    "acc_n_judged": 199,
     "expert_error_rows": 0,
-    "expert_timeout_rows": 0,
+    "timeout_proxy_rows_wait_ge_145": 0,
+    "timeout_proxy_rule": "PROXY: wait_chunks >= 145 of MAX_WAIT_S=150; no explicit timeout status or timestamp was logged in v1",
     "onset_before_last_chunk_fired": 38,
     "audio_gt_30s": 0
-   }
+   },
+   "timing": {
+    "reconstructed_t_mean_s": 42.288396984924596,
+    "reconstructed_t_p50_s": 39.433,
+    "reconstructed_t_p95_s": 70.65159999999997
+   },
+   "timing_missing_reason": null,
+   "timing_source": "data/native_bench/valpaca_always_tts_judged.parquet",
+   "timing_source_sha256": "aa8d296c09a5055bee2d1498dc2bfda0946175e60ee066eb287a1b0039c9b258",
+   "timing_endpoints": "local rows as local_only; escalated rows: onset_overrun_s + stall_ms/1000 + wait_chunks*1s + relay_synth_ms/1000 (teacher-forced re-synthesis wall time) + relay_audio_s (synthesized relay duration)"
   },
   {
    "pool": "valpaca",
    "arm": "balanced_tts",
-   "smoke_only": false,
+   "experiment_family": "native_v1",
+   "protocol_version": "tts_relay",
+   "in_paper": true,
+   "provenance_basis": "inferred, not a per-run record: bench script has a single commit (51fdb4e, 2026-09-02); volume gate_native.json mtime 2026-09-01 22:59 PDT and unchanged since; runs dated 2026-09-02/03 by shard mtime",
    "n_shards": 8,
    "shard_dates": [
     "2026-09-02 18:55 Pacific Daylight Time",
@@ -1799,28 +2401,45 @@
     "native_bench/valpaca/balanced_tts.jsonl.shard0",
     "native_bench/valpaca/balanced_tts.jsonl.shard3"
    ],
+   "smoke_files": [],
+   "smoke_note": null,
    "judged_parquet": "native_bench/valpaca_balanced_tts_judged.parquet",
    "judge": "VoiceBench gpt-4o-mini 1-5",
    "code": "51fdb4e",
    "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
-   "relay_variant": "tts",
    "cached_remix": false,
    "executed": true,
    "stats": {
-    "n": 199,
+    "n_total": 199,
+    "n_scored": 199,
+    "missing_scores": 0,
+    "missing_scores_reason": null,
+    "metric": "vb_score",
+    "acc_or_score_over_scored": 3.7738693467336684,
     "escalation_rate": 0.04522613065326633,
-    "acc_or_score": 3.7738693467336684,
-    "acc_n_judged": 199,
     "expert_error_rows": 0,
-    "expert_timeout_rows": 0,
+    "timeout_proxy_rows_wait_ge_145": 0,
+    "timeout_proxy_rule": "PROXY: wait_chunks >= 145 of MAX_WAIT_S=150; no explicit timeout status or timestamp was logged in v1",
     "onset_before_last_chunk_fired": 2,
     "audio_gt_30s": 0
-   }
+   },
+   "timing": {
+    "reconstructed_t_mean_s": 9.064286432160804,
+    "reconstructed_t_p50_s": 5.618,
+    "reconstructed_t_p95_s": 25.469999999999967
+   },
+   "timing_missing_reason": null,
+   "timing_source": "data/native_bench/valpaca_balanced_tts_judged.parquet",
+   "timing_source_sha256": "4b27813300426908dd87a0026bb0eb942b13f6ed1b8fe82beab0f622f4151d37",
+   "timing_endpoints": "local rows as local_only; escalated rows: onset_overrun_s + stall_ms/1000 + wait_chunks*1s + relay_synth_ms/1000 (teacher-forced re-synthesis wall time) + relay_audio_s (synthesized relay duration)"
   },
   {
    "pool": "valpaca",
    "arm": "conservative_tts",
-   "smoke_only": false,
+   "experiment_family": "native_v1",
+   "protocol_version": "tts_relay",
+   "in_paper": true,
+   "provenance_basis": "inferred, not a per-run record: bench script has a single commit (51fdb4e, 2026-09-02); volume gate_native.json mtime 2026-09-01 22:59 PDT and unchanged since; runs dated 2026-09-02/03 by shard mtime",
    "n_shards": 8,
    "shard_dates": [
     "2026-09-02 19:21 Pacific Daylight Time",
@@ -1839,28 +2458,45 @@
     "native_bench/valpaca/conservative_tts.jsonl.shard3",
     "native_bench/valpaca/conservative_tts.jsonl.shard5"
    ],
+   "smoke_files": [],
+   "smoke_note": null,
    "judged_parquet": "native_bench/valpaca_conservative_tts_judged.parquet",
    "judge": "VoiceBench gpt-4o-mini 1-5",
    "code": "51fdb4e",
    "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
-   "relay_variant": "tts",
    "cached_remix": false,
    "executed": true,
    "stats": {
-    "n": 199,
+    "n_total": 199,
+    "n_scored": 199,
+    "missing_scores": 0,
+    "missing_scores_reason": null,
+    "metric": "vb_score",
+    "acc_or_score_over_scored": 3.6331658291457285,
     "escalation_rate": 0.01507537688442211,
-    "acc_or_score": 3.6331658291457285,
-    "acc_n_judged": 199,
     "expert_error_rows": 0,
-    "expert_timeout_rows": 0,
+    "timeout_proxy_rows_wait_ge_145": 0,
+    "timeout_proxy_rule": "PROXY: wait_chunks >= 145 of MAX_WAIT_S=150; no explicit timeout status or timestamp was logged in v1",
     "onset_before_last_chunk_fired": 2,
     "audio_gt_30s": 0
-   }
+   },
+   "timing": {
+    "reconstructed_t_mean_s": 8.3956783919598,
+    "reconstructed_t_p50_s": 6.232,
+    "reconstructed_t_p95_s": 18.17979999999999
+   },
+   "timing_missing_reason": null,
+   "timing_source": "data/native_bench/valpaca_conservative_tts_judged.parquet",
+   "timing_source_sha256": "9c26a1b43608c50342ff96edbae9209c4ffa40700c81dccd665996a7f632cd51",
+   "timing_endpoints": "local rows as local_only; escalated rows: onset_overrun_s + stall_ms/1000 + wait_chunks*1s + relay_synth_ms/1000 (teacher-forced re-synthesis wall time) + relay_audio_s (synthesized relay duration)"
   },
   {
    "pool": "valpaca",
    "arm": "never",
-   "smoke_only": false,
+   "experiment_family": "native_v1",
+   "protocol_version": "local_only",
+   "in_paper": true,
+   "provenance_basis": "inferred, not a per-run record: bench script has a single commit (51fdb4e, 2026-09-02); volume gate_native.json mtime 2026-09-01 22:59 PDT and unchanged since; runs dated 2026-09-02/03 by shard mtime",
    "n_shards": 8,
    "shard_dates": [
     "2026-09-02 10:47 Pacific Daylight Time",
@@ -1878,23 +2514,37 @@
     "native_bench/valpaca/never.jsonl.shard7",
     "native_bench/valpaca/never.jsonl.shard4"
    ],
+   "smoke_files": [],
+   "smoke_note": null,
    "judged_parquet": "native_bench/valpaca_never_judged.parquet",
    "judge": "VoiceBench gpt-4o-mini 1-5",
    "code": "51fdb4e",
    "gate_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
-   "relay_variant": null,
    "cached_remix": false,
    "executed": true,
    "stats": {
-    "n": 199,
+    "n_total": 199,
+    "n_scored": 199,
+    "missing_scores": 0,
+    "missing_scores_reason": null,
+    "metric": "vb_score",
+    "acc_or_score_over_scored": 3.678391959798995,
     "escalation_rate": 0.0,
-    "acc_or_score": 3.678391959798995,
-    "acc_n_judged": 199,
     "expert_error_rows": 0,
-    "expert_timeout_rows": 0,
+    "timeout_proxy_rows_wait_ge_145": 0,
+    "timeout_proxy_rule": "PROXY: wait_chunks >= 145 of MAX_WAIT_S=150; no explicit timeout status or timestamp was logged in v1",
     "onset_before_last_chunk_fired": 0,
     "audio_gt_30s": 0
-   }
+   },
+   "timing": {
+    "reconstructed_t_mean_s": 7.588341708542713,
+    "reconstructed_t_p50_s": 6.467,
+    "reconstructed_t_p95_s": 17.242799999999995
+   },
+   "timing_missing_reason": null,
+   "timing_source": "data/native_bench/valpaca_never_judged.parquet",
+   "timing_source_sha256": "839ddd831917e3f3d2484828616300ed72ee05fa948ae6a22e66ca89bd414f84",
+   "timing_endpoints": "onset_overrun_s (answer-onset chunks past end of query audio, 1 s/chunk) + answer_ms/1000 (TEXT generation wall time; generate_audio=False, no audio synthesized)"
   }
  ]
 }

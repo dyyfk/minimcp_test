@@ -41,8 +41,10 @@ PART_SRC = {"caliboff": ["queries_public.jsonl", "queries_gen.jsonl"],
             "freshoff": ["queries_fresh.jsonl"]}
 
 # id -> (source file, raw row) over every calibration query file
+# (queries.jsonl holds the frozen calib/test pool the caliboff rows
+# come from; the la.CALIB_FILES expansions cover the rest)
 src = {}
-for f in la.CALIB_FILES:
+for f in ["queries.jsonl"] + la.CALIB_FILES:
     p = D / f
     if not p.exists():
         continue
@@ -121,19 +123,34 @@ for name, oo, cc, art, rates in (
                        "artifact": art[lg][t]}
                    for t, r in rates.items()}
     report[name] = rep
+    bad = []
     for lg, d in rep.items():
         for t, v in d.items():
             dv = abs(v["recomputed"] - v["artifact"])
             flag = "" if dv < 1e-3 else "  <-- MISMATCH"
+            if flag:
+                bad.append((name, lg, t, dv))
             print(f"{name} {lg} {t}: {v['recomputed']:.4f} vs "
                   f"artifact {v['artifact']:.4f}{flag}")
+    if bad:
+        raise SystemExit(
+            f"threshold validation FAILED, refusing to export: {bad}")
 
 rows = []
 for j, qid in enumerate(ids):
     sf, raw = src.get(qid, (None, {}))
+    # source_split: the split field carried by the ORIGINAL source file
+    # (only queries.jsonl / queries_fresh rows have one); "unknown"
+    # where the source never recorded a split. experiment_role: every
+    # row in this artifact was in the fit; core rows additionally form
+    # the threshold quantile base. NO row here has a validation or
+    # held-out-test role.
+    ssp = raw.get("split") or split_f.get(qid) or "unknown"
     rows.append({
         "id": qid, "part": parts[j], "source_file": sf,
-        "pool": raw.get("pool"), "split": split_f.get(qid),
+        "pool": raw.get("pool"), "source_split": ssp,
+        "experiment_role": ("fit_core+quantile_base" if core[j]
+                            else "fit_fresh_train"),
         "lang": lang[j], "query": raw.get("query"),
         "label_native": int(y[j]), "core": bool(core[j]),
         "fold_deployed": int(fold_dep[j]),
@@ -149,19 +166,32 @@ df.to_parquet(OUT / "calibration_oof.parquet", index=False)
 with open(OUT / "calibration_manifest.jsonl", "w", encoding="utf-8") as fh:
     for r in rows:
         fh.write(json.dumps({k: r[k] for k in (
-            "id", "part", "source_file", "pool", "split", "lang",
-            "query", "label_native", "leak_excluded")},
+            "id", "part", "source_file", "pool", "source_split",
+            "experiment_role", "lang", "query", "label_native",
+            "leak_excluded")},
             ensure_ascii=False) + "\n")
 
 sweep = json.loads((D / "threshold_sweep.json").read_text())
+dep_sha = hashlib.sha256((D / "gate_native.json").read_bytes()).hexdigest()
+nl_sha = hashlib.sha256(
+    (D / "gate_native_noleak.json").read_bytes()).hexdigest()
+ids_k = [i for i, kk in zip(ids, keep) if kk]
+train_ids_sha1 = hashlib.sha1("".join(sorted(ids_k)).encode()).hexdigest()
+qbase_ids = sorted(i for i, kk, cc in zip(ids, keep, core) if kk and cc)
+qbase_sha1 = hashlib.sha1("".join(qbase_ids).encode()).hexdigest()
+GRID_RATES = [.10, .15, .20, .25, .30, .40, .50]
+lg_k, core_k = lang[keep], core[keep]
+noleak_grid = {}
+for lg in ("en", "zh"):
+    mm = core_k & (lg_k == lg)
+    noleak_grid[lg] = {str(r): float(np.quantile(oof_nl_k[mm], 1 - r))
+                       for r in GRID_RATES}
 (OUT / "thresholds.json").write_text(json.dumps({
     "rule": "per-language quantile of core-calibration OOF scores at "
             "1-nominal_rate; core = DEPLOYED_PARTS rows (fresh train rows "
             "in the fit but excluded from the quantile base)",
-    "deployed_gate_sha256": hashlib.sha256(
-        (D / "gate_native.json").read_bytes()).hexdigest(),
-    "noleak_gate_sha256": hashlib.sha256(
-        (D / "gate_native_noleak.json").read_bytes()).hexdigest(),
+    "deployed_gate_sha256": dep_sha,
+    "noleak_gate_sha256": nl_sha,
     "deployed_tiers_nominal": {"conservative": .15, "balanced": .30,
                                "aggressive": .50},
     "proposed_8bz_tiers_nominal": {"conservative": .15, "balanced": .25,
@@ -169,7 +199,35 @@ sweep = json.loads((D / "threshold_sweep.json").read_text())
     "deployed_eot_thresholds_lang": dep["eot_thresholds_lang"],
     "noleak_eot_thresholds_lang": nl["eot_thresholds_lang"],
     "noleak_eot_thresholds_8bz_lang": nl["eot_thresholds_8bz_lang"],
-    "sweep_nominal_thresholds": sweep["nominal_thresholds"],
+    "noleak_nominal_grid_lang": {
+        "grid": noleak_grid,
+        "provenance": {
+            "fit_gate_sha256": nl_sha,
+            "train_ids_sha1": train_ids_sha1,
+            "quantile_base": "core rows of the no-leak fit "
+                             "(DEPLOYED_PARTS minus the 7 excluded ids; "
+                             "fresh train rows in the fit but not in the "
+                             "quantile base)",
+            "quantile_base_ids_sha1": qbase_sha1,
+            "lang_rule": "part tag: exp3zhoff -> zh, all other parts en",
+            "score_kind": "OOF, StratifiedKFold(5, shuffle, seed=42), "
+                          "LogisticRegression C=3e-4",
+            "script": "scripts/48_paper_revision_export.py"}},
+    "historical_remix_grid": {
+        "grid": sweep["nominal_thresholds"],
+        "provenance": {
+            "fit_gate_sha256": None, "train_ids_sha1": None,
+            "quantile_base_ids_sha1": None,
+            "script": "scripts/40_threshold_sweep.py (8bz, 2026-09-04)",
+            "limitation": "produced by script 40's own merge (its PARTS "
+                "list loads more tags than the deployed 5-part recipe "
+                "when the extra feature dumps are present) with its own "
+                "zh handling; NOT the same quantile construction as the "
+                "deployed/no-leak artifacts and NOT re-derived here - "
+                "the fit identity metadata was not recorded at run time. "
+                "Its internal remix used already-inspected test "
+                "outcomes: exploration only, never independent "
+                "validation."}},
     "validation": report,
     "manifest_sha1_noleak_ids": nl.get("manifest_sha1"),
 }, indent=1))

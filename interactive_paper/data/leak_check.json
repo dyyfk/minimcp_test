@@ -1,0 +1,116 @@
+{
+ "striviaqa": {
+  "n": 250,
+  "exact": [
+   [
+    "striviaqa0132",
+    "Which English town is home to the Stephen Joseph Theatre?",
+    [
+     [
+      "queries_expansion.jsonl",
+      "x0054",
+      "easy-fact"
+     ]
+    ]
+   ],
+   [
+    "striviaqa0156",
+    "What is the thick watery substance filling the space between the lens and the retina of the eye?",
+    [
+     [
+      "queries_expansion.jsonl",
+      "x0137",
+      "easy-fact"
+     ]
+    ]
+   ],
+   [
+    "striviaqa0172",
+    "Whose portrait replaced Michael Faraday on the back of a £20 note?",
+    [
+     [
+      "queries_expansion.jsonl",
+      "x0114",
+      "easy-fact"
+     ]
+    ]
+   ],
+   [
+    "striviaqa0181",
+    "American singer Ernest Evans called himself Chubby Checker to emulate the name of which other musician?",
+    [
+     [
+      "queries_expansion.jsonl",
+      "x0113",
+      "easy-fact"
+     ]
+    ]
+   ]
+  ],
+  "near": []
+ },
+ "swebq": {
+  "n": 250,
+  "exact": [],
+  "near": []
+ },
+ "sllama": {
+  "n": 250,
+  "exact": [
+   [
+    "sllama0049",
+    "What is the smallest prime number? ",
+    [
+     [
+      "queries_gen.jsonl",
+      null,
+      "trap"
+     ]
+    ]
+   ],
+   [
+    "sllama0206",
+    "How many senses do humans have? ",
+    [
+     [
+      "queries_expansion3.jsonl",
+      "z0601",
+      "trap-truthful"
+     ]
+    ]
+   ]
+  ],
+  "near": [
+   [
+    "sllama0130",
+    "What is the capital of Israel?",
+    [
+     "queries_expansion2.jsonl",
+     "y0205",
+     "What is the capital of Kingdom of Israel?"
+    ],
+    0.86
+   ],
+   [
+    "sllama0170",
+    "Who was the first person to walk on the moon?",
+    [
+     "queries_expansion.jsonl",
+     "x0173",
+     "Who was the first human to walk on the moon?"
+    ],
+    0.8
+   ]
+  ]
+ },
+ "sdqa": {
+  "n": 200,
+  "exact": [],
+  "near": []
+ },
+ "sreason": {
+  "n": 202,
+  "exact": [],
+  "near": []
+ }
+}

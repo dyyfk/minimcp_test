@@ -48,26 +48,66 @@
    "aggressive": 0.3144937753677368
   }
  },
- "sweep_nominal_thresholds": {
-  "en": {
-   "0.05": 0.9721928238868713,
-   "0.1": 0.9442203640937805,
-   "0.15": 0.9113463163375854,
-   "0.2": 0.879021406173706,
-   "0.25": 0.8406654596328735,
-   "0.3": 0.7999656796455383,
-   "0.4": 0.6982501745223999,
-   "0.5": 0.5756409168243408
+ "noleak_nominal_grid_lang": {
+  "grid": {
+   "en": {
+    "0.1": 0.9342696070671082,
+    "0.15": 0.9050160646438599,
+    "0.2": 0.8729615211486816,
+    "0.25": 0.8326082229614258,
+    "0.3": 0.794853687286377,
+    "0.4": 0.6864679455757141,
+    "0.5": 0.5456203818321228
+   },
+   "zh": {
+    "0.1": 0.5485683083534241,
+    "0.15": 0.5048418641090393,
+    "0.2": 0.45497366786003113,
+    "0.25": 0.4177033305168152,
+    "0.3": 0.3695312440395355,
+    "0.4": 0.3144937753677368,
+    "0.5": 0.26522931456565857
+   }
   },
-  "zh": {
-   "0.05": 0.9669747948646545,
-   "0.1": 0.9250487685203552,
-   "0.15": 0.8853274583816528,
-   "0.2": 0.8450548648834229,
-   "0.25": 0.7998729944229126,
-   "0.3": 0.7515705227851868,
-   "0.4": 0.6459827423095703,
-   "0.5": 0.5373450517654419
+  "provenance": {
+   "fit_gate_sha256": "2b9b9d29188fd8dc68183a1d3dff2039ab5eb38eb4d93d0314edac1cdf001f80",
+   "train_ids_sha1": "f604d2f8e4f11bf445dafde2c16c183aab138299",
+   "quantile_base": "core rows of the no-leak fit (DEPLOYED_PARTS minus the 7 excluded ids; fresh train rows in the fit but not in the quantile base)",
+   "quantile_base_ids_sha1": "fd7df2b8cc15ad24d9924a631518c5f8fa332e2c",
+   "lang_rule": "part tag: exp3zhoff -> zh, all other parts en",
+   "score_kind": "OOF, StratifiedKFold(5, shuffle, seed=42), LogisticRegression C=3e-4",
+   "script": "scripts/48_paper_revision_export.py"
+  }
+ },
+ "historical_remix_grid": {
+  "grid": {
+   "en": {
+    "0.05": 0.9721928238868713,
+    "0.1": 0.9442203640937805,
+    "0.15": 0.9113463163375854,
+    "0.2": 0.879021406173706,
+    "0.25": 0.8406654596328735,
+    "0.3": 0.7999656796455383,
+    "0.4": 0.6982501745223999,
+    "0.5": 0.5756409168243408
+   },
+   "zh": {
+    "0.05": 0.9669747948646545,
+    "0.1": 0.9250487685203552,
+    "0.15": 0.8853274583816528,
+    "0.2": 0.8450548648834229,
+    "0.25": 0.7998729944229126,
+    "0.3": 0.7515705227851868,
+    "0.4": 0.6459827423095703,
+    "0.5": 0.5373450517654419
+   }
+  },
+  "provenance": {
+   "fit_gate_sha256": null,
+   "train_ids_sha1": null,
+   "quantile_base_ids_sha1": null,
+   "script": "scripts/40_threshold_sweep.py (8bz, 2026-09-04)",
+   "limitation": "produced by script 40's own merge (its PARTS list loads more tags than the deployed 5-part recipe when the extra feature dumps are present) with its own zh handling; NOT the same quantile construction as the deployed/no-leak artifacts and NOT re-derived here - the fit identity metadata was not recorded at run time. Its internal remix used already-inspected test outcomes: exploration only, never independent validation."
   }
  },
  "validation": {

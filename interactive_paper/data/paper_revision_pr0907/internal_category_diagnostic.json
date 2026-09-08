@@ -353,5 +353,12 @@
    }
   }
  },
- "expert_field_judge_note": "adequate_expert = gpt-5.4-mini judge on the expert's own text (field=expert rejudge 2026-09-07); relay loss is small (agg 4/124, always 14/238) and concentrated in easy-chat; hard-knowledge + gate-fired hard-math are expert-capability-limited (expert acc .30-.39 / .33 on fired rows)"
+ "expert_field_judge_note": "adequate_expert = gpt-5.4-mini judge on the expert's own text (field=expert rejudge 2026-09-07); relay loss is small (agg 4/124, always 14/238) and concentrated in easy-chat; hard-knowledge + gate-fired hard-math are expert-capability-limited (expert acc .30-.39 / .33 on fired rows) CAVEAT: on >30s queries (43/60 hard-knowledge) the expert only received the last 30s of audio - low expert acc there partly reflects truncated input, not just capability.",
+ "audio_gt_30s_by_category": {
+  "counts": {
+   "hard-knowledge": 43,
+   "hard-math": 3
+  },
+  "note": "expert snapshot = last 30s of the full wav -> these queries reach the expert with their BEGINNING cut off. 43/60 hard-knowledge affected: the 'expert capability limit' attribution for hard-knowledge is confounded with this input-window truncation and cannot be split with existing data; protocol fix required before re-attributing."
+ }
 }
