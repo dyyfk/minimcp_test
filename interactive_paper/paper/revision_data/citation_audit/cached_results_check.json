@@ -1,0 +1,590 @@
+{
+  "source_commit": "5a5dbc371671ec39714f6457cd96d8028805de5f",
+  "scope": "Cached per-query judged outcomes only: no new model inference or independent rejudging. All 35 native arms; verify file hashes, scored counts, IDs, accuracy, escalation rate, expert accuracy.",
+  "arms": [
+    {
+      "pool": "frozen",
+      "arm": "never",
+      "source": "interactive_paper/data/native_bench/frozen_never_judged.parquet",
+      "hash_match": true,
+      "raw_n": 240,
+      "scored_n": 240,
+      "same_ids_as_never": true,
+      "recomputed": {
+        "n": 240,
+        "accuracy": 0.4083333333333333,
+        "rate": 0.0
+      },
+      "mismatches": {}
+    },
+    {
+      "pool": "frozen",
+      "arm": "conservative",
+      "source": "interactive_paper/data/native_bench/frozen_conservative_tts_judged.parquet",
+      "hash_match": true,
+      "raw_n": 240,
+      "scored_n": 240,
+      "same_ids_as_never": true,
+      "recomputed": {
+        "n": 240,
+        "accuracy": 0.4666666666666667,
+        "rate": 0.08333333333333333
+      },
+      "mismatches": {}
+    },
+    {
+      "pool": "frozen",
+      "arm": "balanced",
+      "source": "interactive_paper/data/native_bench/frozen_balanced_tts_judged.parquet",
+      "hash_match": true,
+      "raw_n": 240,
+      "scored_n": 240,
+      "same_ids_as_never": true,
+      "recomputed": {
+        "n": 240,
+        "accuracy": 0.5416666666666666,
+        "rate": 0.25
+      },
+      "mismatches": {}
+    },
+    {
+      "pool": "frozen",
+      "arm": "aggressive",
+      "source": "interactive_paper/data/native_bench/frozen_aggressive_tts_judged.parquet",
+      "hash_match": true,
+      "raw_n": 240,
+      "scored_n": 240,
+      "same_ids_as_never": true,
+      "recomputed": {
+        "n": 240,
+        "accuracy": 0.6291666666666667,
+        "rate": 0.5166666666666667
+      },
+      "mismatches": {}
+    },
+    {
+      "pool": "frozen",
+      "arm": "always",
+      "source": "interactive_paper/data/native_bench/frozen_always_tts_judged.parquet",
+      "hash_match": true,
+      "raw_n": 240,
+      "scored_n": 240,
+      "same_ids_as_never": true,
+      "recomputed": {
+        "n": 240,
+        "accuracy": 0.7041666666666667,
+        "rate": 0.9916666666666667,
+        "expert_text_accuracy": 0.7647058823529411
+      },
+      "mismatches": {}
+    },
+    {
+      "pool": "striviaqa",
+      "arm": "never",
+      "source": "interactive_paper/data/native_bench/striviaqa_never_judged.parquet",
+      "hash_match": true,
+      "raw_n": 250,
+      "scored_n": 250,
+      "same_ids_as_never": true,
+      "recomputed": {
+        "n": 250,
+        "accuracy": 0.628,
+        "rate": 0.0
+      },
+      "mismatches": {}
+    },
+    {
+      "pool": "striviaqa",
+      "arm": "conservative",
+      "source": "interactive_paper/data/native_bench/striviaqa_conservative_tts_judged.parquet",
+      "hash_match": true,
+      "raw_n": 250,
+      "scored_n": 250,
+      "same_ids_as_never": true,
+      "recomputed": {
+        "n": 250,
+        "accuracy": 0.604,
+        "rate": 0.04
+      },
+      "mismatches": {}
+    },
+    {
+      "pool": "striviaqa",
+      "arm": "balanced",
+      "source": "interactive_paper/data/native_bench/striviaqa_balanced_tts_judged.parquet",
+      "hash_match": true,
+      "raw_n": 250,
+      "scored_n": 250,
+      "same_ids_as_never": true,
+      "recomputed": {
+        "n": 250,
+        "accuracy": 0.7,
+        "rate": 0.184
+      },
+      "mismatches": {}
+    },
+    {
+      "pool": "striviaqa",
+      "arm": "aggressive",
+      "source": "interactive_paper/data/native_bench/striviaqa_aggressive_tts_judged.parquet",
+      "hash_match": true,
+      "raw_n": 250,
+      "scored_n": 250,
+      "same_ids_as_never": true,
+      "recomputed": {
+        "n": 250,
+        "accuracy": 0.884,
+        "rate": 0.564
+      },
+      "mismatches": {}
+    },
+    {
+      "pool": "striviaqa",
+      "arm": "always",
+      "source": "interactive_paper/data/native_bench/striviaqa_always_tts_judged.parquet",
+      "hash_match": true,
+      "raw_n": 250,
+      "scored_n": 250,
+      "same_ids_as_never": true,
+      "recomputed": {
+        "n": 250,
+        "accuracy": 0.96,
+        "rate": 1.0,
+        "expert_text_accuracy": 0.964
+      },
+      "mismatches": {}
+    },
+    {
+      "pool": "swebq",
+      "arm": "never",
+      "source": "interactive_paper/data/native_bench/swebq_never_judged.parquet",
+      "hash_match": true,
+      "raw_n": 250,
+      "scored_n": 250,
+      "same_ids_as_never": true,
+      "recomputed": {
+        "n": 250,
+        "accuracy": 0.528,
+        "rate": 0.0
+      },
+      "mismatches": {}
+    },
+    {
+      "pool": "swebq",
+      "arm": "conservative",
+      "source": "interactive_paper/data/native_bench/swebq_conservative_tts_judged.parquet",
+      "hash_match": true,
+      "raw_n": 250,
+      "scored_n": 250,
+      "same_ids_as_never": true,
+      "recomputed": {
+        "n": 250,
+        "accuracy": 0.592,
+        "rate": 0.048
+      },
+      "mismatches": {}
+    },
+    {
+      "pool": "swebq",
+      "arm": "balanced",
+      "source": "interactive_paper/data/native_bench/swebq_balanced_tts_judged.parquet",
+      "hash_match": true,
+      "raw_n": 250,
+      "scored_n": 250,
+      "same_ids_as_never": true,
+      "recomputed": {
+        "n": 250,
+        "accuracy": 0.624,
+        "rate": 0.22
+      },
+      "mismatches": {}
+    },
+    {
+      "pool": "swebq",
+      "arm": "aggressive",
+      "source": "interactive_paper/data/native_bench/swebq_aggressive_tts_judged.parquet",
+      "hash_match": true,
+      "raw_n": 250,
+      "scored_n": 250,
+      "same_ids_as_never": true,
+      "recomputed": {
+        "n": 250,
+        "accuracy": 0.752,
+        "rate": 0.6
+      },
+      "mismatches": {}
+    },
+    {
+      "pool": "swebq",
+      "arm": "always",
+      "source": "interactive_paper/data/native_bench/swebq_always_tts_judged.parquet",
+      "hash_match": true,
+      "raw_n": 250,
+      "scored_n": 250,
+      "same_ids_as_never": true,
+      "recomputed": {
+        "n": 250,
+        "accuracy": 0.796,
+        "rate": 0.992,
+        "expert_text_accuracy": 0.8225806451612904
+      },
+      "mismatches": {}
+    },
+    {
+      "pool": "sllama",
+      "arm": "never",
+      "source": "interactive_paper/data/native_bench/sllama_never_judged.parquet",
+      "hash_match": true,
+      "raw_n": 250,
+      "scored_n": 250,
+      "same_ids_as_never": true,
+      "recomputed": {
+        "n": 250,
+        "accuracy": 0.824,
+        "rate": 0.0
+      },
+      "mismatches": {}
+    },
+    {
+      "pool": "sllama",
+      "arm": "conservative",
+      "source": "interactive_paper/data/native_bench/sllama_conservative_tts_judged.parquet",
+      "hash_match": true,
+      "raw_n": 250,
+      "scored_n": 250,
+      "same_ids_as_never": true,
+      "recomputed": {
+        "n": 250,
+        "accuracy": 0.788,
+        "rate": 0.004
+      },
+      "mismatches": {}
+    },
+    {
+      "pool": "sllama",
+      "arm": "balanced",
+      "source": "interactive_paper/data/native_bench/sllama_balanced_tts_judged.parquet",
+      "hash_match": true,
+      "raw_n": 250,
+      "scored_n": 250,
+      "same_ids_as_never": true,
+      "recomputed": {
+        "n": 250,
+        "accuracy": 0.824,
+        "rate": 0.036
+      },
+      "mismatches": {}
+    },
+    {
+      "pool": "sllama",
+      "arm": "aggressive",
+      "source": "interactive_paper/data/native_bench/sllama_aggressive_tts_judged.parquet",
+      "hash_match": true,
+      "raw_n": 250,
+      "scored_n": 250,
+      "same_ids_as_never": true,
+      "recomputed": {
+        "n": 250,
+        "accuracy": 0.856,
+        "rate": 0.188
+      },
+      "mismatches": {}
+    },
+    {
+      "pool": "sllama",
+      "arm": "always",
+      "source": "interactive_paper/data/native_bench/sllama_always_tts_judged.parquet",
+      "hash_match": true,
+      "raw_n": 250,
+      "scored_n": 250,
+      "same_ids_as_never": true,
+      "recomputed": {
+        "n": 250,
+        "accuracy": 0.916,
+        "rate": 1.0,
+        "expert_text_accuracy": 0.932
+      },
+      "mismatches": {}
+    },
+    {
+      "pool": "sdqa",
+      "arm": "never",
+      "source": "interactive_paper/data/native_bench/sdqa_never_judged.parquet",
+      "hash_match": true,
+      "raw_n": 200,
+      "scored_n": 200,
+      "same_ids_as_never": true,
+      "recomputed": {
+        "n": 200,
+        "accuracy": 0.48,
+        "rate": 0.0
+      },
+      "mismatches": {}
+    },
+    {
+      "pool": "sdqa",
+      "arm": "conservative",
+      "source": "interactive_paper/data/native_bench/sdqa_conservative_tts_judged.parquet",
+      "hash_match": true,
+      "raw_n": 200,
+      "scored_n": 200,
+      "same_ids_as_never": true,
+      "recomputed": {
+        "n": 200,
+        "accuracy": 0.54,
+        "rate": 0.065
+      },
+      "mismatches": {}
+    },
+    {
+      "pool": "sdqa",
+      "arm": "balanced",
+      "source": "interactive_paper/data/native_bench/sdqa_balanced_tts_judged.parquet",
+      "hash_match": true,
+      "raw_n": 200,
+      "scored_n": 200,
+      "same_ids_as_never": true,
+      "recomputed": {
+        "n": 200,
+        "accuracy": 0.65,
+        "rate": 0.27
+      },
+      "mismatches": {}
+    },
+    {
+      "pool": "sdqa",
+      "arm": "aggressive",
+      "source": "interactive_paper/data/native_bench/sdqa_aggressive_tts_judged.parquet",
+      "hash_match": true,
+      "raw_n": 200,
+      "scored_n": 200,
+      "same_ids_as_never": true,
+      "recomputed": {
+        "n": 200,
+        "accuracy": 0.825,
+        "rate": 0.66
+      },
+      "mismatches": {}
+    },
+    {
+      "pool": "sdqa",
+      "arm": "always",
+      "source": "interactive_paper/data/native_bench/sdqa_always_tts_judged.parquet",
+      "hash_match": true,
+      "raw_n": 200,
+      "scored_n": 200,
+      "same_ids_as_never": true,
+      "recomputed": {
+        "n": 200,
+        "accuracy": 0.87,
+        "rate": 1.0,
+        "expert_text_accuracy": 0.885
+      },
+      "mismatches": {}
+    },
+    {
+      "pool": "sreason",
+      "arm": "never",
+      "source": "interactive_paper/data/native_bench/sreason_never_judged.parquet",
+      "hash_match": true,
+      "raw_n": 202,
+      "scored_n": 202,
+      "same_ids_as_never": true,
+      "recomputed": {
+        "n": 202,
+        "accuracy": 0.5099009900990099,
+        "rate": 0.0
+      },
+      "mismatches": {}
+    },
+    {
+      "pool": "sreason",
+      "arm": "conservative",
+      "source": "interactive_paper/data/native_bench/sreason_conservative_tts_judged.parquet",
+      "hash_match": true,
+      "raw_n": 202,
+      "scored_n": 202,
+      "same_ids_as_never": true,
+      "recomputed": {
+        "n": 202,
+        "accuracy": 0.6237623762376238,
+        "rate": 0.19801980198019803
+      },
+      "mismatches": {}
+    },
+    {
+      "pool": "sreason",
+      "arm": "balanced",
+      "source": "interactive_paper/data/native_bench/sreason_balanced_tts_judged.parquet",
+      "hash_match": true,
+      "raw_n": 202,
+      "scored_n": 202,
+      "same_ids_as_never": true,
+      "recomputed": {
+        "n": 202,
+        "accuracy": 0.6633663366336634,
+        "rate": 0.3316831683168317
+      },
+      "mismatches": {}
+    },
+    {
+      "pool": "sreason",
+      "arm": "aggressive",
+      "source": "interactive_paper/data/native_bench/sreason_aggressive_tts_judged.parquet",
+      "hash_match": true,
+      "raw_n": 202,
+      "scored_n": 202,
+      "same_ids_as_never": true,
+      "recomputed": {
+        "n": 202,
+        "accuracy": 0.7277227722772277,
+        "rate": 0.504950495049505
+      },
+      "mismatches": {}
+    },
+    {
+      "pool": "sreason",
+      "arm": "always",
+      "source": "interactive_paper/data/native_bench/sreason_always_tts_judged.parquet",
+      "hash_match": true,
+      "raw_n": 202,
+      "scored_n": 202,
+      "same_ids_as_never": true,
+      "recomputed": {
+        "n": 202,
+        "accuracy": 0.8366336633663366,
+        "rate": 1.0,
+        "expert_text_accuracy": 0.8613861386138614
+      },
+      "mismatches": {}
+    },
+    {
+      "pool": "valpaca",
+      "arm": "never",
+      "source": "interactive_paper/data/native_bench/valpaca_never_judged.parquet",
+      "hash_match": true,
+      "raw_n": 199,
+      "scored_n": 199,
+      "same_ids_as_never": true,
+      "recomputed": {
+        "n": 199,
+        "accuracy": 3.678391959798995,
+        "rate": 0.0
+      },
+      "mismatches": {}
+    },
+    {
+      "pool": "valpaca",
+      "arm": "conservative",
+      "source": "interactive_paper/data/native_bench/valpaca_conservative_tts_judged.parquet",
+      "hash_match": true,
+      "raw_n": 199,
+      "scored_n": 199,
+      "same_ids_as_never": true,
+      "recomputed": {
+        "n": 199,
+        "accuracy": 3.6331658291457285,
+        "rate": 0.01507537688442211
+      },
+      "mismatches": {}
+    },
+    {
+      "pool": "valpaca",
+      "arm": "balanced",
+      "source": "interactive_paper/data/native_bench/valpaca_balanced_tts_judged.parquet",
+      "hash_match": true,
+      "raw_n": 199,
+      "scored_n": 199,
+      "same_ids_as_never": true,
+      "recomputed": {
+        "n": 199,
+        "accuracy": 3.7738693467336684,
+        "rate": 0.04522613065326633
+      },
+      "mismatches": {}
+    },
+    {
+      "pool": "valpaca",
+      "arm": "aggressive",
+      "source": "interactive_paper/data/native_bench/valpaca_aggressive_tts_judged.parquet",
+      "hash_match": true,
+      "raw_n": 199,
+      "scored_n": 199,
+      "same_ids_as_never": true,
+      "recomputed": {
+        "n": 199,
+        "accuracy": 4.010050251256281,
+        "rate": 0.4371859296482412
+      },
+      "mismatches": {}
+    },
+    {
+      "pool": "valpaca",
+      "arm": "always",
+      "source": "interactive_paper/data/native_bench/valpaca_always_tts_judged.parquet",
+      "hash_match": true,
+      "raw_n": 199,
+      "scored_n": 199,
+      "same_ids_as_never": true,
+      "recomputed": {
+        "n": 199,
+        "accuracy": 4.1959798994974875,
+        "rate": 1.0,
+        "expert_text_accuracy": 4.954773869346734
+      },
+      "mismatches": {}
+    }
+  ],
+  "internal_queries": {
+    "n": 600,
+    "source_counts": {
+      "gsm8k": 100,
+      "triviaqa": 100,
+      "dolly-15k": 75,
+      "alpaca-zh": 75,
+      "math500": 50,
+      "simpleqa": 50,
+      "mmlu-pro/law": 25,
+      "mmlu-pro/math": 15,
+      "mmlu-pro/psychology": 14,
+      "mmlu-pro/physics": 14,
+      "mmlu-pro/engineering": 13,
+      "mmlu-pro/economics": 11,
+      "mmlu-pro/health": 10,
+      "mmlu-pro/philosophy": 10,
+      "mmlu-pro/business": 9,
+      "mmlu-pro/other": 9,
+      "mmlu-pro/biology": 6,
+      "mmlu-pro/chemistry": 6,
+      "mmlu-pro/history": 4,
+      "mmlu-pro/computer science": 4
+    },
+    "split_counts": {
+      "calib": 360,
+      "test": 240
+    },
+    "pool_counts": {
+      "hard-math": 150,
+      "hard-knowledge": 150,
+      "easy-chat": 150,
+      "easy-fact": 100,
+      "trap": 50
+    }
+  },
+  "fresh_queries": {
+    "n": 303,
+    "columns": [
+      "id",
+      "pool",
+      "split",
+      "query",
+      "reference_answer",
+      "freshqa_id",
+      "freshqa_split"
+    ],
+    "pool_counts": {
+      "fresh_fast": 153,
+      "fresh_never": 150
+    }
+  }
+}

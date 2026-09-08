@@ -1,0 +1,160 @@
+{
+  "date": "2026-09-08",
+  "baseline_git_commit": "5a5dbc371671ec39714f6457cd96d8028805de5f",
+  "main_pdf": {
+    "before_sha256": "8518dc592913aa663a018a2024dc1b75a70407d4e38d911d181614bf3d85f6e5",
+    "after_sha256": "8305afef4340d66a698fb1705d64e2d2c315fb48d6d93f8401e82e70eba58ee8",
+    "pages_before": 42,
+    "pages_after": 42,
+    "main_text_pages": 8,
+    "type3_fonts_before": 12,
+    "type3_fonts_after": 0,
+    "all_fonts_embedded": true
+  },
+  "official_style": {
+    "url": "https://media.neurips.cc/Conferences/NeurIPS2026/Formatting_Instructions_For_NeurIPS_2026.zip",
+    "sha256": "c3fc2894e83d2517ca18b66741d6c595986d97957dc08ec08bb2125a7ec4555a",
+    "matches_official_bytes": true
+  },
+  "validation": {
+    "all_tex_and_bib_hashes_unchanged": true,
+    "all_six_figure_content_streams_unchanged": true,
+    "all_six_figure_extracted_texts_unchanged": true,
+    "original_style_control_build_reproduces_original_layout_text": true,
+    "all_42_pages_rendered_and_contact_sheets_inspected": true,
+    "six_repaired_figures_inspected_at_full_page_size": true,
+    "repair_script_idempotent": true,
+    "unresolved_references_or_citations": false,
+    "overfull_boxes": false,
+    "build_engine": "Tectonic 0.17.0",
+    "notes": [
+      "Official style restoration changes line spacing and float placement; page-by-page text positions are not identical to the original PDF.",
+      "1251 numbered text lines match exactly after whitespace normalization. Line 938 retains its complete text, but lineno places its number below the intervening table.",
+      "TeX retains underfull box and float-placement warnings."
+    ]
+  },
+  "unchanged_tex_bib_sha256": {
+    "refs.bib": "56d22c48537d98edf2cbb76fa6b8e0a45bc3e34037b1db2732394d097f141640",
+    "main.tex": "ce7c1f073fc7f8117ccfa51791ee66256f0438579fe81e0839533cc1caa6fb45",
+    "sections/todo.tex": "4e6bf731b363aecf97761b554a7c45a988f1e63bfabf47aadd7586a911829f2e",
+    "sections/intro.tex": "af38274051814e00943b243f0d27d36f2b6d256e5720f58f8f70a0b2208a601e",
+    "sections/native_rates.tex": "344ace2c015e1ab7324bad95817e23a46d9e13f926cae0745d5d800c280194c8",
+    "sections/transfer.tex": "72b363d95feac03c44ca4692fb40981a862806963cad64defa968ad21d7f75c6",
+    "sections/discussion.tex": "88070c45e739c889eed963f0be6ac4774739efb9d8e692713f6ba77aed3aa6ee",
+    "sections/signal.tex": "4c9b53d13ed47dab78d318d3ad94cec09ab15906138276926da30bec112b05d0",
+    "sections/revision_table.tex": "7b659e572a2b00aea3a2f1eaab27278c6ddd9c8eda5a8f52a48a39104cbc8079",
+    "sections/gate.tex": "413ec16c5b46076baa5a10eeb3f8086025d2e0c81bb2f460eeb28d6a668d5322",
+    "sections/abstract.tex": "ebd60c7212adf4d59816a10d83f126b14d5eba1c9b5a14f5909f3ba0276a2953",
+    "sections/live.tex": "9f5f3b8761b4dac529da79f363ca6cea04813444de73b29811ede1e4be218452",
+    "sections/internal_strata.tex": "01c24534bb0ef35d600dec75859d0fb26ed858630a14c09e3c7221dca2831e74",
+    "sections/related.tex": "c8c6ccc2a92046229140e6a30119520819c1a7eb24ee6cd3f97ff8cd05f06928",
+    "sections/setup.tex": "5e2b8a89fd41cf188f8f0236ec9c79e61723d029e775521e911973807f91a1e3",
+    "sections/appendix.tex": "74646fe24bfa8132a6f6a22aa84bac2ac1a40e6cf1ea91d21767c3c79f340e2f",
+    "figures/teaser_system.tex": "9f2f0b1cddaf9859c62d47c27e7112d8c5cf1d0b9370c7983ad2a4b968d261e1",
+    "figures/teaser_tikz.tex": "34caa0dd0320ab2fbb9685842cbc026ccb35d45326a7aa6df5130e473f25bf47"
+  },
+  "figures": [
+    {
+      "figure": "roc.pdf",
+      "converted": [
+        {
+          "font": "DejaVuSans-Oblique",
+          "glyphs": 2,
+          "source_font_sha256": "ccdf74b350f11fd3dd5774de50e5e6346a1a5da1f5b7d5fb83590665e97a5213"
+        },
+        {
+          "font": "DejaVuSans",
+          "glyphs": 37,
+          "source_font_sha256": "3fdf69cabf06049ea70a00b5919340e2ce1e6d02b0cc3c4b44fb6801bd1e0d22"
+        }
+      ],
+      "before_sha256": "fe384296659327c324c7e3c728d812d5be85113f3fc95df9074a96d8970466e3",
+      "after_sha256": "c3f1642b8465c85ca727f6c6f8a3a6f97427ba90d65ebfb2ad6131aee16d6120"
+    },
+    {
+      "figure": "nvda_probe_reads.pdf",
+      "converted": [
+        {
+          "font": "DejaVuSans",
+          "glyphs": 52,
+          "source_font_sha256": "3fdf69cabf06049ea70a00b5919340e2ce1e6d02b0cc3c4b44fb6801bd1e0d22"
+        },
+        {
+          "font": "DejaVuSans",
+          "glyphs": 3,
+          "source_font_sha256": "3fdf69cabf06049ea70a00b5919340e2ce1e6d02b0cc3c4b44fb6801bd1e0d22"
+        }
+      ],
+      "before_sha256": "613076de81dea04b89368fd63663fe85b2284920f24a1e907424891905d6d2b7",
+      "after_sha256": "ece7b960b567b59bbcdf53f4ef595b70153a14450ad8b80e639d6a0ea38550d1"
+    },
+    {
+      "figure": "fork_pareto.pdf",
+      "converted": [
+        {
+          "font": "DejaVuSans",
+          "glyphs": 43,
+          "source_font_sha256": "3fdf69cabf06049ea70a00b5919340e2ce1e6d02b0cc3c4b44fb6801bd1e0d22"
+        },
+        {
+          "font": "DejaVuSans",
+          "glyphs": 2,
+          "source_font_sha256": "3fdf69cabf06049ea70a00b5919340e2ce1e6d02b0cc3c4b44fb6801bd1e0d22"
+        }
+      ],
+      "before_sha256": "31aecce1153400738fa3af926a643bd5db075bf5f432494739c45faced451226",
+      "after_sha256": "75ee8b7026c6bae650e9380c4ff08bd7f29ad4ee709fa61de45e9c476e562356"
+    },
+    {
+      "figure": "timeline_live.pdf",
+      "converted": [
+        {
+          "font": "DejaVuSans",
+          "glyphs": 53,
+          "source_font_sha256": "3fdf69cabf06049ea70a00b5919340e2ce1e6d02b0cc3c4b44fb6801bd1e0d22"
+        },
+        {
+          "font": "DejaVuSans",
+          "glyphs": 5,
+          "source_font_sha256": "3fdf69cabf06049ea70a00b5919340e2ce1e6d02b0cc3c4b44fb6801bd1e0d22"
+        }
+      ],
+      "before_sha256": "074750d1ba45b0009d46d89e45e75a9d50f2bf6084179082e9990d8eab07a4bc",
+      "after_sha256": "58e91a193f291801810b592b6a4070cc5e5b8cd7435bb6640efd2b65df49fd69"
+    },
+    {
+      "figure": "sllama_latency_decomp.pdf",
+      "converted": [
+        {
+          "font": "DejaVuSans",
+          "glyphs": 43,
+          "source_font_sha256": "3fdf69cabf06049ea70a00b5919340e2ce1e6d02b0cc3c4b44fb6801bd1e0d22"
+        },
+        {
+          "font": "DejaVuSans",
+          "glyphs": 1,
+          "source_font_sha256": "3fdf69cabf06049ea70a00b5919340e2ce1e6d02b0cc3c4b44fb6801bd1e0d22"
+        }
+      ],
+      "before_sha256": "f5ee98f69c6196e26ec2f1298dd2011a439177081b10799f4e602573ff669587",
+      "after_sha256": "65055b2655ae051d2555db25342c7d086bd627e93f1e508fa2e2cb5efbe5d7a6"
+    },
+    {
+      "figure": "noise_audit.pdf",
+      "converted": [
+        {
+          "font": "DejaVuSans",
+          "glyphs": 53,
+          "source_font_sha256": "3fdf69cabf06049ea70a00b5919340e2ce1e6d02b0cc3c4b44fb6801bd1e0d22"
+        },
+        {
+          "font": "DejaVuSans",
+          "glyphs": 6,
+          "source_font_sha256": "3fdf69cabf06049ea70a00b5919340e2ce1e6d02b0cc3c4b44fb6801bd1e0d22"
+        }
+      ],
+      "before_sha256": "6be5a2fd8774d9989738f2f5fb45c11d861b6a2fff7d644baa8bdd1ab865fae5",
+      "after_sha256": "cd7460b3d1f1154684f41a2a71fadb9d7578c0ed74ff094c1603b9b47a5cdf69"
+    }
+  ]
+}

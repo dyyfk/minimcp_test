@@ -757,8 +757,11 @@ pool at 0.230: it misses the pool a router most needs. The training
 receipt: at the argmax threshold its out-of-fold accuracy exactly
 matches the majority class; the internal probes under the same
 accounting clear majority by 9--29 points (Figure~\ref{fig:receipt}).
-Nor is it data-starved: the identical recipe on RouterBench
-\citep{hu2024routerbench} (36{,}497 prompts) reaches only in-domain
+In our RouterBench experiment \citep{hu2024routerbench}, the identical
+recipe uses 36{,}497 prompts retained from the zero-shot release after
+dropping rows missing the prompt, benchmark identity, or either the
+Mixtral or GPT-4 score. This is our filtered subset, not the full
+benchmark size. The router reaches in-domain
 AUC 0.710 with leave-one-benchmark-out at chance; RouteLLM's released
 preference-trained routers score 0.523/0.533 zero-shot on our pool and
 rank the trap pool below ordinary hard pools; our router transfers to
@@ -1126,10 +1129,15 @@ $\ge$1.2\,s commit rule die without any ASR check (20/20;
 pause-bearing variants 0/20). We keep the policy as deployed for
 measurement integrity and note both rules as the obvious fixes. For
 scope: the checkpoint's native duplex profile, measured
-separately on Full-Duplex-Bench v1.0 \citep{lin2025fdb} (727 samples,
-official scripts), shows best-in-class pause handling (turn-over rate
-0.125/0.117 Candor/synthetic), competitive user-interruption response
-(0.915 at 0.90\,s), and zero spontaneous backchannels: the
+separately in our single-pass evaluation on Full-Duplex-Bench v1.0
+\citep{lin2025fdb} (727 samples, official scripts), shows lower pause
+turn-over rates than the baselines listed in the benchmark paper
+(0.125/0.117 Candor/synthetic), a user-interruption turn-over rate of
+0.915 with 0.90\,s latency, and zero spontaneous backchannels. Our evaluation uses
+Parakeet ASR, which differs from the original paper's ASR setup;
+the historical baseline comparison is therefore not a matched rerun.
+These MiniCPM-o 4.5 measurements are ours, not results reported by
+\citet{lin2025fdb}. The
 lexicon floor is a harness-level approximation added precisely because
 the talker head has no native backchannel behavior to preserve.
 
@@ -1466,7 +1474,8 @@ the latency tail (P90 13.25$\to$10.94\,s) rather than fattening it.
   \label{fig:transfer-decomp}
 \end{figure}
 
-\paragraph{AlpacaEval scale caveats.} The official 4.8 is an offline
+\paragraph{AlpacaEval scale caveats.} The official 4.81
+\citep[Table~4]{openbmb2026minicpmo}, rounded elsewhere to 4.8, is an offline
 chat-mode number (our chat-mode control reproduces it at 4.86)
 and the chat-vs-live gap (4.86 vs.\ 3.99) is the duplex loop's
 spoken-reply style plus a token cap, so only live arms are comparable
@@ -1902,20 +1911,22 @@ regularizer per arm recovers most of the loss (.735 at $4{\times}$,
 with $C$ shrinking $3{\times}10^{-4}\to3{\times}10^{-5}$ at
 $8{\times}$): the solver's best response is to suppress the fit to
 the upweighted rows, and no weighting improves on the unweighted
-baseline. The missed failures are therefore not
-recoverable by emphasis at this read point --- consistent with the
-execution-slip class carrying no linearly readable signal at this
-read point (timestamp-limited predictability, not a claim of
-irreducibility in principle). This is the
-signature of emphasis on feature-indistinguishable positives rather
-than under-represented ones \citep{swayamdipta2020cartography,
-pleiss2020aum}, and matches the independent finding that
-internal-state probes read parametric-knowledge recall rather than
-output truthfulness, leaving association-driven confident errors
-undetectable \citep{cheang2025recall}; correctness of a reasoning
-chain becomes linearly readable only as generation proceeds
-\citep{david2025temporal}, which is what the read-point sweep above
-measures in the duplex regime.
+baseline. The missed failures do not benefit from emphasis under the tested
+weighting and regularization settings at this read point. This is
+consistent with limited linearly readable signal, but does not by
+itself distinguish representation overlap from label noise or
+finite-sample effects. Related training-dynamics studies show that
+ambiguous and mislabeled examples can affect generalization
+\citep{swayamdipta2020cartography,pleiss2020aum}; their results do not
+establish the mechanism in our frozen speech representations.
+\citet{cheang2025recall} find that associated
+hallucinations overlap with factual outputs in hidden-state space,
+reducing the effectiveness of the tested detectors on factual
+completion tasks. \citet{david2025temporal} finds that eventual
+correctness is predictable from as few as four reasoning tokens in
+math tasks, without testing a zero-token baseline. These findings
+motivate our read-point analysis, rather than establishing that
+correctness cannot be predicted before generation.
 
 \paragraph{Live validation.} Full live runs on frozen test-240 (real
 raw-audio ASR uplink, real expert, wait paced at one chunk per second)

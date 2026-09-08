@@ -1,0 +1,166 @@
+{
+  "scope": "Current Table 1 NVDA block versus archived three-layer v2 branch in remix_eval3.json; not independent inference or rejudging.",
+  "rows": [
+    {
+      "row": "local",
+      "printed": [
+        null,
+        35.8,
+        37.6,
+        70.8,
+        31.0,
+        null,
+        43.8,
+        null
+      ],
+      "calculated": [
+        null,
+        35.77235772357724,
+        37.6,
+        70.81545064377683,
+        31.0,
+        null,
+        43.79695209183852,
+        null
+      ],
+      "mismatches": []
+    },
+    {
+      "row": "gate@0.15",
+      "printed": [
+        null,
+        48.4,
+        48.8,
+        80.7,
+        42.0,
+        null,
+        55.0,
+        11.2
+      ],
+      "calculated": [
+        null,
+        48.3739837398374,
+        48.8,
+        80.68669527896995,
+        42.0,
+        null,
+        54.96516975470183,
+        11.168217662863313
+      ],
+      "mismatches": []
+    },
+    {
+      "row": "gate@0.3",
+      "printed": [
+        null,
+        61.0,
+        59.2,
+        85.8,
+        54.0,
+        null,
+        65.0,
+        21.2
+      ],
+      "calculated": [
+        null,
+        60.97560975609756,
+        59.199999999999996,
+        85.83690987124464,
+        54.0,
+        null,
+        65.00312990683555,
+        21.206177814997034
+      ],
+      "mismatches": []
+    },
+    {
+      "row": "gate@0.5",
+      "printed": [
+        null,
+        76.8,
+        69.6,
+        89.7,
+        66.5,
+        null,
+        75.7,
+        31.9
+      ],
+      "calculated": [
+        null,
+        76.82926829268293,
+        69.6,
+        89.69957081545064,
+        66.5,
+        null,
+        75.65720977703339,
+        31.860257685194867
+      ],
+      "mismatches": []
+    },
+    {
+      "row": "random@0.5",
+      "printed": [
+        null,
+        65.7,
+        60.2,
+        82.0,
+        60.0,
+        null,
+        67.0,
+        23.2
+      ],
+      "calculated": [
+        null,
+        65.65040650406505,
+        60.199999999999996,
+        81.97424892703862,
+        60.0,
+        null,
+        66.95616385777592,
+        23.1592117659374
+      ],
+      "mismatches": []
+    },
+    {
+      "row": "expert",
+      "printed": [
+        null,
+        95.5,
+        82.8,
+        93.1,
+        89.0,
+        null,
+        90.1,
+        46.3
+      ],
+      "calculated": [
+        null,
+        95.52845528455285,
+        82.8,
+        93.13304721030042,
+        89.0,
+        null,
+        90.11537562371332,
+        46.3184235318748
+      ],
+      "mismatches": []
+    }
+  ],
+  "alpaca": {
+    "probe": "pass-3 three-layer answer onset, L26/L30/L34",
+    "metric": "VoiceBench score (1--5)",
+    "protocol": "frozen local/expert outcomes; pass-3 probe ranking",
+    "n": 198,
+    "local": 3.5505050505050506,
+    "expert": 4.914141414141414,
+    "gate@0.15": 3.893939393939394,
+    "random@0.15": 3.755050505050505,
+    "p@0.15": 0.0,
+    "gate@0.3": 4.171717171717172,
+    "random@0.3": 3.9595959595959593,
+    "p@0.3": 0.0,
+    "gate@0.5": 4.51010101010101,
+    "random@0.5": 4.232323232323233,
+    "p@0.5": 0.0
+  }
+}
