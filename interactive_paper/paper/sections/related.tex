@@ -1,100 +1,52 @@
 \section{Related Work}
 \label{sec:related}
-
-\paragraph{Pre-answer competence estimation.}
-Text-language-model correctness can be estimated from verbal
-self-evaluation \citep{kadavath2022language,lin2022teaching}, output
-uncertainty, or hidden representations
-\citep{azaria2023internal,burns2023discovering,marks2024geometry}.
-Intermediate layers can carry more useful information than the output
-distribution \citep{orgad2024llms}, and trained hidden-state probes are
-strong factual-confidence estimators \citep{mahaut2024factual}.
-Semantic entropy improves uncertainty estimation by comparing sampled
-answers \citep{kuhn2023semantic,farquhar2024detecting}; Semantic
-Entropy Probes amortize this signal into a pre-generation or post-hoc
-hidden-state read \citep{kossen2024semantic}. Attention-map probes and
-multimodal uncertainty fusion extend the same broad idea
-\citep{chuang2024lookback,umui2026}. This work establishes that
-competence is readable in text models. It does not show where the read
-remains reliable after duplex speech training or whether a probe
-calibrated on text transfers to speech-input states.
+\paragraph{Competence readout.}
+Correctness can be estimated from verbal self-evaluation
+\citep{kadavath2022language,lin2022teaching}, hidden representations
+\citep{azaria2023internal,burns2023discovering,marks2024geometry}, and
+uncertainty across sampled answers
+\citep{kuhn2023semantic,farquhar2024detecting}. Intermediate-layer
+representations can expose information missing from model outputs
+\citep{orgad2024llms,mahaut2024factual}; Semantic Entropy Probes
+amortize uncertainty estimation into a hidden-state read
+\citep{kossen2024semantic}. Our question is how readout location,
+input modality, and serving protocol affect this signal after speech
+and duplex fine-tuning.
 
 \paragraph{Selective routing.}
-Text routing splits into two families by where the decision lives.
-In the first, the decision is read from outside the generator:
-HybridLLM \citep{ding2024hybrid}, RouteLLM
-\citep{ong2024routellm}, and query-side routers
-\citep{hybridserve2025,hu2024routerbench,llmrouterbench2026} choose a
-model for a complete text query from query features or preference
-data; FrugalGPT organizes cascades that can score an earlier model's
-response \citep{chen2023frugalgpt}, while AutoMix verifies a drafted
-answer before escalating \citep{aggarwal2024automix}. Closest to our
-signal, recent methods read pre-generation activations or fit linear
-success probes on frozen states
-\citep{varshney2026llmrouter,lugoloobi2025difficulty,
-lugoloobi2026failures}. In the second family, the decision is trained
-into the generator: Toolformer and Self-RAG learn tool or reflection
-tokens \citep{schick2023toolformer,asai2024selfrag}; Co-LLM and CITER
-learn token-level deferral
-\citep{shen2024collaborative,zheng2025citer}; and pause, thought, or
-think/no-think tokens allocate more internal computation
-\citep{goyal2024pause,zelikman2024quietstar,yang2025qwen3,
-guo2025deepseekr1}. Learning-to-defer and early-exit methods make
-related decisions within a model
-\citep{madras2018predict,schuster2022confident}. Our contribution is
-not the linear pre-generation probe by itself. We test whether this
-kind of read survives duplex training and audio input, and use a
-deployment-time threshold without modifying the speech checkpoint.
+FrugalGPT, HybridLLM, and RouteLLM allocate work across language models
+\citep{chen2023frugalgpt,ding2024hybrid,ong2024routellm}; AutoMix
+verifies a drafted answer before escalating \citep{aggarwal2024automix}.
+Pre-generation activation routers and frozen-state success probes are
+especially close to our method
+\citep{varshney2026llmrouter,lugoloobi2026failures}. A linear failure
+probe is thus not itself the novelty. We test its robustness in
+speech-model representations and use a threshold to expose a tunable
+expert-call budget. Predicting local failure remains distinct from
+predicting the benefit of a particular expert.
 
-\paragraph{Duplex control and live handoff.}
-End-to-end spoken dialogue includes native duplex models
-\citep{nguyen2023generative,defossez2024moshi,zeng2024glm4voice,
-bayling2026duplex}, streaming omni models
-\citep{xu2025qwen25omni,openbmb2026minicpmo}, frozen-backbone adapters
-\citep{wang2024freezeomni}, and audio fine-tunes
-\citep{chu2024qwen2audio}. Most control work in these systems concerns
-the floor: state, idle, synchronization, or interruption tokens
-\citep{wang2024fsm,zhang2024duplex,veluri2024syncllm,
-ma2024lslm,fu2024vita,yu2024salmonnomni}, structured action channels
-\citep{zhang2026duplexsla}, or classifier heads over a frozen or
-lightly adapted backbone
-\citep{wang2024freezeomni,chen2025minmo,liao2025flexduo}. Training
-this control is costly enough that reducing the cost is itself a
-research goal \citep{xu2024minimal}, and trained turn-taking remains
-unreliable across models \citep{lin2025fdb}. These mechanisms decide
-when the model may speak; even the most recent native design adds only
-a few turn tokens to the vocabulary and answers every turn locally,
-whatever the model's competence on that turn \citep{bayling2026duplex}.
+\paragraph{Native duplex control.}
+Native spoken-dialogue models coordinate listening and speaking
+\citep{defossez2024moshi,openbmb2026minicpmo}, using state or
+synchronization mechanisms
+\citep{wang2024fsm,zhang2024duplex,veluri2024syncllm} or frozen-backbone
+adapters \citep{wang2024freezeomni}.
+BayLing-Duplex \citep{bayling2026duplex} makes dialogue-state decisions
+within a single autoregressive LLM by interleaving user audio,
+assistant text, and assistant audio and introducing four state tokens.
+Starting from GLM-4-Voice, it learns turn-taking and interruption
+through supervised full-duplex fine-tuning and timing-focused
+preference optimization. Its evaluation measures spoken-answer quality
+and interaction timing, providing a concrete example of learned native
+floor control.
 
-The direct neighbors of our gate are trained think triggers.
-DuplexOmni emits a think-control token at the end of a user utterance
-to hand work to a separate reasoning layer \citep{huang2026duplexomni};
-chronological thinking interleaves reasoning with the speech stream
-\citep{chrono2026thinking}; MiniCPM-o~4.5 ships a built-in reasoning
-mode \citep{openbmb2026minicpmo}; MoshiRAG triggers asynchronous
-retrieval from the model's emerging output \citep{chien2026moshirag}.
-These systems show that a live handoff is possible. But the trigger is
-trained into the weights from purpose-built duplex data, so changing
-the policy or the downstream resource means retraining; it is a binary
-action with no calibrated score, so the escalation rate cannot be set
-to a call budget; and the trained policies are hard to reuse or
-compare, because released artifacts often include the training recipe
-but not the trained checkpoint \citep{huang2026duplexomni}. None of
-these works evaluates a competence score read from a frozen checkpoint
-before generation. Our probe replaces the trained trigger with such a
-read: it needs no training of the speech model, exposes a
-thresholdable score, and on our target model it dominates the built-in
-reasoning mode on both accuracy and latency
-(Appendix~\ref{app:gatedetail}).
-
-\paragraph{Positioning.}
-Prior work therefore establishes three ingredients separately:
-competence can be read from text models, text queries can be routed,
-and duplex models can coordinate speaking or external computation.
-To our knowledge, the reviewed literature does not establish their
-conjunction: whether a frozen duplex-trained speech model exposes a
-pre-answer competence signal that survives unseen query pools and
-text-to-speech transfer, and whether that signal arrives early enough
-to improve live selective escalation. We evaluate these conditions
-directly. The claims are about readout robustness and system utility;
-the training mechanism behind the late-layer failure remains open.
+\paragraph{Competence-aware handoff.}
+DuplexOmni, chronological thinking, and MoshiRAG connect speech to
+reasoning or retrieval
+\citep{huang2026duplexomni,chrono2026thinking,chien2026moshirag}.
+Our work studies a decision complementary to native floor control:
+given a duplex-trained checkpoint, can its hidden states predict
+local-answer failure and guide escalation to an expert under a
+tunable call budget? We fit a small readout without updating the
+speech model. This requires regime-specific calibration and does not
+assume that a learned turn-taking signal predicts answer correctness.

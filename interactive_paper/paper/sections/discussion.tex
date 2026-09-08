@@ -1,111 +1,39 @@
-\section{Discussion}
+\section{Discussion and Limitations}
 \label{sec:discussion}
+The strongest finding is representational: a mid-layer read remains
+predictive under conditions where the conventional final-layer,
+last-token probe fails. This behavior is specific to the tested
+checkpoints and input conditions. The fitted readout can guide
+escalation without updating the speech model, but the native result
+requires in-regime audio features and labels; it is not a zero-shot
+deployment of the text-calibrated probe.
 
-\paragraph{Interpretation.}
-The competence signal this system runs on was already in the frozen
-weights. Nothing was trained into the speech model, and the read costs
-one dot product on states the forward pass computes anyway, so a
-deployed duplex model can gain selective escalation without new
-duplex data, a new control token, or a retrained policy. What matters
-is where the read is taken. The final layer is the default choice
-because it is the interface to the output, and on these duplex
-checkpoints it is the wrong one: the same linear read that inverts at
-the output holds up in the middle of the network. This also points
-back at duplex training itself. The matched comparisons show that the
-fine-tune, not the backbone, is what breaks the late-layer read, so a
-training recipe that adds interaction control may be degrading the
-model's own competence interface while leaving its answers intact. We
-do not know the mechanism, and a model that reads its own state
-before answering still cannot explain why it will fail.
+Failure prediction is also only one part of useful handoff. The
+expert must repair the selected failures, and the serving path must
+preserve its answer within an acceptable wait. The current results
+show answer-content gains alongside large reconstructed timing tails.
+The native capture can already contain generated text. In the main
+recorded protocol, the expert's
+30-second input window admits unconsumed audio at early onset and
+truncates longer questions; text-based judging does not establish
+what listeners receive. The subsequent v2 validation preserves the
+consumed prefix and scores transcribed output audio
+(Appendix~\ref{app:revision-diagnostics}); a full streaming evaluation
+still needs substantive speech onset and completion measured on a
+common clock. Floor-management and interruption checks in the
+appendix remain small scripted studies, without human ratings or
+broad multi-turn validation.
 
-\paragraph{Scope of the signal.}
-The probe is strongest on retrieval-like failures, where the state
-reflects a missing answer before generation. It is weak on false
-premises and complementary to signals that appear during decoding
-(Appendix~\ref{app:livedetail}). This boundary explains why failure
-AUC and system benefit are not the same quantity. A correct ranking
-cannot help when the expert fails on the same turns, and an
-open-ended quality benchmark may not contain the factual-retrieval
-event the probe detects. The unstable Web Questions curve and the
-negative AlpacaEval result are part of that boundary rather than
-exceptions to it; SD-QA, by contrast, confirms selective gains on
-real human speech. Selective escalation needs both a readable local
-failure and expert headroom.
-
-\paragraph{Calibration.}
-The model weights stay frozen, but the gate is still a fitted
-component. Text-only calibration is enough for the cross-modal result
-on end-to-end speech models, the deployed probe uses a wider
-benchmark-disjoint mix, and both the concurrent and native read
-points require refitting in their own regime. The method avoids
-fine-tuning the talker and moves the operating budget through a
-threshold, but it does not remove the need for representative
-calibration data.
-
-\paragraph{Limitations.}
-The internal study uses one phrasing per $\ptrue$ variant, and its
-real-speech validation is scripted read speech in a single dialect.
-Formula-symbolic content is out of scope for the audio arm, since any
-speech rendering destroys it. Labels come from one judge family, with
-no human labels; a stronger re-judge bounds the resulting shifts at
-about one point. Each query is run once per tier, which puts a
-replication floor of two to three points on every live accuracy, and
-no claim here rests on a smaller difference. The second-family
-NVDA result covers method transfer through the model's native frame
-protocol, not matched-pair attribution. Its external pools were
-inspected during the variant review and thus need fresh-pool
-confirmation; its layer and features were selected on calibration-only
-LOPO metrics. For the main MiniCPM probe, the layer and features were
-chosen by cross-validation on the internal calibration split and then
-confirmed on held-out pools, rather than by nested selection inside
-each held-out pool. The mechanism behind the late-layer decay on text input remains
-unresolved (Appendix~\ref{app:mech}).
-
-Serving regime is the sharpest practical limit. Calibration does not
-carry across regimes: under concurrent prefill the frozen read
-degrades and needs an in-regime refit, and the native read needs its
-own refit, wider calibration, and labels judged on native answers
-before it matches the turn-based loop
-(Appendices~\ref{app:duplexval},~\ref{app:native}). That native read
-also appears saturated, in that more labels of the same kind, larger
-heads, and a distilled second-signal student all leave it close to
-where it is. Finally, the evaluation is scripted and single-turn.
-Disfluent correction, chained tool calls, and multi-turn grounding
-remain open \citep{lin2026fdbv3}, and in native testing a new
-question asked during the expert wait usually derails the pending
-relay, so a production system has to cancel or replace an in-flight
-request when the user moves on. Interruption inherits the duplex
-head's own turn-taking, and here the harness's bookkeeping matters
-more than decode-time levers. Our first design narrated escalations to
-the head in bracketed system notes and let the condemned local answer
-run on silently to its own end-of-turn; after a barge the head then
-committed to the following question only about two times in three,
-and no decode-side intervention (down-weighting the listen token,
-forced listen windows, closing the interrupted turn) made the commit
-reliable. The failures traced to the context those mechanisms left
-behind---content the head never saw in training, stacked against
-speaking. A three-arm control (stock serving, gate-disabled, full
-escalation) made the attribution exact: after a mid-answer ``stop''
-the stock head commits to a follow-up question within $\sim$2\,s in
-6/6 runs, our gate-disabled loop matches it 6/6, and only the
-escalation arm locked (3/6)---so every part of the deficit was the
-harness, none of it the head. Closing the gap took three rounds of
-making the escalation context indistinguishable from a native
-session: teacher-forcing whatever audio the system actually played
-(stall line, relayed answer up to the cut) into the context as the
-head's own closed speech turn; pacing the relayed words into the
-per-second audio units \emph{while} they play, rather than holding
-the head in a forced listen state through its own audible answer;
-and dropping the post-interruption forced-listen window. With all
-three, the escalation arm recovers 6/6, matching stock. Restoring
-the commit also exposed a calibration layer: the post-interruption
-context is a regime of its own, and the dialogue-act gate---
-calibrated on standalone and ordinary in-context utterances---
-initially ruled real follow-up questions floor turns there; its
-stimulus set had to be extended with interruption-context dumps.
-The general lesson is that a duplex head's turn-taking is
-conditioned on everything the serving layer writes into its context,
-and any bookkeeping shape a native session cannot produce (system
-notes, phantom muted turns, forced listen runs) is paid for in
-floor behavior; claims that a failure is ``intrinsic to the head''
-should be required to survive a stock-serving control arm.
+The internal mixture and its test split remain fixed. We report all
+five external QA pools rather than changing test composition after
+observing outcomes. Known calibration overlaps are disclosed; the
+small offline effect of removing them does not make the recorded
+benchmark overlap-free. Base-model pretraining contamination is
+unresolved. Layer selection is not nested within every LOPO fold,
+LLM judges have residual error, and the main table's single pass does
+not quantify run-to-run reliability; later internal repeats provide
+a limited diagnostic (Appendix~\ref{app:revision-diagnostics}).
+The next evaluation should lock
+a deduplicated calibration manifest and validation-selected
+thresholds before evaluation on fresh, audited benchmarks.
+\label{sec:main-end}

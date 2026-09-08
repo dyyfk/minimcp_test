@@ -1,20 +1,20 @@
 \begin{abstract}
-Real-time speech systems answer most queries with a local model, but
-some queries call for a stronger expert. Selective escalation is well
-studied for text; speech tightens the constraint: the decision must be
-made before the model commits to a response, and the signal must
-survive distribution and modality shift. We ask whether a speech
-model's own hidden states already carry such a competence signal. Our
-key finding is that they do, but not where escalation methods usually
-look: the conventional final-layer read collapses under distribution
-shift, while a mid-network read stays reliable, transfers from
-text-calibrated probes to speech input, and can be taken once at the
-model's own speak commit, before the answer is produced, in about
-30\,ms. A linear probe on this representation gates a native
-full-duplex escalation loop: it raises delivered answer accuracy from
-41\% to 63\% at 52\% escalation while beating matched-rate random
-escalation, and, with weights, features, and layer fixed, improves all
-five external speech-QA benchmarks over always-local operation. These results identify a mid-network
-representation, rather than the final-layer read, as the practical
-signal for deciding when a speech model should hand off.
+A speech model's decision to speak does not establish that it can answer
+correctly. We study whether its frozen hidden states expose a useful
+signal for selective escalation to a stronger expert. On MiniCPM-o~4.5,
+a final-layer, last-token failure probe inverts on held-out math queries
+with text input (AUC 0.372), whereas the same read at layer 22 reaches
+0.931. A text-calibrated mid-layer probe also transfers to speech-input
+states (AUC 0.855). We use this read location in a separately calibrated
+answer-onset gate and evaluate its decisions in the model's native
+listen/speak protocol. On 240 internal test queries, answer-content
+accuracy increases from 40.8\% to 62.9\% at 51.7\% escalation, exceeding
+the reported random-mixture reference by 6.8 points. Across five
+external speech-QA pools, the aggressive tier improves macro accuracy
+from 59.4\% to 80.9\%, versus 75.2\% for the reference. Reconstructed
+timing diagnostics expose substantial expert-path costs; these experiments
+do not establish an end-to-end conversational latency benefit. The
+results support mid-layer competence readout as a routing signal and
+identify the timing, calibration, and relay constraints that must be
+resolved for real-time use.
 \end{abstract}

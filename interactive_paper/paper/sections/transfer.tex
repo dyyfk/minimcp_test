@@ -1,73 +1,45 @@
-\subsection{Transfer to public speech benchmarks}
+\subsection{External transfer and its limits}
 \label{sec:transfer}
 \label{sec:transfer-neg}
+The native gate's weights, feature definition, layer, and per-language
+thresholds stay fixed across the five external QA pools. The upper
+block's \emph{avg} excludes the internal set; $\Delta$ is its gain
+over always-local. Aggressive macro accuracy rises from \textbf{59.4\% to 80.9\%}, compared with
+75.2\% for the reported random mixture: +21.5 points over local
+answering and +5.7 over random. Its realized call rate ranges
+from 18.8\% on Llama Questions to 66.0\% on SD-QA, so this is not a
+uniform 50\%-budget comparison. TriviaQA and SD-QA illustrate large
+improvements over local answering (+25.6 and +34.5 points) and over
+the corresponding random reference (+6.9 and +8.8 points).
 
-The shortcut analysis of \S\ref{sec:audit} makes external transfer
-necessary. We freeze the
-probe weights, feature set, and layer selected on the internal
-calibration mix, then run the live loop of \S\ref{sec:liveproto} on six
-public speech benchmarks with audio input and text output: Speech
-TriviaQA, Speech Web Questions, Llama Questions, and Reasoning QA from
-OpenAudioBench \citep{openaudiobench2025} (spoken renderings of
-\citealp{joshi2017triviaqa}, \citealp{berant2013webquestions}, and the
-set of \citealp{nachmani2024spoken}), SD-QA (real dialectal human
-speech) \citep{faisal2021sdqa}, and VoiceBench AlpacaEval
-\citep{chen2024voicebench,taori2023alpaca}. All audio is the
-benchmarks' official pre-rendered audio; no evaluation query is used to
-fit the probe. The only per-pool adjustment is label-free: tier
-thresholds are quantiles of that pool's score distribution, requiring
-no correctness labels or judge calls. This controls the call budget but
-cannot improve ranking. A single absolute threshold also beats
-matched-rate random on four of five QA pools, but its escalation rate
-varies from 2\% to 48\% (Appendix~\ref{app:fixedthr}). We use each benchmark's
-official judge when available and verify that the local-only controls
-are on the published scale.
+The lower tiers are less reliable. Conservative accuracy falls by
+2.4 points on TriviaQA and 3.6 on Llama Questions; balanced leaves
+Llama Questions unchanged. Separately sampled sessions and limited
+expert headroom constrain the interpretation of small differences.
+The results support aggressive-tier gains across these pools, not
+improvement on every benchmark at every budget. On AlpacaEval, the
+table caption reports 3.68 locally and 4.01 at aggressive, with
+a random-mixture reference of approximately 3.9; the always arm scores 4.20 versus 4.95
+for returned expert text. The relay cap is particularly restrictive
+for long, open-ended answers.
 
-% Main results table lives in signal.tex so it lands
-% early in the paper; label tab:transfer unchanged.
+Failure categories and later reads help explain the boundary. In the
+native failure-type audit, specific-but-wrong answers comprise
+70\% of failures and are ranked at AUC 0.81, while execution slips
+in multi-step reasoning are near chance (0.47). In a separate
+read-time sweep, external mean AUC increases from 0.755 at commitment
+to 0.791 after two answer chunks. This is consistent with some useful
+information emerging during generation, without proving a causal
+mechanism (Appendix~\ref{app:readtime}).
 
-The frozen scores remain discriminative outside the calibration mix:
-AUC ranges from 0.683 to 0.806 across the five QA pools, with a mean of
-0.771 (Appendix~\ref{app:transferdetail}). The gate also improves
-deployed-channel accuracy over always-local operation on every QA
-benchmark and at every budget; at 50\% escalation, mean accuracy rises
-from 63.4\% to 82.1\%. These gains establish system utility but do not
-by themselves establish selectivity, because random escalation also
-adds expert answers.
-
-The NVDA probe reaches 0.818 OOF AUC and 0.816 mean external AUC under
-each pool's assigned judge. It averages linear heads at L26/L30/L34
-on a pass-3 answer-onset capture from the model's native frame
-protocol. This tests method transfer without running a live loop. The
-full training protocol and read-point ablations are in
-Appendix~\ref{app:nvda}.
-
-Llama Questions provides the cleanest fixed-budget test. It contains a
-single query type, the kept-local subset scores 97.6\% while the
-escalated subset scores 69.6\% ($z{=}6.46$), and expert answers improve
-the latter to 88.8\% ($p{<}.0001$). At 50\% escalation, the measured
-system reaches 94.8\%, compared with 93.6\% for always escalating.
-Matched-rate precision reaches 95\% of its base-rate cap
-(Appendix~\ref{app:transferdetail}). Cross-lingual transfer also
-improves when the English calibration mix is widened: Chinese
-Reasoning QA rises from AUC 0.621 to 0.683 despite adding no Chinese
-calibration data.
-
-The transfer results also expose the boundary between predicting local
-failure and creating expert benefit. SD-QA is a positive real-speech
-case and exceeds matched-rate random at all three budgets. Web
-Questions is less stable, with little gain over random at the low and
-high budgets; in its top-scoring 15\%, many local failures are also
-missed by the expert
-(Appendix~\ref{app:fixedthr}). AlpacaEval is a clearer negative: its
-open-ended failures do not present the retrieval-failure pattern the
-probe reads. On NVDA, the pass-3 probe beats matched-rate random on all
-four binary QA pools at 30\% and 50\% escalation ($p\le.0008$); at
-15\%, SD-QA is inconclusive ($p{=}0.063$). On AlpacaEval, the same
-pass-3 ranking reaches 4.51 versus 4.23 for random at 50\%
-($p<.001$). Thus the three MiniCPM negatives all separate at the
-30\% and 50\% budgets on the second family: external utility depends
-on both the competence ranking and whether the selected failures are
-repairable by the expert
-(Appendices~\ref{app:nvda},~\ref{app:fixedthr},
-and~\ref{app:transferdetail}).
+The lower block of Table~\ref{tab:transfer} reports the exploratory
+NemotronLabs-VoiceChat-11B (NVDA) study. Its \emph{avg} covers four
+English QA pools, with no internal or Mandarin entry. At a 50\%
+replay budget, average accuracy rises from 43.8\% to 75.7\%
+($\Delta=31.9$ points), compared with 67.0\% for random. This is
+native-frame replay with cached outcome mixtures, not another set
+of MiniCPM native sessions. The L26/L30/L34 heads reach 0.818
+out-of-fold AUC and 0.816 mean external AUC in the separate probe
+analysis (Appendix~\ref{app:nvda}); Table~\ref{tab:transfer} reports
+accuracy rather than AUC. External pools were inspected during
+variant review, so independent confirmation is needed.

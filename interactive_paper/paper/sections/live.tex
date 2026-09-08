@@ -1,112 +1,63 @@
-\section{Results}
+\section{Escalation Results}
 \label{sec:results}
+\input{sections/revision_table}
 
-% Main results table (tab:transfer) is declared in signal.tex so it
-% floats to an early page.
-
-\subsection{Live escalation}
+\subsection{Internal accuracy and timing cost}
 \label{sec:live}
 \label{sec:liveloop}
 \label{sec:livecurve}
+The upper MiniCPM block of Table~\ref{tab:transfer} reports
+answer-content accuracy on the fixed 240-query internal test set:
+40.8\% locally, then 46.7\%, 54.2\%, and 62.9\% for conservative,
+balanced, and aggressive. Their realized escalation rates are
+8.3\%, 25.0\%, and 51.7\% (Appendix~\ref{app:transferdetail}).
+Aggressive exceeds the table's random reference of 56.1\% by
+6.8 percentage points. Per-tier internal comparisons are in
+Table~\ref{tab:live}. Aggressive recovers 74.6\% of the measured
+local-to-always accuracy gap while using 51.7\% expert calls.
+This measures selection value relative to the recorded endpoints.
 
-We ran the 240 frozen test queries and the five external pools
-through five live arms each --- never, three gate tiers, always ---
-every arm a separate native full-duplex session per query
-(\S\ref{sec:liveproto}). We score delivered answer accuracy: the
-correctness of what the user hears after the full path, judged by
-each benchmark's own judge. On the internal set accuracy rises
-monotonically, $\mathbf{40.8\% \to 46.7\% \to 54.2\% \to 62.9\%}$ at
-0/8/25/52\% realized escalation, and the balanced and aggressive
-gains are significant (paired bootstrap; Table~\ref{tab:transfer},
-Figure~\ref{fig:dualview}). The gate exceeds matched-rate random
-escalation by 6.0 and 6.8 points at those two tiers; the conservative
-tier, firing on 8\% of turns, is within noise of random.
+Gains vary across the fixed internal strata: factual QA improves by
+52.5 points, while math accuracy is unchanged. Of 60 knowledge
+questions, 43 exceed the expert's input window. These descriptive
+results identify an input constraint and task differences, without
+attributing the accuracy gap to truncation or changing the test
+mixture (Appendix~\ref{app:internal-strata}).
 
-% fig:dualview is declared at the end of Section 4 so it floats
-% onto the page where these results are discussed.
+The timing diagnostic makes the cost visible
+(Figure~\ref{fig:dualview}). Internal mean time increases from 5.7\,s
+locally to 15.3\,s at balanced and 27.3\,s at aggressive; aggressive
+P95 is 103.2\,s. The always arm averages 45.1\,s. A lower call rate
+can reduce expert-path exposure, but these tails do not support
+calling the current aggressive setting low latency. An earlier
+cached-outcome sweep suggested nominal 15/25/40\% as candidates;
+those settings require new runs and are not substituted for the
+measured 15/30/50\% recipe here (Appendix~\ref{app:current-protocol}).
 
-A measured always-escalate arm reaches 70.4\% against 76.5\% for the
-expert's returned text scored directly, so the spoken relay now costs
-6 points on this pool (a 400-character spoken cap on long answers);
-on the five external pools the two differ by 1 to 3 points. Local
-decoding is stochastic, and a zero-escalation re-run moves a pool's
-floor by up to 3.6 points, so no claim rests on a smaller
-difference. Full tables, latency profiles, and boundary cases are in
-Appendix~\ref{app:livedetail}.
+Table~\ref{tab:transfer}'s measured always arm and expert-text row
+score different objects. On the 238 internal always-arm rows with expert scores,
+returned text reaches 76.5\% and intended relay content reaches
+71.0\%; the full 240-row always arm scores 70.4\%. This paired
+5.5-point gap combines relay content changes with judge variability;
+it does not isolate formatting loss or acoustic intelligibility.
+The table's ``relay-free bound'' is a returned-text reference, not a
+proven upper bound on every routed or spoken answer.
 
-\paragraph{Serving-regime checks.}
-Replaying the loop with the talker enabled leaves the frozen ranking
-nearly unchanged (AUC 0.871/0.856 versus 0.866 with the talker
-disabled). A teacher-forced concurrent-prefill variant is less stable
-and requires an in-regime refit; its external results remain
-exploratory (Appendix~\ref{app:duplexval}). Under the model's native
-full-duplex head, the read moves to the head's own listen$\to$speak
-commit point, and the probe is refit in regime on a widened
-5{,}228-row calibration merge under the official serving
-configuration, with labels judged on the native answers. The refit
-reads at AUC 0.876 internally and 0.771 on the four English external
-QA pools. The Mandarin reasoning pool is lower, at 0.621; a
-1{,}500-question held-out Mandarin set of facts, knowledge, and
-commonsense reads at 0.811, so the gap is multi-step reasoning
-rather than language (Appendix~\ref{app:native}). Re-mixing the
-native gate's decisions with cached expert outcomes beats
-matched-rate random on all five English pools at both deployed
-tiers; with per-language thresholds the Mandarin pool escalates at
-the nominal rates and beats matched-rate random at the two lower
-tiers. These checks support the ranking beyond the primary
-turn-based loop, but they also show that read points, probe weights,
-and thresholds must be calibrated for the serving regime
-(Appendix~\ref{app:native}).
-
-\paragraph{The relay, not the gate, was the first bottleneck.}
-The first native pass used the talker to voice the returned answer
-from a steering prompt. On Speech
-TriviaQA the expert's returned text scored 0.960 under the official
-judge, but what the talker voiced after a steering prompt scored
-0.728 (never-escalate 0.628), because the head truncated, ignored, or
-re-answered the relayed text on about a quarter of turns. Speaking
-the cleaned expert text verbatim through the talker's own
-teacher-forced voice, with a context note in place of the steering
-prompt, closes that gap (same 60 queries: 0.733 versus 0.933) at
-about two seconds of added synthesis time, and is now the deployed
-relay, and all results in Table~\ref{tab:transfer} use it. Native
-local floors sit 1--8 points below the earlier turn-based harness
-loop (Appendix~\ref{app:livedetail}), but the routing gain is larger:
-at the aggressive tier delivered accuracy rises by 26 points on
-Speech TriviaQA, 22 on Speech WebQ, 34 on SD-QA, and 22 on the
-Mandarin reasoning pool, which now escalates at its nominal rates
-under per-language thresholds; Llama Questions gains 3 points at
-19\% escalation. Open-ended generation remains the boundary: on
-AlpacaEval the always-escalate arm scores 4.20 against 4.95 for the
-expert text, because the spoken cap removes half of the long
-answers. Classifying the 600 native failures by cause shows where
-the pre-answer read works: specific-but-wrong answers are 70\% of
-failures and are ranked at AUC 0.81 (79\% escalated at the aggressive
-tier against a 31\% false-fire rate on correct turns), misheard
-questions at 0.89, whereas execution slips in multi-step reasoning are
-at chance (0.47) --- the error has not happened yet when the gate
-reads, so only a later read point could recover them.
-
-\paragraph{When the signal arrives.}
-To measure that directly we re-dumped the full calibration merge and
-the six pools under the serving configuration and read the same
-layer-22 vector at five moments of one generation: one step before
-the commit, at the commit (deployed), and after the first, second, and
-third answer chunks, fitting one probe per moment with the deployed
-recipe. Across the five external pools the mean AUC is 0.753 before
-the commit, 0.755 at it, 0.762, 0.791, and 0.801 after one, two, and
-three answer chunks; the Mandarin reasoning pool moves from 0.648 to
-0.769 after two chunks while the internal test set stays at 0.85. The
-commit-point state carries retrieval confidence; execution confidence
-only exists once the answer is under way. The pre-commit ceiling we
-report is therefore a ceiling on the former, and the roughly 0.05 above
-it is available at the price of two to three seconds of a partly voiced
-wrong answer, a product trade rather than a probe improvement. Reading
-one step earlier, before the first spoken unit enters the state, helps
-Mandarin (+0.06) and costs Speech WebQ (--0.06): the first unit is
-often the answer entity in English and a discourse marker in Mandarin.
-A two-stage variant that decides at the commit for confident turns and
-defers only a gray band to the later read recovers under one point of
-mean delivered accuracy at a fixed budget (0.711 to 0.718 at 30\%),
-with the gain confined to the Mandarin reasoning pool (+4.5 points),
-so the single commit-point decision remains the deployed form.
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\linewidth]{revision_accuracy_latency}
+  \caption{\textbf{Accuracy gains and timing costs on three pools.}
+  Left: observed mean answer-content accuracy against realized expert
+  call rate; C/B/A denote conservative/balanced/aggressive. The dashed
+  line uses the original Table~\ref{tab:transfer} random-mixture
+  convention (\S\ref{sec:evalproto}). The horizontal
+  always-arm reference passes through the measured always point;
+  it is not an oracle bound. Right: mean, P50, and P95 of the reconstructed
+  timing diagnostic on a log scale. L/W denote local/always. Each point
+  uses the original recorded pass, with one run per query and arm;
+  no repeated-run uncertainty is implied. The timing paths have
+  different output endpoints (\S\ref{sec:evalproto}). All five external
+  QA pools, including the weaker cases, appear in the upper block of
+  Table~\ref{tab:transfer}.}
+  \label{fig:dualview}
+\end{figure}

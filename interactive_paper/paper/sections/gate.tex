@@ -1,40 +1,27 @@
-\subsection{Decision timing and escalation budget}
+\subsection{From a failure score to an answer-onset decision}
 \label{sec:system}
+For native serving, we concatenate the last tail state, the mean of
+the tail states, and the mean input state at L22 into
+$\phi(x)\in\mathbb{R}^{12288}$. A logistic probe gives
+\begin{equation}
+ s(x)=\sigma\!\left(w^\top\phi(x)+b\right),\qquad
+ d(x)=\mathbf{1}\{s(x)\geq\tau_{\ell}\}\,
+       \mathbf{1}\{a(x)\geq\tau_a\},
+ \label{eq:gate}
+\end{equation}
+where $a(x)$ is a separately fitted dialogue-act score that filters
+floor-management turns, and $\tau_{\ell}$ is a language-specific
+failure threshold. Calibration-score quantiles define three nominal
+budgets (15/30/50\%); realized rates can differ on a new pool.
+The model weights stay frozen, but both heads require fitting.
 
-\paragraph{Scoring latency.}
-The gate is a linear read on L22 states the forward pass already
-computes: a 4096-d dot product per position (the deployed probe adds
-two pooled positions at no added scoring latency;
-Appendix~\ref{app:signal}). On an H100, measured from prefill start
-with CUDA synchronization, the score is available at P50 in
-20\,ms for text and 45\,ms for audio, against a time to first token
-of 36/68\,ms on the same benchmark. The measurement excludes network
-time, but it establishes the ordering the system needs: the cloud
-request can start before local decoding commits to an answer.
-Waiting for decoded tokens does not improve the read in our data and
-postpones the expert request (Appendix~\ref{app:gatedetail}).
-
-\paragraph{Read position in the audio loop.}
-In the streaming loop, scores taken from intermediate audio chunks
-are weaker than a read at the end of the turn and can miss
-information in the last chunk. The system therefore reads once, at
-the end of the user turn: after the final audio chunk it prefills the
-assistant turn and reads L22 at its start. In a 360-query replay,
-this single read reaches AUC 0.887 in about 30\,ms, against 0.843
-for the offline reference, and arrives before the first output
-token (Appendix~\ref{app:livedetail}).
-
-\paragraph{From score to escalation budget.}
-Thresholding the score converts it into a call budget. On the frozen
-test split, the probe beats matched-rate random escalation at every
-operating point and recovers over half of the local-to-expert gap
-with a third of the expert calls (Figure~\ref{fig:tradeoff},
-appendix). In distribution it is statistically tied with a
-pool-identity classifier, as \S\ref{sec:audit} predicts; its
-advantage appears under transfer, where pool identity stops being
-sufficient. The gate is fit to local failure, not expert benefit: a
-benefit label would specialize the ranking to the current expert. The
-frozen scores remain useful under the stricter benefit label, but
-pools with little expert headroom remain a system-level limit
-(Appendix~\ref{app:fixedthr}). Comparisons with the model's built-in
-reasoning mode are in Appendix~\ref{app:gatedetail}.
+The native capture occurs when a generation call first returns a
+listen-to-speak transition. It can include the first generated text
+unit, so we call it \emph{answer onset}. This differs from the earlier
+turn-based prefill read, whose measured P50 availability was 20\,ms
+for text and 45\,ms for audio on an H100. A separate turn-end replay
+reported about 30\,ms (Appendices~\ref{app:gatedetail}
+and~\ref{app:livedetail}); those measurements are not native-path
+end-to-end latency. Later native reads can improve reasoning-failure
+prediction, at the cost of waiting for answer chunks
+(Appendix~\ref{app:readtime}).

@@ -1,0 +1,212 @@
+{
+  "status": "post-hoc descriptive analysis of all fixed test queries",
+  "source_commit": "e74ca0c80f0e20fea8b466424e0307ea621a1403",
+  "input_sha256": {
+    "internal_query_manifest.jsonl": "61618dca1a9532dceb0b9a774ca28c3d8837ade098876d694de2ad1b1b93f0f3",
+    "frozen_never_judged.parquet": "082df3b3ae133a5c871d9ad97812c9ce206140caa26cb95f4616b4e42023a825",
+    "frozen_aggressive_tts_judged.parquet": "213b32296a4c1e449e1f9e325d08f3298eb264b5c2c7644d034759b99ac98652",
+    "frozen_always_tts_judged.parquet": "9ac19665fbc00c80e83986ca8d42f030d880ac9cc160bf70589071df0cdd05c8"
+  },
+  "runs_per_query_arm": 1,
+  "scoring_field": "adequate",
+  "n": 240,
+  "strata": [
+    {
+      "category": "easy-chat",
+      "label": "Chat",
+      "n": 60,
+      "local": 0.65,
+      "aggressive": 0.7,
+      "always": 0.7,
+      "aggressive_rate": 0.35,
+      "audio_gt_30s_n": 0,
+      "always_fired_long_n": 0
+    },
+    {
+      "category": "easy-fact",
+      "label": "Factual QA",
+      "n": 40,
+      "local": 0.325,
+      "aggressive": 0.85,
+      "always": 0.925,
+      "aggressive_rate": 0.625,
+      "audio_gt_30s_n": 0,
+      "always_fired_long_n": 0
+    },
+    {
+      "category": "hard-knowledge",
+      "label": "Knowledge",
+      "n": 60,
+      "local": 0.15,
+      "aggressive": 0.31666666666666665,
+      "always": 0.38333333333333336,
+      "aggressive_rate": 0.7166666666666667,
+      "audio_gt_30s_n": 43,
+      "always_fired_long_n": 42
+    },
+    {
+      "category": "hard-math",
+      "label": "Math",
+      "n": 60,
+      "local": 0.6166666666666667,
+      "aggressive": 0.6166666666666667,
+      "always": 0.7833333333333333,
+      "aggressive_rate": 0.25,
+      "audio_gt_30s_n": 3,
+      "always_fired_long_n": 3
+    },
+    {
+      "category": "trap",
+      "label": "SimpleQA traps",
+      "n": 20,
+      "local": 0.0,
+      "aggressive": 0.95,
+      "always": 1.0,
+      "aggressive_rate": 1.0,
+      "audio_gt_30s_n": 0,
+      "always_fired_long_n": 0
+    }
+  ],
+  "source_breakdown": [
+    {
+      "source": "alpaca-zh",
+      "n": 31,
+      "local": 0.6129032258064516,
+      "aggressive": 0.6451612903225806,
+      "aggressive_rate": 0.16129032258064516
+    },
+    {
+      "source": "dolly-15k",
+      "n": 29,
+      "local": 0.6896551724137931,
+      "aggressive": 0.7586206896551724,
+      "aggressive_rate": 0.5517241379310345
+    },
+    {
+      "source": "gsm8k",
+      "n": 43,
+      "local": 0.8372093023255814,
+      "aggressive": 0.7441860465116279,
+      "aggressive_rate": 0.0
+    },
+    {
+      "source": "math500",
+      "n": 17,
+      "local": 0.058823529411764705,
+      "aggressive": 0.29411764705882354,
+      "aggressive_rate": 0.8823529411764706
+    },
+    {
+      "source": "mmlu-pro/biology",
+      "n": 1,
+      "local": 0.0,
+      "aggressive": 1.0,
+      "aggressive_rate": 1.0
+    },
+    {
+      "source": "mmlu-pro/business",
+      "n": 4,
+      "local": 0.25,
+      "aggressive": 0.5,
+      "aggressive_rate": 0.75
+    },
+    {
+      "source": "mmlu-pro/chemistry",
+      "n": 2,
+      "local": 0.0,
+      "aggressive": 0.0,
+      "aggressive_rate": 1.0
+    },
+    {
+      "source": "mmlu-pro/computer science",
+      "n": 2,
+      "local": 0.0,
+      "aggressive": 0.0,
+      "aggressive_rate": 1.0
+    },
+    {
+      "source": "mmlu-pro/economics",
+      "n": 4,
+      "local": 0.5,
+      "aggressive": 0.5,
+      "aggressive_rate": 0.25
+    },
+    {
+      "source": "mmlu-pro/engineering",
+      "n": 9,
+      "local": 0.2222222222222222,
+      "aggressive": 0.0,
+      "aggressive_rate": 0.8888888888888888
+    },
+    {
+      "source": "mmlu-pro/health",
+      "n": 2,
+      "local": 0.0,
+      "aggressive": 0.5,
+      "aggressive_rate": 0.5
+    },
+    {
+      "source": "mmlu-pro/history",
+      "n": 1,
+      "local": 0.0,
+      "aggressive": 1.0,
+      "aggressive_rate": 1.0
+    },
+    {
+      "source": "mmlu-pro/law",
+      "n": 14,
+      "local": 0.14285714285714285,
+      "aggressive": 0.35714285714285715,
+      "aggressive_rate": 0.7857142857142857
+    },
+    {
+      "source": "mmlu-pro/math",
+      "n": 5,
+      "local": 0.0,
+      "aggressive": 0.6,
+      "aggressive_rate": 0.8
+    },
+    {
+      "source": "mmlu-pro/other",
+      "n": 3,
+      "local": 0.0,
+      "aggressive": 0.3333333333333333,
+      "aggressive_rate": 0.6666666666666666
+    },
+    {
+      "source": "mmlu-pro/philosophy",
+      "n": 4,
+      "local": 0.0,
+      "aggressive": 0.25,
+      "aggressive_rate": 0.75
+    },
+    {
+      "source": "mmlu-pro/physics",
+      "n": 5,
+      "local": 0.2,
+      "aggressive": 0.4,
+      "aggressive_rate": 0.8
+    },
+    {
+      "source": "mmlu-pro/psychology",
+      "n": 4,
+      "local": 0.25,
+      "aggressive": 0.0,
+      "aggressive_rate": 0.0
+    },
+    {
+      "source": "simpleqa",
+      "n": 20,
+      "local": 0.0,
+      "aggressive": 0.95,
+      "aggressive_rate": 1.0
+    },
+    {
+      "source": "triviaqa",
+      "n": 40,
+      "local": 0.325,
+      "aggressive": 0.85,
+      "aggressive_rate": 0.625
+    }
+  ]
+}

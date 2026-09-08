@@ -1,0 +1,16 @@
+\begin{table}[h]
+\centering\small
+\caption{Descriptive strata of the fixed internal test set. Local, aggressive (A), and always report answer-content accuracy (\%); call rate is the aggressive arm's realized rate. The final column counts question waveforms longer than the expert's 30-second input window. One recorded run per query and arm; no samples are removed or reweighted.}
+\label{tab:internal-strata}
+\begin{tabular}{lrrrrrr}
+\toprule
+Stratum & $n$ & Local & A & Always & A call rate & $>30$\,s ($n$) \\
+\midrule
+Chat & 60 & 65.0 & 70.0 & 70.0 & 35.0 & 0 \\
+Factual QA & 40 & 32.5 & 85.0 & 92.5 & 62.5 & 0 \\
+Knowledge & 60 & 15.0 & 31.7 & 38.3 & 71.7 & 43 \\
+Math & 60 & 61.7 & 61.7 & 78.3 & 25.0 & 3 \\
+SimpleQA traps & 20 & 0.0 & 95.0 & 100.0 & 100.0 & 0 \\
+\bottomrule
+\end{tabular}
+\end{table}

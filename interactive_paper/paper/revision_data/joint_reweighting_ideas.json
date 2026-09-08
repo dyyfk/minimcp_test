@@ -1,0 +1,660 @@
+{
+  "status": "Post-hoc joint mixture sensitivity. No new model runs or improvement of a fixed-distribution gate. Original paper remains unchanged.",
+  "source_commit": "e74ca0c80f0e20fea8b466424e0307ea621a1403",
+  "input_sha256": {
+    "frozen_never_judged.parquet": "082df3b3ae133a5c871d9ad97812c9ce206140caa26cb95f4616b4e42023a825",
+    "frozen_conservative_tts_judged.parquet": "e42abdd53deebf54012d36d3097f5cacac6d0a0cedbb0a48b2bee198175f2d33",
+    "frozen_balanced_tts_judged.parquet": "5f7846ec52ca5eef09b566cb70ebfa85d5f8d4c853f885833ddf58411592739f",
+    "frozen_aggressive_tts_judged.parquet": "213b32296a4c1e449e1f9e325d08f3298eb264b5c2c7644d034759b99ac98652",
+    "frozen_always_tts_judged.parquet": "9ac19665fbc00c80e83986ca8d42f030d880ac9cc160bf70589071df0cdd05c8"
+  },
+  "all_sixteen_joint_scenarios": [
+    {
+      "knowledge_weight": 1.0,
+      "math_weight": 1.0,
+      "query_count": 240,
+      "category_shares": {
+        "hard-math": 0.25,
+        "hard-knowledge": 0.25,
+        "easy-fact": 0.16666666666666666,
+        "easy-chat": 0.25,
+        "trap": 0.08333333333333333
+      },
+      "arms": {
+        "never": {
+          "accuracy": 0.4083333333333333,
+          "call_rate": 0.0
+        },
+        "conservative": {
+          "accuracy": 0.4666666666666667,
+          "call_rate": 0.08333333333333333,
+          "random": 0.4329861111111111,
+          "gap_pp": 3.3680555555555545
+        },
+        "balanced": {
+          "accuracy": 0.5416666666666666,
+          "call_rate": 0.25,
+          "random": 0.4822916666666667,
+          "gap_pp": 5.937499999999996
+        },
+        "aggressive": {
+          "accuracy": 0.6291666666666667,
+          "call_rate": 0.5166666666666667,
+          "random": 0.5611805555555556,
+          "gap_pp": 6.798611111111108
+        },
+        "always": {
+          "accuracy": 0.7041666666666667,
+          "call_rate": 0.9916666666666667
+        }
+      }
+    },
+    {
+      "knowledge_weight": 1.0,
+      "math_weight": 0.75,
+      "query_count": 240,
+      "category_shares": {
+        "hard-math": 0.2,
+        "hard-knowledge": 0.26666666666666666,
+        "easy-fact": 0.17777777777777778,
+        "easy-chat": 0.26666666666666666,
+        "trap": 0.08888888888888889
+      },
+      "arms": {
+        "never": {
+          "accuracy": 0.39444444444444443,
+          "call_rate": 0.0
+        },
+        "conservative": {
+          "accuracy": 0.4533333333333333,
+          "call_rate": 0.08333333333333333,
+          "random": 0.4198148148148148,
+          "gap_pp": 3.3518518518518503
+        },
+        "balanced": {
+          "accuracy": 0.5388888888888889,
+          "call_rate": 0.25666666666666665,
+          "random": 0.47258518518518516,
+          "gap_pp": 6.63037037037037
+        },
+        "aggressive": {
+          "accuracy": 0.63,
+          "call_rate": 0.5344444444444445,
+          "random": 0.5571530864197531,
+          "gap_pp": 7.284691358024686
+        },
+        "always": {
+          "accuracy": 0.6988888888888889,
+          "call_rate": 0.9911111111111112
+        }
+      }
+    },
+    {
+      "knowledge_weight": 1.0,
+      "math_weight": 0.5,
+      "query_count": 240,
+      "category_shares": {
+        "hard-math": 0.14285714285714285,
+        "hard-knowledge": 0.2857142857142857,
+        "easy-fact": 0.19047619047619047,
+        "easy-chat": 0.2857142857142857,
+        "trap": 0.09523809523809523
+      },
+      "arms": {
+        "never": {
+          "accuracy": 0.37857142857142856,
+          "call_rate": 0.0
+        },
+        "conservative": {
+          "accuracy": 0.4380952380952381,
+          "call_rate": 0.08333333333333333,
+          "random": 0.40476190476190477,
+          "gap_pp": 3.3333333333333326
+        },
+        "balanced": {
+          "accuracy": 0.5357142857142857,
+          "call_rate": 0.2642857142857143,
+          "random": 0.4616326530612245,
+          "gap_pp": 7.408163265306122
+        },
+        "aggressive": {
+          "accuracy": 0.6309523809523809,
+          "call_rate": 0.5547619047619048,
+          "random": 0.5529251700680272,
+          "gap_pp": 7.802721088435371
+        },
+        "always": {
+          "accuracy": 0.6928571428571428,
+          "call_rate": 0.9904761904761905
+        }
+      }
+    },
+    {
+      "knowledge_weight": 1.0,
+      "math_weight": 0.25,
+      "query_count": 240,
+      "category_shares": {
+        "hard-math": 0.07692307692307693,
+        "hard-knowledge": 0.3076923076923077,
+        "easy-fact": 0.20512820512820512,
+        "easy-chat": 0.3076923076923077,
+        "trap": 0.10256410256410256
+      },
+      "arms": {
+        "never": {
+          "accuracy": 0.36025641025641025,
+          "call_rate": 0.0
+        },
+        "conservative": {
+          "accuracy": 0.4205128205128205,
+          "call_rate": 0.08333333333333333,
+          "random": 0.3873931623931624,
+          "gap_pp": 3.3119658119658113
+        },
+        "balanced": {
+          "accuracy": 0.532051282051282,
+          "call_rate": 0.27307692307692305,
+          "random": 0.4491814595660749,
+          "gap_pp": 8.286982248520713
+        },
+        "aggressive": {
+          "accuracy": 0.632051282051282,
+          "call_rate": 0.5782051282051283,
+          "random": 0.5485437212360289,
+          "gap_pp": 8.350756081525311
+        },
+        "always": {
+          "accuracy": 0.6858974358974359,
+          "call_rate": 0.9897435897435898
+        }
+      }
+    },
+    {
+      "knowledge_weight": 0.75,
+      "math_weight": 1.0,
+      "query_count": 240,
+      "category_shares": {
+        "hard-math": 0.26666666666666666,
+        "hard-knowledge": 0.2,
+        "easy-fact": 0.17777777777777778,
+        "easy-chat": 0.26666666666666666,
+        "trap": 0.08888888888888889
+      },
+      "arms": {
+        "never": {
+          "accuracy": 0.4255555555555556,
+          "call_rate": 0.0
+        },
+        "conservative": {
+          "accuracy": 0.48777777777777775,
+          "call_rate": 0.0811111111111111,
+          "random": 0.4498888888888889,
+          "gap_pp": 3.788888888888886
+        },
+        "balanced": {
+          "accuracy": 0.5655555555555556,
+          "call_rate": 0.24444444444444444,
+          "random": 0.4988888888888889,
+          "gap_pp": 6.6666666666666705
+        },
+        "aggressive": {
+          "accuracy": 0.65,
+          "call_rate": 0.5033333333333333,
+          "random": 0.5765555555555555,
+          "gap_pp": 7.344444444444454
+        },
+        "always": {
+          "accuracy": 0.7255555555555555,
+          "call_rate": 0.9922222222222222
+        }
+      }
+    },
+    {
+      "knowledge_weight": 0.75,
+      "math_weight": 0.75,
+      "query_count": 240,
+      "category_shares": {
+        "hard-math": 0.21428571428571427,
+        "hard-knowledge": 0.21428571428571427,
+        "easy-fact": 0.19047619047619047,
+        "easy-chat": 0.2857142857142857,
+        "trap": 0.09523809523809523
+      },
+      "arms": {
+        "never": {
+          "accuracy": 0.4119047619047619,
+          "call_rate": 0.0
+        },
+        "conservative": {
+          "accuracy": 0.475,
+          "call_rate": 0.08095238095238096,
+          "random": 0.4369614512471655,
+          "gap_pp": 3.803854875283447
+        },
+        "balanced": {
+          "accuracy": 0.5642857142857143,
+          "call_rate": 0.2511904761904762,
+          "random": 0.48965419501133783,
+          "gap_pp": 7.463151927437645
+        },
+        "aggressive": {
+          "accuracy": 0.6523809523809524,
+          "call_rate": 0.5214285714285715,
+          "random": 0.5732993197278912,
+          "gap_pp": 7.908163265306123
+        },
+        "always": {
+          "accuracy": 0.7214285714285714,
+          "call_rate": 0.9916666666666667
+        }
+      }
+    },
+    {
+      "knowledge_weight": 0.75,
+      "math_weight": 0.5,
+      "query_count": 240,
+      "category_shares": {
+        "hard-math": 0.15384615384615385,
+        "hard-knowledge": 0.23076923076923078,
+        "easy-fact": 0.20512820512820512,
+        "easy-chat": 0.3076923076923077,
+        "trap": 0.10256410256410256
+      },
+      "arms": {
+        "never": {
+          "accuracy": 0.39615384615384613,
+          "call_rate": 0.0
+        },
+        "conservative": {
+          "accuracy": 0.46025641025641023,
+          "call_rate": 0.08076923076923077,
+          "random": 0.42204142011834317,
+          "gap_pp": 3.821499013806706
+        },
+        "balanced": {
+          "accuracy": 0.5628205128205128,
+          "call_rate": 0.258974358974359,
+          "random": 0.4791584483892176,
+          "gap_pp": 8.36620644312952
+        },
+        "aggressive": {
+          "accuracy": 0.6551282051282051,
+          "call_rate": 0.5423076923076923,
+          "random": 0.5699704142011834,
+          "gap_pp": 8.51577909270217
+        },
+        "always": {
+          "accuracy": 0.7166666666666667,
+          "call_rate": 0.9910256410256411
+        }
+      }
+    },
+    {
+      "knowledge_weight": 0.75,
+      "math_weight": 0.25,
+      "query_count": 240,
+      "category_shares": {
+        "hard-math": 0.08333333333333333,
+        "hard-knowledge": 0.25,
+        "easy-fact": 0.2222222222222222,
+        "easy-chat": 0.3333333333333333,
+        "trap": 0.1111111111111111
+      },
+      "arms": {
+        "never": {
+          "accuracy": 0.37777777777777777,
+          "call_rate": 0.0
+        },
+        "conservative": {
+          "accuracy": 0.44305555555555554,
+          "call_rate": 0.08055555555555556,
+          "random": 0.4046296296296296,
+          "gap_pp": 3.8425925925925917
+        },
+        "balanced": {
+          "accuracy": 0.5611111111111111,
+          "call_rate": 0.26805555555555555,
+          "random": 0.4671296296296296,
+          "gap_pp": 9.39814814814815
+        },
+        "aggressive": {
+          "accuracy": 0.6583333333333333,
+          "call_rate": 0.5666666666666667,
+          "random": 0.5666666666666667,
+          "gap_pp": 9.166666666666668
+        },
+        "always": {
+          "accuracy": 0.7111111111111111,
+          "call_rate": 0.9902777777777778
+        }
+      }
+    },
+    {
+      "knowledge_weight": 0.5,
+      "math_weight": 1.0,
+      "query_count": 240,
+      "category_shares": {
+        "hard-math": 0.2857142857142857,
+        "hard-knowledge": 0.14285714285714285,
+        "easy-fact": 0.19047619047619047,
+        "easy-chat": 0.2857142857142857,
+        "trap": 0.09523809523809523
+      },
+      "arms": {
+        "never": {
+          "accuracy": 0.4452380952380952,
+          "call_rate": 0.0
+        },
+        "conservative": {
+          "accuracy": 0.5119047619047619,
+          "call_rate": 0.07857142857142857,
+          "random": 0.4691836734693877,
+          "gap_pp": 4.272108843537414
+        },
+        "balanced": {
+          "accuracy": 0.5928571428571429,
+          "call_rate": 0.23809523809523808,
+          "random": 0.5178004535147392,
+          "gap_pp": 7.5056689342403615
+        },
+        "aggressive": {
+          "accuracy": 0.6738095238095239,
+          "call_rate": 0.4880952380952381,
+          "random": 0.5939909297052154,
+          "gap_pp": 7.981859410430847
+        },
+        "always": {
+          "accuracy": 0.75,
+          "call_rate": 0.9928571428571429
+        }
+      }
+    },
+    {
+      "knowledge_weight": 0.5,
+      "math_weight": 0.75,
+      "query_count": 240,
+      "category_shares": {
+        "hard-math": 0.23076923076923078,
+        "hard-knowledge": 0.15384615384615385,
+        "easy-fact": 0.20512820512820512,
+        "easy-chat": 0.3076923076923077,
+        "trap": 0.10256410256410256
+      },
+      "arms": {
+        "never": {
+          "accuracy": 0.43205128205128207,
+          "call_rate": 0.0
+        },
+        "conservative": {
+          "accuracy": 0.5,
+          "call_rate": 0.0782051282051282,
+          "random": 0.45671597633136096,
+          "gap_pp": 4.328402366863903
+        },
+        "balanced": {
+          "accuracy": 0.5935897435897436,
+          "call_rate": 0.24487179487179486,
+          "random": 0.5092800788954636,
+          "gap_pp": 8.430966469428004
+        },
+        "aggressive": {
+          "accuracy": 0.6782051282051282,
+          "call_rate": 0.5064102564102564,
+          "random": 0.5917652859960553,
+          "gap_pp": 8.643984220907297
+        },
+        "always": {
+          "accuracy": 0.7474358974358974,
+          "call_rate": 0.9923076923076923
+        }
+      }
+    },
+    {
+      "knowledge_weight": 0.5,
+      "math_weight": 0.5,
+      "query_count": 240,
+      "category_shares": {
+        "hard-math": 0.16666666666666666,
+        "hard-knowledge": 0.16666666666666666,
+        "easy-fact": 0.2222222222222222,
+        "easy-chat": 0.3333333333333333,
+        "trap": 0.1111111111111111
+      },
+      "arms": {
+        "never": {
+          "accuracy": 0.4166666666666667,
+          "call_rate": 0.0
+        },
+        "conservative": {
+          "accuracy": 0.4861111111111111,
+          "call_rate": 0.07777777777777778,
+          "random": 0.4421604938271605,
+          "gap_pp": 4.395061728395061
+        },
+        "balanced": {
+          "accuracy": 0.5944444444444444,
+          "call_rate": 0.25277777777777777,
+          "random": 0.49952160493827164,
+          "gap_pp": 9.492283950617281
+        },
+        "aggressive": {
+          "accuracy": 0.6833333333333333,
+          "call_rate": 0.5277777777777778,
+          "random": 0.5896604938271606,
+          "gap_pp": 9.367283950617278
+        },
+        "always": {
+          "accuracy": 0.7444444444444445,
+          "call_rate": 0.9916666666666667
+        }
+      }
+    },
+    {
+      "knowledge_weight": 0.5,
+      "math_weight": 0.25,
+      "query_count": 240,
+      "category_shares": {
+        "hard-math": 0.09090909090909091,
+        "hard-knowledge": 0.18181818181818182,
+        "easy-fact": 0.24242424242424243,
+        "easy-chat": 0.36363636363636365,
+        "trap": 0.12121212121212122
+      },
+      "arms": {
+        "never": {
+          "accuracy": 0.3984848484848485,
+          "call_rate": 0.0
+        },
+        "conservative": {
+          "accuracy": 0.4696969696969697,
+          "call_rate": 0.07727272727272727,
+          "random": 0.42494490358126724,
+          "gap_pp": 4.475206611570249
+        },
+        "balanced": {
+          "accuracy": 0.5954545454545455,
+          "call_rate": 0.26212121212121214,
+          "random": 0.48824150596877874,
+          "gap_pp": 10.721303948576672
+        },
+        "aggressive": {
+          "accuracy": 0.6893939393939394,
+          "call_rate": 0.553030303030303,
+          "random": 0.5878558310376493,
+          "gap_pp": 10.153810835629018
+        },
+        "always": {
+          "accuracy": 0.740909090909091,
+          "call_rate": 0.990909090909091
+        }
+      }
+    },
+    {
+      "knowledge_weight": 0.25,
+      "math_weight": 1.0,
+      "query_count": 240,
+      "category_shares": {
+        "hard-math": 0.3076923076923077,
+        "hard-knowledge": 0.07692307692307693,
+        "easy-fact": 0.20512820512820512,
+        "easy-chat": 0.3076923076923077,
+        "trap": 0.10256410256410256
+      },
+      "arms": {
+        "never": {
+          "accuracy": 0.46794871794871795,
+          "call_rate": 0.0
+        },
+        "conservative": {
+          "accuracy": 0.5397435897435897,
+          "call_rate": 0.07564102564102564,
+          "random": 0.4914168310322157,
+          "gap_pp": 4.832675871137404
+        },
+        "balanced": {
+          "accuracy": 0.6243589743589744,
+          "call_rate": 0.23076923076923078,
+          "random": 0.5395463510848126,
+          "gap_pp": 8.481262327416172
+        },
+        "aggressive": {
+          "accuracy": 0.7012820512820512,
+          "call_rate": 0.4705128205128205,
+          "random": 0.6139283366206443,
+          "gap_pp": 8.735371466140695
+        },
+        "always": {
+          "accuracy": 0.7782051282051282,
+          "call_rate": 0.9935897435897436
+        }
+      }
+    },
+    {
+      "knowledge_weight": 0.25,
+      "math_weight": 0.75,
+      "query_count": 240,
+      "category_shares": {
+        "hard-math": 0.25,
+        "hard-knowledge": 0.08333333333333333,
+        "easy-fact": 0.2222222222222222,
+        "easy-chat": 0.3333333333333333,
+        "trap": 0.1111111111111111
+      },
+      "arms": {
+        "never": {
+          "accuracy": 0.45555555555555555,
+          "call_rate": 0.0
+        },
+        "conservative": {
+          "accuracy": 0.5291666666666667,
+          "call_rate": 0.075,
+          "random": 0.4797222222222222,
+          "gap_pp": 4.9444444444444455
+        },
+        "balanced": {
+          "accuracy": 0.6277777777777778,
+          "call_rate": 0.2375,
+          "random": 0.5320833333333334,
+          "gap_pp": 9.569444444444441
+        },
+        "aggressive": {
+          "accuracy": 0.7083333333333334,
+          "call_rate": 0.4888888888888889,
+          "random": 0.6130864197530864,
+          "gap_pp": 9.524691358024695
+        },
+        "always": {
+          "accuracy": 0.7777777777777778,
+          "call_rate": 0.9930555555555556
+        }
+      }
+    },
+    {
+      "knowledge_weight": 0.25,
+      "math_weight": 0.5,
+      "query_count": 240,
+      "category_shares": {
+        "hard-math": 0.18181818181818182,
+        "hard-knowledge": 0.09090909090909091,
+        "easy-fact": 0.24242424242424243,
+        "easy-chat": 0.36363636363636365,
+        "trap": 0.12121212121212122
+      },
+      "arms": {
+        "never": {
+          "accuracy": 0.4409090909090909,
+          "call_rate": 0.0
+        },
+        "conservative": {
+          "accuracy": 0.5166666666666667,
+          "call_rate": 0.07424242424242425,
+          "random": 0.46588154269972454,
+          "gap_pp": 5.078512396694218
+        },
+        "balanced": {
+          "accuracy": 0.6318181818181818,
+          "call_rate": 0.24545454545454545,
+          "random": 0.5234710743801653,
+          "gap_pp": 10.834710743801656
+        },
+        "aggressive": {
+          "accuracy": 0.7166666666666667,
+          "call_rate": 0.5106060606060606,
+          "random": 0.6126584022038567,
+          "gap_pp": 10.400826446280998
+        },
+        "always": {
+          "accuracy": 0.7772727272727272,
+          "call_rate": 0.9924242424242424
+        }
+      }
+    },
+    {
+      "knowledge_weight": 0.25,
+      "math_weight": 0.25,
+      "query_count": 240,
+      "category_shares": {
+        "hard-math": 0.1,
+        "hard-knowledge": 0.1,
+        "easy-fact": 0.26666666666666666,
+        "easy-chat": 0.4,
+        "trap": 0.13333333333333333
+      },
+      "arms": {
+        "never": {
+          "accuracy": 0.42333333333333334,
+          "call_rate": 0.0
+        },
+        "conservative": {
+          "accuracy": 0.5016666666666667,
+          "call_rate": 0.07333333333333333,
+          "random": 0.44924444444444445,
+          "gap_pp": 5.242222222222226
+        },
+        "balanced": {
+          "accuracy": 0.6366666666666667,
+          "call_rate": 0.255,
+          "random": 0.5134333333333333,
+          "gap_pp": 12.323333333333341
+        },
+        "aggressive": {
+          "accuracy": 0.7266666666666667,
+          "call_rate": 0.5366666666666666,
+          "random": 0.6129555555555555,
+          "gap_pp": 11.371111111111121
+        },
+        "always": {
+          "accuracy": 0.7766666666666666,
+          "call_rate": 0.9916666666666667
+        }
+      }
+    }
+  ],
+  "random_convention": "All arms identically weighted; original Table 1 endpoint-mixture convention; actual gate request rate as mixture coefficient.",
+  "limits": [
+    "Weights were considered after observing test outcomes.",
+    "240 unique queries retained; these are weighted summaries, not subsampled live runs.",
+    "Realized call rates differ between mixtures.",
+    "This is not independent validation or an improvement on the original test distribution."
+  ]
+}

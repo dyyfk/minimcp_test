@@ -3,6 +3,259 @@
 % (2026-08-25); full prose history in the project log / git history.
 % =========================================================================
 
+\section{Current benchmark protocol and evidence scope}
+\label{app:current-protocol}
+Table~\ref{tab:transfer} retains the original main-results presentation:
+its upper block reports MiniCPM native-benchmark accuracy, while its
+lower block reports NVDA native-frame replay. Figure~\ref{fig:dualview}
+is recomputed from the committed MiniCPM judged rows with the TTS relay
+and follows the upper block's random-mixture convention. The 35 input
+parquets match the hashes in the accompanying benchmark audit.
+Steer-relay runs and later patched-model variants use different
+protocols and are not pooled with these arms. The
+remaining appendix preserves representation studies, retired
+turn-based experiments, concurrent-serving controls, and exploratory
+native variants. Their settings and denominators differ. They are
+not additional repeats of the main benchmark, and historical
+``delivered'' or ``latency'' labels must be interpreted using each
+experiment's scored object and timer endpoint.
+
+\paragraph{Calibration ledger.}
+Representation probes use 360 calibration queries from the original
+600-query mixture and single-position 4,096-dimensional features.
+The earlier turn-based gate uses 2,310 calibration rows and three
+positions. The main native gate uses 5,228 rows, native-answer labels,
+three L22 positions, and logistic regression with $C=3\times10^{-4}$.
+The native merge has 4,986 core rows and 242 fresh training rows.
+Five-fold stratified cross-validation uses shuffle seed 42. Thresholds
+are the $(1-r)$ quantiles of core-row OOF scores within each language
+group at nominal budgets $r\in\{0.15,0.30,0.50\}$. Fresh training rows
+participate in the fit but not the quantile base. The released OOF
+scores yield AUC 0.8477 on 5,228 rows and 0.8493 on the 5,221-row
+refit after excluding seven overlapping IDs. Recomputing the 12
+language/tier/fit quantiles from these scores reproduces both
+artifacts' thresholds to four decimals. This checks the exported
+scores and threshold calculation, not an independent feature-level
+refit. The recorded arms use the original artifact and 15/30/50\%
+tiers; neither the deduplicated gate nor the proposed 15/25/40\%
+tiers was used for these results. The 240 internal test queries
+retain their original membership and pool proportions.
+
+\paragraph{Capture and input availability.}
+The native feature capture follows a generation call returning the
+first listen-to-speak transition. Thus the tail can include the first
+generated text unit. Earlier prefill timing measurements concern a
+different read point. In the benchmark implementation, the expert
+receives the last 30 seconds of the preloaded question waveform,
+rather than a prefix clipped to the current input chunk. This admits
+future audio when the model commits early. On the internal set,
+escalated early commits occur in 1/240, 10/240, and 18/240 sessions
+for conservative, balanced, and aggressive, and 26/240 for always
+(26 of the 238 fired sessions). Always-arm early escalations also
+occur in 38/199 AlpacaEval and 18/202 Mandarin reasoning sessions.
+Conversely, 46/240 internal question waveforms exceed 30 seconds.
+The always arm fires on 45 of these, dropping their beginnings from
+the expert input; the remaining query does not trigger a request.
+The input rule follows from the archived code; the exact request
+audio was not persisted. These data therefore cannot establish a
+causal streaming latency benefit. Preserving the received question
+prefix may change accuracy and waiting time and requires new runs.
+
+\paragraph{Scored object and denominators.}
+The judge receives generated local text or cleaned intended relay
+text. Local generation uses \texttt{generate\_audio=False}; relay
+synthesis records a duration, but no local/relay audio or client
+playback timestamps are archived. The field named \texttt{transcript}
+is uplink ASR of the user's question, not transcription of an answer.
+The upper block's ``delivered accuracy'' therefore means answer-content
+accuracy. Each arm has 240 internal rows. The always
+policy commits and escalates on 238 (99.2\%); its two non-commit
+rows remain in the denominator. Expert-text scores exist for 238
+rows, and returned-text/relay comparisons use this matched subset.
+The WebQ always arm similarly realizes 99.2\% calls.
+The original Table~\ref{tab:transfer} reference mixes local and always
+accuracy with weight $r$, the gate's call rate, treating the always
+policy as the 100\% endpoint. It gives internal aggressive random
+accuracy 56.1\% and a 6.8-point gate advantage. Normalizing instead
+by the observed always-arm rate ($\lambda=r/r_{\rm always}$) gives
+56.2\% and 6.7 points. We report this as a sensitivity check, while
+the main text and Figure~\ref{fig:dualview} use the original table's
+convention. For AlpacaEval, mixing the rounded caption anchors
+(3.68, 4.20) at the rounded 44\% rate gives 3.91; using all unrounded
+row values gives 3.9047. Both support the main-text description of
+approximately 3.9, on a scale separate from binary QA accuracy.
+
+\paragraph{Timing reconstruction.}
+Let $o_i=\max(0,c_i+1-n_i)$ be the chunk offset relative to question
+end, where $c_i$ is the zero-based onset chunk and $n_i$ the number
+of chunks. Missing onset uses $c_i=n_i$, reproducing the historical
+plotting convention. The recorded diagnostic is
+\[
+ \widetilde T_i=
+ \begin{cases}
+ o_i+t_i^{\rm answer}, & \text{local},\\
+ o_i+t_i^{\rm stall}+w_i+t_i^{\rm synth}+d_i^{\rm relay}, & \text{escalated},
+ \end{cases}
+\]
+where durations are in seconds and $w_i$ is the count of waiting
+chunks. We retain this definition to expose the recorded cost
+profile, not as a synchronized wall-clock identity: asynchronous
+stages can overlap, missing fields are zero-filled by the plotting
+recipe, and the two paths end at different output events. Local
+$t_i^{\rm answer}$ ends at text generation; the relay sum includes
+both synthesis time and synthesized waveform duration. Neither a
+shared audio-ready endpoint nor client-audible completion is measured.
+Figure
+\ref{fig:dualview} reports the mean and within-arm P50/P95 over
+queries in the original recorded pass. These quantiles do not
+measure run-to-run uncertainty, and query bootstraps in historical
+figures are not substitutes for repeated executions.
+
+\paragraph{Operating-point candidates, not replacement results.}
+The archived sweep summary records a cached local/always-outcome
+analysis (4 September 2026), shown in
+Table~\ref{tab:threshold-candidates}.
+Nominal 15/25/40\% is a candidate recipe for confirmation. Within
+that same remix, reducing the nominal aggressive budget from 50\%
+to 40\% changes mean reconstructed time from 23.3 to 19.6\,s
+(15.9\% lower), with accuracy changing from 64.2\% to 60.4\%.
+Comparing 19.6\,s from this remix directly against 27.3\,s from a
+separate recorded arm would mix protocols. The historical sweep's
+threshold grid differs from both released core-OOF grids: at nominal
+30\% in Mandarin, it uses 0.7516, versus 0.3862 for the deployed
+artifact and 0.3695 for the deduplicated artifact. The revised export
+identifies this grid as historical, with its unavailable fit metadata
+explicitly left unspecified; it separately supplies a fresh grid from
+the deduplicated core OOF scores. The historical sweep uses already
+inspected test outcomes; it provides exploratory operating points,
+not independent validation or a deployed threshold change.
+
+\begin{table}[h]
+\centering\small
+\caption{Reported internal cached-outcome sweep. Nominal budget refers
+ to calibration quantiles; accuracy and mean time are remix estimates.
+ New native runs are required before replacing the main operating points.}
+\label{tab:threshold-candidates}
+\begin{tabular}{rrrr}
+\toprule
+Nominal budget (\%) & Realized rate (\%) & Accuracy (\%) & Mean diagnostic (s)\\
+\midrule
+15 & 8.8 & 44.6 & 9.5\\
+20 & 14.2 & 47.9 & 13.1\\
+25 & 21.7 & 52.5 & 14.4\\
+30 & 27.5 & 55.4 & 16.0\\
+40 & 40.4 & 60.4 & 19.6\\
+50 & 50.0 & 64.2 & 23.3\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Overlap audit and unresolved contamination.}
+The recorded normalized-exact/token-Jaccard ($\geq0.8$) screen found
+four exact TriviaQA collisions, two exact and two near Llama Questions
+collisions, and none in WebQ, SD-QA, or Reasoning-zh. One Llama match
+was in an unused generated-query file; seven rows were actually in
+the 5,228-row calibration merge. The reported 5,221-row refit changes
+internal AUC from 0.8761 to 0.8754 and, on separate official-configuration
+dumps, TriviaQA from 0.8113 to 0.8109 and Llama Questions from 0.7427
+to 0.7411; reported remix accuracy shifts are below 0.5 point.
+The released exclusion list, refit artifact, and per-sample OOF scores
+now document the candidate; it was not substituted into the gate used
+for the main recorded arms. The above held-out AUC changes and remix
+effects remain log-reported, distinct from the OOF statistics checked
+above. They do not remove overlap
+from the presented benchmark, exhaust semantic or translated
+near-duplicates, or resolve base-model pretraining contamination.
+A revised deployment evaluation requires fresh arm runs with the
+deduplicated artifact and independently selected operating points.
+
+\subsection{Internal task strata}
+\label{app:internal-strata}
+Table~\ref{tab:internal-strata} describes all 240 original test queries
+under their original category assignments. These post-hoc summaries
+do not change membership, weights, thresholds, or the main result.
+The gate's gain over local answering varies substantially by task.
+SimpleQA traps show a large accuracy gain but consume expert calls
+on every query; that gain alone does not establish better selection
+than a random policy with the same call rate within that stratum.
+
+\input{sections/internal_strata}
+
+The input-window limitation is concentrated in knowledge questions:
+43 of 60 exceed 30 seconds, compared with three of 60 math questions.
+The always arm fires on 42 of those 43 knowledge queries, omitting
+their beginnings from its uplink transcription input; the remaining
+query is a non-commit. Knowledge accuracy remains 38.3\% in that arm.
+This identifies an input constraint, without establishing how much
+of the remaining error truncation causes or predicting the gain from
+fixing it. All questions remain in the reported denominator.
+
+The math stratum also illustrates why separate sampled arms cannot
+be treated as deterministic per-query counterfactuals. On its 43
+GSM8K queries, local accuracy is 83.7\% and aggressive accuracy is
+74.4\%, although the aggressive arm escalates none of them. This
+difference cannot be assigned to expert substitution. A single run
+per arm cannot separate sampling variability from differences in
+local-path execution conditions. The other
+17 math queries are from MATH. We retain both subsets rather than
+selecting the one that improves the aggregate result.
+
+\subsection{Subsequent protocol and relay diagnostics}
+\label{app:revision-diagnostics}
+These follow-up artifacts are separate from the original pass in
+Table~\ref{tab:transfer} and Figure~\ref{fig:dualview}; they do not
+replace its test mixture or operating points.
+
+\paragraph{Previously completed internal repeats.}
+The archived \texttt{repeat\_variance.json} records two additional
+240-query passes, r1 and r2, under the v1 protocol and original gate.
+Across r0/r1/r2, aggressive accuracy ranges from 62.9\% to 65.4\%
+(mean 64.4\%, sample standard deviation 1.3 points); local accuracy
+ranges from 40.8\% to 42.9\%. These descriptive records include
+decoding and judge variability, rather than isolating either source.
+The main table retains r0 throughout, and the figure's query quantiles
+are not error bars from these repeats.
+
+\paragraph{Validation excluded from the revised gate fit.}
+The v2 protocol sends the expert only the audio prefix already
+consumed by the local model. It also synthesizes and saves output
+audio on both paths, transcribes that output for a separate content
+score, and records server monotonic timestamps. Its gate excludes
+299 validation queries (239 English, 60 Mandarin) from the 5,221-row
+deduplicated merge, leaving 4,922 fit rows. Validation and the internal
+test set have disjoint query IDs. The recorded \texttt{val1} pass
+contains 299 queries per endpoint arm: local and always text accuracy
+are 152/299 (50.8\%) and 231/299 (77.3\%); output-audio transcription
+accuracy is 144/299 (48.2\%) and 198/299 (66.2\%). The latter measures
+transcribed content, not human-rated audio quality.
+
+Using the never-arm onset scores and these cached endpoints, nominal
+15/30/50\% produces remix text accuracies of 57.5/66.2/71.6\% at
+realized selection rates of 14.7/28.8/50.2\%. These are validation
+remixes, not live executions of the three gate arms. The accompanying
+latency sweep adds chunk counts and component durations; it is still
+a reconstruction despite the availability of timestamps. It does not
+establish measured audio-ready latency or a latency-optimal tier choice.
+These validation observations therefore do not replace the main
+benchmark or establish the gain from any single protocol change.
+
+\paragraph{Offline formatter checks.}
+Applying formatter candidates v2 and v3 to the same archived expert
+texts recovers the two previously truncated numerical conclusions
+(64 and 36) with either candidate. For the known HTML-answer example,
+v2 returns an empty string and v3 preserves the answer content.
+Across 238 internal always-arm expert texts, empty outputs decrease
+from one to zero and a heuristic display-syntax flag decreases from
+22 to eight; on 202 Mandarin reasoning texts, the flag decreases
+from nine to two. This effect is not uniform: SD-QA flags increase
+from two to three. These string checks neither measure TTS behavior
+nor establish higher answer accuracy. Similar reference-token
+retention cannot rule out other formatting errors, and inconsistent
+judgments of identical text prevent attributing every expert/relay
+score disagreement to the formatter. The new structured-answer
+candidate has no measured result here; its tool-free configuration
+also differs from the web-enabled expert baseline.
+
 \section{Model roster}
 \label{app:models}
 
@@ -632,15 +885,17 @@ check behind the pre-answer gate.
 
 % fair_dualview now appears in the main text (Section 5, fig:dualview).
 
-\paragraph{Full live tables.} Table~\ref{tab:live} (both scoring views,
-speakable subset and full pool) and Table~\ref{tab:latency} (measured
-response latency). The conservative tier shortens the P95 tail:
-its few escalations displace exactly the longest local decodes.
-Figure~\ref{fig:pareto-latency} joins accuracy and latency;
-Figure~\ref{fig:timeline-live} replays three real sessions from
-recorded timers.
+\paragraph{Benchmark and historical tables.} The upper block of
+Table~\ref{tab:live} and Table~\ref{tab:latency} summarize native
+answer-content accuracy and reconstructed timing. The lower block
+and the audible-onset experiment below concern the retired
+turn-based harness. Their timing endpoints and thresholds differ
+(Appendix~\ref{app:current-protocol}). In the native table,
+conservative increases P95 from 17.3 to 22.3\,s; the earlier
+turn-based tail reduction does not carry over to these rows.
+Figure~\ref{fig:timeline-live} illustrates historical recorded timers.
 
-\paragraph{Time to first audible audio.} The sweep above is
+\paragraph{Historical turn-based time to first audible audio.} The earlier sweep is
 text-out; a TTS-on re-run of the balanced arm (same 240 queries,
 talker head + vocoder on, stall pre-synthesized once in the talker's
 own voice) measures speech onset directly. The gate decision is
@@ -661,23 +916,23 @@ the tail.
 
 \begin{table}[h]
 \centering\small
-\caption{Native full-duplex live sweep on the internal test set
-($n{=}240$), bootstrap 95\% CIs ($B{=}5000$); one live arm per tier.
-Random = matched-rate mix of the never and always arms. The
-relay-free bound scores the expert's returned text directly (always
-arm: 0.765). Top: native sessions with the deployed TTS relay.
+\caption{Native-protocol answer-content sweep on the internal test set
+($n{=}240$), query-bootstrap 95\% CIs ($B{=}5000$); one recorded run
+per query and tier. Random follows the original Table~\ref{tab:transfer} mixture
+convention, using the gate rate and the always-policy endpoint. Expert returned text scores 0.765 on 238 rows.
+Top: native sessions with the TTS relay.
 Bottom, for reference: the retired turn-based harness loop on the
 same queries (audio input, text output).}
 \label{tab:live}
 \begin{tabular}{lcccc}
 \toprule
-tier & esc & delivered & $\Delta$ vs.\ floor & random \\
+tier & esc & content & $\Delta$ vs.\ floor & random \\
 \midrule
 never & 0\%  & 0.408 [0.35,0.47] & --- & 0.408 \\
 conservative  & 8\% & 0.467 [0.40,0.53] & +0.058 & 0.433 \\
 balanced      & 25\% & 0.542 [0.48,0.60] & +0.133 & 0.482 \\
 aggressive    & 52\% & 0.629 [0.57,0.69] & +0.221 & 0.561 \\
-always (measured) & 100\% & 0.704 [0.65,0.76] & +0.296 & 0.704 \\
+always (measured) & 99.2\% & 0.704 [0.65,0.76] & +0.296 & 0.704 \\
 \midrule
 \multicolumn{5}{l}{\emph{turn-based harness loop (retired), full pool}} \\
 never & 0\%  & 0.383 [0.32,0.45] & --- & 0.383 \\
@@ -691,12 +946,11 @@ always (measured) & 100\% & 0.617 & +0.234 & 0.617 \\
 
 \begin{table}[h]
 \centering\small
-\caption{Time from the end of user speech to the end of the delivered
-answer (s), native sessions on the internal test set, $n{=}240$ per
-arm. Escalated turns include the stall, the wall-clock wait for the
-expert, and the spoken relay; the P95/P99 tail is dominated by expert
-calls that hit the 150\,s wait cap and by long spoken answers, and is
-indicative only at this $n$.}
+\caption{Reconstructed completion-time diagnostic (s), internal native
+benchmark, $n{=}240$ per arm. Local and relay paths have different
+endpoints; these are not client-side audible completion times
+(Appendix~\ref{app:current-protocol}). P95/P99 summarize the sampled
+query distribution and are unstable at this sample size.}
 \label{tab:latency}
 \begin{tabular}{lrrrrrr}
 \toprule
@@ -706,7 +960,7 @@ never & 0\% & 5.7 & 3.6 & 17.3 & 21.2 & --- \\
 conservative  & 8\% & 12.0 & 4.3 & 22.3 & 192 & +0.7 \\
 balanced      & 25\% & 15.3 & 5.6 & 39.9 & 290 & +2.0 \\
 aggressive    & 52\% & 27.3 & 10.9 & 103 & 403 & +7.3 \\
-always & 100\% & 45.1 & 20.8 & 210 & 370 & +17.2 \\
+always & 99.2\% & 45.1 & 20.8 & 210 & 370 & +17.2 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -714,8 +968,9 @@ always & 100\% & 45.1 & 20.8 & 210 & 370 & +17.2 \\
 \begin{figure}[h]
   \centering
   \includegraphics[width=\linewidth]{native_frozen_pareto}
-  \caption{Delivered accuracy vs.\ per-arm P50 time-to-answer, native
-  sessions on the internal test set.}
+  \caption{Historical plotting view of native answer-content accuracy
+  against reconstructed P50 completion time; see the endpoint caveats
+  in Appendix~\ref{app:current-protocol}.}
   \label{fig:pareto-latency}
 \end{figure}
 
@@ -994,7 +1249,7 @@ across tiers), so the turn-based honest-negative stands.
 \caption{The full escalation loop in the concurrent regime
 (exploratory: one session per arm, 360-row in-regime
 calibration, teacher-forced carrier), all pools, judge-matched to
-Table~\ref{tab:transfer} (OAB official for TriviaQA/WebQ/Llama; ours
+the MiniCPM upper block of Table~\ref{tab:transfer} (OAB official for TriviaQA/WebQ/Llama; ours
 for SD-QA/Reasoning/internal; VoiceBench 1--5 for AlpacaEval). Gate =
 in-regime probe, per-pool label-free quantile thresholds; tier columns
 are headed by each pool's realized rate, and the \emph{rand}
@@ -1040,19 +1295,19 @@ end-pointing thus degrades into an extra turn rather than a lost query, the hone
 \section{Fixed-threshold transfer and the expert-benefit oracle}
 \label{app:fixedthr}
 
-Both analyses below run in the gold-inject view (escalated rows
-take the expert's answer to the gold text). The deployed-channel view
-cannot evaluate a freely moving threshold: the most permissive arm
-escalates 50\%, so the other half of each pool has no expert outcome on
-record, whereas the ceiling runs cover every id. Labels follow each
-pool's own judge (Table~\ref{tab:transfer}); the two judges disagree by
-up to 13 points on Web Questions, so they are never mixed within a row.
-AUC columns are recomputed from the deployed sweep's stored
-end-of-turn scores; they differ from Table~\ref{tab:transfer}'s AUC
-column (captured in a separate scoring pass) by up to 0.03
-externally and 0.04 on the internal pool (0.840 here vs.\ 0.879 there):
-the passes render and prefill the audio independently, and the probe
-score carries render-to-render jitter.
+Both analyses below concern the retired turn-based experiment and
+use the gold-inject view (escalated rows take the expert's answer to
+the gold text). In that experiment, the most permissive recorded
+routing arm escalated 50\%, while separate expert-reference runs
+covered every ID for the counterfactual mixtures. Labels use each
+pool's assigned judge; the main MiniCPM accuracy block uses the same
+judge families, but a different serving protocol.
+The AUCs in this appendix section come from the turn-based sweep's
+stored end-of-turn scores. They differ from a separate turn-based
+scoring pass by up to 0.03 externally and 0.04 internally (0.840
+versus 0.879). Those passes render and prefill audio independently.
+These are failure-prediction AUCs; they are not columns of
+Table~\ref{tab:transfer}, which reports answer accuracy.
 AlpacaEval is excluded: it has no binary correctness label on either
 side, only a 1--5 score whose expert ceiling is degenerate (195/199 at
 5).
@@ -1160,8 +1415,22 @@ internal frozen test & 46.3 & 49.2 & 53.3 & 54.3 & 60.8 & 68.3 & 65.0 & 74.2 & 8
 \end{tabular}
 \end{table}
 
-\section{Transfer latency shapes}
+\section{Native escalation rates and historical transfer latency}
 \label{app:transferdetail}
+
+\paragraph{Rates for the main MiniCPM block.}
+Table~\ref{tab:native-rates} supplies the per-pool realized rates
+referenced by the caption of Table~\ref{tab:transfer}. They differ
+from the nominal 15/30/50\% calibration budgets. The NVDA lower
+block uses its own 15/30/50\% replay budgets and is not covered by
+this rate table.
+\input{sections/native_rates}
+
+\paragraph{Scope of the historical analysis below.}
+The remaining paragraphs describe the retired turn-based transfer
+experiment. Its thresholds, local floors, and latency endpoints
+differ from the MiniCPM native benchmark; those numerical claims
+should not be applied to the main-table native arms.
 
 \paragraph{Matched-rate precision.} Precision at a fixed escalation
 rate is capped at base-fail/rate: on Llama Questions (base fail 0.16)
@@ -1236,6 +1505,15 @@ $\pm$0.02--0.03 floor is Figure~\ref{fig:app-noise}.
 \section{External-benchmark figure set}
 \label{app:families}
 
+The following are retained historical plotting views of the native
+benchmark. Their ``delivered'' labels refer to answer content, and
+``time-to-answer'' is the reconstructed timing diagnostic defined in
+Appendix~\ref{app:current-protocol}. Expert-text lines are separate
+reference scores, not guaranteed bounds on the deployed channel;
+the updated main plot aligns the horizontal reference with the
+measured always arm and follows the original main-table random
+mixture convention.
+
 \begin{figure}[h]
   \centering
   \begin{minipage}{0.49\linewidth}\includegraphics[width=\linewidth]{native_striviaqa_dualview}\end{minipage}\hfill
@@ -1308,21 +1586,44 @@ Is the proposed answer correct? Reply with exactly one word: Yes or No.
 \section{Reproducibility}
 \label{app:repro}
 
-All sampling and splits use a fixed seed (42); the calibration/test
-split is frozen once and the test split is touched only by the
-evaluation scripts. Environment pins: torch 2.8.0; transformers 4.51.0
-for MiniCPM-o~4.5, with per-model pins for comparison backbones; all
-experiments run on single-H100 instances. Probe artifacts (weights,
-feature configuration, per-pool label-free thresholds), the judge
-prompt above, all trace files, and the per-experiment execution log (including per-run GPU and API spend, on the order of \$800 total)
-ship in the project repository, released upon publication.
+Representation-study sampling and splits use seed 42. Native serving
+uses sampled decoding; the main table contains one recorded run per
+query and arm. Later internal repeats are described separately in
+Appendix~\ref{app:revision-diagnostics}. Core model environments and
+per-model pins are recorded in the experiment log (MiniCPM-o~4.5:
+PyTorch 2.8.0, Transformers 4.51.0; single-H100 instances).
+The revised benchmark figures, appendix rate table, and MiniCPM
+metric summary are generated from judged native rows by \texttt{paper/build\_revision\_figures.py}; its summary
+records input hashes, sample counts, scoring fields, and the timing
+and mixture definitions. The original main Table~\ref{tab:transfer}
+is preserved and is not rewritten by this script; its NVDA block
+belongs to the separate replay experiment in Appendix~\ref{app:nvda}. Main thresholds are per-language calibration
+quantiles. Historical per-pool quantiles are confined to the experiments
+that explicitly use them. The audit snapshot
+\texttt{data/paper\_revision\_pr0907/} supplies the calibration manifest,
+OOF scores, thresholds, overlap exclusions, refit artifact, and
+benchmark file hashes. These support the score-level checks in
+Appendix~\ref{app:current-protocol}. The subsequent release through
+\texttt{3ade619} supplies the previously missing scripts and an input
+manifest. Its clean-checkout reproduction record reports rerunning
+export scripts 48/49 after hash-verifying 38 feature shards and 46
+judged parquet files: five text exports are byte-identical and the OOF
+table is value-identical. Local revision checks independently verify
+the published OOF thresholds, validation ID hashes, arm gate hashes,
+and validation accuracy remixes; they do not rerun model inference or
+the full feature fit. The internal-stratum analysis is
+generated by \texttt{paper/build\_internal\_diagnostic.py} from the
+original query manifest and three native arms; its output records
+input hashes. It runs no models and estimates no new operating point.
 
 \section{The native full-duplex regime}
 \label{app:native}
 
-Every result so far reads the probe under a turn-based serving
-loop (harness-controlled end-of-turn) or its harness-interleaved
-concurrent variant (Appendix~\ref{app:duplexval}). MiniCPM-o~4.5 also
+The earlier representation and harness experiments read the probe
+under a turn-based loop or its concurrent variant
+(Appendix~\ref{app:duplexval}). The main benchmark instead uses the
+native regime. This section records its successive calibration and
+serving variants; they are distinct from repeated main-benchmark runs. MiniCPM-o~4.5 also
 ships a native full-duplex mode: audio prefills in 1\,s units into the
 same context the model generates from, and the head itself emits
 $\langle$listen$\rangle$ or speaks, yielding the floor via its
@@ -1399,20 +1700,13 @@ Reasoning-zh & 202 & .606 & .495 & .605 & \textbf{.621} \\
 \end{tabular}
 \end{table}
 
-\paragraph{Benchmark-overlap audit.} The calibration expansions and
-the external speech benchmarks both draw on public QA sources
-(TriviaQA appears on both sides of the ledger), so we audited every
-calibration query against the five external pools: normalized exact
-match plus a token-Jaccard $\ge 0.8$ near-duplicate screen. Eight
-collisions exist --- 4/250 Speech TriviaQA and 4/250 Llama Questions
-queries have a (near-)duplicate among the deployed 5{,}228
-calibration rows; the other three pools have none. Refitting the
-deployed gate with the seven colliding calibration rows removed moves
-external AUC by at most $.002$ (TriviaQA $.811\to.811$, Llama
-Questions $.743\to.741$ on the official-configuration dumps) and
-re-mixed delivered accuracy at the deployed tiers by less than half a
-point, so no transfer result rests on memorized test questions
-(\texttt{scripts/41\_leak\_audit.py}).
+\paragraph{Benchmark-overlap audit.}
+The native benchmark contains known calibration overlaps. The precise
+collision counts, the reported deduplicated-refit sensitivity, and
+the distinction between that candidate and the gate actually used in
+the recorded arms are given in Appendix~\ref{app:current-protocol}.
+The offline audit does not establish overlap-free deployment or rule
+out pretraining contamination.
 
 \begin{table}[t]
 \centering\small
@@ -1746,3 +2040,52 @@ speech, left as deployment future work. Latency: listen chunks cost
 0.04\,s and speak chunks $\sim$0.5\,s on one H100 (realtime holds);
 fire$\to$stall-audio 0.2--1\,s; fire$\to$relay-first-audio is the
 expert wall clock (13--20\,s observed) plus $\sim$2.5\,s.
+
+\subsection{Failure type and later-read diagnostics}
+\label{app:readtime}
+A separate audit of the six QA pools classified never-arm failures
+using question text, an audio transcript, the reference answer, the
+local answer, and the judge note. The reported specific-but-wrong
+class contains 418 examples (about 70\% of logged failures) and is
+ranked at AUC 0.813 against correct answers. Perception errors
+($n=36$) reach 0.889; execution slips ($n=44$, including 35 Mandarin
+reasoning cases) reach 0.469. The class labels are model judgments,
+not direct observations of an internal failure mechanism. A fluent
+answer to a misheard question can be assigned to the wrong class.
+
+A fresh read-time dump captured five L22 vectors during each native
+generation and fitted a separate probe at each point (5,236 judged
+calibration rows, row-random five-fold fitting, $C=3\times10^{-4}$).
+These are different sessions and calibration rows from the main arms.
+The pre-onset vector precedes the onset generation call; the onset
+vector follows it. Later vectors follow one, two, or three additional
+answer chunks. The last available vector pads sequences that finish
+earlier (0.2/2.8/10.6\% at the three later reads).
+Table~\ref{tab:readtime} preserves the corresponding diagnostic.
+
+\begin{table}[h]
+\centering\small
+\caption{Separate native read-time sweep: failure-prediction AUC.
+External macro equally weights five speech-QA pools. This evaluates
+representation availability during generation, not a live deferred
+routing policy or its audible latency.}
+\label{tab:readtime}
+\begin{tabular}{lrrrr}
+\toprule
+Read point & Calibration OOF & Internal test & Reasoning-zh & External macro\\
+\midrule
+Before onset & .848 & .832 & .711 & .753\\
+At onset & .850 & .852 & .648 & .755\\
+After 1 chunk & .852 & .854 & .681 & .762\\
+After 2 chunks & .855 & .846 & .769 & .791\\
+After 3 chunks & .857 & .858 & .744 & .801\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The sweep supports a timing tradeoff: later states can improve
+failure prediction, particularly on reasoning, but may require
+withholding or revising generated content. A cached two-stage
+mixture improves external mean answer-content accuracy from .711
+to .718 at a 30\% budget. This is a diagnostic remix rather than
+a newly recorded two-stage serving arm.

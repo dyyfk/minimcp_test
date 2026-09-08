@@ -1,0 +1,43 @@
+{
+  "source_commit": "3ade61955e4b3b5c06cfe31fe820d0d08e08af9f",
+  "scope": "Later diagnostics; original Table 1 and teaser unchanged. No new model runs.",
+  "input_sha256": {
+    "data/gate_native_v2.json": "068b6ccd9846d4d216f8baa035f14001b59952c4e2351af47fb2fc4f628f7506",
+    "data/native_bench_v2/val1/validation_never_tts_judged.parquet": "90e6d026e8508c329e3a4db6b15772fe553ea426d25d42998b02a6dbadb20a6f",
+    "data/native_bench_v2/val1/validation_always_tts_judged.parquet": "1d2c82a3f0381c559757678d801b680cfbbfa11d6a22e025b69383f5c509e370",
+    "data/paper_revision_pr0907/validation_tier_freeze.json": "6c7846cca7f54c607435b2a1b17592f32e939d9688c9fe76d10c4f273024e9ed",
+    "data/paper_revision_pr0907/repeat_variance.json": "4dfbc450f931d9a5dbbbf7e3dc8f7cab5318c1ba2953ecf39fe9c28fa5e48b49",
+    "data/paper_revision_pr0907/repro_record.json": "909d1e8646480aef9426fb7194ebaf9b88e3b4c10b17b70ba7ae16d86f7200f8",
+    "data/paper_revision_pr0907/relay_fmt_offline.json": "e4c5149ee8693ed2d13746bb33c58409e28e7ec99339682bc45c2d177b31911c"
+  },
+  "verified": {
+    "validation_n": 299,
+    "validation_languages": {
+      "en": 239,
+      "zh": 60
+    },
+    "fit_n": 4922,
+    "fit_id_hash_matches": true,
+    "validation_id_hash_matches": true,
+    "validation_internal_test_id_overlap": 0,
+    "validation_known_leak_id_overlap": 0,
+    "both_val1_gate_hashes_match": true,
+    "all_seven_accuracy_remixes_match": true,
+    "text_correct": {
+      "never": 152,
+      "always": 231
+    },
+    "audio_asr_correct": {
+      "never": 144,
+      "always": 198
+    },
+    "formatter_regression_cases_and_syntax_counts_match": true
+  },
+  "limits": [
+    "No local full-feature fit or new inference.",
+    "repeat_variance and clean-checkout reproducibility are archived reports, not locally rerun experiments.",
+    "Eight frozen formatter retention fields differ by one item in local reproduction; source reconciliation requested.",
+    "trunc1 new judged rows not included in the reviewed Git tree; new improvement numbers withheld from manuscript.",
+    "scripts/53 latency uses component sums, not recorded monotonic endpoint differences."
+  ]
+}
