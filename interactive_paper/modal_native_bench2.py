@@ -223,8 +223,13 @@ def live_shard(shard: list, pool: str, tier: str, shard_id: int = -1,
     def clean_expert(txt, max_chars=400):
         """Expert markdown -> one spoken paragraph: strip emphasis/links/
         tables, flatten bullets into a comma list, keep whole sentences
-        (abbreviation-aware) up to max_chars."""
+        (abbreviation-aware) up to max_chars.
+        v2 relay-loss fixes: fenced code blocks are dropped (code read
+        aloud is garbage on the delivered channel), and the FINAL
+        sentence is always kept (reasoning answers put the conclusion
+        last; the v1 head-only cap cut it off)."""
         t = str(txt)
+        t = _re.sub(r"```.*?```", " ", t, flags=_re.S)            # code blocks
         t = _re.sub(r"\[([^\]]+)\]\([^)]*\)", r"\1", t)          # [text](url)
         t = _re.sub(r"\(\s*https?://[^)]*\)", "", t)              # bare (url)
         t = _re.sub(r"^\s*\|.*\|\s*$", " ", t, flags=_re.M)         # table rows
@@ -241,7 +246,11 @@ def live_shard(shard: list, pool: str, tier: str, shard_id: int = -1,
             if out and len(out) + 1 + len(se) > max_chars:
                 break
             out = (out + " " + se).strip()
-        if len(out) > max_chars + 80:
+        last = sents[-1].strip() if sents else ""
+        if last and not out.endswith(last) \
+                and len(out) + len(last) < max_chars + 200:
+            out = (out + " " + last).strip()      # keep the conclusion
+        if len(out) > max_chars + 280:
             out = out[:max_chars].rsplit(" ", 1)[0] + "."
         return out or t[:max_chars]
 
