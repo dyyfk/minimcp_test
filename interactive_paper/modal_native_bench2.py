@@ -128,7 +128,8 @@ def _load_queries(pool):
               secrets=[OPENAI], timeout=60 * 60 * 5)
 def live_shard(shard: list, pool: str, tier: str, shard_id: int = -1,
                relay: str = "tts", run_id: str = "",
-               art_path: str = ART) -> list:
+               art_path: str = ART, fmt: str = "v2",
+               expert: str = "web") -> list:
     import glob as _glob
     import hashlib
     import shutil
@@ -146,6 +147,7 @@ def live_shard(shard: list, pool: str, tier: str, shard_id: int = -1,
     from transformers import AutoModel, AutoTokenizer
     sys.path.insert(0, "/workspace/gate")
     import escalate
+    import relay_fmt
 
     _, audio_dir, lang, _ = POOLS[pool]
     cache = os.path.expanduser("~/.cache/huggingface/modules/"
@@ -214,45 +216,15 @@ def live_shard(shard: list, pool: str, tier: str, shard_id: int = -1,
         return duplex.streaming_generate(top_k=GEN_TOP_K)
 
     import inspect as _insp
-    import re as _re
 
     def _call_def(fn, **kw):
         ps = set(_insp.signature(fn).parameters)
         return fn(**{k: v for k, v in kw.items() if k in ps})
 
-    def clean_expert(txt, max_chars=400):
-        """Expert markdown -> one spoken paragraph: strip emphasis/links/
-        tables, flatten bullets into a comma list, keep whole sentences
-        (abbreviation-aware) up to max_chars.
-        v2 relay-loss fixes: fenced code blocks are dropped (code read
-        aloud is garbage on the delivered channel), and the FINAL
-        sentence is always kept (reasoning answers put the conclusion
-        last; the v1 head-only cap cut it off)."""
-        t = str(txt)
-        t = _re.sub(r"```.*?```", " ", t, flags=_re.S)            # code blocks
-        t = _re.sub(r"\[([^\]]+)\]\([^)]*\)", r"\1", t)          # [text](url)
-        t = _re.sub(r"\(\s*https?://[^)]*\)", "", t)              # bare (url)
-        t = _re.sub(r"^\s*\|.*\|\s*$", " ", t, flags=_re.M)         # table rows
-        t = _re.sub(r"^\s*#{1,6}\s*", "", t, flags=_re.M)            # headings
-        t = _re.sub(r"^\s*(?:[-*\u2022]|\d+[.)])\s+", ", ", t, flags=_re.M)   # bullets
-        t = _re.sub(r"[*_`>]+", "", t)
-        t = _re.sub(r"\s*\n+\s*", " ", t)
-        t = _re.sub(r"\s*,\s*,+", ", ", t)
-        t = _re.sub(r":\s*,\s*", ": ", t)
-        t = _re.sub(r"\s+", " ", t).strip(" ,")
-        sents = _re.split(r"(?<!\b[A-Z])(?<!\b[A-Z][a-z])(?<!\bU\.S)(?<!\bDr)(?<!\bMr)(?<!\bMrs)(?<!\bSt)(?<!\bNo)(?<=[.!?])\s+(?=[A-Z0-9\u4e00-\u9fff])", t)
-        out = ""
-        for se in sents:
-            if out and len(out) + 1 + len(se) > max_chars:
-                break
-            out = (out + " " + se).strip()
-        last = sents[-1].strip() if sents else ""
-        if last and not out.endswith(last) \
-                and len(out) + len(last) < max_chars + 200:
-            out = (out + " " + last).strip()      # keep the conclusion
-        if len(out) > max_chars + 280:
-            out = out[:max_chars].rsplit(" ", 1)[0] + "."
-        return out or t[:max_chars]
+    # Exp-2: formatter is a per-run choice; v2 is the shipped default,
+    # v3 is the conservative candidate (src/relay_fmt.py, single source)
+    clean_expert = (relay_fmt.format_spoken_v3 if fmt == "v3"
+                    else relay_fmt.clean_expert_v2)
 
     tts_ready = {"ok": False}
     tok_tf = None
@@ -318,6 +290,8 @@ def live_shard(shard: list, pool: str, tier: str, shard_id: int = -1,
                "lang": q.get("lang", lang),
                "run_id": run_id, "seed": int(seed),
                "gate_art_sha256": art_sha, "protocol": "v2",
+               "relay_fmt": fmt, "expert_mode": expert,
+               "gen_top_k": GEN_TOP_K,
                "status": None, "expert_timed_out": False,
                "expert_input_s": None, "expert_input_sha256": None,
                "answer_audio_s": None, "answer_synth_ms": None,
@@ -350,11 +324,18 @@ def live_shard(shard: list, pool: str, tier: str, shard_id: int = -1,
                 exp["uplink"] = str(up)
                 exp["asr_s"] = round(time.time() - t0, 2)
                 t1 = time.time()
-                r = escalate.ask_expert_web(up, effort="low")
-                if r.get("error"):
-                    r = escalate.ask_expert(up, effort="low")
-                exp["answer"] = (r.get("answer")
-                                 or f"[error: {r.get('error')}]")
+                if expert == "structured":
+                    r = escalate.ask_expert_structured(up, effort="low")
+                    exp["final_answer"] = r.get("final_answer")
+                    exp["explanation"] = r.get("concise_explanation")
+                    exp["answer"] = (r.get("spoken_answer")
+                                     or f"[error: {r.get('error')}]")
+                else:
+                    r = escalate.ask_expert_web(up, effort="low")
+                    if r.get("error"):
+                        r = escalate.ask_expert(up, effort="low")
+                    exp["answer"] = (r.get("answer")
+                                     or f"[error: {r.get('error')}]")
                 exp["expert_s"] = round(time.time() - t1, 2)
             except Exception as e:
                 exp["answer"] = f"[thinker failed: {str(e)[:100]}]"
@@ -508,6 +489,8 @@ def live_shard(shard: list, pool: str, tier: str, shard_id: int = -1,
             exp_done.wait(timeout=5)
             rec["relay"] = (rec.get("relay_text", "") if relay == "tts" else full)
             rec["expert_answer"] = exp.get("answer", "")
+            rec["expert_final_answer"] = exp.get("final_answer")
+            rec["expert_explanation"] = exp.get("explanation")
             rec["transcript"] = exp.get("uplink", "")[:300]
             rec["asr_s"] = exp.get("asr_s")
             rec["expert_latency_s"] = (
@@ -685,22 +668,63 @@ def judge_pool(pool: str, tier: str, field: str = "delivered",
         exec(compile(ast.Module(body=keep, type_ignores=[]), "modal_bench", "exec"), ns)
         return ns
 
+    # Exp-4: identical (judge-config, query, reference, answer) content
+    # always reuses one verdict — across fields, arms, and repeat runs.
+    # Cache is append-only jsonl on the volume; last write wins.
+    import hashlib
+
+    def _h(x):
+        return hashlib.sha256(str(x).encode()).hexdigest()[:16]
+
+    mb = _bench_ns() if jkind in ("oab", "vb") else None
+    jsig = {"ours": lambda: "|".join(
+                ["ours", escalate.JUDGE_MODEL, escalate.JUDGE_EFFORT,
+                 _h(escalate.JUDGE_SYSTEM)]),
+            "oab": lambda: "|".join(
+                ["oab", mb["OAB_JUDGE_MODEL"], _h(mb["OAB_PATTERN"])]),
+            "vb": lambda: "|".join(
+                ["vb", mb["VB_JUDGE_MODEL"], _h(mb["VB_META_PROMPT_OPEN"])]),
+            }[jkind]()
+    vnames = {"ours": ("adequate", "judge_reason"), "oab": ("oab_ok",),
+              "vb": ("vb_score",)}[jkind]
+
+    def _ckey(r):
+        return hashlib.sha256(json.dumps(
+            [jsig, str(r["query"]), str(r.get("reference_answer") or ""),
+             str(r["delivered"])], ensure_ascii=False).encode()).hexdigest()
+
+    cache_p = f"{OUT_DIR}/judge_cache.jsonl"
+    jcache = {}
+    if os.path.exists(cache_p):
+        for ln in open(cache_p, encoding="utf-8"):
+            if ln.strip():
+                e = json.loads(ln)
+                jcache[e["k"]] = e["v"]
+    misses = []
+    for r in todo:
+        v = jcache.get(_ckey(r))
+        if v is not None and v.get(vnames[0]) is not None:
+            for k2, val in v.items():
+                r[k2 + sfx] = val
+        else:
+            misses.append(r)
+    print(f">>> judge cache: {len(todo) - len(misses)} reused, "
+          f"{len(misses)} to call", flush=True)
+
     if jkind == "ours":
         jin = [{"query": r["query"], "reference_answer": r["reference_answer"],
-                "answer": r["delivered"]} for r in todo]
+                "answer": r["delivered"]} for r in misses]
         jr = asyncio.run(escalate.judge_many(jin, concurrency=8))
-        for r, j in zip(todo, jr):
+        for r, j in zip(misses, jr):
             r["adequate" + sfx] = j.get("adequate")
             r["judge_reason" + sfx] = j.get("judge_reason")
     elif jkind == "oab":
-        mb = _bench_ns()
         jin = [{"query": r["query"], "reference_answer": r["reference_answer"],
-                "answer": r["delivered"]} for r in todo]
+                "answer": r["delivered"]} for r in misses]
         jr = mb["_oab_judge"](jin, concurrency=3)
-        for r, j in zip(todo, jr):
+        for r, j in zip(misses, jr):
             r["oab_ok" + sfx] = j.get("oab_ok")
     else:   # VoiceBench 1-5 open-ended judge, official prompt
-        mb = _bench_ns()
         client = escalate._async_client()
         sem = asyncio.Semaphore(3)
 
@@ -731,8 +755,15 @@ def judge_pool(pool: str, tier: str, field: str = "delivered",
                 await asyncio.sleep(3)
 
         async def run():
-            await asyncio.gather(*(one(r) for r in todo))
+            await asyncio.gather(*(one(r) for r in misses))
         asyncio.run(run())
+    with open(cache_p, "a", encoding="utf-8") as fh:
+        for r in misses:
+            if r.get(vnames[0] + sfx) is None:
+                continue        # judge failed; retryable, never cached
+            fh.write(json.dumps(
+                {"k": _ckey(r), "v": {n: r.get(n + sfx) for n in vnames}},
+                ensure_ascii=False) + "\n")
     if field == "delivered" or not len(old):
         keep = old[~old["id"].isin({r["id"] for r in todo})] if len(old) else old
         new = pd.concat([keep, pd.DataFrame(todo)], ignore_index=True)
@@ -756,7 +787,8 @@ def judge_pool(pool: str, tier: str, field: str = "delivered",
 @app.local_entrypoint()
 def run_bench(pool: str = "striviaqa", tier: str = "never",
               workers: int = 6, limit: int = 0, relay: str = "tts",
-              run_id: str = "", gate_art: str = "", ids: str = ""):
+              run_id: str = "", gate_art: str = "", ids: str = "",
+              fmt: str = "v2", expert: str = "web"):
     if not run_id:
         raise SystemExit("v2 requires --run-id")
     qs = _todo.remote(pool, tier, relay, run_id)
@@ -777,7 +809,7 @@ def run_bench(pool: str = "striviaqa", tier: str = "never",
           flush=True)
     done = list(live_shard.starmap(
         [(shards[i], pool, tier, i if not smoke else -1, relay, run_id,
-          gate_art or ART)
+          gate_art or ART, fmt, expert)
          for i in range(workers) if shards[i]]))
     print(f">>> complete: {sum(len(d) for d in done)}")
 

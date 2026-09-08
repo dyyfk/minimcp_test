@@ -167,3 +167,14 @@ be split with existing data; (2) local path `generate_audio=False`;
 | summary.json | rev2 |
 | artifact_index.jsonl / input_manifest.jsonl / repro_record.json | rev2 |
 | scripts | 40/41/43 (committed), 48/49 (rev2), 50 (category diagnostic), 51 (repeat variance, pending data) |
+
+## Update 2026-09-08 (8cy)
+
+Author decision: three repeats CANCELLED; one run per query/arm after
+freeze (repeat_id fixed 0). Staged validation plan + re-estimated
+costs: `internal_improvement_validation_design.md` (this dir).
+New CPU-only code this commit: src/relay_fmt.py (v2 moved + v3
+candidate), bench2 --fmt/--expert run params, escalate.
+ask_expert_structured, judge content cache
+(/data/native_bench_v2/judge_cache.jsonl), scripts/55 +
+relay_fmt_offline.json. No GPU/API run started.

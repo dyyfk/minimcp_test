@@ -1,0 +1,201 @@
+{
+ "regression_cases": {
+  "q0091": {
+   "v2": {
+    "text": "Vanessa ran twice as far as Aaron. Since Vanessa ran 4 miles: \\[ \\text{Aaron's distance} = \\frac{4}{2} = 2 \\text{ miles} \\] Aaron ran 2 miles in 16 minutes, so his speed was: \\[ \\frac{2}{16} = \\frac{1}{8} \\text{ mile per minute} \\] Aaron ran twice as fast as Vanessa, so Vanessa’s speed was: \\[ \\frac{1}{8} \\div 2 = \\frac{1}{16} \\text{ mile per minute} \\] Vanessa’s time for 4 miles was: \\[ 4 \\div \\frac{1}{16} = 64 \\] Final answer: 64",
+    "keeps_answer": true
+   },
+   "v3": {
+    "text": "Vanessa ran twice as far as Aaron. Since Vanessa ran 4 miles: Aaron's distance = (4)/(2) = 2 miles Aaron ran 2 miles in 16 minutes, so his speed was: (2)/(16) = (1)/(8) mile per minute Aaron ran twice as fast as Vanessa, so Vanessa’s speed was: (1)/(8) ÷ 2 = (1)/(16) mile per minute Vanessa’s time for 4 miles was: 4 ÷ (1)/(16) = 64 Final answer: 64",
+    "keeps_answer": true
+   },
+   "recorded_v1_relay": "Vanessa ran twice as far as Aaron."
+  },
+  "q0046": {
+   "v2": {
+    "text": "For each normal gallon of lemonade: 1 gallon needs 1 cup of lemon juice. , 1 cup of lemon juice needs 6 lemons. Tim needs 4 normal gallons: \\[ 4 \\times 1 = 4 \\text{ cups of lemon juice} \\] Alan wants 1 extra gallon twice as tart, so it needs twice the lemon juice: \\[ 1 \\times 2 = 2 \\text{ cups of lemon juice} \\] Total lemon juice needed: \\[ 4 + 2 = 6 \\text{ cups} \\] Since each cup needs 6 lemons: \\[ 6 \\times 6 = 36 \\] Final answer: 36",
+    "keeps_answer": true
+   },
+   "v3": {
+    "text": "For each normal gallon of lemonade: 1 gallon needs 1 cup of lemon juice. 1 cup of lemon juice needs 6 lemons. Tim needs 4 normal gallons: 4 × 1 = 4 cups of lemon juice Alan wants 1 extra gallon twice as tart, so it needs twice the lemon juice: 1 × 2 = 2 cups of lemon juice Total lemon juice needed: 4 + 2 = 6 cups Since each cup needs 6 lemons: 6 × 6 = 36 Final answer: 36",
+    "keeps_answer": true
+   },
+   "recorded_v1_relay": "For each normal gallon of lemonade: 1 gallon needs 1 cup of lemon juice. , 1 cup of lemon juice needs 6 lemons."
+  },
+  "q0486": {
+   "v2": {
+    "text": "",
+    "keeps_answer": false
+   },
+   "v3": {
+    "text": "<button type=\"button\">点击我</button>",
+    "keeps_answer": true
+   },
+   "recorded_v1_relay": "html <button type=\"button\"点击我</button"
+  }
+ },
+ "retention": {
+  "frozen": {
+   "raw_expert": {
+    "n": 238,
+    "ref_retained": 0.5756302521008403,
+    "len_mean": 233.7563025210084,
+    "ref_retained_on_relay_loss": 0.2857142857142857
+   },
+   "v2": {
+    "n": 238,
+    "ref_retained": 0.5714285714285714,
+    "n_with_ref": 238,
+    "len_mean": 150.11344537815125,
+    "len_p90": 353.3,
+    "n_empty": 1,
+    "residual_syntax": 22,
+    "ref_retained_expert_right": 0.6813186813186813,
+    "relay_loss_rows": 14,
+    "ref_retained_on_relay_loss": 0.21428571428571427
+   },
+   "v3": {
+    "n": 238,
+    "ref_retained": 0.5672268907563025,
+    "n_with_ref": 238,
+    "len_mean": 150.83193277310923,
+    "len_p90": 370.0,
+    "n_empty": 0,
+    "residual_syntax": 8,
+    "ref_retained_expert_right": 0.6813186813186813,
+    "relay_loss_rows": 14,
+    "ref_retained_on_relay_loss": 0.21428571428571427
+   }
+  },
+  "sreason": {
+   "raw_expert": {
+    "n": 202,
+    "ref_retained": 0.6089108910891089,
+    "len_mean": 112.56435643564356,
+    "ref_retained_on_relay_loss": 0.6
+   },
+   "v2": {
+    "n": 202,
+    "ref_retained": 0.6188118811881188,
+    "n_with_ref": 202,
+    "len_mean": 90.42574257425743,
+    "len_p90": 197.10000000000005,
+    "n_empty": 0,
+    "residual_syntax": 9,
+    "ref_retained_expert_right": 0.6494252873563219,
+    "relay_loss_rows": 5,
+    "ref_retained_on_relay_loss": 0.6
+   },
+   "v3": {
+    "n": 202,
+    "ref_retained": 0.6138613861386139,
+    "n_with_ref": 202,
+    "len_mean": 89.21782178217822,
+    "len_p90": 187.70000000000002,
+    "n_empty": 0,
+    "residual_syntax": 2,
+    "ref_retained_expert_right": 0.6494252873563219,
+    "relay_loss_rows": 5,
+    "ref_retained_on_relay_loss": 0.6
+   }
+  },
+  "sllama": {
+   "raw_expert": {
+    "n": 250,
+    "ref_retained": 0.744,
+    "len_mean": 92.388,
+    "ref_retained_on_relay_loss": 0.4
+   },
+   "v2": {
+    "n": 250,
+    "ref_retained": 0.744,
+    "n_with_ref": 250,
+    "len_mean": 80.76,
+    "len_p90": 170.49999999999997,
+    "n_empty": 0,
+    "residual_syntax": 0,
+    "ref_retained_expert_right": 0.7939914163090128,
+    "relay_loss_rows": 5,
+    "ref_retained_on_relay_loss": 0.4
+   },
+   "v3": {
+    "n": 250,
+    "ref_retained": 0.744,
+    "n_with_ref": 250,
+    "len_mean": 79.736,
+    "len_p90": 170.49999999999997,
+    "n_empty": 0,
+    "residual_syntax": 0,
+    "ref_retained_expert_right": 0.7939914163090128,
+    "relay_loss_rows": 5,
+    "ref_retained_on_relay_loss": 0.4
+   }
+  },
+  "striviaqa": {
+   "raw_expert": {
+    "n": 250,
+    "ref_retained": 0.112,
+    "len_mean": 92.64,
+    "ref_retained_on_relay_loss": 0.0
+   },
+   "v2": {
+    "n": 250,
+    "ref_retained": 0.112,
+    "n_with_ref": 250,
+    "len_mean": 79.608,
+    "len_p90": 161.0,
+    "n_empty": 0,
+    "residual_syntax": 1,
+    "ref_retained_expert_right": 0.11618257261410789,
+    "relay_loss_rows": 1,
+    "ref_retained_on_relay_loss": 0.0
+   },
+   "v3": {
+    "n": 250,
+    "ref_retained": 0.112,
+    "n_with_ref": 250,
+    "len_mean": 79.624,
+    "len_p90": 161.0,
+    "n_empty": 0,
+    "residual_syntax": 1,
+    "ref_retained_expert_right": 0.11618257261410789,
+    "relay_loss_rows": 1,
+    "ref_retained_on_relay_loss": 0.0
+   }
+  },
+  "sdqa": {
+   "raw_expert": {
+    "n": 200,
+    "ref_retained": 0.775,
+    "len_mean": 202.235,
+    "ref_retained_on_relay_loss": 0.0
+   },
+   "v2": {
+    "n": 200,
+    "ref_retained": 0.775,
+    "n_with_ref": 200,
+    "len_mean": 154.83,
+    "len_p90": 343.0,
+    "n_empty": 0,
+    "residual_syntax": 2,
+    "ref_retained_expert_right": 0.847457627118644,
+    "relay_loss_rows": 4,
+    "ref_retained_on_relay_loss": 0.0
+   },
+   "v3": {
+    "n": 200,
+    "ref_retained": 0.77,
+    "n_with_ref": 200,
+    "len_mean": 149.47,
+    "len_p90": 313.5,
+    "n_empty": 0,
+    "residual_syntax": 3,
+    "ref_retained_expert_right": 0.8418079096045198,
+    "relay_loss_rows": 4,
+    "ref_retained_on_relay_loss": 0.0
+   }
+  }
+ },
+ "lengths": {},
+ "residual_syntax": {}
+}

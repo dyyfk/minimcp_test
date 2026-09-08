@@ -6740,3 +6740,429 @@ measure corr .17-.49 vs the .6 suppression threshold; phone-leakage
 corr values wanted from the field to tune it). Suite green:
 stop-follow 4/4 (post-cut ASR hears the full question; one residual
 single empty turn immediately recovered), compare-on 3/3, ctx PASS.
+
+### 8cp — phatic questions must not escalate: act-gate category coverage (2026-09-05)
+
+**User-caught bug (live demo):** trivial phatic queries — "how are
+you", "can you hear me" — escalated to gpt-5.5. Mechanism: they are
+question-SHAPED, so the 8bh act gate (trained question-positives vs
+floor-COMMAND negatives: stop/backchannel/ack/filler) rules them
+info-seeking and passes them to the failure probe, which is OOD on
+them. Quantified on 88 new TTS'd phatic stims (8ba behavioral-stim
+protocol, not an eval pool; social openers 30 / channel checks 36 /
+assistant-meta 22; en+zh, 2 voices, standalone-from-silence):
+failure-probe false-fire at aggressive = social 100%, meta 100%,
+chancheck 97%; at balanced 37/41/44%. Exactly the user's report.
+
+**Fix (volume-only deploy):** the 88 phatic stims join the act-gate
+negatives (263→351) and scripts/24 refits. The act read absorbs the
+new category for free: OOF AUC 0.9999 (unchanged), all phatic cats
+0.00% act-pass, residual false-fire 0.00% at every tier, and the
+joint-gap threshold IMPROVES — act_thr .551→.474, question-side loss
+0.52%→0.24%, with the 8ch positives intact (stopq/stopqpc/reqqpc
+100% pass, reqq 100%, calib 99.7%). Failure-probe calibration
+untouched by design (same 8bh argument). gate_act.json updated on
+the gate-data volume only — NO code deploy (coauthor shipped 6 demo
+deploys the same day; old artifact backed up as
+gate_act_pre8cp.json, local backup data/gate_act_pre8cp.json).
+
+**Live smoke (deployed demo, new artifact via cold reload):** phatic
+arm at AGGRESSIVE tier — 6 stims ("How are you?", "How's it going?",
+"你好吗？", "Can you hear me?", "Are you there?", "What's your
+name?"): 3 gate reads, fired=0, escalating-phases=0; the talker
+answers naturally ("Hi there, I'm doing well, thanks for asking").
+"How are you?" now reads act=.52 (was passed outright) and its
+failure score .46 sits under every tier. Positive control (escalate
+arm, balanced): GATE score .814 >= thr .797 -> fired, thinker 5.1s,
+relay delivered. (First control run had fired=False at the same
+threshold — that qid's live onset read hovers at the .797 line,
+34_rerun_stability variance, not an act-gate effect: its act score
+is .9998 under both old and new weights.)
+
+Files: modal_flooract.py (make_phatic inventory), modal_native_dump.py
+(phatic pool), scripts/24_act_probe.py (phatic negatives),
+data/gate_act.json, figures/act_probe.json, _ws_native_smoke.py
+(phatic arm); paper appendix "Dialogue-act gating" extended.
+
+## Phase 8cq — G0: oracle-utilization R_b + answer-free baselines — the probe reads ~1/3 of the achievable routing gain ($0, 2026-09-06)
+
+External-review item 6 (main-conference plan review): convert "beats
+matched-rate random by a few points" into "captures x% of the
+achievable routing gain". `scripts/45_oracle_utilization.py` on the
+cached paired never/always native arms (same rows as
+tab:native-validity): every query has both outcomes (L = local
+correct, E = expert correct), so at exact top-k budgets we compare
+random / probe-ranking / paired-outcome oracle on identical rows,
+with query-resampled bootstrap CIs and absolute deltas kept alongside
+(the ratio is unstable when oracle-random is small).
+
+**Headline (ext-5 mean).** The ceiling is NOT low: fixable rows
+(L=0,E=1) are 13-41% per pool, harmful (L=1,E=0) only 1-4%; the
+oracle clears random by +.105/+.182/+.168 at 15/30/50% vs the
+probe's +.031/+.056/+.059. R_b = .29 [.18,.40] / .30 [.23,.39] /
+.35 [.27,.44] — roughly flat in budget and pool (WebQ weakest,
+R<=.15, CIs crossing 0; SD-QA best at low budgets, .67 at 5%).
+So the "only a few points" reading is NOT "the ceiling was low":
+~2/3 of what a commit-time router could deliver is unread by the
+deployed probe. This reframes 8by's closed ledger: every read-side
+lever failed to capture a gap that is large and real — motivation
+for intervention-side work (G1/G2), not for more read-side tuning.
+(8bv's 7.5pt/100 recoverable-headroom at aggressive is the same
+quantity at one tier: ext-5 oracle-probe = .108 at 50%.)
+
+**Answer-free baseline row (Step-0 table).** Commit-instant scalars
+from the same arms — audio_s / n_chunks / onset_chunk / act — reach
+only .55-.57 AUC (orientation-FREE, i.e. generous) vs the probe's
+.753 on identical rows. Still "not measured": commit-time next-token
+entropy (no logits in any cached dump; needs a small dump run) and
+P(IK)-style extra forward. p(True)/RTJ is measured but needs the
+answer, so it is not commit-time.
+
+**Caveats.** Probe = pure top-k ranking (no threshold calibration
+error — flattering to the probe; deployed R_b would be lower).
+Oracle needs no causality (it conditions on E). Arms are one live
+session each; the ±2-3pt replication floor applies to levels, less
+so to the paired deltas.
+
+Paper: app:native new "Oracle utilization" paragraph + fig:oracleutil;
+live.tex qualifier sentence after the matched-random claim.
+Files: scripts/45_oracle_utilization.py,
+figures/oracle_utilization.{json,png}, paper/figures/oracle_utilization.png.
+
+## Phase 8cr — G0-2: what IS the unread two thirds? Taxonomy x k2 x stochasticity decomposition ($0, 2026-09-06)
+
+Follow-up to 8cq: at the 30% budget the probe misses 223 of 428
+fixable rows (L=0,E=1). `scripts/46_unread_decomposition.py` crosses
+the missed set with 8bv's failure taxonomy, a k2 re-read, and a
+cross-generation stability check (never arm vs the 8bw k-dump = two
+independent generations per query, label agreement .71-.82).
+
+1. **Not a special failure type.** Missed = 71% confident_wrong
+   (same class the probe catches: caught = 78%), quality_other 17%,
+   execution only 7.6% (concentrated in sreason, 14/38). The
+   "execution failures are principally unreadable at commit" excuse
+   covers <10% of the miss outside zh reasoning.
+2. **Not read too early.** A k2 probe (8bw recipe retrained, two
+   answer chunks in) fires on only 10-29% of missed rows at its own
+   matched 30% quantile, vs 71-90% of caught rows — onset and k2
+   agree about who looks suspicious; the missed rows look clean to
+   both. Consistent with 8bw/8bx.
+3. **One third is the oracle cheating on coin flips.** 33% of missed
+   fixable rows flip to correct in the second generation (caught:
+   15%; frozen 38% vs 5%, sllama 70% vs 33%). The oracle conditions
+   on the realized draw of stochastic decoding; no commit-time
+   reader can. Two samples/query -> this is a LOWER bound on the
+   stochastic share. All-fixable flip rate 24.6%.
+
+**Net.** The honest commit-time ceiling sits meaningfully below the
+8cq oracle: of the probe-missed gain, ~1/3 is decode stochasticity,
+<10% execution-type, ~1/4 recoverable-at-k2-only; after discounting
+flips, ~half of stably-fixable rows (147/319) are unread at commit
+AND at k2 — a real, non-aleatoric gap, but 8by's ledger says it is
+not reachable by reading this state harder. This is the calibrated
+target (and its size cap) for the G1/G2 intervention line: worth
+roughly +8-10pt delivered at 30% if fully captured, not the naive
++12.6pt oracle gap. Paper: app:native oracle-utilization paragraph
+extended. Files: scripts/46_unread_decomposition.py,
+figures/unread_decomposition.json.
+
+## Phase 8cs — commit-time entropy baseline + final-layer cells, measured and closed (~$15 GPU + ~$5 API, 2026-09-06)
+
+The two "not measured" Step-0 cells from the external review, plus the
+post-norm cell it flagged. New `*e` dumps (six eval pools, official
+config, ~1,380 rows, same-generation gpt-5.4-mini labels):
+modal_native_dump.py 8cs fields — final-RMSNorm hook giving next-token
+entropy/top1/margin at TWO moments (pre = before the onset chunk's
+generate, strictly zero answer tokens; onset = deployed read moment)
+plus pre/post-norm L35 last-token hiddens (H35/H35n).
+
+1. **Entropy cell: ~chance.** Strictly-causal pre-generate entropy /
+   top-1 / margin AUC .510-.526 everywhere (ext-5 mean .518); at the
+   deployed-read moment .549 — and the smoke showed why: the
+   successor there is a control token, near-deterministic (entropy
+   ~1e-3), exactly the review's warning. Probe on identical
+   same-generation rows: .744 ext-5 / .845 internal. The only
+   commit-available scalar family left unmeasured is P(IK)-style
+   extra forward.
+2. **Post-norm cell: closed.** External-pool LOPO, last-token probes:
+   H35 (pre-norm) .626, H35n (post-norm) .602 — post-norm buys
+   nothing at the LM-head's own view of the state.
+3. **Bonus: the text cliff does not transfer to the audio commit
+   read, and depth is flat there.** Matched 4096-d last-token LOPO:
+   L22 .620 vs L35 .626 — equal. The deployed probe's margin over
+   single-token reads (.730 vs .62 LOPO on the same rows) comes from
+   the three-part aggregate (rolling tail mean + user-audio mean),
+   not from mid-depth per se. Consistent with app:signal's
+   audio-modality note; sharpens it: at the native commit point the
+   layer choice barely matters, the FEATURE AGGREGATION carries it.
+
+Files: modal_native_dump.py (8cs fields), scripts/47_commit_entropy.py,
+figures/commit_entropy.json, data/frozen_native_*e_feats.shard*.npz,
+data/frozen_native_*e_judged.parquet. Paper: app:native
+oracle-utilization paragraph extended; todo P2 updated.
+
+## Phase 8ct — G1 back-diff pilot: the late-layer cliff heals dose-dependently under local weight reversion, duplex behavior intact (~$25, 2026-09-07)
+
+Manifest check (data/weight_manifests.json, HTTP-range headers only):
+397/399 Qwen3-8B tensors identical in name+shape inside MiniCPM-o 4.5
+as llm.*; only embed/lm_head differ (vocab 151,936 vs 151,748 — MiniCPM
+TRIMMED 188 rows). Interpolation touches only llm.model.layers.{S}.*.
+
+modal_backdiff.py: w <- (1-b)w_mini + b w_qwen on segment S, then the
+Phase-5d text layer-sweep capture (360 calib rows) + a 12-query native
+duplex smoke (official config). LOPO hard-math AUC by layer:
+
+| config      | L22  | L32  | L33  | L34  | L35  | smoke |
+|-------------|------|------|------|------|------|-------|
+| b=0 control | .931 | .651 | .498 | .347 | .364 | 12/12 spoke, 12 eot |
+| 28-35 b=.10 | .931 | .666 | .547 | .416 | .438 | 12/12, 12 eot |
+| 28-35 b=.25 | .931 | .688 | .591 | .515 | .434 | 12/12, 10 eot |
+| 32-35 b=.10 | .931 | .648 | .507 | .380 | .384 | 12/12, 12 eot |
+| 32-35 b=.25 | .931 | .661 | .569 | .408 | .379 | 12/12, 11 eot |
+
+1. b=0 reproduces the committed cliff exactly (.931/.347-.364) —
+   pipeline equivalence verified.
+2. Healing is dose-dependent (b .1 -> .25 monotone at L33/L34) and
+   segment-dependent (28-35 > 32-35 at matched b) — the damage is
+   carried continuously by the late-layer weight delta, upgrade from
+   observational (8aw exclusion) to interventional evidence.
+3. L22 is bit-identical everywhere (.931): the intervention is local;
+   the deployed read is untouched.
+4. Duplex behavior survives: all configs 12/12 spoke with coherent
+   answers; only cost is a mild eot dip at b=.25 (10-11/12).
+5. Recovery is PARTIAL (L34 .515 at best vs backbone ~.9+): weak
+   interpolation reverses direction but does not reach the backbone;
+   the fuller dose-response (b to .5+, module-level split, behavior
+   regression at scale) is the G1 follow-up before any G3 decision.
+
+Files: modal_backdiff.py, data/weight_manifests.json,
+data/layers/layers_bd*.npz, data/backdiff_smoke_*.json,
+figures/backdiff_pilot.json.
+
+## Phase 8ct-2 — G1 complete: damage lives in late MLPs; behavior cliff at b=.5; MLP-only reversion is behavior-free ($30, 2026-09-07)
+
+| config (L28-35)   | L33  | L34  | L35  | 100-q smoke (spoke/eot) |
+|-------------------|------|------|------|--------------------------|
+| b=0 (12q control) | .498 | .347 | .364 | 12/12, 12/12 |
+| b=.25 both        | .591 | .515 | .434 | 100/100, 87/100 |
+| b=.25 attn-only   | .492 | .401 | .423 | 100/100, 97/100 |
+| b=.25 mlp-only    | .591 | .477 | .382 | 100/100, **100/100** |
+| b=.5 both         | .660 | .634 | .435 | 100/100, **0/100** |
+
+1. Dose-response continues: b=.5 lifts L34 to .634 (from .347) — but
+   TURN-TAKING COLLAPSES (eot 0/100: speaks, never ends the turn).
+   The Pareto frontier is real and sharp between b=.25 and b=.5.
+2. Module localization: MLP-only reversion reproduces the full L33
+   healing (.591 = both) at ZERO behavior cost (eot 100/100);
+   attn-only is ~control on readability. The duplex damage to
+   late-layer readability lives predominantly in L28-35 MLPs.
+3. G1 VERDICT: PASS. G3 LoRA design answer: mount on L28-35 MLP
+   projections; the b=.25-mlp point is the free-repair reference any
+   trained repair must beat. Caveat: no n=100 b=0 eot control (12q
+   only); run one before quoting the 87/100 as a b=.25 cost.
+
+Files: modal_backdiff.py (part=attn/mlp), layers_bd28-35_b0.5*.npz,
+*attn/*mlp npz, backdiff_smoke_*_n100.json. G1 spend ~$55/$100.
+
+## Phase 8ct-3 — external review round 2: claim downgrades + pre-G3 checklist ($0, 2026-09-07)
+
+Review verdict accepted: G1 strengthened the TEXT mechanism story but
+does NOT yet license "repair guided by G1 localization" for the AUDIO
+gate — the two regimes were shown (8cs) to be different phenomena and
+must be reconnected by experiment, not by shared layer numbers.
+
+**Claim downgrades (apply wherever these numbers are quoted):**
+1. "信息没写进任何层" -> "已测试的冻结表征读取方案未能捕获这些行";
+   fixed-threshold + k2 misses do not prove absence of information.
+   Late LoRA = recomputation of H27; "写入自我认知" is a hypothesis.
+2. The 147-row set = "两次生成均未答对且两读取点均漏检的候选子集",
+   NOT a stable/deterministic target; flip 33% estimates
+   P(right2|wrong1,missed), not an "unpredictable share"; attribution
+   to decode sampling needs same-commit-state forking (our two
+   generations re-ran whole sessions). +8-10pt was a GROSS count;
+   fixed-budget net requires replacement accounting (the 8cq oracle
+   frontier +.182@30% IS net; the 147-row derivation was not).
+3. G1 wording: beta=.25-all has 13/100 eot failures (not "safe");
+   attention .347->.401 is weak, not null; MLP-only reproduces L33
+   but not L34 (.477 vs .515) -> "MLP 是更有希望、粗粒度行为代价更小
+   的候选", not "唯一定位". 100/100 eot = 95% upper bound ~3% failure
+   rate, say "未观察到失败" not "零损伤".
+4. Contribution naming: "原生流式条件下的答案前风险预测训练", NOT
+   "修复内生自我认知". Correctness supervision is supervised learning;
+   near-neighbor work exists (LLMs must be taught to know what they
+   don't know); our差异 = zero-answer-token native streaming input +
+   interaction constraints + realized routing gain.
+
+**Pre-G3 checklist (must complete before G2/G3 money):**
+a. beta=0 n=100 same-query behavior control (~$3).
+b. Frozen model: late-layer (L33-35) THREE-PART aggregate reads on
+   the eval pools — single-token parity does not imply aggregate
+   parity; this is the real starting line (~$15 dump w/ extra hooks).
+c. beta=.25-MLP patched model: same audio-commit 3-part reads + own
+   judged outcomes -> its routing value + behavior at scale. Decides
+   G3's framing per the review's 3-outcome table (~$20).
+d. G3 (single fixed config, no multi-candidate search): mount L28-35
+   MLP, READ AFTER LAST TRAINED BLOCK (dev-set layer scan only);
+   two-stage eval — (i) diagnostic on frozen outcomes/prefixes (y_0
+   fixed, separates prediction improvement from behavior drift), (ii)
+   full system A_b vs frozen-L22 gate at matched budget; arms
+   head-only / KL-only / KL+CE; parameter-matched alternative-mount
+   control if claiming the G1 position matters. Acceptance = realized
+   routing gain at fixed budget with interaction constraints held +
+   never-arm accuracy delta reported; AUC auxiliary only; 147 rows =
+   diagnostic slice, never an acceptance criterion.
+
+## Phase 8cu — pre-G3 checklist a/b/c results (~$40, 2026-09-07)
+
+a. beta=0 n=100 behavior control: 100/100 spoke, 99/100 eot. So
+   beta=.25-all's 87/100 is a real ~12pt cost; attention 97 ~ base;
+   MLP 100/100 >= base — behavior-clean now against a proper control.
+
+b. FROZEN startline, 3-part aggregate, ext-5 LOPO (own-generation
+   gpt-5.4-mini labels): L22 .695 vs L33/34/35 .660/.667/.662;
+   acc@30% .681 vs .675-.679 (rand .647). Aggregation restores most
+   of the late layers' value; L22 keeps a ~.03 AUC edge, routing ~tied.
+
+c. beta=.25-MLP patched model (same dump/judge): AUC on its own
+   outcomes RISES at every layer — L22 .756, L33-35 .694-.702; gate
+   margin over matched random +.057 vs frozen +.034; behavior clean.
+   SURPRISE: its judged local fail rates DROP vs frozen same-judge
+   (striviaqa .59->.43, sreason .54->.46, sllama .74->.67, sdqa
+   .49->.45) — reverting late MLPs seems to IMPROVE answer adequacy.
+   Caveats before believing: verbosity confound (patched model talks
+   longer; judge rewards completeness), generic-judge labels (bench
+   arms use pool judges — do NOT mix; absolute delivered numbers here
+   unreliable), label distribution shift makes cross-model AUC
+   comparison loose, single generation.
+
+Review-2 decision table verdict: audio-side signal improved AND
+behavior held -> deployment-relevant intervention prior EXISTS;
+G2/G3 unlocked. But the 8cu surprise (local quality up) must be
+re-judged with pool-official judges first — if real, the headline
+may be bigger than the gate story (duplex FT costs answer quality,
+locally revertible); if verbosity artifact, it caps the G3 eval
+design (length-controlled judging).
+Files: modal_backdiff.py (agg_shard), figures/agg_startline.json,
+data/frozen_native_*agg*_{feats,judged}.
+
+## 8cu-2 — cross-label 2x2 + deployed-gate-on-patched ($0, 2026-09-07)
+ext-5 LOPO means (common ids): s0y0 .693 | s0yb .685 | sby0 .714 | sbyb .755
+deployed gate (no refit): on frozen .748, on patched .748 (sreason .711->.753)
+=> label shift does NOT explain the gain (s0yb flat); patched trajectories
+genuinely rank better even on OLD outcomes (+.021); original gate transfers
+unchanged to the patched model. Best current candidate: patched model +
+ORIGINAL L22 gate. Next: both-sides official rejudge (~$5) then repeat-gen.
+Files: figures/crosslabel_2x2.json.
+
+## 8cu-3 — official rejudge KILLS the answer-quality claim ($4, 2026-09-07)
+Pool-official judges (oab for striviaqa/swebq/sllama), same answers:
+striviaqa .612->.500 (-.112), swebq .564->.584 (+.020), sllama
+.796->.744 (-.052); wrong->right 66 vs right->wrong 102 on the oab-3.
+The generic gpt-5.4-mini "improvement" (8cu) was a JUDGE ARTIFACT
+(verbosity/completeness preference) — exactly review-3's warned
+confound. DISCREPANCY TO RESOLVE: sdqa/sreason adequate-rate readings
+conflict between the 8cu feats-joined view (.46->.54 improve) and the
+all-rows judged view (.545->.455 worsen) — audit the join/no_speak
+filtering before quoting either. CONSEQUENCE: the training-free
+candidate loses its quality leg; surviving facts = behavior clean +
+original gate transfers (.748); the 2x2 AUC gains used generic-judge
+labels and must be recomputed on official labels before любые claims.
+G3 decision paused pending: (i) join audit, (ii) AUC/routing on
+official labels.
+
+## 8cu-4 — audit result: MY SIGN ERROR manufactured the 8cu "surprise"; free-repair deployment line CLOSED ($0, 2026-09-07)
+The 8cu analysis printed 1-escalate_label.mean under the name "fail"
+— i.e. the ADEQUATE rate. No join discrepancy exists: generic AND
+official judges AGREE the patched model answers WORSE (official oab-3:
+-.112/+.020/-.052; generic: same direction). 8cu's "answer quality
+improved" claim is retracted (my error, not a judge artifact issue —
+though review-3's rejudge is what caught it).
+Official-label AUCs (oab-3): LOPO frozen .744 -> patched .764 (+.02);
+DEPLOYED gate .768 -> .769 (flat). Verdict: patched model = local
+accuracy -3..-11pt for ~+2pt LOPO ranking, deployed-gate ranking
+unchanged -> NET NEGATIVE as a system; "patched + original gate"
+candidate closed. G1's standing value = text-mechanism causal
+evidence + MLP localization + behavior map (paper mechanism chapter),
+NOT a deployment lever. G3 premise weakened accordingly: correctness
+info at commit is not unlocked by reverting late MLPs; any LoRA must
+beat the FROZEN system and carry the burden review-3 assigned.
+
+## 8cv — paper-revision P0 inventory: pr0907 bundle ($0, 2026-09-07)
+Coauthor revision task list, P0 only (no model started). Deliverable:
+data/paper_revision_pr0907/ (STATUS.md, manifest.json for all 45
+native-bench pool x arm x relay runs, artifact_index.jsonl ~530 volume
+files, per-sample calibration_oof.parquet via scripts/48 — 5,228-row
+deployed merge + 5,221 no-leak refit, fold ids, all 12 per-language
+thresholds reproduce the shipped artifacts to 4 decimals).
+Verified: volume gate_native.json == repo copy (sha 0e6494c2, 8bq);
+gate_native_noleak.json NOT on volume -> no-leak gate / 15-25-40 tiers
+never deployed, no run used them. modal_native_bench.py has exactly
+one commit (51fdb4e) == reviewed snapshot: the three flagged
+boundaries are real in ALL runs — (1) expert snapshot = last 30s of
+the full wav (fired turns with onset before last chunk: frozen always
+26/238, valpaca 38/199, sreason 18/202; and 46/240 frozen queries
+>30s lose their beginning), (2) local path generate_audio=False,
+latency = server-side composite estimate, no client clock anywhere,
+(3) delivered-judge scores TEXT (relay/local), never ASR of produced
+audio. Steer vs tts relay variants differ hugely (striviaqa always
+.728 vs .960) — separate protocols, do not mix. Commit dd33f7c.
+
+## 8cw — pr0907 rev2: coauthor P0 review corrections + clean-checkout repro ($0, 2026-09-07)
+All five review items closed CPU-only (commits 9c117b7 + fa9c1c6,
+pushed): missing deps committed (scripts 40/41/43 + 4 jsons + 6
+part-label judged parquets — they were never in git); 48 fail-hard
+threshold validation + full source resolution; thresholds.json ships
+a fresh no-leak 10-50% per-language OOF grid with fit provenance and
+demotes the 8bz grid to historical_remix_grid (null fit metadata,
+exploration-only); manifest 46 entries with experiment_family/
+in_paper/provenance_basis (v1 gate SHA labeled INFERRED), smoke
+separated; steer timing recomputed from its own parquets (striviaqa
+agg 6.97s mean matches reviewer's independent recalc; n_scored
+231/250 explicit); source_split unknowns kept, timeout renamed
+wait>=145 proxy, all timing renamed "reconstructed timing
+diagnostic". Clean worktree at 9c117b7 + 84 sha256-verified non-git
+inputs reproduces 48/49 byte-identically (repro_record.json).
+Review's >30s finding confirmed: 43/60 hard-knowledge + 3 hard-math
+wavs exceed the expert's 30s tail window — the hard-knowledge
+"expert limit" attribution is confounded with input truncation.
+Internal v1-protocol repeats r1/r2 (user-authorized pre-review) still
+in flight under native_bench_repeats/; variance report via scripts/51.
+
+## 8cx — v1 expert input truncation was worth 20 points on long knowledge (~$25, 2026-09-08)
+User-directed internal-gain line. trunc1: the 43 internal
+hard-knowledge queries >30s rerun on the v2 always arm (causal
+consumed-prefix expert input; 31/43 hear the FULL question vs v1's
+tail-30s that beheaded all 43). Expert-field acc .310 -> .512,
+delivered .326 -> .512 (+18.6pp, n=43, ~2.5 sigma). The 8bu "expert
+capability limit" on hard-knowledge was substantially an input
+artifact. Supporting $0 analyses (scripts/54): threshold 50->60%
+buys +2.4pp (then flat; oracle-at-rate .761, ranking-limited);
+relay loss = code-garbling + conclusion-cut (v2 clean_expert now
+drops code blocks and always keeps the final sentence). Projected
+internal always ceiling .717 -> ~.75, aggressive +2.5-3pp from the
+input fix alone before any tier change.
+
+## 8cy — Exp-2/4 CPU fixes + no-repeat validation design ($0, 2026-09-08)
+Author update: three repeats CANCELLED — one run per query/arm after
+config freeze; internal first. Design + accounting in
+data/paper_revision_pr0907/internal_improvement_validation_design.md.
+CPU deliverables (no model started): (1) src/relay_fmt.py — v2
+formatter moved out verbatim (behavior diff 0 on 1064 recorded expert
+texts) + conservative v3 (keeps code/tables/comparison chars,
+converts LaTeX display macros, answer-cue sentence priority, drops
+rationale from the FRONT on overflow); bench2 runs pick --fmt v2|v3
+and --expert web|structured, rec logs relay_fmt/expert_mode/
+gen_top_k. (2) escalate.ask_expert_structured — final_answer/
+concise_explanation/spoken_answer via Structured Outputs (Exp-2
+candidate 1). (3) judge content cache (Exp-4): identical
+(judge-config, query, reference, answer) reuses one verdict across
+fields/arms/runs — /data/native_bench_v2/judge_cache.jsonl. (4)
+scripts/55 offline diagnostic (relay_fmt_offline.json): q0091/q0046
+already saved by v2's conclusion-keep; v3 additionally saves q0486
+(v2 → EMPTY string on pure-code answers), empties 1→0, residual
+TTS-read display syntax frozen 22→8, sreason 9→2;
+reference-retention v2≈v3≈raw expert → the remaining relay-loss rows
+are NOT formatter-fixable (candidate-1 territory or judge variance).
+striviaqa retention .112 = alias-list metric artifact (raw expert
+same). NOTE: review_sources/internal_improvement_audit_2026-09-08.json
+referenced by the task sheet does not exist in this repo.

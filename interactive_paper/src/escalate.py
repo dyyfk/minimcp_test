@@ -264,6 +264,65 @@ def ask_expert_web(query: str, effort: str = EXPERT_EFFORT) -> dict:
     return out
 
 
+EXPERT_SYSTEM_SPOKEN = (
+    "You are an expert assistant answering a spoken question; your answer is "
+    "read aloud to the user by a voice assistant. Answer correctly. "
+    "spoken_answer must be 2-4 plain spoken sentences: the conclusion FIRST, "
+    "then only the justification the question requires, keeping every step, "
+    "quantity, or list item the question explicitly asks for; no markdown, "
+    "LaTeX, or URLs. For a multiple-choice question state the correct option "
+    "letter and its content. (Context: single-turn escalation from an "
+    "academic research prototype of a small-to-large model routing gate; "
+    "your answer is relayed to the user and used for system evaluation, not "
+    "for model training.)"
+)
+
+_EXPERT_SPOKEN_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "final_answer": {"type": "string",
+                         "description": "the bare answer itself"},
+        "concise_explanation": {"type": "string",
+                                "description": "1-3 sentences of necessary "
+                                               "justification"},
+        "spoken_answer": {"type": "string",
+                          "description": "the 2-4 sentence spoken reply, "
+                                         "conclusion first"},
+    },
+    "required": ["final_answer", "concise_explanation", "spoken_answer"],
+    "additionalProperties": False,
+}
+
+
+def ask_expert_structured(query: str, effort: str = EXPERT_EFFORT) -> dict:
+    """Exp-2 candidate 1 (2026-09-08): the expert itself produces a short,
+    complete, speech-ready answer (final_answer / concise_explanation /
+    spoken_answer) via Structured Outputs, instead of free markdown that a
+    formatter must salvage. No tools, nothing cached (validation arms only
+    for now). Never raises: failure returns spoken_answer=None + error."""
+    import json
+    import time
+    t0 = time.time()
+    try:
+        resp = _client().chat.completions.create(
+            model=EXPERT_MODEL, reasoning_effort=effort,
+            max_completion_tokens=EXPERT_MAX_TOKENS,
+            response_format=_resp_format("spoken_answer",
+                                         _EXPERT_SPOKEN_SCHEMA),
+            messages=[{"role": "system", "content": EXPERT_SYSTEM_SPOKEN},
+                      {"role": "user", "content": query}],
+            user=USER_ID,
+        )
+        v = json.loads(_content(resp))
+        return {**v, "latency_s": time.time() - t0, "error": None,
+                **_usage(resp)}
+    except Exception as e:
+        return {"final_answer": None, "concise_explanation": None,
+                "spoken_answer": None, "latency_s": time.time() - t0,
+                "error": str(e), "prompt_tokens": None,
+                "completion_tokens": None}
+
+
 async def ask_expert_many(queries: list[str], concurrency: int = 3,
                           effort: str = EXPERT_EFFORT,
                           cache_dir: str | None = None) -> list[dict]:
