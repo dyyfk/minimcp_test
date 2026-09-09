@@ -7368,3 +7368,38 @@ No model inference, rejudging, or replacement of numerical results was
 performed in this edit, and the new runs' IDs and artifact hashes were not
 independently checked here. This correction concerns gate-training overlap
 with evaluation questions; it makes no claim about base-model pretraining.
+
+---
+
+## 8dc — cross-modal transfer figure: contribution 2 finally drawn (2026-09-09)
+
+The paper claimed text→audio L22 transfer .855 with no figure showing
+WHERE cross-modal readability emerges or that it survives real speech.
+New `fig:xmodal-transfer` (scripts/57_xmodal_transfer_fig.py →
+figures/xmodal_transfer.{png,pdf}), two panels, no new experiments —
+pure retrieval of 6a/6b/6d/7b per-layer artifacts:
+
+- **Left (matched-query modality transfer, 6a/6b/6d):** per-layer
+  text→audio failure AUC vs relative depth, all four models, pulled
+  from gate-data `audio_xmodal_{minicpm-o45,minicpm-o26,
+  qwen2.5-omni-7b,freeze-omni}-audio.json` (now also in local data/).
+  o4.5 plateau .82–.87 (L22 deployed .855), o2.6 .74–.80 (onset ~46%
+  depth), qwen2.5-omni .80–.83 (onset ~25%), Freeze-Omni flat
+  .52–.60 — the shared mid-layer core is built by end-to-end training,
+  absent on the frozen backbone.
+- **Right (query-disjoint + real speech, 7b):** sdqa_report only
+  PRINTED its per-layer table (never wrote a JSON) — reran
+  `modal run modal_audio.py::sdqa_report` ($0, CPU) and persisted
+  data/sdqa_layer_transfer.json (36 layers × {tx→sdqaTX, au→sdqaAU,
+  tx→sdqaAU}). Deploy recipe tx→sdqa-audio: L22 .760, peak .800 @L25,
+  declining to .714 @L35 — matches the 7b log verbatim.
+- **Scope discipline (user call):** the .855 is MATCHED-QUERY modality
+  transfer; the right panel is the query-disjoint eval — caption and
+  §xmodal text keep the two claims separate, no conflation.
+
+Paper: readout_results.tex §xmodal rewritten around the figure
+(onset depths per model, Freeze-Omni negative, matched-query vs
+query-disjoint distinction, app:signal pointer kept); rebuilt via
+`modal run _build_pdf.py::build` — fig lands as Figure 4 p.6, clean.
+Colors follow the 40_lopo_layer_matrix.py model→color convention;
+palette CVD-validated. Spend ≈ $0.

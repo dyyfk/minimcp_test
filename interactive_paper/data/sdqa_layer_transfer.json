@@ -1,0 +1,222 @@
+{
+ "source": "modal_audio.py::sdqa_report rerun 2026-09-09 (Phase 7b data)",
+ "note": "frozen-pool calib probes -> SD-QA (200 real human recordings, VoiceBench sd-qa USA); query-disjoint AND cross-modal",
+ "curves": [
+  {
+   "layer": 0,
+   "tx2sdqa_text": 0.685,
+   "au2sdqa_audio": 0.48,
+   "tx2sdqa_audio": 0.545
+  },
+  {
+   "layer": 1,
+   "tx2sdqa_text": 0.649,
+   "au2sdqa_audio": 0.515,
+   "tx2sdqa_audio": 0.565
+  },
+  {
+   "layer": 2,
+   "tx2sdqa_text": 0.648,
+   "au2sdqa_audio": 0.515,
+   "tx2sdqa_audio": 0.583
+  },
+  {
+   "layer": 3,
+   "tx2sdqa_text": 0.67,
+   "au2sdqa_audio": 0.506,
+   "tx2sdqa_audio": 0.609
+  },
+  {
+   "layer": 4,
+   "tx2sdqa_text": 0.679,
+   "au2sdqa_audio": 0.442,
+   "tx2sdqa_audio": 0.534
+  },
+  {
+   "layer": 5,
+   "tx2sdqa_text": 0.664,
+   "au2sdqa_audio": 0.434,
+   "tx2sdqa_audio": 0.487
+  },
+  {
+   "layer": 6,
+   "tx2sdqa_text": 0.672,
+   "au2sdqa_audio": 0.426,
+   "tx2sdqa_audio": 0.499
+  },
+  {
+   "layer": 7,
+   "tx2sdqa_text": 0.659,
+   "au2sdqa_audio": 0.418,
+   "tx2sdqa_audio": 0.502
+  },
+  {
+   "layer": 8,
+   "tx2sdqa_text": 0.686,
+   "au2sdqa_audio": 0.424,
+   "tx2sdqa_audio": 0.462
+  },
+  {
+   "layer": 9,
+   "tx2sdqa_text": 0.707,
+   "au2sdqa_audio": 0.459,
+   "tx2sdqa_audio": 0.483
+  },
+  {
+   "layer": 10,
+   "tx2sdqa_text": 0.721,
+   "au2sdqa_audio": 0.488,
+   "tx2sdqa_audio": 0.502
+  },
+  {
+   "layer": 11,
+   "tx2sdqa_text": 0.723,
+   "au2sdqa_audio": 0.509,
+   "tx2sdqa_audio": 0.549
+  },
+  {
+   "layer": 12,
+   "tx2sdqa_text": 0.724,
+   "au2sdqa_audio": 0.561,
+   "tx2sdqa_audio": 0.618
+  },
+  {
+   "layer": 13,
+   "tx2sdqa_text": 0.725,
+   "au2sdqa_audio": 0.584,
+   "tx2sdqa_audio": 0.621
+  },
+  {
+   "layer": 14,
+   "tx2sdqa_text": 0.729,
+   "au2sdqa_audio": 0.551,
+   "tx2sdqa_audio": 0.637
+  },
+  {
+   "layer": 15,
+   "tx2sdqa_text": 0.701,
+   "au2sdqa_audio": 0.558,
+   "tx2sdqa_audio": 0.651
+  },
+  {
+   "layer": 16,
+   "tx2sdqa_text": 0.739,
+   "au2sdqa_audio": 0.596,
+   "tx2sdqa_audio": 0.64
+  },
+  {
+   "layer": 17,
+   "tx2sdqa_text": 0.76,
+   "au2sdqa_audio": 0.628,
+   "tx2sdqa_audio": 0.706
+  },
+  {
+   "layer": 18,
+   "tx2sdqa_text": 0.768,
+   "au2sdqa_audio": 0.657,
+   "tx2sdqa_audio": 0.741
+  },
+  {
+   "layer": 19,
+   "tx2sdqa_text": 0.771,
+   "au2sdqa_audio": 0.665,
+   "tx2sdqa_audio": 0.756
+  },
+  {
+   "layer": 20,
+   "tx2sdqa_text": 0.788,
+   "au2sdqa_audio": 0.651,
+   "tx2sdqa_audio": 0.744
+  },
+  {
+   "layer": 21,
+   "tx2sdqa_text": 0.795,
+   "au2sdqa_audio": 0.652,
+   "tx2sdqa_audio": 0.717
+  },
+  {
+   "layer": 22,
+   "tx2sdqa_text": 0.794,
+   "au2sdqa_audio": 0.679,
+   "tx2sdqa_audio": 0.76
+  },
+  {
+   "layer": 23,
+   "tx2sdqa_text": 0.777,
+   "au2sdqa_audio": 0.719,
+   "tx2sdqa_audio": 0.794
+  },
+  {
+   "layer": 24,
+   "tx2sdqa_text": 0.787,
+   "au2sdqa_audio": 0.727,
+   "tx2sdqa_audio": 0.793
+  },
+  {
+   "layer": 25,
+   "tx2sdqa_text": 0.802,
+   "au2sdqa_audio": 0.741,
+   "tx2sdqa_audio": 0.8
+  },
+  {
+   "layer": 26,
+   "tx2sdqa_text": 0.798,
+   "au2sdqa_audio": 0.721,
+   "tx2sdqa_audio": 0.794
+  },
+  {
+   "layer": 27,
+   "tx2sdqa_text": 0.784,
+   "au2sdqa_audio": 0.745,
+   "tx2sdqa_audio": 0.781
+  },
+  {
+   "layer": 28,
+   "tx2sdqa_text": 0.775,
+   "au2sdqa_audio": 0.75,
+   "tx2sdqa_audio": 0.751
+  },
+  {
+   "layer": 29,
+   "tx2sdqa_text": 0.767,
+   "au2sdqa_audio": 0.754,
+   "tx2sdqa_audio": 0.728
+  },
+  {
+   "layer": 30,
+   "tx2sdqa_text": 0.783,
+   "au2sdqa_audio": 0.75,
+   "tx2sdqa_audio": 0.734
+  },
+  {
+   "layer": 31,
+   "tx2sdqa_text": 0.767,
+   "au2sdqa_audio": 0.759,
+   "tx2sdqa_audio": 0.724
+  },
+  {
+   "layer": 32,
+   "tx2sdqa_text": 0.793,
+   "au2sdqa_audio": 0.748,
+   "tx2sdqa_audio": 0.73
+  },
+  {
+   "layer": 33,
+   "tx2sdqa_text": 0.802,
+   "au2sdqa_audio": 0.753,
+   "tx2sdqa_audio": 0.717
+  },
+  {
+   "layer": 34,
+   "tx2sdqa_text": 0.8,
+   "au2sdqa_audio": 0.765,
+   "tx2sdqa_audio": 0.714
+  },
+  {
+   "layer": 35,
+   "tx2sdqa_text": 0.788,
+   "au2sdqa_audio": 0.737,
+   "tx2sdqa_audio": 0.714
+  }
+ ]
+}
