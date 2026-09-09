@@ -22,16 +22,17 @@ audio cases; this agreement is not a validation of speech delivery.
 
 Three calibration regimes must be distinguished: 360 examples for
 single-position representation probes; 2,310 for the earlier
-turn-based three-position gate; and 5,228 for the native gate, refitted
+turn-based three-position gate; and 5,221 for the native gate, refitted
 on native features and judged native-answer outcomes. The native fit
-contains 4,986 core and 242 fresh training rows; thresholds use
+contains 4,979 core and 242 fresh training rows; thresholds use
 five-fold out-of-fold scores from the core rows, grouped by language.
 Conservative, balanced, and aggressive target nominal calibration
 rates of 15/30/50\%; realized rates on new pools can differ.
 Neither fresh-row scores nor external evaluation-pool quantiles enter
-these thresholds. Seven fitting rows overlap external questions.
-A 5,221-row deduplicated artifact is available, but was not used in
-the recorded benchmark; its reported offline effects are small
+these thresholds. Seven rows overlapping external questions were
+removed from the calibration set before refitting the gate and
+recomputing its thresholds. All native-benchmark results reported here
+come from reruns with this deduplicated fit
 (Appendix~\ref{app:current-protocol}).
 
 \paragraph{Native benchmark protocol and metrics.}

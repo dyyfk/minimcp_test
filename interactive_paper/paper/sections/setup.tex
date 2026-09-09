@@ -13,11 +13,12 @@ escalation expert, on the fixed 240-query internal test set and four
 external English speech-QA pools: Speech TriviaQA, Speech Web Questions,
 and Speech Llama Questions from OpenAudioBench \citep{openaudiobench2025},
 and SD-QA from VoiceBench \citep{faisal2021sdqa,chen2024voicebench}.
-The native probe is fitted on 5,228 calibration rows; per-language
-thresholds use core out-of-fold scores and stay fixed across pools.
-Seven calibration rows overlap external questions; the recorded arms
-use the original fit. Calibration details, model controls, and the
-overlap audit are in Appendix~\ref{app:current-protocol}.
+The native probe is fitted on 5,221 calibration rows after excluding
+benchmark overlaps. All reported native-benchmark results were rerun
+with this refitted probe; per-language thresholds use the remaining
+core rows' out-of-fold scores and stay fixed across pools.
+Calibration details and model controls are in
+Appendix~\ref{app:current-protocol}.
 
 Each query has one sampled native session per arm: local-only,
 conservative, balanced, aggressive, and always-escalate.

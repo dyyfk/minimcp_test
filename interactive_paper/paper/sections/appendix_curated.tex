@@ -14,18 +14,19 @@ diagnostics are separate from the main-table macro average.
 
 \paragraph{Calibration.}
 Representation analyses use a fixed 360-query calibration split and
-single-position 4,096-dimensional features. The native gate uses 5,228
+single-position 4,096-dimensional features. The native gate uses 5,221
 rows with native-answer labels and three L22 summaries: the last tail
 state, the tail mean, and the input mean. The logistic head uses
 $C=3\times10^{-4}$. Five-fold stratified cross-validation uses seed 42;
-thresholds are language-specific 15/30/50\% quantiles of the 4,986 core
+thresholds are language-specific 15/30/50\% quantiles of the 4,979 core
 rows' out-of-fold scores. The 242 fresh rows enter fitting but not the
 quantile base. Exported scores reproduce thresholds to four decimals.
-The seven-row overlap exclusion changes the reported held-out AUCs by
-at most 0.002 and offline accuracy remixes by less than 0.5 point.
-These checks concern a separate refit; the recorded arms use the original
-gate and retain those overlaps. Layer selection used internal LOPO
-results without nested selection within each held-out pool.
+The overlap audit identified seven calibration rows matching external
+questions. These rows were excluded from both fitting and threshold
+calibration, and the native benchmark was rerun with the resulting gate.
+All reported native-benchmark results use this deduplicated fit.
+Layer selection used internal LOPO results without nested selection
+within each held-out pool.
 
 \paragraph{Scoring and timing.}
 Each arm contains one native-protocol session per query. Answer-content

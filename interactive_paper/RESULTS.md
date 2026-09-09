@@ -7341,3 +7341,30 @@ call whether to re-hook them). Files: scripts/56_native_feature_ablation.py,
 figures/native_feature_ablation.{json,png,pdf},
 figures/paper_pdf_redraw.py (fig_native_ablation),
 paper/figures/native_feature_ablation.{png,pdf}.
+
+## Current-paper overlap remediation status (2026-09-09; author confirmation)
+
+The author confirmed that the seven calibration rows overlapping external
+evaluation questions were removed, the experiments were rerun, and the
+current reported data use the cleaned training set. This supersedes the
+current-paper status in the historical 8bz, 8cb, and 8cv entries that the
+deduplicated gate was only an offline candidate and that the reported
+native arms still used the overlapping fit. Those entries remain a record
+of the earlier experimental state.
+
+The committed `data/leak_exclude.json` lists exactly seven IDs:
+`x0054`, `x0113`, `x0114`, `x0137`, `x0173`, `y0205`, and `z0601`.
+`data/gate_native_noleak.json` records `train_n=5221` and the same exclusion
+list. The calibration manifest places all seven excluded rows in the core
+fit/quantile set, leaving 4,979 core rows and 242 fresh training rows.
+The paper's setup and curated appendix now describe removal, refitting,
+and rerunning, instead of presenting an unresolved seven-row overlap or
+using the earlier sensitivity analysis as a substitute for remediation.
+
+Evidence boundary for this documentation update: rerun completion and the
+current data's provenance are author-confirmed; the exclusion list, total
+fit count, and core/fresh counts were checked in committed artifacts.
+No model inference, rejudging, or replacement of numerical results was
+performed in this edit, and the new runs' IDs and artifact hashes were not
+independently checked here. This correction concerns gate-training overlap
+with evaluation questions; it makes no claim about base-model pretraining.
