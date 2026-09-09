@@ -68,11 +68,11 @@ def load(pool, tier, relay=None):
     # the end of the audio in native duplex, so this can be small or 0
     on = (df["onset_chunk"].fillna(df["n_chunks"]) + 1 - df["n_chunks"]).clip(lower=0)
     esc = df["mode"] == "escalated"
-    # relay cost: steering relay = talker generation wall; TTS relay =
-    # synth wall + the spoken audio itself
+    # relay cost to first audio: steering relay = talker generation wall;
+    # TTS relay = synth wall only (the spoken audio's own duration is
+    # playback, not latency)
     if "relay_synth_ms" in df.columns:
-        relay_s = (df["relay_synth_ms"].fillna(0) / 1000
-                   + df["relay_audio_s"].fillna(0))
+        relay_s = df["relay_synth_ms"].fillna(0) / 1000
     else:
         relay_s = df["relay_ms"].fillna(0) / 1000
     df["t_s"] = np.where(
@@ -184,7 +184,7 @@ for pool, spec in SPEC.items():
         p = pts[a]
         ax.plot(p["t50"], p["acc"], "o", ms=8, color=BLUE, mfc=(BLUE if p["kind"] == "live" else "white"), mew=2, zorder=4)
         ax.annotate(a, (p["t50"], p["acc"]), textcoords="offset points", xytext=(6, -12), fontsize=9, color=BLUE)
-    ax.set_xlabel("P50 time from end of user speech to answer complete (s)")
+    ax.set_xlabel("P50 time from end of user speech to first audio (s)")
     ax.set_ylabel(ylab)
     ax.set_title(f"{spec['title']} — latency vs accuracy (native full duplex)", fontsize=9.5, loc="left")
     fig.tight_layout()

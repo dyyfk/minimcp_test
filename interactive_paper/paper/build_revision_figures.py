@@ -47,14 +47,20 @@ def load_rows(data_dir, pool, arm, col):
             df[key] = pd.to_numeric(df[key], errors='raise').astype(float)
     esc = df['mode'].eq('escalated')
     on = (df['onset_chunk'].fillna(df['n_chunks']) + 1 - df['n_chunks']).clip(lower=0)
-    relay = df['relay_synth_ms'].fillna(0) / 1000 + df['relay_audio_s'].fillna(0) if 'relay_synth_ms' in df else df['relay_ms'].fillna(0) / 1000
-    df['timing_diagnostic_s'] = np.where(esc, on + df['stall_ms'].fillna(0) / 1000 + df['wait_chunks'].fillna(0) + relay, on + df['answer_ms'].fillna(0) / 1000)
+    # Time to first audio (TTFA). Escalated: the relay waveform is ready to
+    # play once the blocking TTS call returns (relay_synth_ms); the waveform's
+    # own duration (relay_audio_s) is playback, not latency, and is reported
+    # separately. Local: the talker's answer text is complete (answer_ms is
+    # timed from onset), an upper bound on its first audio.
+    synth = df['relay_synth_ms'].fillna(0) / 1000 if 'relay_synth_ms' in df else df['relay_ms'].fillna(0) / 1000
+    df['timing_diagnostic_s'] = np.where(esc, on + df['stall_ms'].fillna(0) / 1000 + df['wait_chunks'].fillna(0) + synth, on + df['answer_ms'].fillna(0) / 1000)
     assert not df['timing_diagnostic_s'].isna().any(), name
     v = df['timing_diagnostic_s']
     stats = {'n': len(df), 'accuracy': float(df[col].astype(float).mean()),
              'rate': float(esc.mean()), 'mean_s': float(v.mean()),
              'p50_s': float(v.quantile(.5)), 'p95_s': float(v.quantile(.95)),
              'p99_s': float(v.quantile(.99)),
+             'relay_playback_mean_s': float(df.loc[esc, 'relay_audio_s'].fillna(0).mean()) if esc.any() and 'relay_audio_s' in df else 0.0,
              'early_onset_n': int((df['onset_chunk'] < df['n_chunks'] - 1).sum()),
              'early_escalation_n': int(((df['onset_chunk'] < df['n_chunks'] - 1) & esc).sum()),
              'source': 'interactive_paper/data/native_bench/' + name,
@@ -93,7 +99,7 @@ def generate(data_dir):
            'runs_per_query_arm': 1,
            'random_reference': 'original Table 1: (1-r)*local_accuracy + r*always_accuracy, where r is the gate rate; always-policy endpoint treated as 100%',
            'sensitivity_reference': 'actual-rate normalization uses lambda=r/realized_always_rate; retained separately',
-           'timing_status': 'reconstruction; local text completion and expert relay duration have different endpoints',
+           'timing_status': 'reconstructed time to first audio (TTFA): escalated = onset + stall + wait_chunks + relay TTS synthesis; local = onset + answer text complete. Relay playback duration (relay_audio_s) is excluded and reported as relay_playback_mean_s',
            'pools': summary}
     (out / 'native_summary.json').write_text(json.dumps(doc, indent=2) + '\n')
     write_rate_table(summary)
@@ -134,8 +140,8 @@ def draw_pairs(s):
         for key,lab,color,ls,marker in [('mean_s','Mean',BLUE,'-','o'),('p50_s','P50',GREY,'--','s'),('p95_s','P95',ORANGE,':','^')]:
             tx.plot(range(5),[p[a][key] for a in ARMS],label=lab,color=color,ls=ls,lw=1.4,marker=marker,ms=4)
         tx.set_yscale('log');tx.set_ylim(1,350);tx.set_yticks([1,3,10,30,100,300]);tx.set_yticklabels(['1','3','10','30','100','300']);tx.minorticks_off()
-        tx.set_xticks(range(5));tx.set_xticklabels(['L','C','B','A','W']);tx.set_xlim(-.15,4.15);tx.set_ylabel('Reconstructed time (s)')
-        tx.set_title('Timing diagnostic',loc='left',fontsize=9.2,pad=5)
+        tx.set_xticks(range(5));tx.set_xticklabels(['L','C','B','A','W']);tx.set_xlim(-.15,4.15);tx.set_ylabel('Time to first audio (s)')
+        tx.set_title('Time to first audio',loc='left',fontsize=9.2,pad=5)
         if i==0: tx.legend(frameon=False,fontsize=7.5,loc='upper left',ncol=3,handlelength=1.2,columnspacing=.7)
         if i==2: ax.set_xlabel('Realized expert call rate (%)');tx.set_xlabel('Recorded arm')
     fig.subplots_adjust(left=.09,right=.985,top=.95,bottom=.075)

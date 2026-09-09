@@ -25,9 +25,13 @@ attributing the accuracy gap to truncation or changing the test
 mixture (Appendix~\ref{app:internal-strata}).
 
 The timing diagnostic makes the cost visible
-(Figure~\ref{fig:dualview}). Internal mean time increases from 5.7\,s
-locally to 15.3\,s at balanced and 27.3\,s at aggressive; aggressive
-P95 is 103.2\,s. The always arm averages 45.1\,s. A lower call rate
+(Figure~\ref{fig:dualview}). Internal mean time to first audio
+increases from 5.7\,s locally to 8.7\,s at balanced and 14.4\,s at
+aggressive; aggressive P95 is 60.8\,s. The always arm averages
+17.6\,s (P50 11.5\,s). The expert call itself accounts for 6.0\,s of
+that mean; the rest is the blocking, non-streaming synthesis of the
+expert text, whose tail is driven by code and markup voiced verbatim
+(Appendix~\ref{app:current-protocol}). A lower call rate
 can reduce expert-path exposure, but these tails do not support
 calling the current aggressive setting low latency. An earlier
 cached-outcome sweep suggested nominal 15/25/40\% as candidates;
@@ -53,10 +57,11 @@ proven upper bound on every routed or spoken answer.
   convention (\S\ref{sec:evalproto}). The horizontal
   always-arm reference passes through the measured always point;
   it is not an oracle bound. Right: mean, P50, and P95 of the reconstructed
-  timing diagnostic on a log scale. L/W denote local/always. Each point
+  time to first audio on a log scale. L/W denote local/always. Each point
   uses the original recorded pass, with one run per query and arm;
-  no repeated-run uncertainty is implied. The timing paths have
-  different output endpoints (\S\ref{sec:evalproto}). All five external
+  no repeated-run uncertainty is implied. Local rows end at answer-text
+  completion and escalated rows when the relay waveform is synthesized;
+  playback duration is excluded (\S\ref{sec:evalproto}). All five external
   QA pools, including the weaker cases, appear in the upper block of
   Table~\ref{tab:transfer}.}
   \label{fig:dualview}

@@ -72,8 +72,10 @@ as the full-escalation endpoint; it is an analytical mixture, not a
 separately run randomized arm. Non-commits and a sensitivity check
 using the actual always-arm rate are reported in
 Appendix~\ref{app:current-protocol}.
-Timing is reconstructed from chunk offsets and logged stage durations.
-The relay path includes synthesis and audio duration; the local path
-ends at text generation. Figure~\ref{fig:dualview} reports mean, P50,
-and P95 of this asymmetric diagnostic, not a shared audio-ready or
-audible-completion measurement (Appendix~\ref{app:current-protocol}).
+Timing is reconstructed from chunk offsets and logged stage durations
+as time to first audio: the relay path ends when its synthesized
+waveform is ready (expert wait plus blocking TTS), excluding the
+waveform's playback duration; the local path ends at text generation.
+Figure~\ref{fig:dualview} reports mean, P50, and P95 of this
+diagnostic, not a client-audible completion measurement
+(Appendix~\ref{app:current-protocol}).

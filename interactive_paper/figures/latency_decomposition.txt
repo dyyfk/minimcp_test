@@ -1,0 +1,35 @@
+
+== never        n=240 esc=0.0%
+   paper        mean=   5.7 P50=   3.6 P95=  17.3 P99=  21.2
+   first_audio  mean=   5.7 P50=   3.6 P95=  17.3 P99=  21.2
+   text_ready   mean=   5.7 P50=   3.6 P95=  17.3 P99=  21.2
+
+== conservative n=240 esc=8.3%
+   paper        mean=  12.0 P50=   4.3 P95=  22.3 P99= 192.3
+   first_audio  mean=   7.6 P50=   4.2 P95=  17.5 P99=  80.2
+   text_ready   mean=   5.7 P50=   4.2 P95=  15.2 P99=  21.2
+   escalated-row component means (s): onset=0.15, stall=0.55, wait_chunks=12.65, expert_api=13.66, relay_synth=21.97, relay_audio_dur=53.2
+   share of paper total: onset=0%, stall=1%, wait_chunks=14%, relay_synth=25%, relay_audio_dur=60%
+
+== balanced     n=240 esc=25.0%
+   paper        mean=  15.3 P50=   5.6 P95=  39.9 P99= 290.2
+   first_audio  mean=   8.7 P50=   5.3 P95=  22.9 P99=  89.6
+   text_ready   mean=   6.0 P50=   4.9 P95=  15.2 P99=  22.8
+   escalated-row component means (s): onset=0.32, stall=0.24, wait_chunks=9.92, expert_api=11.07, relay_synth=10.55, relay_audio_dur=26.45
+   share of paper total: onset=1%, stall=0%, wait_chunks=21%, relay_synth=22%, relay_audio_dur=56%
+
+== aggressive   n=240 esc=51.7%
+   paper        mean=  27.3 P50=  10.9 P95= 103.2 P99= 402.9
+   first_audio  mean=  14.4 P50=   8.0 P95=  60.8 P99= 130.5
+   text_ready   mean=   8.3 P50=   5.8 P95=  21.3 P99=  59.1
+   escalated-row component means (s): onset=0.33, stall=0.21, wait_chunks=10.51, expert_api=11.55, relay_synth=11.8, relay_audio_dur=24.96
+   share of paper total: onset=1%, stall=0%, wait_chunks=22%, relay_synth=25%, relay_audio_dur=52%
+
+== always       n=240 esc=99.2%
+   paper        mean=  45.1 P50=  20.8 P95= 210.1 P99= 370.2
+   first_audio  mean=  17.6 P50=  11.5 P95=  69.4 P99= 116.7
+   text_ready   mean=   5.8 P50=   4.1 P95=  14.1 P99=  20.8
+   escalated-row component means (s): onset=0.4, stall=0.19, wait_chunks=5.25, expert_api=6.05, relay_synth=11.9, relay_audio_dur=27.76
+   share of paper total: onset=1%, stall=0%, wait_chunks=12%, relay_synth=26%, relay_audio_dur=61%
+
+wrote /home/user/minimcp_test/interactive_paper/figures/latency_decomposition.json
