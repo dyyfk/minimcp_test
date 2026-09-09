@@ -1,20 +1,28 @@
 \begin{abstract}
-A speech model's decision to speak does not establish that it can answer
-correctly. We study whether its frozen hidden states expose a useful
-signal for selective escalation to a stronger expert. On MiniCPM-o~4.5,
-a final-layer, last-token failure probe inverts on held-out math queries
-with text input (AUC 0.372), whereas the same read at layer 22 reaches
-0.931. A text-calibrated mid-layer probe also transfers to speech-input
-states (AUC 0.855). We use this read location in a separately calibrated
-answer-onset gate and evaluate its decisions in the model's native
-listen/speak protocol. On 240 internal test queries, answer-content
-accuracy increases from 40.8\% to 62.9\% at 51.7\% escalation, exceeding
-the reported random-mixture reference by 6.8 points. Across five
-external speech-QA pools, the aggressive tier improves macro accuracy
-from 59.4\% to 80.9\%, versus 75.2\% for the reference. Reconstructed
-timing diagnostics expose substantial expert-path costs; these experiments
-do not establish an end-to-end conversational latency benefit. The
-results support mid-layer competence readout as a routing signal and
-identify the timing, calibration, and relay constraints that must be
-resolved for real-time use.
+A local speech model can keep a conversation going, and a stronger
+expert can take over the hard questions. Calling the expert on every
+turn adds cost and waiting time, so the local model needs an early
+estimate of whether its own answer will fail. Hidden-state probes give
+such estimates for text models. It is not known whether this signal
+survives speech and duplex fine-tuning, audio input, and the timing of
+a native listen/speak protocol. We study these questions on frozen
+MiniCPM-o~4.5. We fit linear failure probes on stored hidden states,
+audit them across layers, token positions, and input modalities, and
+evaluate a separately calibrated answer-onset gate in the model's
+native protocol. The read location matters: with text input, a
+final-layer, last-token probe inverts on held-out math queries
+(AUC 0.372), and the same read at layer 22 reaches 0.931. A
+text-calibrated layer-22 probe also transfers to speech-input states
+(AUC 0.855). In native sessions on 240 internal test queries, the gate
+raises answer-content accuracy from 40.8\% to 62.9\% at a 51.7\%
+escalation rate, 6.8 points above the reported random-mixture
+reference. On five external speech-QA pools, the aggressive tier
+raises macro accuracy from 59.4\% to 80.9\%, against 75.2\% for the
+reference. The cost is time: on the internal set, mean reconstructed time to
+first audio rises from 5.7\,s locally to 14.4\,s at the aggressive
+tier, with a P95 of 60.8\,s, so these results do not show an
+end-to-end latency benefit. The findings
+support mid-layer competence readout as a routing signal for speech
+models and identify the timing, calibration, and relay constraints
+that real-time use still has to resolve.
 \end{abstract}

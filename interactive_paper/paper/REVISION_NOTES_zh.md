@@ -1,5 +1,12 @@
 # 论文修订说明（2026-09-08）
 
+## 2026-09-09：摘要与 Introduction 重写
+
+- 摘要按 Background → Gap → Objective → Methods → Key Results → Contribution 重排；Introduction 按 Research Context → What We Already Know → What Remains Unknown → Why This Gap Matters → What This Study Does 组织，并区分已有文献结论、合理推断与本文贡献。
+- 全部数字沿用正文与 `../RESULTS.md` 的现有值（0.372 / 0.931 / 0.855；40.8% → 62.9%，51.7%，+6.8 pp；59.4% → 80.9% vs 75.2%；time to first audio 5.7 s → 14.4 s，P95 60.8 s），未新增实验或数据。
+- 句间过渡改用基础连接词，去掉空泛表述；Figure 1 / teaser 原图与图注整块保留。
+- 本次会话的网络策略拦截 TeX 包下载，未能重新编译 `main.pdf`；合并前请在本地或 Overleaf 用 `tectonic main.tex` 重新编译并核对主文仍为 8 页（原版第 8 页仅约 6 行正文，预计可容纳新增篇幅）。
+
 这版是在删除 human-eval 后的版本上做的文字与图表修订，未启动新的 GPU / API 实验。原始内部测试集、实验回答与评测标签均未改动；图 3 左上角采用下述明确标注的事后重配，Table 1 仍保留原分布。
 
 ## 2026-09-08：已确认的图 3 样式
