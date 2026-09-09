@@ -1,10 +1,10 @@
 {
-  "scope": "Current Table 1 NVDA block versus archived three-layer v2 branch in remix_eval3.json; not independent inference or rejudging.",
+  "scope": "Current Table 1 NVDA block. External columns reproduce the archived three-layer v2 branch in remix_eval3.json. Internal independently judges same-run pass-3 answers and uses the test-excluded fit in internal_pass3_remix.json.",
   "rows": [
     {
       "row": "local",
       "printed": [
-        null,
+        19.6,
         35.8,
         37.6,
         70.8,
@@ -14,7 +14,7 @@
         null
       ],
       "calculated": [
-        null,
+        19.583333333333332,
         35.77235772357724,
         37.6,
         70.81545064377683,
@@ -28,7 +28,7 @@
     {
       "row": "gate@0.15",
       "printed": [
-        null,
+        31.7,
         48.4,
         48.8,
         80.7,
@@ -38,7 +38,7 @@
         11.2
       ],
       "calculated": [
-        null,
+        31.666666666666664,
         48.3739837398374,
         48.8,
         80.68669527896995,
@@ -52,7 +52,7 @@
     {
       "row": "gate@0.3",
       "printed": [
-        null,
+        44.6,
         61.0,
         59.2,
         85.8,
@@ -62,7 +62,7 @@
         21.2
       ],
       "calculated": [
-        null,
+        44.583333333333336,
         60.97560975609756,
         59.199999999999996,
         85.83690987124464,
@@ -76,7 +76,7 @@
     {
       "row": "gate@0.5",
       "printed": [
-        null,
+        60.4,
         76.8,
         69.6,
         89.7,
@@ -86,7 +86,7 @@
         31.9
       ],
       "calculated": [
-        null,
+        60.416666666666664,
         76.82926829268293,
         69.6,
         89.69957081545064,
@@ -100,7 +100,7 @@
     {
       "row": "random@0.5",
       "printed": [
-        null,
+        53.5,
         65.7,
         60.2,
         82.0,
@@ -110,7 +110,7 @@
         23.2
       ],
       "calculated": [
-        null,
+        53.48467862481315,
         65.65040650406505,
         60.199999999999996,
         81.97424892703862,
@@ -124,7 +124,7 @@
     {
       "row": "expert",
       "printed": [
-        null,
+        91.7,
         95.5,
         82.8,
         93.1,
@@ -134,7 +134,7 @@
         46.3
       ],
       "calculated": [
-        null,
+        91.66666666666666,
         95.52845528455285,
         82.8,
         93.13304721030042,
