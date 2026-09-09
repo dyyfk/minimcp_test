@@ -1,39 +1,22 @@
 \section{Discussion and Limitations}
 \label{sec:discussion}
-The strongest finding is representational: a mid-layer read remains
-predictive under conditions where the conventional final-layer,
-last-token probe fails. This behavior is specific to the tested
-checkpoints and input conditions. The fitted readout can guide
-escalation without updating the speech model, but the native result
-requires in-regime audio features and labels; it is not a zero-shot
-deployment of the text-calibrated probe.
+The central finding is that a mid-layer read remains predictive in tested
+conditions where a final-layer, last-token probe fails. This read location
+also supports selective expert calls without updating the speech model.
 
-Failure prediction is also only one part of useful handoff. The
-expert must repair the selected failures, and the serving path must
-preserve its answer within an acceptable wait. The current results
-show answer-content gains alongside long time-to-first-audio tails.
-The native capture can already contain generated text. In the main
-recorded protocol, the expert's
-30-second input window admits unconsumed audio at early onset and
-truncates longer questions; text-based judging does not establish
-what listeners receive. The subsequent v2 validation preserves the
-consumed prefix and scores transcribed output audio
-(Appendix~\ref{app:revision-diagnostics}); a full streaming evaluation
-still needs substantive speech onset and completion measured on a
-common clock. Floor-management and interruption checks in the
-appendix remain small scripted studies, without human ratings or
-broad multi-turn validation.
+Three boundaries define the scope of the results. First, coverage is
+limited to the tested checkpoints and predominantly single-turn speech QA.
+Broader conversational tasks, including multi-turn dialogue and expert
+continuity, remain to be evaluated. Second, native serving requires
+in-regime audio features and answer labels to fit the readout and set
+thresholds; representation transfer alone does not provide a zero-shot gate.
+Third, the benchmark measures answer-content accuracy and reconstructed
+serving time. Its long expert-path tails do not establish a latency benefit;
+human-rated speech quality and common-clock measurements of audible
+responses would better capture the listener's experience.
 
-The internal mixture and its test split remain fixed. The main
-comparison covers four English QA pools; Mandarin results remain
-in the appendix and are excluded from the main macro average. Known calibration overlaps are disclosed; the
-small offline effect of removing them does not make the recorded
-benchmark overlap-free. Base-model pretraining contamination is
-unresolved. Layer selection is not nested within every LOPO fold,
-LLM judges have residual error, and the main table's single pass does
-not quantify run-to-run reliability; later internal repeats provide
-a limited diagnostic (Appendix~\ref{app:revision-diagnostics}).
-The next evaluation should lock
-a deduplicated calibration manifest and validation-selected
-thresholds before evaluation on fresh, audited benchmarks.
+These results motivate competence-aware handoff as a useful addition to a
+speech model's floor control. Appendix~\ref{app:current-protocol} records
+the calibration, scoring, and input protocol needed to interpret the
+benchmark.
 \label{sec:main-end}
