@@ -1,33 +1,42 @@
 \section{Introduction}
 \label{sec:intro}
-Spoken interaction places a tight deadline on response selection
-\citep{stivers2009universals}. A local speech model can maintain the
-conversation, while a stronger expert handles difficult questions.
-Calling the expert on every turn increases cost and waiting time;
-selective escalation instead requires an early estimate of whether the
-local answer will fail. A duplex model already decides when to speak,
-but this floor-management decision need not reveal whether it knows
-the answer.
+Spoken interaction leaves little time to choose a response
+\citep{stivers2009universals}. One practical design pairs a local
+speech model, which keeps the conversation going, with a stronger
+expert that handles the hard questions. Calling the expert on every
+turn adds cost and waiting time. Selective escalation needs something
+else: an early estimate of whether the local answer will fail, made
+before that answer is produced.
 
-Hidden-state probes and self-evaluation can estimate correctness in
-text models \citep{kadavath2022language,azaria2023internal,kossen2024semantic},
-and text routers allocate queries between models
-\citep{ong2024routellm,varshney2026llmrouter}. Applying these ideas to
-speech introduces three questions. Does a readout distinguish failures
-on unseen query pools? Does it survive the move from text to audio
-input? And where in the streaming protocol is the state actually
-available? High in-distribution AUC or a fast offline probe alone does
-not answer these questions.
+Prior work gives two starting points. For text models, hidden-state
+probes and verbal self-evaluation can predict whether an answer is
+correct \citep{kadavath2022language,azaria2023internal,kossen2024semantic},
+and intermediate layers can carry information that the output does
+not show \citep{orgad2024llms}. Text routers use such signals to
+divide queries between models of different cost
+\citep{chen2023frugalgpt,ong2024routellm,varshney2026llmrouter}.
+For speech, native duplex models decide for themselves when to listen
+and when to speak \citep{defossez2024moshi,openbmb2026minicpmo}.
 
-We investigate them on frozen MiniCPM-o~4.5
-\citep{openbmb2026minicpmo}, with raw-backbone and speech-model controls.
-The representational result is input- and position-specific: on text
-input, a final-layer, last-token probe falls below chance on held-out
-math, while a mid-layer probe remains predictive. The final-layer
-failure does not generalize to audio-calibrated, audio-input probes.
-The practical motivation for the middle layer is therefore robustness
-across the tested conditions, rather than a universal absence of
-competence information at the output.
+Three things remain unknown. First, it is not known whether a failure
+probe still works when the query pool changes; a high in-distribution
+AUC can come from pool identity rather than from competence. Second,
+it is not known whether a probe fit on text input still reads
+speech-input states after speech and duplex fine-tuning. Third, it is
+not known where in a streaming protocol the hidden state is actually
+available for a routing decision. A duplex model already decides when
+to speak, but this floor-management decision need not reveal whether
+it knows the answer. It is reasonable to expect that some competence
+information survives fine-tuning, because the backbone carried it
+before. The layer, position, and modality at which it can be read
+have not been measured on a duplex speech model.
+
+This gap matters in practice. A gate placed at the wrong layer can
+look good on its calibration pool and then invert on a new one, so
+the expert is called on the wrong turns. A probe that fails on audio
+input cannot be used in a speech system at all. And a read that only
+becomes available after the answer is generated removes the early
+decision that motivated escalation in the first place.
 
 \begin{figure}[t]
   \centering
@@ -44,16 +53,22 @@ competence information at the output.
   \label{fig:hero}
 \end{figure}
 
-Our contributions are threefold. First, a layer and position audit
-shows that LOPO math AUC increases from 0.372 at the final layer to
-0.931 at layer 22; matched controls constrain, but do not identify, the
-cause of the late-layer degradation. Second, a text-calibrated
-mid-layer probe transfers to speech-input states at AUC 0.855,
-separating representation transfer from the additional calibration
-needed for native serving. Third, a native-protocol benchmark shows
-that a separately fitted answer-onset gate selects useful expert
-calls: it improves internal answer-content accuracy by 22.1 points
-and exceeds the reported random-mixture reference by 6.8 points at the
-aggressive tier. We report accuracy together with the recorded timing
-costs and distinguish this benchmark from a causal streaming evaluation
-of audible responses.
+We study these questions on frozen MiniCPM-o~4.5
+\citep{openbmb2026minicpmo}, with raw-backbone and other speech-model
+controls. Our contributions are three. First, a layer and position
+audit shows that text-input LOPO math AUC increases from 0.372 at the
+final layer to 0.931 at layer 22. With audio calibration and audio
+input, the final-layer probe does not show this failure, so we use
+the middle layer for its robustness across the tested conditions, not
+because the output layer never holds competence information. Matched
+controls link the late-layer degradation to the tested fine-tuned
+checkpoints but do not identify its cause. Second, a text-calibrated
+layer-22 probe transfers to speech-input states at AUC 0.855; we
+separate this representation transfer from the extra calibration that
+native serving needs. Third, a native-protocol benchmark shows that a
+separately fitted answer-onset gate selects useful expert calls. It
+raises internal answer-content accuracy by 22.1 points and exceeds
+the reported random-mixture reference by 6.8 points at the aggressive
+tier. We report accuracy together with reconstructed time to first
+audio, and we distinguish this benchmark from a causal streaming
+evaluation of audible responses.
