@@ -3,27 +3,32 @@
 
 \subsection{The local--expert loop}
 \label{sec:system}
-Our system pairs a local full-duplex speech model with a stronger
-external expert (Figure~\ref{fig:hero}). The local model processes
-incoming speech and decides when to respond. At that transition,
-the system chooses whether to continue with the local answer or
-request expert help. On the expert path, an audio uplink transcribes
-the question, the expert returns a text answer, and the local
-talker voices the prepared relay text. The expert request and relay
-add cost and waiting time. Our goal is to improve answer accuracy
-under a limited expert-call budget by selecting questions that
-benefit from expert help. We use local-answer failure risk to guide
-this selection; the benefit still depends on whether the expert
-repairs the error and the relay preserves its answer.
+Selective model routing balances response quality against the cost
+of a stronger model \citep{ong2024routellm}. This suits our goal:
+improve answer accuracy under a limited expert-call budget. We adapt
+the routing decision to a local full-duplex speech model's transition
+from listening to speaking (Figure~\ref{fig:hero}). The local model
+processes incoming speech and decides when to respond; the gate then
+chooses whether to continue locally or request expert help. On the
+expert path, an audio uplink transcribes the question, the expert
+returns a text answer, and the local talker voices the prepared relay
+text. The request and relay add cost and waiting time. We use
+local-answer failure risk as a proxy for the value of escalation:
+benefit still depends on whether the expert repairs the error and
+the relay preserves its answer.
 
 \subsection{A probe for the handoff decision}
 \label{sec:probe}
-The local model already computes hidden states as it processes the
-question. If these states carry information about its ability to
-answer, a small classifier can read that signal without generating
-a separate self-evaluation. We use a linear \emph{probe} to test
-whether the existing representations contain a directly readable
-failure signal.
+Linear \emph{probes} test what information a classifier can read from
+frozen representations \citep{alain2017understanding}. Hidden-state
+classifiers have estimated statement truthfulness
+\citep{azaria2023internal} and pre-generation task success
+\citep{lugoloobi2026failures}. We use this approach to ask whether a
+speech model's existing states contain a directly readable failure
+signal. Reusing these states avoids generating a separate
+self-evaluation and leaves the speech model unchanged. The linear
+restriction makes this a test of accessible information; poor
+performance does not rule out information requiring a nonlinear readout.
 
 Offline, we collect local answers to calibration questions and use
 a judge to assign correctness labels. Each label is paired with
@@ -38,7 +43,8 @@ $x$, the fitted weights $w,b$ give the risk score
 At inference, the probe reads the current features without a
 reference answer or an online judge. Scores above a
 language-specific threshold $\tau_{\ell}$ favor escalation;
-thresholds are set from calibration scores and held fixed during
-evaluation (\S\ref{sec:models}). An auxiliary dialogue-act head
+thresholds select nominal expert-call budgets from calibration scores
+and stay fixed during evaluation (\S\ref{sec:models}). Realized call
+rates can change when the query distribution shifts. An auxiliary dialogue-act head
 restricts escalation to information requests, filtering turns such
 as acknowledgments and stop commands (Appendix~\ref{app:actgate}).

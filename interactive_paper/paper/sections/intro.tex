@@ -6,7 +6,7 @@ speech model, which keeps the conversation going, with a stronger
 expert that handles the hard questions. Calling the expert on every
 turn adds cost and waiting time. Selective escalation needs something
 else: an early estimate of whether the local answer will fail, made
-before that answer is produced.
+at the onset of a response.
 
 Prior work gives two starting points. For text models, hidden-state
 probes and verbal self-evaluation can predict whether an answer is
@@ -44,8 +44,9 @@ decision that motivated escalation in the first place.
   \caption{\textbf{The deployed system.} \textbf{(1)} Speech streams in
   1\,s chunks into a full-duplex local model that decides for itself
   when to speak. \textbf{(2)} At that speak commit, a mid-network (L22)
-  linear read scores the turn in $\sim$30\,ms, before the answer is
-  produced. \textbf{(3)} Lower-risk turns stay local; higher-risk turns
+  linear read scores the turn in $\sim$30\,ms at answer onset; the
+  triggering call may already return the first text unit.
+  \textbf{(3)} Lower-risk turns stay local; higher-risk turns
   are sent to a cloud expert while the talker stalls. \textbf{(4)} The
   returned answer is spoken verbatim in the talker's own voice.
   Delivered accuracy on the internal test set rises from 40.8\% to
@@ -62,8 +63,16 @@ input, the final-layer probe does not show this failure, so we use
 the middle layer for its robustness across the tested conditions, not
 because the output layer never holds competence information. Matched
 controls link the late-layer degradation to the tested fine-tuned
-checkpoints but do not identify its cause. Second, a text-calibrated
-layer-22 probe transfers to speech-input states at AUC 0.855; we
+checkpoints but do not identify its cause. At native answer onset, a
+matched $2\times2$ layer-by-readout ablation separates depth from
+aggregation: combining three positions raises L22 mean AUC from
+0.595 to 0.695, while its single-state read trails the final layer
+(Figure~\ref{fig:native-ablation}). Second, a text-calibrated L22
+probe transfers to speech-input states at AUC 0.855 on matched TTS
+queries and 0.760 on 200 query-disjoint human recordings
+(Figure~\ref{fig:xmodal-transfer}). Cross-model comparisons extend
+the modality-transfer pattern to MiniCPM-o~2.6 and Qwen2.5-Omni, with
+weaker transfer in the frozen-backbone Freeze-Omni control. We
 separate this representation transfer from the extra calibration that
 native serving needs. Third, a native-protocol benchmark shows that a
 separately fitted answer-onset gate selects useful expert calls. It

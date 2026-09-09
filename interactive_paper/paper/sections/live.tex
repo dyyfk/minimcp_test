@@ -1,6 +1,32 @@
 \input{sections/readout_results}
 \input{sections/revision_table}
 
+\begin{figure}[!t]
+  \centering
+  \includegraphics[width=\linewidth]{revision_accuracy_latency}
+  \caption{\textbf{Accuracy gains and timing costs on three pools.}
+  Left: answer-content accuracy against expert call rate. The Internal
+  curve uses post-hoc weights of 0.25 for knowledge and math and 1 for
+  other categories, for both accuracy and call rate; all 240 queries
+  remain included. The Internal column of Table~\ref{tab:transfer}
+  retains its original query weights. External curves are unweighted.
+  C/B/A denote conservative/balanced/aggressive. The dashed
+  line uses the original Table~\ref{tab:transfer} random-mixture
+  convention (\S\ref{sec:evalproto}). The horizontal
+  always-arm reference passes through the measured always point;
+  it is not an oracle bound. Right: mean and P50 of the reconstructed
+  time to first audio on a log scale, using the original query mixture.
+  L/W denote local/always. Each point
+  uses the original recorded pass, with one run per query and arm;
+  no repeated-run uncertainty is implied. Local rows end at answer-text
+  completion and escalated rows when the relay waveform is synthesized;
+  playback duration is excluded (\S\ref{sec:evalproto}). Internal P95/P99
+  are reported in Table~\ref{tab:latency}. All four external
+  QA pools appear in the upper block of
+  Table~\ref{tab:transfer}.}
+  \label{fig:dualview}
+\end{figure}
+
 \subsection{Internal accuracy and timing cost}
 \label{sec:live}
 \label{sec:liveloop}
@@ -33,29 +59,3 @@ expert text, whose tail is driven by code and markup voiced verbatim
 (Appendix~\ref{app:current-protocol}). A lower call rate
 can reduce expert-path exposure, but these tails do not support
 calling the current aggressive setting low latency.
-
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=\linewidth]{revision_accuracy_latency}
-  \caption{\textbf{Accuracy gains and timing costs on three pools.}
-  Left: answer-content accuracy against expert call rate. The Internal
-  curve uses post-hoc weights of 0.25 for knowledge and math and 1 for
-  other categories, for both accuracy and call rate; all 240 queries
-  remain included. The Internal column of Table~\ref{tab:transfer}
-  retains its original query weights. External curves are unweighted.
-  C/B/A denote conservative/balanced/aggressive. The dashed
-  line uses the original Table~\ref{tab:transfer} random-mixture
-  convention (\S\ref{sec:evalproto}). The horizontal
-  always-arm reference passes through the measured always point;
-  it is not an oracle bound. Right: mean and P50 of the reconstructed
-  time to first audio on a log scale, using the original query mixture.
-  L/W denote local/always. Each point
-  uses the original recorded pass, with one run per query and arm;
-  no repeated-run uncertainty is implied. Local rows end at answer-text
-  completion and escalated rows when the relay waveform is synthesized;
-  playback duration is excluded (\S\ref{sec:evalproto}). Internal P95/P99
-  are reported in Table~\ref{tab:latency}. All four external
-  QA pools appear in the upper block of
-  Table~\ref{tab:transfer}.}
-  \label{fig:dualview}
-\end{figure}

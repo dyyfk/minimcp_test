@@ -17,7 +17,6 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 sys.path.insert(0, "src")
-from gate import Probe
 
 VOL = "figures/_voldata"
 OUT = ["figures", "paper/figures"]
@@ -93,6 +92,7 @@ def _b(x):
 
 
 def _load_test():
+    from gate import Probe
     cfg = json.load(open("data/gate_config.json"))
     probe = Probe.from_config(cfg)
     df = pd.read_parquet(f"{VOL}/calib_features.parquet")
@@ -425,71 +425,10 @@ def fig_nvda_remix():
     save(fig, "nvda_remix")
 
 
-# ------------------------------------------- native feature ablation (8cw)
+# ------------------------------------------- native feature ablation (8db)
 def fig_native_ablation():
-    """2x2 layer x readout ablation at the native audio commit point
-    (figures/native_feature_ablation.json, scripts/56)."""
-    d = json.load(open("figures/native_feature_ablation.json"))
-    POOLS5 = ["striviaqa", "swebq", "sllama", "sdqa", "sreason"]
-    CELLS = [("L22", "last"), ("L22", "agg"), ("L35", "last"),
-             ("L35", "agg")]
-    xs = [0.0, 0.38, 1.0, 1.38]
-    cols = {"last": C2, "agg": C1}
-    dep = d["deployed_gate_L22_agg"]
-
-    fig, (ax, bx) = plt.subplots(1, 2, figsize=(8.6, 3.7))
-    for x, (L, view) in zip(xs, CELLS):
-        c = d[f"{L}_{view}"]
-        au = c["auc"]["ext5_mean"]
-        ax.bar(x, au - 0.5, 0.34, bottom=0.5, color=cols[view], zorder=3)
-        ax.text(x - 0.055, au + 0.007, f".{round(au * 1000):03d}",
-                ha="center", fontsize=11.5, color=INK)
-        ax.scatter([x + 0.10] * 5, [c["auc"][p] for p in POOLS5], s=24,
-                   facecolor="white", edgecolor=MUT, lw=1.1, zorder=4)
-        dp = c["delta_pts"]["pooled"]
-        bx.bar(x, dp, 0.34, color=cols[view], zorder=3)
-        bx.text(x - 0.055, dp + 0.25, f"+{dp:.1f}", ha="center",
-                fontsize=11.5, color=INK)
-        bx.scatter([x + 0.10] * 5, [c["delta_pts"][p] for p in POOLS5],
-                   s=24, facecolor="white", edgecolor=MUT, lw=1.1,
-                   zorder=4)
-    bx.text(xs[0], -1.05, "$p$=.05", ha="center", fontsize=10.5,
-            color=MUT)
-
-    ax.axhline(0.5, color=MUT, lw=1.2, ls=(0, (3, 2)))
-    ax.text(-0.31, 0.489, "chance", color=MUT, fontsize=11, va="top")
-    ax.axhline(dep["auc"]["ext5_mean"], color=INK, lw=1.1,
-               ls=(0, (1, 2)))
-    ax.text(-0.31, dep["auc"]["ext5_mean"] + 0.006,
-            "deployed gate (full calibration)", color=INK, fontsize=10.5)
-    ax.set_ylim(0.45, 0.80)
-    ax.set_ylabel("failure AUC (ext-5 LOPO)")
-    ax.set_title("ranking", fontsize=14)
-
-    bx.axhline(0, color=MUT, lw=1.2, ls=(0, (3, 2)))
-    bx.text(1.72, -0.4, "random", color=MUT, fontsize=11, ha="right",
-            va="top")
-    bx.axhline(dep["delta_pts"]["pooled"], color=INK, lw=1.1,
-               ls=(0, (1, 2)))
-    bx.text(-0.31, dep["delta_pts"]["pooled"] + 0.18, "deployed gate",
-            color=INK, fontsize=10.5)
-    bx.set_ylim(-4.6, 7.2)
-    bx.set_ylabel("acc. over random @30% budget (pts)")
-    bx.set_title("routing", fontsize=14)
-
-    for a in (ax, bx):
-        a.set_xticks([0.19, 1.19])
-        a.set_xticklabels(["L22\n(mid, deployed)", "L35\n(final)"],
-                          fontsize=12.5)
-        a.set_xlim(-0.35, 1.73)
-        a.tick_params(axis="x", length=0)
-    from matplotlib.patches import Patch
-    from matplotlib.lines import Line2D
-    handles = [Patch(color=C2, label="last-token read (4,096-d)"),
-               Patch(color=C1, label="3-position aggregate (12,288-d)"),
-               Line2D([], [], marker="o", ls="", markerfacecolor="white",
-                      markeredgecolor=MUT, label="per-pool")]
-    fig.legend(handles=handles, loc="lower center", ncol=3, fontsize=12,
-               frameon=False, bbox_to_anchor=(0.5, 1.0))
-    fig.tight_layout()
-    save(fig, "native_feature_ablation")
+    """Build the focused main figure and named appendix diagnostics."""
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "paper"))
+    from build_native_ablation import build
+    build()

@@ -29,37 +29,26 @@ With audio calibration and audio input, the final-layer probe reaches
 conditions; the mechanism behind the text-input degradation remains
 open (Appendix~\ref{app:mech}).
 
-The text-input cliff does not carry over to the deployed read point
-unchanged. A layer $\times$ readout ablation at the native audio
-commit moment, with all four cells recomputed on one
-official-configuration batch under identical training pools, labels,
-splits, and head recipe, separates depth from position aggregation
-(Figure~\ref{fig:native-ablation}). With a single last-token read the
-mid layer has no advantage (0.595 at L22 vs.\ 0.654 at the final
-layer, external-pool LOPO); the three-position aggregation recovers
-the signal ($+$0.10 AUC at L22, $+$0.01 at L35), and the mid-layer
-edge exists only for the aggregated read (0.695 vs.\ 0.662). At a
-matched 30\% escalation budget every cell except single-token L22
-clears random routing by $+$2.8 to $+$3.5 accuracy points,
-differences within the replication floor. The mid-layer advantage is
-therefore specific to the text input condition; at the native commit
-point the position aggregation carries the read, with a residual
-mid-depth ranking edge.
+At native answer onset, we separate the effect of layer from the
+effect of combining positions. All four readouts use one audio batch
+with identical training pools, labels, splits, and head recipe
+(Figure~\ref{fig:native-ablation}). At L22, aggregation raises mean
+failure-prediction AUC from 0.595 to 0.695; at the final layer, the
+change is smaller (0.654 to 0.662). The single-state L22 read has no
+advantage over the final layer. Thus, the evidence supports using
+aggregation with L22, rather than attributing the native signal to
+middle-layer selection alone. Named per-pool results and cached
+routing gains are reported in Appendix~\ref{app:native-ablation}.
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=\linewidth]{native_feature_ablation}
-  \caption{\textbf{At the native commit point, position aggregation
-  carries the read.} Layer $\times$ readout ablation, all four cells
-  recomputed on one official-configuration batch (five external
-  pools, LOPO; circles: held-out pools; dotted reference: the
-  deployed gate, trained on the full calibration merge). Left:
-  failure AUC. Right: accuracy over matched-random escalation at a
-  30\% budget. The text-input mid-layer advantage
-  (Figure~\ref{fig:layersweep}) does not transfer to the audio commit
-  read: single-token depth is flat-to-reversed, and the
-  three-position aggregation restores the signal at L22 ($+$0.10 AUC)
-  while adding almost nothing at the final layer.}
+  \includegraphics[width=0.9\linewidth]{native_feature_ablation}
+  \caption{\textbf{Aggregation improves failure prediction at L22.}
+  Mean AUC across five external pools under leave-one-pool-out
+  evaluation on one native audio batch. Gray bars read the latest
+  tail state; blue bars concatenate that state with the tail mean
+  and input mean (\S\ref{sec:readlocation}). Arrows show the AUC
+  change from aggregation; chance is 0.5.}
   \label{fig:native-ablation}
 \end{figure}
 

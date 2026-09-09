@@ -102,3 +102,20 @@ coordinates and unchanged main-table hash. The earlier
 `section4_consistency_audit.json` is a historical unweighted snapshot.
 Experimental setup details and replay qualifications remain in
 `sections/setup_details.tex`.
+
+## Native ablation figure (2026-09-09)
+
+`python build_native_ablation.py` redraws the four matched AUCs in
+`figures/native_feature_ablation.{pdf,png}`, the appendix routing figure
+`figures/native_ablation_routing.{pdf,png}`, and the named per-pool table
+`sections/native_ablation_values.tex`. The source is the unchanged recorded
+summary `../figures/native_feature_ablation.json` from the 8db analysis.
+The builder prints its SHA-256 and validates the equal-pool AUC averages;
+it does not refit probes, rejudge answers, or run model inference.
+
+The main plot omits the unlabeled per-pool dots and the separately trained
+deployed-gate reference. Their values remain in the appendix table and text.
+Routing gains use cached outcomes at a 30% budget; their pooled averages
+must not be relabeled as equal-pool means. The legacy
+`paper_pdf_redraw.fig_native_ablation()` entry point delegates to this
+builder, which also updates the matching assets in `../figures/`.

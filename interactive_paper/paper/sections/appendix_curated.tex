@@ -162,6 +162,48 @@ probe's advantage is therefore not explained by query wording or source
 identity alone. On audio labels the surface router improves to 0.814 but
 still trails the L22 probe at 0.879.
 
+\subsection{Native feature ablation}
+\label{app:native-ablation}
+
+Figure~\ref{fig:native-ablation} uses one native audio batch
+(\texttt{agg0}, official configuration), with all layer features captured
+in the same sessions and judged against their own generated answers.
+Single-state and aggregated features have 4,096 and 12,288 dimensions,
+respectively. Each readout fits a logistic head ($C=3\times10^{-4}$) on
+four pools and evaluates the fifth. The five pools include Mandarin reasoning;
+this set differs from the main table's four English external pools.
+Table~\ref{tab:native-ablation-values} identifies the individual pool
+results that underlie the averages, including the weaker reasoning scores.
+
+The routing comparison selects the highest-risk 30\% of questions in
+each pool and combines recorded local outcomes with cached always-arm
+expert outcomes. Figure~\ref{fig:native-ablation-routing} reports pooled
+accuracy gains over 2,000 matched random allocations. Per-pool gains in
+Table~\ref{tab:native-ablation-values} use the analytical 30\% random
+mixture. These are cached outcome comparisons, not new live gate sessions.
+For the L22 single-state read, 0.0505 of the random allocations matched or
+exceeded the observed accuracy; none did for the other three readouts.
+These comparisons test against random routing, not differences between
+the readouts.
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.9\linewidth]{native_ablation_routing}
+  \caption{\textbf{Cached routing gains at a matched 30\% budget.}
+  Accuracy gains over random escalation, pooled across the same five
+  evaluation sets as Figure~\ref{fig:native-ablation}. Each bar uses
+  the recorded local and expert outcomes; feature choices and colors
+  match the main figure.}
+  \label{fig:native-ablation-routing}
+\end{figure}
+
+\input{sections/native_ablation_values}
+
+For context, the separately trained deployed gate reaches mean AUC
+0.750 and a pooled gain of 4.80 percentage points on these rows. It was
+fitted on the full calibration merge, so it is not a matched training
+condition for the four LOPO ablations and is excluded from their plots.
+
 \section{Second duplex family}
 \label{app:nvda}
 

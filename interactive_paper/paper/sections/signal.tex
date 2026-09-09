@@ -1,22 +1,28 @@
 \subsection{Where should the probe read?}
 \label{sec:readlocation}
-The probe needs a place to read the model's internal state.
-The final-layer state is a natural starting point because it feeds
-the output head, but its ability to predict failure may change with
-the query distribution and input modality. Reading an earlier
-layer or pooling several token positions may provide a more
-transferable signal. Timing matters as well: a signal that requires
-a completed answer arrives too late to guide the initial handoff.
-We therefore examine layer, position, and read time together, asking
-where a useful failure signal is available early in the response
-(\S\ref{sec:duplex}--\ref{sec:xmodal}; Appendix~\ref{app:readtime}).
+Adapting the probe to duplex speech requires choosing its layer,
+position, and read time. The final layer feeds the output head, but
+this does not ensure that its failure signal survives a change in
+query distribution or input modality. We select L22 based on its
+robustness in the text-input layer audit and representation-transfer
+tests (\S\ref{sec:duplex}--\ref{sec:xmodal}); those results alone do
+not establish the best readout for native audio serving.
 
-The native system uses L22 and concatenates the latest tail state,
-the mean of the tail states, and the mean input state. It reads them
-when the generation call first returns a listen-to-speak transition.
-This call can already contain the first generated text unit, so we
-call the decision point \emph{answer onset}. Waiting for further
-answer chunks may reveal additional failure information, but delays
-the handoff. The native probe is fitted on features and answer
-labels collected in this serving regime; its calibration is
-separate from the representation-transfer study.
+The native feature vector concatenates the latest L22 tail state,
+the mean of the tail states, and the mean input state, allowing the
+probe to combine the current boundary state with pooled context.
+The separate native layer-by-readout ablation
+(Figure~\ref{fig:native-ablation}) supports aggregation at L22;
+it does not show a mid-layer advantage for a single-token read.
+
+We read these features when the generation call first returns a
+listen-to-speak transition. This makes the gate available at the
+local model's response boundary without waiting for a completed
+answer. The call can already contain the first generated text unit,
+so we call the decision point \emph{answer onset}. Further answer
+chunks may expose additional failure information, at the cost of a
+later handoff (Appendix~\ref{app:readtime}). We fit the native probe
+and thresholds on features and answer labels from this serving regime
+to match its audio input and generation behavior. This calibration
+is separate from the representation-transfer study, which alone
+does not provide a zero-shot native gate.
