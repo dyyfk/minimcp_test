@@ -1,0 +1,82 @@
+{
+  "protocol": {
+    "probe": "pass-3 layer-average L26/L30/L34; commit|onset_last|onset_mean8|run_mean",
+    "fit": "2,258 committed calibration rows; all internal test IDs excluded",
+    "local_outcome": "gpt-5.4-mini judgment of the same pass-3 answer",
+    "expert_outcome": "frozen eval_expert.parquet::expert_adequate",
+    "budget": "top nominal fraction of 223 scoreable rows",
+    "no_onset_policy": "17 rows remain local and cannot escalate",
+    "n_total": 240,
+    "n_scoreable": 223,
+    "n_no_onset": 17
+  },
+  "scoreable_auc_fresh_labels": 0.8761548064918852,
+  "pass2_to_fresh_label_flips_on_scoreable": 11,
+  "rows": {
+    "always-local": {
+      "accuracy": 0.19583333333333333,
+      "call_rate": 0.0
+    },
+    "gate@0.15": {
+      "accuracy": 0.31666666666666665,
+      "call_rate": 0.1375,
+      "n_escalated": 33,
+      "matched_random": 0.29572122571001497,
+      "permutation_p_random_ge_gate": 0.0184
+    },
+    "gate@0.3": {
+      "accuracy": 0.44583333333333336,
+      "call_rate": 0.2791666666666667,
+      "n_escalated": 67,
+      "matched_random": 0.39863602391629294,
+      "permutation_p_random_ge_gate": 0.0001
+    },
+    "gate@0.5": {
+      "accuracy": 0.6041666666666666,
+      "call_rate": 0.4666666666666667,
+      "n_escalated": 112,
+      "matched_random": 0.5348467862481315,
+      "permutation_p_random_ge_gate": 0.0
+    },
+    "matched-random@0.5": {
+      "accuracy": 0.5348467862481315,
+      "call_rate": 0.4666666666666667
+    },
+    "always-expert": {
+      "accuracy": 0.9166666666666666,
+      "call_rate": 1.0
+    }
+  },
+  "by_pool": {
+    "easy-chat": {
+      "n": 60,
+      "local": 0.23333333333333334,
+      "expert": 0.95,
+      "scoreable": 60
+    },
+    "easy-fact": {
+      "n": 40,
+      "local": 0.3,
+      "expert": 0.95,
+      "scoreable": 40
+    },
+    "hard-knowledge": {
+      "n": 60,
+      "local": 0.16666666666666666,
+      "expert": 0.8666666666666667,
+      "scoreable": 43
+    },
+    "hard-math": {
+      "n": 60,
+      "local": 0.18333333333333332,
+      "expert": 1.0,
+      "scoreable": 60
+    },
+    "trap": {
+      "n": 20,
+      "local": 0.0,
+      "expert": 0.65,
+      "scoreable": 20
+    }
+  }
+}

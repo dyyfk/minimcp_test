@@ -54,7 +54,7 @@
 | MATH-500 来源 | Lightman Appendix C 明确从 MATH test 留出 500 题，与引用关系一致。 |
 | 内部 600 题、360/240 split | 已读取实际 `queries.jsonl` 核对来源、数量、split，见机器可读复核记录。 |
 | 主表 MiniCPM 上半部 | 已从 Git 读取 35 份逐题 parquet，对文件 SHA、各臂 ID 集合、计分样本数、正确率、升级率、专家文本分数复算；再对主表七行及均值/增量核对，全部一致（35/35 哈希一致、35/35 ID 检查通过、数值差异 0）。 |
-| 主表 NVDA 下半部 | 与 `remix_eval3.json` 的三层 v2 分支及 AlpacaEval 汇总对照；主表六行及均值/增量全部一致。这是归档汇总一致性核查，未重新推理或独立重判。 |
+| 主表 NVDA 下半部 | 外部四列与 `remix_eval3.json` 的三层 v2 分支及 AlpacaEval 汇总对照；六行及均值/增量全部一致。Internal 列使用已有 pass-3 replay 的同次回答重新调用 gpt-5.4-mini 判分，并用排除全部 test ID 的 2,258-row probe fit 复算；240 题全部进入 accuracy 分母，17 题无 answer-onset read、保持 local。此次没有重新做 GPU inference。 |
 | FreshQA fast-/never-changing | 原文分类存在；本论文 a priori 升级标签是额外策略标签，不能当成原数据的模型失败标注。 |
 
 ### D1：FDB 的模型成绩有运行报告，但尚未逐样本复算

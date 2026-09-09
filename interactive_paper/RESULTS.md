@@ -7166,3 +7166,31 @@ are NOT formatter-fixable (candidate-1 territory or judge variance).
 striviaqa retention .112 = alias-list metric artifact (raw expert
 same). NOTE: review_sources/internal_improvement_audit_2026-09-08.json
 referenced by the task sheet does not exist in this repo.
+
+## 8cz — NVDA pass-3 same-run internal evaluation (OpenAI judge only, 2026-09-08)
+Filled the missing Internal column of Table 1 from the completed pass-3
+native-frame replay. The local outcome is a new gpt-5.4-mini judgment of
+the exact pass-3 answer, rather than the older cached answer used by the
+external re-mix. The three-layer L26/L30/L34 probe reads
+commit/onset-last/onset-mean8/running-user-mean states. Its fit uses
+2,258 committed calibration rows and excludes every frozen test ID.
+
+All 240 internal test queries remain in the accuracy denominator. The
+223 queries with a valid answer-onset read are ranked; the other 17
+cannot escalate and remain local. Nominal scoreable-query budgets of
+15/30/50% therefore escalate 33/67/112 queries and realize
+13.8/27.9/46.7% overall. Accuracy is 19.6% always-local, 31.7/44.6/60.4%
+at the three tiers, 53.5% for scoreability-matched random at the aggressive tier,
+and 91.7% always-expert. The aggressive gate exceeds matched random by
+6.9 points; none of 10,000 random subsets matched it ($p<10^{-4}$).
+At 15/30%, the corresponding permutation $p$-values are .0184/.0001. Scoreable-query
+AUC is .876. Eleven of 223 labels differ from the pass-2 labels, while
+the table cells move by at most 0.4 points from the older cached-label
+sensitivity calculation.
+
+This is a post-selection diagnostic, not an untouched holdout:
+L26/L30/L34 and the four-block architecture were selected in analyses
+that included the internal split. Reproduction artifacts:
+`judge_nvda_internal.py`,
+`data/gate_pull/new/probe_doc/internal_pass3_judged.json`,
+`remix_eval3_internal.py`, and `internal_pass3_remix.json`.

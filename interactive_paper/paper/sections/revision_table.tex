@@ -14,9 +14,16 @@ always-escalate arms at each pool's realized rate. avg and $\Delta$
 live block and four in the NVDA block. The relay-free bound scores the
 expert's returned text directly. The
 bottom block evaluates our latest three-layer
-NemotronLabs-VoiceChat-11B probe by re-mixing cached local and expert
+NemotronLabs-VoiceChat-11B probe by re-mixing local and cached expert
 outcomes after replay through its native frame protocol
-(Appendix~\ref{app:nvda}). AlpacaEval, reported separately on its
+(Appendix~\ref{app:nvda}). External columns retain cached local outcomes
+and the prior 2,481-row fit. The Internal column judges the same pass-3
+answers on all 240 queries and uses a 2,258-row refit that excludes
+these test IDs (with cached pass-2 training labels). All policies leave
+the 17 queries without an answer-onset read local, so the 15/30/50\%
+scoreable-query budgets realize 14/28/47\% overall. This Internal result
+is post-selection because probe architecture selection included this
+split. AlpacaEval, reported separately on its
 1--5 scale, changes from 3.68 to 4.01 at 44\% escalation on MiniCPM
 (matched random 3.91; always-escalate 4.20 against 4.95 for the
 expert text, a spoken-length cap); the pass-3 NVDA ranking changes
@@ -36,12 +43,12 @@ always-escalate (measured) & 70.4 & 96.0 & 79.6 & 91.6 & 87.0 & 83.7 & 87.6 & +2
 expert text as returned (relay-free bound) & 76.5 & 96.4 & 82.3 & 93.2 & 88.5 & 86.1 & 89.3 & +29.9 \\
 \midrule
 \multicolumn{9}{l}{\emph{NVDA three-layer answer-onset probe (pass-3 native-frame replay)}} \\
-always-local          & --- & 35.8 & 37.6 & 70.8 & 31.0 & --- & 43.8 & --- \\
-\;+ gate @15\%        & --- & 48.4 & 48.8 & 80.7 & 42.0 & --- & 55.0 & +11.2 \\
-\;+ gate @30\%        & --- & 61.0 & 59.2 & 85.8 & 54.0 & --- & 65.0 & +21.2 \\
-\;+ gate @50\%        & --- & 76.8 & 69.6 & 89.7 & 66.5 & --- & 75.7 & +31.9 \\
-\;matched random @50\% & --- & 65.7 & 60.2 & 82.0 & 60.0 & --- & 67.0 & +23.2 \\
-always-expert (ceiling) & --- & 95.5 & 82.8 & 93.1 & 89.0 & --- & 90.1 & +46.3 \\
+always-local          & 19.6 & 35.8 & 37.6 & 70.8 & 31.0 & --- & 43.8 & --- \\
+\;+ gate @15\%        & 31.7 & 48.4 & 48.8 & 80.7 & 42.0 & --- & 55.0 & +11.2 \\
+\;+ gate @30\%        & 44.6 & 61.0 & 59.2 & 85.8 & 54.0 & --- & 65.0 & +21.2 \\
+\;+ gate @50\%        & 60.4 & 76.8 & 69.6 & 89.7 & 66.5 & --- & 75.7 & +31.9 \\
+\;matched random @50\% & 53.5 & 65.7 & 60.2 & 82.0 & 60.0 & --- & 67.0 & +23.2 \\
+always-expert (ceiling) & 91.7 & 95.5 & 82.8 & 93.1 & 89.0 & --- & 90.1 & +46.3 \\
 \bottomrule
 \end{tabular}
 \end{table}
