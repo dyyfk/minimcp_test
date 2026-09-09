@@ -7,3 +7,6 @@ __pycache__/
 # large activation dumps — re-fetch from the gate-data Modal volume
 interactive_paper/data/layers/layers_*.npz
 interactive_paper/data/layers/cues_*.npz
+
+# LaTeX build log (pdflatex/tectonic); aux/bbl/out stay tracked with main.pdf
+interactive_paper/paper/main.log
