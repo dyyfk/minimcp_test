@@ -7194,3 +7194,43 @@ that included the internal split. Reproduction artifacts:
 `judge_nvda_internal.py`,
 `data/gate_pull/new/probe_doc/internal_pass3_judged.json`,
 `remix_eval3_internal.py`, and `internal_pass3_remix.json`.
+
+## 8da — timing diagnostic switched to time to first audio; always arm 45.1 → 17.6 s ($0, 2026-09-09)
+
+The always-escalate 45.1 s in Table tab:latency / Figure fig:dualview was
+not expert latency. `paper/build_revision_figures.py::load_rows` summed
+`onset + stall + wait_chunks + relay_synth_ms + relay_audio_s` for escalated
+rows. `relay_audio_s` is the *duration of the synthesized relay waveform*
+(playback, 61% of the always-arm total) and `relay_synth_ms` is the blocking
+non-streaming teacher-forced TTS call (26%); the expert API itself is 6.0 s
+mean / 4.6 s P50 (`expert_latency_s`), and `wait_chunks` already counts that
+wait (corr .96–.99). Local rows stopped at text completion, so the two paths
+were not comparable. Decomposition script:
+`figures/latency_decomposition.py` → `latency_decomposition.{txt,json}`.
+
+New definition (TTFA): escalated = onset + stall + wait_chunks + relay_synth;
+local = onset + answer_ms (unchanged; upper bound on local first audio).
+Playback duration is reported separately as a `play` column. Internal
+(n=240/arm):
+
+| tier | esc | mean | P50 | P95 | P99 | play (mean, esc rows) |
+|---|---|---|---|---|---|---|
+| never | 0% | 5.7 | 3.6 | 17.3 | 21.2 | — |
+| conservative | 8% | 7.6 | 4.2 | 17.5 | 80.2 | 53.2 |
+| balanced | 25% | 8.7 | 5.3 | 22.9 | 89.6 | 26.4 |
+| aggressive | 52% | 14.4 | 8.0 | 60.8 | 131 | 25.0 |
+| always | 99.2% | 17.6 | 11.5 | 69.4 | 117 | 27.8 |
+
+(old: 5.7 / 12.0 / 15.3 / 27.3 / 45.1 mean; P50 3.6 / 4.3 / 5.6 / 10.9 / 20.8.)
+The remaining tail is TTS on code/LaTeX/markdown voiced verbatim: 64/238
+always rows contain such symbols and average 59.6 s of audio vs 16.0 s for
+the rest (worst: a UK-phone regex answer → 341 s of audio, 132 s synth).
+That is a relay-formatter bug (`clean_expert` should strip code/markup or
+route such answers through the steer relay), separate from the gate.
+
+Regenerated: `paper/revision_data/native_summary.json`,
+`academic_figure_values.json`, `paper/figures/revision_accuracy_latency.*`,
+`figures/native_*_{dualview,pareto}.png` (+ paper copies,
+`native_bench_summary.json`). Paper text: Table tab:latency, timing
+reconstruction paragraph, §live, §setup, fig captions. `main.pdf` rebuilt with
+pdfLaTeX + BibTeX (tectonic's bundle host is unreachable from the sandbox).

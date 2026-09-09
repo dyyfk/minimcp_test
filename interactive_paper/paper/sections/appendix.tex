@@ -89,23 +89,30 @@ approximately 3.9, on a scale separate from binary QA accuracy.
 Let $o_i=\max(0,c_i+1-n_i)$ be the chunk offset relative to question
 end, where $c_i$ is the zero-based onset chunk and $n_i$ the number
 of chunks. Missing onset uses $c_i=n_i$, reproducing the historical
-plotting convention. The recorded diagnostic is
+plotting convention. The recorded diagnostic is the time to first audio (TTFA),
 \[
  \widetilde T_i=
  \begin{cases}
  o_i+t_i^{\rm answer}, & \text{local},\\
- o_i+t_i^{\rm stall}+w_i+t_i^{\rm synth}+d_i^{\rm relay}, & \text{escalated},
+ o_i+t_i^{\rm stall}+w_i+t_i^{\rm synth}, & \text{escalated},
  \end{cases}
 \]
 where durations are in seconds and $w_i$ is the count of waiting
-chunks. We retain this definition to expose the recorded cost
-profile, not as a synchronized wall-clock identity: asynchronous
-stages can overlap, missing fields are zero-filled by the plotting
-recipe, and the two paths end at different output events. Local
-$t_i^{\rm answer}$ ends at text generation; the relay sum includes
-both synthesis time and synthesized waveform duration. Neither a
-shared audio-ready endpoint nor client-audible completion is measured.
-Figure
+chunks (the expert call runs during these chunks; $w_i$ tracks the
+logged expert latency with correlation 0.96--0.99). $t_i^{\rm synth}$
+is the wall time of the blocking, non-streaming teacher-forced TTS
+call that voices the expert text; the relay waveform can start
+playing when it returns. The waveform's own duration $d_i^{\rm relay}$
+(mean 27.8\,s on the always arm, 61\% of the sum when included) is
+playback, not latency, and is reported as the ``play'' column of
+Table~\ref{tab:latency}; an earlier draft of this table added it to
+the escalated rows, which is why its always arm read 45.1\,s. We
+retain the remaining definition to expose the recorded cost profile,
+not as a synchronized wall-clock identity: asynchronous stages can
+overlap, missing fields are zero-filled by the plotting recipe, and
+the two paths end at different output events. Local $t_i^{\rm answer}$
+ends at text generation, an upper bound on the duplex talker's first
+audio; client-audible completion is not measured. Figure
 \ref{fig:dualview} reports the mean and within-arm P50/P95 over
 queries in the original recorded pass. These quantiles do not
 measure run-to-run uncertainty, and query bootstraps in historical
@@ -117,10 +124,12 @@ analysis (4 September 2026), shown in
 Table~\ref{tab:threshold-candidates}.
 Nominal 15/25/40\% is a candidate recipe for confirmation. Within
 that same remix, reducing the nominal aggressive budget from 50\%
-to 40\% changes mean reconstructed time from 23.3 to 19.6\,s
+to 40\% changes mean reconstructed time (under the sweep's
+playback-inclusive definition) from 23.3 to 19.6\,s
 (15.9\% lower), with accuracy changing from 64.2\% to 60.4\%.
-Comparing 19.6\,s from this remix directly against 27.3\,s from a
-separate recorded arm would mix protocols. The historical sweep's
+Comparing 19.6\,s from this remix directly against the separately
+recorded aggressive arm (14.4\,s TTFA; 27.3\,s under the same
+playback-inclusive definition) would mix protocols. The historical sweep's
 threshold grid differs from both released core-OOF grids: at nominal
 30\% in Mandarin, it uses 0.7516, versus 0.3862 for the deployed
 artifact and 0.3695 for the deduplicated artifact. The revised export
@@ -890,12 +899,13 @@ check behind the pre-answer gate.
 
 \paragraph{Benchmark and historical tables.} The upper block of
 Table~\ref{tab:live} and Table~\ref{tab:latency} summarize native
-answer-content accuracy and reconstructed timing. The lower block
-and the audible-onset experiment below concern the retired
+answer-content accuracy and reconstructed time to first audio. The
+lower block and the audible-onset experiment below concern the retired
 turn-based harness. Their timing endpoints and thresholds differ
 (Appendix~\ref{app:current-protocol}). In the native table,
-conservative increases P95 from 17.3 to 22.3\,s; the earlier
-turn-based tail reduction does not carry over to these rows.
+conservative leaves P95 essentially unchanged (17.3 to 17.5\,s) but
+raises P99 to 80\,s; the earlier turn-based tail reduction does not
+carry over to these rows.
 Figure~\ref{fig:timeline-live} illustrates historical recorded timers.
 
 \paragraph{Historical turn-based time to first audible audio.} The earlier sweep is
@@ -949,21 +959,26 @@ always (measured) & 100\% & 0.617 & +0.234 & 0.617 \\
 
 \begin{table}[h]
 \centering\small
-\caption{Reconstructed completion-time diagnostic (s), internal native
-benchmark, $n{=}240$ per arm. Local and relay paths have different
-endpoints; these are not client-side audible completion times
-(Appendix~\ref{app:current-protocol}). P95/P99 summarize the sampled
-query distribution and are unstable at this sample size.}
+\caption{Reconstructed time to first audio (TTFA, s), internal native
+benchmark, $n{=}240$ per arm. Escalated rows end when the relay
+waveform has been synthesized (expert wait plus blocking TTS); local
+rows end at answer-text completion, an upper bound on their first
+audio. The relay waveform's own playback duration (``play'', mean over
+escalated rows) is not latency and is listed separately; it is
+inflated by code, \LaTeX, and markdown in expert answers being
+synthesized verbatim. These are not client-side audible completion
+times (Appendix~\ref{app:current-protocol}). P95/P99 summarize the
+sampled query distribution and are unstable at this sample size.}
 \label{tab:latency}
-\begin{tabular}{lrrrrrr}
+\begin{tabular}{lrrrrrrr}
 \toprule
-tier & esc & mean & P50 & P95 & P99 & $\Delta$P50 \\
+tier & esc & mean & P50 & P95 & P99 & $\Delta$P50 & play \\
 \midrule
-never & 0\% & 5.7 & 3.6 & 17.3 & 21.2 & --- \\
-conservative  & 8\% & 12.0 & 4.3 & 22.3 & 192 & +0.7 \\
-balanced      & 25\% & 15.3 & 5.6 & 39.9 & 290 & +2.0 \\
-aggressive    & 52\% & 27.3 & 10.9 & 103 & 403 & +7.3 \\
-always & 99.2\% & 45.1 & 20.8 & 210 & 370 & +17.2 \\
+never & 0\% & 5.7 & 3.6 & 17.3 & 21.2 & --- & --- \\
+conservative  & 8\% & 7.6 & 4.2 & 17.5 & 80.2 & +0.6 & 53.2 \\
+balanced      & 25\% & 8.7 & 5.3 & 22.9 & 89.6 & +1.7 & 26.4 \\
+aggressive    & 52\% & 14.4 & 8.0 & 60.8 & 131 & +4.4 & 25.0 \\
+always & 99.2\% & 17.6 & 11.5 & 69.4 & 117 & +7.9 & 27.8 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -972,7 +987,7 @@ always & 99.2\% & 45.1 & 20.8 & 210 & 370 & +17.2 \\
   \centering
   \includegraphics[width=\linewidth]{native_frozen_pareto}
   \caption{Historical plotting view of native answer-content accuracy
-  against reconstructed P50 completion time; see the endpoint caveats
+  against reconstructed P50 time to first audio; see the endpoint caveats
   in Appendix~\ref{app:current-protocol}.}
   \label{fig:pareto-latency}
 \end{figure}
@@ -1516,8 +1531,8 @@ $\pm$0.02--0.03 floor is Figure~\ref{fig:app-noise}.
 
 The following are retained historical plotting views of the native
 benchmark. Their ``delivered'' labels refer to answer content, and
-``time-to-answer'' is the reconstructed timing diagnostic defined in
-Appendix~\ref{app:current-protocol}. Expert-text lines are separate
+``time-to-answer'' axes show the reconstructed time to first audio
+defined in Appendix~\ref{app:current-protocol}. Expert-text lines are separate
 reference scores, not guaranteed bounds on the deployed channel;
 the updated main plot aligns the horizontal reference with the
 measured always arm and follows the original main-table random

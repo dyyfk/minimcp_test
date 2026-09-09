@@ -1,351 +1,303 @@
 \relax 
 \providecommand\hyper@newdestlabel[2]{}
-\providecommand\HyperFirstAtBeginDocument{\AtBeginDocument}
-\HyperFirstAtBeginDocument{\ifx\hyper@anchor\@undefined
-\global\let\oldcontentsline\contentsline
-\gdef\contentsline#1#2#3#4{\oldcontentsline{#1}{#2}{#3}}
-\global\let\oldnewlabel\newlabel
-\gdef\newlabel#1#2{\newlabelxx{#1}#2}
-\gdef\newlabelxx#1#2#3#4#5#6{\oldnewlabel{#1}{{#2}{#3}}}
-\AtEndDocument{\ifx\hyper@anchor\@undefined
-\let\contentsline\oldcontentsline
-\let\newlabel\oldnewlabel
-\fi}
-\fi}
-\global\let\hyper@last\relax 
-\gdef\HyperFirstAtBeginDocument#1{#1}
-\providecommand*\HyPL@Entry[1]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
 \citation{stivers2009universals}
-\citation{kadavath2022language,azaria2023internal,burns2023discovering,kossen2024semantic}
-\citation{ong2024routellm,varshney2026llmrouter,lugoloobi2026failures}
-\citation{wang2024fsm,zhang2024duplex,veluri2024syncllm,fu2024vita,yu2024salmonnomni}
-\citation{huang2026duplexomni,chien2026moshirag}
-\HyPL@Entry{0<</S/D>>}
+\citation{kadavath2022language,azaria2023internal,kossen2024semantic}
+\citation{ong2024routellm,varshney2026llmrouter}
+\citation{openbmb2026minicpmo}
 \@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{section.1}\protected@file@percent }
 \newlabel{sec:intro}{{1}{1}{Introduction}{section.1}{}}
-\citation{veluri2024syncllm,defossez2024moshi}
-\citation{wang2024freezeomni,yu2024salmonnomni}
-\citation{huang2026duplexomni}
-\citation{openbmb2026minicpmo}
-\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces \textbf  {Primary turn-based system.} \textbf  {(1)} Speech reaches a duplex-trained local model. \textbf  {(2)} At the end of the user turn, a mid-network (L22) linear read scores the turn in $\sim $30\,ms, before the first output token. \textbf  {(3)} Lower-risk turns stay local; higher-risk turns are sent to a cloud expert. \textbf  {(4)} The local model remains the talker and relays the returned answer. Deployed-channel accuracy rises from 42.2\% to 63.3\% at 57\% escalation in the audio-input/text-output sweep; a TTS-on replay validates the speech path separately.}}{2}{figure.1}\protected@file@percent }
-\newlabel{fig:hero}{{1}{2}{\textbf {Primary turn-based system.} \textbf {(1)} Speech reaches a duplex-trained local model. \textbf {(2)} At the end of the user turn, a mid-network (L22) linear read scores the turn in $\sim $30\,ms, before the first output token. \textbf {(3)} Lower-risk turns stay local; higher-risk turns are sent to a cloud expert. \textbf {(4)} The local model remains the talker and relays the returned answer. Deployed-channel accuracy rises from 42.2\% to 63.3\% at 57\% escalation in the audio-input/text-output sweep; a TTS-on replay validates the speech path separately}{figure.1}{}}
 \citation{kadavath2022language,lin2022teaching}
 \citation{azaria2023internal,burns2023discovering,marks2024geometry}
-\citation{orgad2024llms}
-\citation{mahaut2024factual}
 \citation{kuhn2023semantic,farquhar2024detecting}
+\citation{orgad2024llms,mahaut2024factual}
 \citation{kossen2024semantic}
-\citation{chuang2024lookback,umui2026}
-\citation{ding2024hybrid}
-\citation{ong2024routellm}
-\citation{hybridserve2025,hu2024routerbench,llmrouterbench2026}
-\citation{chen2023frugalgpt}
+\citation{chen2023frugalgpt,ding2024hybrid,ong2024routellm}
 \citation{aggarwal2024automix}
-\citation{varshney2026llmrouter,lugoloobi2025difficulty,lugoloobi2026failures}
-\citation{schick2023toolformer,asai2024selfrag}
-\citation{shen2024collaborative,zheng2025citer}
-\citation{goyal2024pause,zelikman2024quietstar,yang2025qwen3,guo2025deepseekr1}
-\citation{madras2018predict,schuster2022confident}
-\citation{nguyen2023generative,defossez2024moshi,zeng2024glm4voice,bayling2026duplex}
-\citation{xu2025qwen25omni,openbmb2026minicpmo}
+\citation{varshney2026llmrouter,lugoloobi2026failures}
+\citation{defossez2024moshi,openbmb2026minicpmo}
+\citation{wang2024fsm,zhang2024duplex,veluri2024syncllm}
 \citation{wang2024freezeomni}
-\citation{chu2024qwen2audio}
-\citation{wang2024fsm,zhang2024duplex,veluri2024syncllm,ma2024lslm,fu2024vita,yu2024salmonnomni}
-\citation{zhang2026duplexsla}
-\citation{wang2024freezeomni,chen2025minmo,liao2025flexduo}
-\citation{xu2024minimal}
-\citation{lin2025fdb}
 \citation{bayling2026duplex}
-\@writefile{toc}{\contentsline {section}{\numberline {2}Related Work}{3}{section.2}\protected@file@percent }
-\newlabel{sec:related}{{2}{3}{Related Work}{section.2}{}}
-\@writefile{toc}{\contentsline {paragraph}{Pre-answer competence estimation.}{3}{section*.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Selective routing.}{3}{section*.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Duplex control and live handoff.}{3}{section*.3}\protected@file@percent }
-\citation{huang2026duplexomni}
-\citation{chrono2026thinking}
-\citation{openbmb2026minicpmo}
-\citation{chien2026moshirag}
-\citation{huang2026duplexomni}
-\@writefile{toc}{\contentsline {paragraph}{Positioning.}{4}{section*.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {3}Reading Competence from Hidden States}{4}{section.3}\protected@file@percent }
-\newlabel{sec:signal}{{3}{4}{Reading Competence from Hidden States}{section.3}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Signal comparison under distribution shift}{4}{subsection.3.1}\protected@file@percent }
-\newlabel{sec:audit}{{3.1}{4}{Signal comparison under distribution shift}{subsection.3.1}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Main results: selective escalation on the internal test set and five public speech-QA benchmarks (post-relay answer accuracy, \%, audio-input/text-output live loop). The probe is fixed; tier thresholds are label-free per-pool quantiles (the internal tiers realize 14/31/57\% escalation). Matched-rate random mixes the always-local and measured always-escalate arms at each pool's realized rate. avg and $\Delta $ (average gain over always-local) cover the five external pools. The bottom block applies the same recipe to NemotronLabs-VoiceChat-11B offline, re-mixing cached local and expert outcomes (Appendix\nobreakspace  {}\ref  {app:nvda}). AlpacaEval, reported separately on its 1--5 scale, changes from 3.99 to 4.35 on MiniCPM but does not beat matched-rate random; the second family changes from 3.55 to 4.46 versus 4.23 for random. Per-tier random references and gold-input ceilings: Appendices\nobreakspace  {}\ref  {app:fixedthr}--\ref  {app:transferdetail}.}}{5}{table.1}\protected@file@percent }
-\newlabel{tab:transfer}{{1}{5}{Main results: selective escalation on the internal test set and five public speech-QA benchmarks (post-relay answer accuracy, \%, audio-input/text-output live loop). The probe is fixed; tier thresholds are label-free per-pool quantiles (the internal tiers realize 14/31/57\% escalation). Matched-rate random mixes the always-local and measured always-escalate arms at each pool's realized rate. avg and $\Delta $ (average gain over always-local) cover the five external pools. The bottom block applies the same recipe to NemotronLabs-VoiceChat-11B offline, re-mixing cached local and expert outcomes (Appendix~\ref {app:nvda}). AlpacaEval, reported separately on its 1--5 scale, changes from 3.99 to 4.35 on MiniCPM but does not beat matched-rate random; the second family changes from 3.55 to 4.46 versus 4.23 for random. Per-tier random references and gold-input ceilings: Appendices~\ref {app:fixedthr}--\ref {app:transferdetail}}{table.1}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Layer and position sweep}{5}{subsection.3.2}\protected@file@percent }
-\newlabel{sec:duplex}{{3.2}{5}{Layer and position sweep}{subsection.3.2}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces The core representational result: LOPO math AUC by layer and position. On the duplex model the standard (final-layer, last-token) read inverts on text input while mid-network layers hold $\ge $0.9; raw backbones show no cliff. The deployed gate reads L22.}}{6}{figure.2}\protected@file@percent }
-\newlabel{fig:layersweep}{{2}{6}{The core representational result: LOPO math AUC by layer and position. On the duplex model the standard (final-layer, last-token) read inverts on text input while mid-network layers hold $\ge $0.9; raw backbones show no cliff. The deployed gate reads L22}{figure.2}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Modality transfer}{6}{subsection.3.3}\protected@file@percent }
-\newlabel{sec:xmodal}{{3.3}{6}{Modality transfer}{subsection.3.3}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}Decision timing and escalation budget}{6}{subsection.3.4}\protected@file@percent }
-\newlabel{sec:system}{{3.4}{6}{Decision timing and escalation budget}{subsection.3.4}{}}
-\@writefile{toc}{\contentsline {paragraph}{Scoring latency.}{6}{section*.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Read position in the audio loop.}{6}{section*.6}\protected@file@percent }
+\citation{huang2026duplexomni,chrono2026thinking,chien2026moshirag}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces \textbf  {The deployed system.} \textbf  {(1)} Speech streams in 1\,s chunks into a full-duplex local model that decides for itself when to speak. \textbf  {(2)} At that speak commit, a mid-network (L22) linear read scores the turn in $\sim $30\,ms, before the answer is produced. \textbf  {(3)} Lower-risk turns stay local; higher-risk turns are sent to a cloud expert while the talker stalls. \textbf  {(4)} The returned answer is spoken verbatim in the talker's own voice. Delivered accuracy on the internal test set rises from 40.8\% to 62.9\% at 52\% escalation in native full-duplex sessions.}}{2}{figure.1}\protected@file@percent }
+\newlabel{fig:hero}{{1}{2}{\textbf {The deployed system.} \textbf {(1)} Speech streams in 1\,s chunks into a full-duplex local model that decides for itself when to speak. \textbf {(2)} At that speak commit, a mid-network (L22) linear read scores the turn in $\sim $30\,ms, before the answer is produced. \textbf {(3)} Lower-risk turns stay local; higher-risk turns are sent to a cloud expert while the talker stalls. \textbf {(4)} The returned answer is spoken verbatim in the talker's own voice. Delivered accuracy on the internal test set rises from 40.8\% to 62.9\% at 52\% escalation in native full-duplex sessions}{figure.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {2}Related Work}{2}{section.2}\protected@file@percent }
+\newlabel{sec:related}{{2}{2}{Related Work}{section.2}{}}
+\@writefile{toc}{\contentsline {paragraph}{Competence readout.}{2}{section*.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Selective routing.}{2}{section*.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Native duplex control.}{2}{section*.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces \textbf  {Text-input transfer depends on layer and position.} LOPO math AUC across layers: late last-token reads deteriorate on the duplex checkpoints, while mid-layer reads and raw-backbone controls remain predictive. Layer 22 is the MiniCPM-o~4.5 read location used subsequently. This plot does not show an equivalent collapse under audio calibration and audio input.}}{3}{figure.2}\protected@file@percent }
+\newlabel{fig:layersweep}{{2}{3}{\textbf {Text-input transfer depends on layer and position.} LOPO math AUC across layers: late last-token reads deteriorate on the duplex checkpoints, while mid-layer reads and raw-backbone controls remain predictive. Layer 22 is the MiniCPM-o~4.5 read location used subsequently. This plot does not show an equivalent collapse under audio calibration and audio input}{figure.2}{}}
+\@writefile{toc}{\contentsline {paragraph}{Competence-aware handoff.}{3}{section*.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3}Reading Competence from Hidden States}{3}{section.3}\protected@file@percent }
+\newlabel{sec:signal}{{3}{3}{Reading Competence from Hidden States}{section.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Distribution transfer exposes a readout failure}{3}{subsection.3.1}\protected@file@percent }
+\newlabel{sec:audit}{{3.1}{3}{Distribution transfer exposes a readout failure}{subsection.3.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Layer and position matter}{3}{subsection.3.2}\protected@file@percent }
+\newlabel{sec:duplex}{{3.2}{3}{Layer and position matter}{subsection.3.2}{}}
 \citation{wei2024simpleqa}
 \citation{wang2024mmlupro}
 \citation{joshi2017triviaqa}
 \citation{conover2023dolly,taori2023alpaca}
 \citation{cobbe2021gsm8k,hendrycks2021math,lightman2024lets}
-\citation{zheng2023judging}
-\citation{li2018spokensquad,chen2024voicebench}
-\citation{kadavath2022language}
-\citation{faisal2021sdqa}
-\@writefile{toc}{\contentsline {paragraph}{From score to escalation budget.}{7}{section*.7}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {4}Experimental Setup}{7}{section.4}\protected@file@percent }
-\newlabel{sec:setup}{{4}{7}{Experimental Setup}{section.4}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Models}{7}{subsection.4.1}\protected@file@percent }
-\newlabel{sec:models}{{4.1}{7}{Models}{subsection.4.1}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Dataset and labels}{7}{subsection.4.2}\protected@file@percent }
-\newlabel{sec:dataset}{{4.2}{7}{Dataset and labels}{subsection.4.2}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Probe training and baseline signals}{7}{subsection.4.3}\protected@file@percent }
-\newlabel{sec:signals}{{4.3}{7}{Probe training and baseline signals}{subsection.4.3}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}Benchmarks and evaluation protocol}{7}{subsection.4.4}\protected@file@percent }
-\newlabel{sec:evalproto}{{4.4}{7}{Benchmarks and evaluation protocol}{subsection.4.4}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Live escalation on the internal test set (speakable subset, $n{=}218$). Blue: deployed-channel accuracy, where the expert answers from the talker's own transcript. Green: the same sessions re-scored with the expert answering the reference transcript, which factors out the relay channel. Each curve has its own matched-rate random reference (dashed, same floor and endpoint). Selection beats random in both, by 7.2--9.4 points deployed and 5.3--8.3 points channel-controlled; the gap between the curves is the cost of the relay channel.}}{8}{figure.3}\protected@file@percent }
-\newlabel{fig:dualview}{{3}{8}{Live escalation on the internal test set (speakable subset, $n{=}218$). Blue: deployed-channel accuracy, where the expert answers from the talker's own transcript. Green: the same sessions re-scored with the expert answering the reference transcript, which factors out the relay channel. Each curve has its own matched-rate random reference (dashed, same floor and endpoint). Selection beats random in both, by 7.2--9.4 points deployed and 5.3--8.3 points channel-controlled; the gap between the curves is the cost of the relay channel}{figure.3}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.5}Live loop and escalation path}{8}{subsection.4.5}\protected@file@percent }
-\newlabel{sec:liveproto}{{4.5}{8}{Live loop and escalation path}{subsection.4.5}{}}
-\newlabel{sec:inject}{{4.5}{8}{Live loop and escalation path}{subsection.4.5}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {5}Results}{8}{section.5}\protected@file@percent }
-\newlabel{sec:results}{{5}{8}{Results}{section.5}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Live escalation}{8}{subsection.5.1}\protected@file@percent }
-\newlabel{sec:live}{{5.1}{8}{Live escalation}{subsection.5.1}{}}
-\newlabel{sec:liveloop}{{5.1}{8}{Live escalation}{subsection.5.1}{}}
-\newlabel{sec:livecurve}{{5.1}{8}{Live escalation}{subsection.5.1}{}}
 \citation{openaudiobench2025}
-\citation{joshi2017triviaqa}
-\citation{berant2013webquestions}
-\citation{nachmani2024spoken}
-\citation{faisal2021sdqa}
-\citation{chen2024voicebench,taori2023alpaca}
-\@writefile{toc}{\contentsline {paragraph}{Serving-regime checks.}{9}{section*.8}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Transfer to public speech benchmarks}{9}{subsection.5.2}\protected@file@percent }
-\newlabel{sec:transfer}{{5.2}{9}{Transfer to public speech benchmarks}{subsection.5.2}{}}
-\newlabel{sec:transfer-neg}{{5.2}{9}{Transfer to public speech benchmarks}{subsection.5.2}{}}
-\citation{lin2026fdbv3}
-\@writefile{toc}{\contentsline {section}{\numberline {6}Discussion}{10}{section.6}\protected@file@percent }
-\newlabel{sec:discussion}{{6}{10}{Discussion}{section.6}{}}
-\@writefile{toc}{\contentsline {paragraph}{Interpretation.}{10}{section*.9}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Scope of the signal.}{10}{section*.10}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Calibration.}{10}{section*.11}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Limitations.}{10}{section*.12}\protected@file@percent }
+\citation{faisal2021sdqa,chen2024voicebench}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Text-to-speech representation transfer}{4}{subsection.3.3}\protected@file@percent }
+\newlabel{sec:xmodal}{{3.3}{4}{Text-to-speech representation transfer}{subsection.3.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}From a failure score to an answer-onset decision}{4}{subsection.3.4}\protected@file@percent }
+\newlabel{sec:system}{{3.4}{4}{From a failure score to an answer-onset decision}{subsection.3.4}{}}
+\newlabel{eq:gate}{{1}{4}{From a failure score to an answer-onset decision}{equation.3.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Experimental Setup}{4}{section.4}\protected@file@percent }
+\newlabel{sec:setup}{{4}{4}{Experimental Setup}{section.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Models, data, and calibration}{4}{subsection.4.1}\protected@file@percent }
+\newlabel{sec:models}{{4.1}{4}{Models, data, and calibration}{subsection.4.1}{}}
+\newlabel{sec:dataset}{{4.1}{4}{Models, data, and calibration}{subsection.4.1}{}}
+\newlabel{sec:signals}{{4.1}{4}{Models, data, and calibration}{subsection.4.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Native benchmark protocol and metrics}{4}{subsection.4.2}\protected@file@percent }
+\newlabel{sec:evalproto}{{4.2}{4}{Native benchmark protocol and metrics}{subsection.4.2}{}}
+\newlabel{sec:liveproto}{{4.2}{4}{Native benchmark protocol and metrics}{subsection.4.2}{}}
+\newlabel{sec:inject}{{4.2}{4}{Native benchmark protocol and metrics}{subsection.4.2}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Main results: selective escalation on the internal test set and five public speech-QA benchmarks (delivered answer accuracy, \%, native full-duplex sessions, one live arm per tier). The probe is fixed; tier thresholds are label-free calibration quantiles per language (the internal tiers realize 8/25/52\% escalation; realized rates per pool are in Appendix~\ref {app:transferdetail}). Matched-rate random mixes the always-local and measured always-escalate arms at each pool's realized rate. avg and $\Delta $ (average gain over always-local) cover five external pools in the live block and four in the NVDA block. The relay-free bound scores the expert's returned text directly. The bottom block evaluates our latest three-layer NemotronLabs-VoiceChat-11B probe by re-mixing local and cached expert outcomes after replay through its native frame protocol (Appendix~\ref {app:nvda}). External columns retain cached local outcomes and the prior 2,481-row fit. The Internal column judges the same pass-3 answers on all 240 queries and uses a 2,258-row refit that excludes these test IDs (with cached pass-2 training labels). All policies leave the 17 queries without an answer-onset read local, so the 15/30/50\% scoreable-query budgets realize 14/28/47\% overall. This Internal result is post-selection because probe architecture selection included this split. AlpacaEval, reported separately on its 1--5 scale, changes from 3.68 to 4.01 at 44\% escalation on MiniCPM (matched random 3.91; always-escalate 4.20 against 4.95 for the expert text, a spoken-length cap); the pass-3 NVDA ranking changes from 3.55 to 4.51 versus 4.23 for random.}}{5}{table.1}\protected@file@percent }
+\newlabel{tab:transfer}{{1}{5}{Main results: selective escalation on the internal test set and five public speech-QA benchmarks (delivered answer accuracy, \%, native full-duplex sessions, one live arm per tier). The probe is fixed; tier thresholds are label-free calibration quantiles per language (the internal tiers realize 8/25/52\% escalation; realized rates per pool are in Appendix~\ref {app:transferdetail}). Matched-rate random mixes the always-local and measured always-escalate arms at each pool's realized rate. avg and $\Delta $ (average gain over always-local) cover five external pools in the live block and four in the NVDA block. The relay-free bound scores the expert's returned text directly. The bottom block evaluates our latest three-layer NemotronLabs-VoiceChat-11B probe by re-mixing local and cached expert outcomes after replay through its native frame protocol (Appendix~\ref {app:nvda}). External columns retain cached local outcomes and the prior 2,481-row fit. The Internal column judges the same pass-3 answers on all 240 queries and uses a 2,258-row refit that excludes these test IDs (with cached pass-2 training labels). All policies leave the 17 queries without an answer-onset read local, so the 15/30/50\% scoreable-query budgets realize 14/28/47\% overall. This Internal result is post-selection because probe architecture selection included this split. AlpacaEval, reported separately on its 1--5 scale, changes from 3.68 to 4.01 at 44\% escalation on MiniCPM (matched random 3.91; always-escalate 4.20 against 4.95 for the expert text, a spoken-length cap); the pass-3 NVDA ranking changes from 3.55 to 4.51 versus 4.23 for random}{table.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Escalation Results}{5}{section.5}\protected@file@percent }
+\newlabel{sec:results}{{5}{5}{Escalation Results}{section.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Internal accuracy and timing cost}{5}{subsection.5.1}\protected@file@percent }
+\newlabel{sec:live}{{5.1}{5}{Internal accuracy and timing cost}{subsection.5.1}{}}
+\newlabel{sec:liveloop}{{5.1}{5}{Internal accuracy and timing cost}{subsection.5.1}{}}
+\newlabel{sec:livecurve}{{5.1}{5}{Internal accuracy and timing cost}{subsection.5.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}External transfer and its limits}{6}{subsection.5.2}\protected@file@percent }
+\newlabel{sec:transfer}{{5.2}{6}{External transfer and its limits}{subsection.5.2}{}}
+\newlabel{sec:transfer-neg}{{5.2}{6}{External transfer and its limits}{subsection.5.2}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces \textbf  {Accuracy gains and timing costs on three pools.} Left: observed mean answer-content accuracy against realized expert call rate; C/B/A denote conservative/balanced/aggressive. The dashed line uses the original Table~\ref {tab:transfer} random-mixture convention (\S  \ref {sec:evalproto}). The horizontal always-arm reference passes through the measured always point; it is not an oracle bound. Right: mean, P50, and P95 of the reconstructed time to first audio on a log scale. L/W denote local/always. Each point uses the original recorded pass, with one run per query and arm; no repeated-run uncertainty is implied. Local rows end at answer-text completion and escalated rows when the relay waveform is synthesized; playback duration is excluded (\S  \ref {sec:evalproto}). All five external QA pools, including the weaker cases, appear in the upper block of Table~\ref {tab:transfer}.}}{7}{figure.3}\protected@file@percent }
+\newlabel{fig:dualview}{{3}{7}{\textbf {Accuracy gains and timing costs on three pools.} Left: observed mean answer-content accuracy against realized expert call rate; C/B/A denote conservative/balanced/aggressive. The dashed line uses the original Table~\ref {tab:transfer} random-mixture convention (\S \ref {sec:evalproto}). The horizontal always-arm reference passes through the measured always point; it is not an oracle bound. Right: mean, P50, and P95 of the reconstructed time to first audio on a log scale. L/W denote local/always. Each point uses the original recorded pass, with one run per query and arm; no repeated-run uncertainty is implied. Local rows end at answer-text completion and escalated rows when the relay waveform is synthesized; playback duration is excluded (\S \ref {sec:evalproto}). All five external QA pools, including the weaker cases, appear in the upper block of Table~\ref {tab:transfer}}{figure.3}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Discussion and Limitations}{7}{section.6}\protected@file@percent }
+\newlabel{sec:discussion}{{6}{7}{Discussion and Limitations}{section.6}{}}
+\newlabel{sec:main-end}{{6}{8}{Discussion and Limitations}{section.6}{}}
 \bibstyle{plainnat}
 \bibdata{refs}
 \bibcite{aggarwal2024automix}{{1}{2024}{{Aggarwal et~al.}}{{Aggarwal, Madaan, Anand, Potharaju, Mishra, Zhou, Gupta, Rajagopal, Kappaganthu, Yang, Upadhyay, Faruqui, and {Mausam}}}}
-\bibcite{asai2024selfrag}{{2}{2024}{{Asai et~al.}}{{Asai, Wu, Wang, Sil, and Hajishirzi}}}
-\bibcite{azaria2023internal}{{3}{2023}{{Azaria and Mitchell}}{{}}}
-\bibcite{berant2013webquestions}{{4}{2013}{{Berant et~al.}}{{Berant, Chou, Frostig, and Liang}}}
-\bibcite{burns2023discovering}{{5}{2023}{{Burns et~al.}}{{Burns, Ye, Klein, and Steinhardt}}}
-\bibcite{chen2023frugalgpt}{{6}{2023}{{Chen et~al.}}{{Chen, Zaharia, and Zou}}}
-\bibcite{chen2025minmo}{{7}{2025}{{Chen et~al.}}{{Chen, Chen, Chen, et~al.}}}
-\bibcite{chen2024voicebench}{{8}{2024}{{Chen et~al.}}{{Chen, Yue, Zhang, Gao, Tan, and Li}}}
-\bibcite{chien2026moshirag}{{9}{2026}{{Chien et~al.}}{{Chien, Orsini, Kharitonov, Zeghidour, Livescu, and D{\'e}fossez}}}
-\bibcite{chu2024qwen2audio}{{10}{2024}{{Chu et~al.}}{{Chu, Xu, Yang, Wei, Wei, Guo, et~al.}}}
-\bibcite{chuang2024lookback}{{11}{2024}{{Chuang et~al.}}{{Chuang, Qiu, Hsieh, Krishna, Kim, and Glass}}}
-\bibcite{cobbe2021gsm8k}{{12}{2021}{{Cobbe et~al.}}{{Cobbe, Kosaraju, Bavarian, Chen, Jun, Kaiser, et~al.}}}
-\bibcite{conover2023dolly}{{13}{2023}{{Conover et~al.}}{{Conover, Hayes, Mathur, Xie, Wan, Shah, Ghodsi, Wendell, Zaharia, and Xin}}}
-\bibcite{openbmb2026minicpmo}{{14}{2026}{{Cui et~al.}}{{Cui, Xu, Wang, Yu, Sun, Xu, et~al.}}}
-\bibcite{guo2025deepseekr1}{{15}{2025}{{{DeepSeek-AI} et~al.}}{{{DeepSeek-AI}, Guo, et~al.}}}
-\bibcite{defossez2024moshi}{{16}{2024}{{D{\'e}fossez et~al.}}{{D{\'e}fossez, Mazar{\'e}, Orsini, Royer, P{\'e}rez, J{\'e}gou, Grave, and Zeghidour}}}
-\bibcite{ding2024hybrid}{{17}{2024}{{Ding et~al.}}{{Ding, Mallick, Wang, Sim, Mukherjee, R{\"u}hle, Lakshmanan, and Awadallah}}}
-\bibcite{faisal2021sdqa}{{18}{2021}{{Faisal et~al.}}{{Faisal, Keshava, Alam, and Anastasopoulos}}}
-\bibcite{bayling2026duplex}{{19}{2026}{{Fang et~al.}}{{Fang, Guo, and Feng}}}
-\bibcite{farquhar2024detecting}{{20}{2024}{{Farquhar et~al.}}{{Farquhar, Kossen, Kuhn, and Gal}}}
-\bibcite{fu2024vita}{{21}{2024}{{Fu et~al.}}{{Fu, Lin, Long, Shen, Dai, Zhao, et~al.}}}
-\bibcite{goyal2024pause}{{22}{2024}{{Goyal et~al.}}{{Goyal, Ji, Rawat, Menon, Kumar, and Nagarajan}}}
-\bibcite{hendrycks2021math}{{23}{2021}{{Hendrycks et~al.}}{{Hendrycks, Burns, Kadavath, Arora, Basart, Tang, Song, and Steinhardt}}}
-\bibcite{hu2024routerbench}{{24}{2024}{{Hu et~al.}}{{Hu, Bieker, Li, Jiang, Keigwin, Ranganath, Keutzer, and Upadhyay}}}
-\bibcite{huang2026duplexomni}{{25}{2026}{{Huang et~al.}}{{Huang, Zhang, Yu, Shi, Ma, Xu, Gao, Hao, He, and Liu}}}
-\bibcite{joshi2017triviaqa}{{26}{2017}{{Joshi et~al.}}{{Joshi, Choi, Weld, and Zettlemoyer}}}
-\bibcite{kadavath2022language}{{27}{2022}{{Kadavath et~al.}}{{Kadavath, Conerly, Askell, Henighan, Drain, Perez, Schiefer, Hatfield-Dodds, DasSarma, Tran-Johnson, et~al.}}}
-\bibcite{kossen2024semantic}{{28}{2024}{{Kossen et~al.}}{{Kossen, Han, Razzak, Schut, Malik, and Gal}}}
-\bibcite{kuhn2023semantic}{{29}{2023}{{Kuhn et~al.}}{{Kuhn, Gal, and Farquhar}}}
-\bibcite{li2018spokensquad}{{30}{2018}{{Li et~al.}}{{Li, Wu, Liu, and Lee}}}
-\bibcite{llmrouterbench2026}{{31}{2026}{{Li et~al.}}{{Li, Zhang, Guo, Wang, Tang, Zhang, Chen, Qi, Ye, Bai, Wang, and Hu}}}
-\bibcite{openaudiobench2025}{{32}{2025}{{Li et~al.}}{{Li, Liu, Zhang, Fang, Pan, Wang, et~al.}}}
-\bibcite{liao2025flexduo}{{33}{2025}{{Liao et~al.}}{{Liao, Xu, Ou, Yang, Jian, Wan, and Zhang}}}
-\bibcite{lightman2024lets}{{34}{2024}{{Lightman et~al.}}{{Lightman, Kosaraju, Burda, Edwards, Baker, Lee, Leike, Schulman, Sutskever, and Cobbe}}}
-\bibcite{lin2025fdb}{{35}{2025}{{Lin et~al.}}{{Lin, Lian, Li, Wang, Anumanchipalli, Liu, and Lee}}}
-\bibcite{lin2026fdbv3}{{36}{2026}{{Lin et~al.}}{{Lin, Chen, Chen, and Lee}}}
-\bibcite{lin2022teaching}{{37}{2022}{{Lin et~al.}}{{Lin, Hilton, and Evans}}}
-\bibcite{lugoloobi2025difficulty}{{38}{2025}{{Lugoloobi and Russell}}{{}}}
-\bibcite{lugoloobi2026failures}{{39}{2026}{{Lugoloobi et~al.}}{{Lugoloobi, Foster, Bankes, and Russell}}}
-\bibcite{ma2024lslm}{{40}{2024}{{Ma et~al.}}{{Ma, Song, Du, Cong, Chen, Wang, Wang, and Chen}}}
-\bibcite{madras2018predict}{{41}{2018}{{Madras et~al.}}{{Madras, Pitassi, and Zemel}}}
-\bibcite{mahaut2024factual}{{42}{2024}{{Mahaut et~al.}}{{Mahaut, Aina, Czarnowska, Hardalov, Müller, and Màrquez}}}
-\bibcite{marks2024geometry}{{43}{2024}{{Marks and Tegmark}}{{}}}
-\bibcite{nachmani2024spoken}{{44}{2024}{{Nachmani et~al.}}{{Nachmani, Levkovitch, Hirsch, Salazar, Asawaroengchai, Mariooryad, Rivlin, Skerry-Ryan, and Tadmor~Ramanovich}}}
-\bibcite{nguyen2023generative}{{45}{2023}{{Nguyen et~al.}}{{Nguyen, Kharitonov, Copet, Adi, Hsu, Elkahky, Tomasello, Algayres, Sagot, Mohamed, and Dupoux}}}
-\bibcite{ong2024routellm}{{46}{2024}{{Ong et~al.}}{{Ong, Almahairi, Wu, Chiang, Wu, Gonzalez, Kadous, and Stoica}}}
-\bibcite{orgad2024llms}{{47}{2025}{{Orgad et~al.}}{{Orgad, Toker, Gekhman, Reichart, Szpektor, Kotek, and Belinkov}}}
-\bibcite{schick2023toolformer}{{48}{2023}{{Schick et~al.}}{{Schick, Dwivedi-Yu, Dess{\`\i }, Raileanu, Lomeli, Zettlemoyer, Cancedda, and Scialom}}}
-\bibcite{schuster2022confident}{{49}{2022}{{Schuster et~al.}}{{Schuster, Fisch, Gupta, Dehghani, Bahri, Tran, Tay, and Metzler}}}
-\bibcite{shen2024collaborative}{{50}{2024}{{Shen et~al.}}{{Shen, Lang, Wang, Kim, and Sontag}}}
-\bibcite{stivers2009universals}{{51}{2009}{{Stivers et~al.}}{{Stivers, Enfield, Brown, Englert, Hayashi, Heinemann, Hoymann, Rossano, de~Ruiter, Yoon, and Levinson}}}
-\bibcite{taori2023alpaca}{{52}{2023}{{Taori et~al.}}{{Taori, Gulrajani, Zhang, Dubois, Li, Guestrin, Liang, and Hashimoto}}}
-\bibcite{varshney2026llmrouter}{{53}{2026}{{Varshney et~al.}}{{Varshney, Surla, Xu, Venkata~Krishnan, Jeblick, Austin, Vaidya, and Onofrio}}}
-\bibcite{veluri2024syncllm}{{54}{2024}{{Veluri et~al.}}{{Veluri, Peloquin, Yu, Gong, and Gollakota}}}
-\bibcite{vu2023freshllms}{{55}{2023}{{Vu et~al.}}{{Vu, Iyyer, Wang, Constant, Wei, Wei, Tar, Sung, Zhou, Le, and Luong}}}
-\bibcite{wang2024fsm}{{56}{2024{a}}{{Wang et~al.}}{{Wang, Lu, Tang, Yan, Xia, and Xiong}}}
-\bibcite{wang2024freezeomni}{{57}{2024{b}}{{Wang et~al.}}{{Wang, Li, Fu, Xie, Li, Sun, and Ma}}}
-\bibcite{wang2024mmlupro}{{58}{2024{c}}{{Wang et~al.}}{{Wang, Ma, Zhang, Ni, et~al.}}}
-\bibcite{wei2024simpleqa}{{59}{2024}{{Wei et~al.}}{{Wei, Karina, Chung, Jiao, Papay, Glaese, Schulman, and Fedus}}}
-\bibcite{chrono2026thinking}{{60}{2026}{{Wu et~al.}}{{Wu, Zhang, Chen, Zhang, Tian, Yang, Yu, Liu, Hou, Hu, and Chng}}}
-\bibcite{xu2025qwen25omni}{{61}{2025}{{Xu et~al.}}{{Xu, Guo, He, Hu, He, Bai, Chen, et~al.}}}
-\bibcite{xu2024minimal}{{62}{2024}{{Xu et~al.}}{{Xu, Wang, Zhao, Han, Yan, Zhang, Tao, Liu, and Che}}}
-\bibcite{hybridserve2025}{{63}{2025}{{Xue et~al.}}{{Xue, Fu, Mai, and Marina}}}
-\bibcite{yang2025qwen3}{{64}{2025}{{Yang et~al.}}{{}}}
-\bibcite{yu2024salmonnomni}{{65}{2024}{{Yu et~al.}}{{Yu, Wang, Yang, Chen, Tian, Zhang, Sun, Lu, Wang, and Zhang}}}
-\bibcite{zelikman2024quietstar}{{66}{2024}{{Zelikman et~al.}}{{Zelikman, Harik, Shao, Jayasiri, Haber, and Goodman}}}
-\bibcite{zeng2024glm4voice}{{67}{2024}{{Zeng et~al.}}{{Zeng, Du, Liu, Wang, Jiang, Zhao, Dong, and Tang}}}
-\bibcite{umui2026}{{68}{2026{a}}{{Zhang et~al.}}{{Zhang, Martin, Jurayj, Murray, Van~Durme, and Kriz}}}
-\bibcite{zhang2026duplexsla}{{69}{2026{b}}{{Zhang et~al.}}{{Zhang, Chen, Wu, Li, Zhang, Zhang, Liu, Lin, Peng, Liu, Chng, Yan, Wu, Huang, Yang, and Tian}}}
-\bibcite{zhang2024duplex}{{70}{2024}{{Zhang et~al.}}{{Zhang, Chen, Hu, Han, Xu, Xu, Zhao, Sun, and Liu}}}
-\bibcite{zheng2023judging}{{71}{2023}{{Zheng et~al.}}{{Zheng, Chiang, Sheng, Zhuang, Wu, Zhuang, Lin, Li, Li, Xing, Zhang, Gonzalez, and Stoica}}}
-\bibcite{zheng2025citer}{{72}{2025}{{Zheng et~al.}}{{Zheng, Chen, Zhang, Kundu, Li, Liu, Xing, Wang, and Yao}}}
-\@writefile{toc}{\contentsline {section}{\numberline {A}Model roster}{16}{appendix.A}\protected@file@percent }
-\newlabel{app:models}{{A}{16}{Model roster}{appendix.A}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Model roster. ``Pair'' groups a fine-tune with its raw backbone control; the comparison statistic is always the within-pair difference.}}{16}{table.2}\protected@file@percent }
-\newlabel{tab:models}{{2}{16}{Model roster. ``Pair'' groups a fine-tune with its raw backbone control; the comparison statistic is always the within-pair difference}{table.2}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {B}Extended signal and readout analyses}{16}{appendix.B}\protected@file@percent }
-\newlabel{app:signal}{{B}{16}{Extended signal and readout analyses}{appendix.B}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Signals on MiniCPM-o 4.5, judged failure labels. In-dist = calibration-split AUC (probes 5-fold out-of-fold); LOPO math = leave-one-pool-out AUC on held-out math; audio = the same readout under speech input (final/mid-layer probe: audio-input LOPO math / text-only calibration read on audio states). Full per-signal detail: Appendix\nobreakspace  {}\ref  {app:signal}.}}{16}{table.3}\protected@file@percent }
-\newlabel{tab:signals}{{3}{16}{Signals on MiniCPM-o 4.5, judged failure labels. In-dist = calibration-split AUC (probes 5-fold out-of-fold); LOPO math = leave-one-pool-out AUC on held-out math; audio = the same readout under speech input (final/mid-layer probe: audio-input LOPO math / text-only calibration read on audio states). Full per-signal detail: Appendix~\ref {app:signal}}{table.3}{}}
-\@writefile{toc}{\contentsline {paragraph}{The in-distribution shortcut, quantified.}{16}{section*.14}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{ROC curves.}{16}{section*.15}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{$p(\mathrm  {True})$ backbone dependence.}{16}{section*.16}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Matched pairs.}{16}{section*.17}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces ROC on the calibration split. $p(\mathrm  {True})$-post leads but needs a full drafted answer; the probes and $p(\mathrm  {True})$-pre are pre-answer.}}{17}{figure.4}\protected@file@percent }
-\newlabel{fig:roc}{{4}{17}{ROC on the calibration split. $\ptrue $-post leads but needs a full drafted answer; the probes and $\ptrue $-pre are pre-answer}{figure.4}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces LOPO transfer (AUC, held-out pool) of the final-layer last-token probe, Qwen2.5-7B family.}}{17}{table.4}\protected@file@percent }
-\newlabel{tab:lopo}{{4}{17}{LOPO transfer (AUC, held-out pool) of the final-layer last-token probe, Qwen2.5-7B family}{table.4}{}}
-\@writefile{toc}{\contentsline {paragraph}{Modality specificity of the cliff.}{17}{section*.18}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Audio collapse of verbalized introspection.}{17}{section*.19}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces LOPO math transfer by depth (last-token probes).}}{18}{table.5}\protected@file@percent }
-\newlabel{tab:sweep}{{5}{18}{LOPO math transfer by depth (last-token probes)}{table.5}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {6}{\ignorespaces Pre-answer introspection under audio input. Trap $p_{\mathrm  {yes}}$ = mean stated probability of answering correctly on a 100\%-fail pool (lower is better).}}{18}{table.6}\protected@file@percent }
-\newlabel{tab:audioptrue}{{6}{18}{Pre-answer introspection under audio input. Trap $p_{\mathrm {yes}}$ = mean stated probability of answering correctly on a 100\%-fail pool (lower is better)}{table.6}{}}
-\@writefile{toc}{\contentsline {paragraph}{Probe $\oplus $ repeat-then-judge fusion.}{18}{section*.20}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {7}{\ignorespaces Probe $\oplus $ repeat-then-judge $p(\mathrm  {True})$-pre fusion (native regime, deployed read point). $\Delta $ = fusion $-$ probe, bootstrap 95\% CI.}}{18}{table.7}\protected@file@percent }
-\newlabel{tab:rtjfusion}{{7}{18}{Probe $\oplus $ repeat-then-judge $\ptrue $-pre fusion (native regime, deployed read point). $\Delta $ = fusion $-$ probe, bootstrap 95\% CI}{table.7}{}}
-\@writefile{toc}{\contentsline {paragraph}{Real-speech validation.}{18}{section*.21}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Synthesis.}{18}{section*.22}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{The deployed probe, and which calibration each result uses.}{19}{section*.23}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {C}Second duplex family: NemotronLabs-VoiceChat-11B}{19}{appendix.C}\protected@file@percent }
-\newlabel{app:nvda}{{C}{19}{Second duplex family: NemotronLabs-VoiceChat-11B}{appendix.C}{}}
-\@writefile{toc}{\contentsline {paragraph}{Escalation re-mix on every transfer pool.}{19}{section*.24}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {8}{\ignorespaces The frozen-recipe NVDA probe re-mixed at fixed escalation rates, official judge per pool, each against its own matched-rate random reference (same measured outcomes, escalation set drawn at random; identical at 0\% and 100\% by construction). AlpacaEval rows are VoiceBench 1--5 scores; others accuracy. Every pool clears random at all three budgets: $p\le 0.0004$ at 30\% and 50\%, $p<0.03$ at 15\% (20k permutations, \texttt  {scripts/18\_nvda\_random\_check.py}).}}{20}{table.8}\protected@file@percent }
-\newlabel{tab:nvda-remix}{{8}{20}{The frozen-recipe NVDA probe re-mixed at fixed escalation rates, official judge per pool, each against its own matched-rate random reference (same measured outcomes, escalation set drawn at random; identical at 0\% and 100\% by construction). AlpacaEval rows are VoiceBench 1--5 scores; others accuracy. Every pool clears random at all three budgets: $p\le 0.0004$ at 30\% and 50\%, $p<0.03$ at 15\% (20k permutations, \texttt {scripts/18\_nvda\_random\_check.py})}{table.8}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Re-mix curves for the frozen-recipe NVDA probe: selective (top-$r$ by probe score) vs.\ matched-rate random on the five transfer pools, official judge per pool. Every pool separates, including the three that are flat on MiniCPM (all five pools, $p\le 0.0004$ at 30/50\% and $p<0.03$ at 15\%, permutation).}}{20}{figure.5}\protected@file@percent }
-\newlabel{fig:nvda-remix}{{5}{20}{Re-mix curves for the frozen-recipe NVDA probe: selective (top-$r$ by probe score) vs.\ matched-rate random on the five transfer pools, official judge per pool. Every pool separates, including the three that are flat on MiniCPM (all five pools, $p\le 0.0004$ at 30/50\% and $p<0.03$ at 15\%, permutation)}{figure.5}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {D}What breaks at the output: mechanism audit}{20}{appendix.D}\protected@file@percent }
-\newlabel{app:mech}{{D}{20}{What breaks at the output: mechanism audit}{appendix.D}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Second-family test: (a) the usable read again peaks mid-network; (b) frozen-recipe transfer lands in the deployed-probe AUC band.}}{21}{figure.6}\protected@file@percent }
-\newlabel{fig:nvda}{{6}{21}{Second-family test: (a) the usable read again peaks mid-network; (b) frozen-recipe transfer lands in the deployed-probe AUC band}{figure.6}{}}
-\@writefile{toc}{\contentsline {paragraph}{Four mechanisms ruled out.}{21}{section*.25}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {9}{\ignorespaces Mechanism candidates for the final-layer inversion. Final-layer LOPO hard-math AUC on MiniCPM-o\nobreakspace  {}4.5 unless noted; 0.366 is the unmodified baseline and 0.931 the L22 read.}}{21}{table.9}\protected@file@percent }
-\newlabel{tab:mech}{{9}{21}{Mechanism candidates for the final-layer inversion. Final-layer LOPO hard-math AUC on MiniCPM-o~4.5 unless noted; 0.366 is the unmodified baseline and 0.931 the L22 read}{table.9}{}}
-\@writefile{toc}{\contentsline {paragraph}{What does separate the models.}{21}{section*.26}\protected@file@percent }
+\bibcite{azaria2023internal}{{2}{2023}{{Azaria and Mitchell}}{{}}}
+\bibcite{burns2023discovering}{{3}{2023}{{Burns et~al.}}{{Burns, Ye, Klein, and Steinhardt}}}
+\bibcite{cheang2025recall}{{4}{2025}{{Cheang et~al.}}{{Cheang, Chan, Zhang, and Deng}}}
+\bibcite{chen2023frugalgpt}{{5}{2023}{{Chen et~al.}}{{Chen, Zaharia, and Zou}}}
+\bibcite{chen2024voicebench}{{6}{2024}{{Chen et~al.}}{{Chen, Yue, Zhang, Gao, Tan, and Li}}}
+\bibcite{chien2026moshirag}{{7}{2026}{{Chien et~al.}}{{Chien, Orsini, Kharitonov, Zeghidour, Livescu, and D{\'e}fossez}}}
+\bibcite{cobbe2021gsm8k}{{8}{2021}{{Cobbe et~al.}}{{Cobbe, Kosaraju, Bavarian, Chen, Jun, Kaiser, et~al.}}}
+\bibcite{conover2023dolly}{{9}{2023}{{Conover et~al.}}{{Conover, Hayes, Mathur, Xie, Wan, Shah, Ghodsi, Wendell, Zaharia, and Xin}}}
+\bibcite{openbmb2026minicpmo}{{10}{2026}{{Cui et~al.}}{{Cui, Xu, Wang, Yu, Sun, Xu, et~al.}}}
+\bibcite{david2025temporal}{{11}{2025}{{David}}{{}}}
+\bibcite{defossez2024moshi}{{12}{2024}{{D{\'e}fossez et~al.}}{{D{\'e}fossez, Mazar{\'e}, Orsini, Royer, P{\'e}rez, J{\'e}gou, Grave, and Zeghidour}}}
+\bibcite{ding2024hybrid}{{13}{2024}{{Ding et~al.}}{{Ding, Mallick, Wang, Sim, Mukherjee, R{\"u}hle, Lakshmanan, and Awadallah}}}
+\bibcite{faisal2021sdqa}{{14}{2021}{{Faisal et~al.}}{{Faisal, Keshava, Alam, and Anastasopoulos}}}
+\bibcite{bayling2026duplex}{{15}{2026}{{Fang et~al.}}{{Fang, Guo, and Feng}}}
+\bibcite{farquhar2024detecting}{{16}{2024}{{Farquhar et~al.}}{{Farquhar, Kossen, Kuhn, and Gal}}}
+\bibcite{hendrycks2021math}{{17}{2021}{{Hendrycks et~al.}}{{Hendrycks, Burns, Kadavath, Arora, Basart, Tang, Song, and Steinhardt}}}
+\bibcite{hu2024routerbench}{{18}{2024}{{Hu et~al.}}{{Hu, Bieker, Li, Jiang, Keigwin, Ranganath, Keutzer, and Upadhyay}}}
+\bibcite{huang2026duplexomni}{{19}{2026}{{Huang et~al.}}{{Huang, Zhang, Yu, Shi, Ma, Xu, Gao, Hao, He, and Liu}}}
+\bibcite{joshi2017triviaqa}{{20}{2017}{{Joshi et~al.}}{{Joshi, Choi, Weld, and Zettlemoyer}}}
+\bibcite{kadavath2022language}{{21}{2022}{{Kadavath et~al.}}{{Kadavath, Conerly, Askell, Henighan, Drain, Perez, Schiefer, Hatfield-Dodds, DasSarma, Tran-Johnson, et~al.}}}
+\bibcite{kossen2024semantic}{{22}{2024}{{Kossen et~al.}}{{Kossen, Han, Razzak, Schut, Malik, and Gal}}}
+\bibcite{kuhn2023semantic}{{23}{2023}{{Kuhn et~al.}}{{Kuhn, Gal, and Farquhar}}}
+\bibcite{openaudiobench2025}{{24}{2025}{{Li et~al.}}{{Li, Liu, Zhang, Fang, Pan, Wang, et~al.}}}
+\bibcite{lightman2024lets}{{25}{2024}{{Lightman et~al.}}{{Lightman, Kosaraju, Burda, Edwards, Baker, Lee, Leike, Schulman, Sutskever, and Cobbe}}}
+\bibcite{lin2025fdb}{{26}{2025}{{Lin et~al.}}{{Lin, Lian, Li, Wang, Anumanchipalli, Liu, and Lee}}}
+\bibcite{lin2022teaching}{{27}{2022}{{Lin et~al.}}{{Lin, Hilton, and Evans}}}
+\bibcite{lugoloobi2026failures}{{28}{2026}{{Lugoloobi et~al.}}{{Lugoloobi, Foster, Bankes, and Russell}}}
+\bibcite{mahaut2024factual}{{29}{2024}{{Mahaut et~al.}}{{Mahaut, Aina, Czarnowska, Hardalov, Müller, and Màrquez}}}
+\bibcite{marks2024geometry}{{30}{2024}{{Marks and Tegmark}}{{}}}
+\bibcite{ong2024routellm}{{31}{2024}{{Ong et~al.}}{{Ong, Almahairi, Wu, Chiang, Wu, Gonzalez, Kadous, and Stoica}}}
+\bibcite{orgad2024llms}{{32}{2025}{{Orgad et~al.}}{{Orgad, Toker, Gekhman, Reichart, Szpektor, Kotek, and Belinkov}}}
+\bibcite{pleiss2020aum}{{33}{2020}{{Pleiss et~al.}}{{Pleiss, Zhang, Elenberg, and Weinberger}}}
+\bibcite{stivers2009universals}{{34}{2009}{{Stivers et~al.}}{{Stivers, Enfield, Brown, Englert, Hayashi, Heinemann, Hoymann, Rossano, de~Ruiter, Yoon, and Levinson}}}
+\bibcite{swayamdipta2020cartography}{{35}{2020}{{Swayamdipta et~al.}}{{Swayamdipta, Schwartz, Lourie, Wang, Hajishirzi, Smith, and Choi}}}
+\bibcite{taori2023alpaca}{{36}{2023}{{Taori et~al.}}{{Taori, Gulrajani, Zhang, Dubois, Li, Guestrin, Liang, and Hashimoto}}}
+\bibcite{varshney2026llmrouter}{{37}{2026}{{Varshney et~al.}}{{Varshney, Surla, Xu, Krishnan, Jeblick, Austin, Vaidya, and Onofrio}}}
+\bibcite{veluri2024syncllm}{{38}{2024}{{Veluri et~al.}}{{Veluri, Peloquin, Yu, Gong, and Gollakota}}}
+\bibcite{vu2023freshllms}{{39}{2023}{{Vu et~al.}}{{Vu, Iyyer, Wang, Constant, Wei, Wei, Tar, Sung, Zhou, Le, and Luong}}}
+\bibcite{wang2024fsm}{{40}{2024{a}}{{Wang et~al.}}{{Wang, Lu, Tang, Yan, Xia, and Xiong}}}
+\bibcite{wang2024freezeomni}{{41}{2024{b}}{{Wang et~al.}}{{Wang, Li, Fu, Shen, Xie, Li, Sun, and Ma}}}
+\bibcite{wang2024mmlupro}{{42}{2024{c}}{{Wang et~al.}}{{Wang, Ma, Zhang, Ni, et~al.}}}
+\bibcite{wei2024simpleqa}{{43}{2024}{{Wei et~al.}}{{Wei, Karina, Chung, Jiao, Papay, Glaese, Schulman, and Fedus}}}
+\bibcite{chrono2026thinking}{{44}{2026}{{Wu et~al.}}{{Wu, Zhang, Chen, Zhang, Tian, Yang, Yu, Liu, Hou, Hu, and Chng}}}
+\bibcite{zhang2024duplex}{{45}{2024}{{Zhang et~al.}}{{Zhang, Chen, Hu, Han, Xu, Xu, Zhao, Sun, and Liu}}}
+\@writefile{toc}{\contentsline {section}{\numberline {A}Current benchmark protocol and evidence scope}{12}{appendix.A}\protected@file@percent }
+\newlabel{app:current-protocol}{{A}{12}{Current benchmark protocol and evidence scope}{appendix.A}{}}
+\@writefile{toc}{\contentsline {paragraph}{Calibration ledger.}{12}{section*.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Capture and input availability.}{12}{section*.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Scored object and denominators.}{12}{section*.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Timing reconstruction.}{12}{section*.9}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Operating-point candidates, not replacement results.}{13}{section*.10}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Reported internal cached-outcome sweep. Nominal budget refers to calibration quantiles; accuracy and mean time are remix estimates. New native runs are required before replacing the main operating points.}}{13}{table.2}\protected@file@percent }
+\newlabel{tab:threshold-candidates}{{2}{13}{Reported internal cached-outcome sweep. Nominal budget refers to calibration quantiles; accuracy and mean time are remix estimates. New native runs are required before replacing the main operating points}{table.2}{}}
+\@writefile{toc}{\contentsline {paragraph}{Overlap audit and unresolved contamination.}{13}{section*.11}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {A.1}Internal task strata}{14}{subsection.A.1}\protected@file@percent }
+\newlabel{app:internal-strata}{{A.1}{14}{Internal task strata}{subsection.A.1}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Descriptive strata of the fixed internal test set. Local, aggressive (A), and always report answer-content accuracy (\%); call rate is the aggressive arm's realized rate. The final column counts question waveforms longer than the expert's 30-second input window. One recorded run per query and arm; no samples are removed or reweighted.}}{14}{table.3}\protected@file@percent }
+\newlabel{tab:internal-strata}{{3}{14}{Descriptive strata of the fixed internal test set. Local, aggressive (A), and always report answer-content accuracy (\%); call rate is the aggressive arm's realized rate. The final column counts question waveforms longer than the expert's 30-second input window. One recorded run per query and arm; no samples are removed or reweighted}{table.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {A.2}Subsequent protocol and relay diagnostics}{14}{subsection.A.2}\protected@file@percent }
+\newlabel{app:revision-diagnostics}{{A.2}{14}{Subsequent protocol and relay diagnostics}{subsection.A.2}{}}
+\@writefile{toc}{\contentsline {paragraph}{Previously completed internal repeats.}{14}{section*.12}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Validation excluded from the revised gate fit.}{14}{section*.13}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Offline formatter checks.}{15}{section*.14}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {B}Model roster}{15}{appendix.B}\protected@file@percent }
+\newlabel{app:models}{{B}{15}{Model roster}{appendix.B}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Model roster. ``Pair'' groups a fine-tune with its raw backbone control; the comparison statistic is always the within-pair difference.}}{15}{table.4}\protected@file@percent }
+\newlabel{tab:models}{{4}{15}{Model roster. ``Pair'' groups a fine-tune with its raw backbone control; the comparison statistic is always the within-pair difference}{table.4}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {C}Extended signal and readout analyses}{15}{appendix.C}\protected@file@percent }
+\newlabel{app:signal}{{C}{15}{Extended signal and readout analyses}{appendix.C}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces Signals on MiniCPM-o 4.5, judged failure labels. In-dist = calibration-split AUC (probes 5-fold out-of-fold); LOPO math = leave-one-pool-out AUC on held-out math; audio = the same readout under speech input (final/mid-layer probe: audio-input LOPO math / text-only calibration read on audio states). Full per-signal detail: Appendix~\ref {app:signal}.}}{15}{table.5}\protected@file@percent }
+\newlabel{tab:signals}{{5}{15}{Signals on MiniCPM-o 4.5, judged failure labels. In-dist = calibration-split AUC (probes 5-fold out-of-fold); LOPO math = leave-one-pool-out AUC on held-out math; audio = the same readout under speech input (final/mid-layer probe: audio-input LOPO math / text-only calibration read on audio states). Full per-signal detail: Appendix~\ref {app:signal}}{table.5}{}}
+\@writefile{toc}{\contentsline {paragraph}{The in-distribution shortcut, quantified.}{15}{section*.15}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{ROC curves.}{15}{section*.16}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces ROC on the calibration split. $p(\mathrm  {True})$-post leads but needs a full drafted answer; the probes and $p(\mathrm  {True})$-pre are pre-answer.}}{16}{figure.4}\protected@file@percent }
+\newlabel{fig:roc}{{4}{16}{ROC on the calibration split. $\ptrue $-post leads but needs a full drafted answer; the probes and $\ptrue $-pre are pre-answer}{figure.4}{}}
+\@writefile{toc}{\contentsline {paragraph}{$p(\mathrm  {True})$ backbone dependence.}{16}{section*.17}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Matched pairs.}{16}{section*.18}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Modality specificity of the cliff.}{16}{section*.19}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {6}{\ignorespaces LOPO transfer (AUC, held-out pool) of the final-layer last-token probe, Qwen2.5-7B family.}}{17}{table.6}\protected@file@percent }
+\newlabel{tab:lopo}{{6}{17}{LOPO transfer (AUC, held-out pool) of the final-layer last-token probe, Qwen2.5-7B family}{table.6}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {7}{\ignorespaces LOPO math transfer by depth (last-token probes).}}{17}{table.7}\protected@file@percent }
+\newlabel{tab:sweep}{{7}{17}{LOPO math transfer by depth (last-token probes)}{table.7}{}}
+\@writefile{toc}{\contentsline {paragraph}{Audio collapse of verbalized introspection.}{17}{section*.20}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {8}{\ignorespaces Pre-answer introspection under audio input. Trap $p_{\mathrm  {yes}}$ = mean stated probability of answering correctly on a 100\%-fail pool (lower is better).}}{17}{table.8}\protected@file@percent }
+\newlabel{tab:audioptrue}{{8}{17}{Pre-answer introspection under audio input. Trap $p_{\mathrm {yes}}$ = mean stated probability of answering correctly on a 100\%-fail pool (lower is better)}{table.8}{}}
+\@writefile{toc}{\contentsline {paragraph}{Probe $\oplus $ repeat-then-judge fusion.}{17}{section*.21}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Real-speech validation.}{17}{section*.22}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Synthesis.}{17}{section*.23}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{The deployed probe, and which calibration each result uses.}{17}{section*.24}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {9}{\ignorespaces Probe $\oplus $ repeat-then-judge $p(\mathrm  {True})$-pre fusion (native regime, deployed read point). $\Delta $ = fusion $-$ probe, bootstrap 95\% CI.}}{18}{table.9}\protected@file@percent }
+\newlabel{tab:rtjfusion}{{9}{18}{Probe $\oplus $ repeat-then-judge $\ptrue $-pre fusion (native regime, deployed read point). $\Delta $ = fusion $-$ probe, bootstrap 95\% CI}{table.9}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {D}Second duplex family: NemotronLabs-VoiceChat-11B}{18}{appendix.D}\protected@file@percent }
+\newlabel{app:nvda}{{D}{18}{Second duplex family: NemotronLabs-VoiceChat-11B}{appendix.D}{}}
+\@writefile{toc}{\contentsline {paragraph}{Probe training protocol.}{18}{section*.25}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Layer location.}{18}{section*.26}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Scope of the transfer test.}{18}{section*.27}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Pass-3 results.}{19}{section*.28}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Read-point boundary.}{19}{section*.29}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {10}{\ignorespaces Pass-3 NVDA probe read points under GPT-5.4-mini labels ($L_2$-logistic $C{=}10^{-4}$ on standardized features; 2{,}481-row analysis fits; external labels excluded from fitting, $n=249/250/249/200$). LOPO$_\text  {pool}$ is mean within-held-pool AUC over 13 eligible calibration pools. $\Delta $ is the paired-bootstrap difference in external mean from the single-layer answer-onset reference on the same replay.}}{19}{table.10}\protected@file@percent }
+\newlabel{tab:nvda-reads}{{10}{19}{Pass-3 NVDA probe read points under GPT-5.4-mini labels ($L_2$-logistic $C{=}10^{-4}$ on standardized features; 2{,}481-row analysis fits; external labels excluded from fitting, $n=249/250/249/200$). LOPO$_\text {pool}$ is mean within-held-pool AUC over 13 eligible calibration pools. $\Delta $ is the paired-bootstrap difference in external mean from the single-layer answer-onset reference on the same replay}{table.10}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Pass-3 NVDA method-transfer results under native-frame replay. (a) External AUC under GPT-5.4-mini labels by read point: the reported three-layer answer-onset probe reaches 0.813 mean AUC, while removing post-commit states costs about 0.03. Dots are the four pools. (b) Accuracy at fixed escalation budgets under official judges: the reported probe beats matched-rate random at every budget on average.}}{19}{figure.5}\protected@file@percent }
+\newlabel{fig:nvda-reads}{{5}{19}{Pass-3 NVDA method-transfer results under native-frame replay. (a) External AUC under GPT-5.4-mini labels by read point: the reported three-layer answer-onset probe reaches 0.813 mean AUC, while removing post-commit states costs about 0.03. Dots are the four pools. (b) Accuracy at fixed escalation budgets under official judges: the reported probe beats matched-rate random at every budget on average}{figure.5}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {E}What breaks at the output: mechanism audit}{19}{appendix.E}\protected@file@percent }
+\newlabel{app:mech}{{E}{19}{What breaks at the output: mechanism audit}{appendix.E}{}}
+\@writefile{toc}{\contentsline {paragraph}{Four mechanisms ruled out.}{20}{section*.30}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {11}{\ignorespaces Mechanism candidates for the final-layer inversion. Final-layer LOPO hard-math AUC on MiniCPM-o~4.5 unless noted; 0.366 is the unmodified baseline and 0.931 the L22 read.}}{20}{table.11}\protected@file@percent }
+\newlabel{tab:mech}{{11}{20}{Mechanism candidates for the final-layer inversion. Final-layer LOPO hard-math AUC on MiniCPM-o~4.5 unless noted; 0.366 is the unmodified baseline and 0.931 the L22 read}{table.11}{}}
+\@writefile{toc}{\contentsline {paragraph}{What does separate the models.}{20}{section*.31}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Direct turn-control tests.}{20}{section*.32}\protected@file@percent }
 \citation{hu2024routerbench}
-\@writefile{toc}{\contentsline {paragraph}{Direct turn-control tests.}{22}{section*.27}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{What we do not claim.}{22}{section*.28}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Non-destructive decomposition of the probe's held-out score at every depth. \textbf  {Left:} share of score variance carried by the layer's five dominant directions. \textbf  {Right:} transfer AUC of the residual (distributed) component, intact to the output on both raw backbones and on the omni-streaming control, decaying to inversion over the final layers of both duplex models.}}{22}{figure.7}\protected@file@percent }
-\newlabel{fig:mech}{{7}{22}{Non-destructive decomposition of the probe's held-out score at every depth. \textbf {Left:} share of score variance carried by the layer's five dominant directions. \textbf {Right:} transfer AUC of the residual (distributed) component, intact to the output on both raw backbones and on the omni-streaming control, decaying to inversion over the final layers of both duplex models}{figure.7}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {E}Query-surface router audit}{22}{appendix.E}\protected@file@percent }
-\newlabel{app:router}{{E}{22}{Query-surface router audit}{appendix.E}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Accuracy vs.\ escalation rate, frozen test split: gated escalation vs.\ random-escalation and pool-oracle (type-only) baselines between the small-only and big-only endpoints.}}{23}{figure.8}\protected@file@percent }
-\newlabel{fig:tradeoff}{{8}{23}{Accuracy vs.\ escalation rate, frozen test split: gated escalation vs.\ random-escalation and pool-oracle (type-only) baselines between the small-only and big-only endpoints}{figure.8}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces Identical training receipt for the external router and the two internal probes: the router never clears the majority-class baseline; both probes do, by 9--29 points.}}{23}{figure.9}\protected@file@percent }
-\newlabel{fig:receipt}{{9}{23}{Identical training receipt for the external router and the two internal probes: the router never clears the majority-class baseline; both probes do, by 9--29 points}{figure.9}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces Offline tradeoff for the $p(\mathrm  {True})$ signals (pre-answer and post-draft).}}{24}{figure.10}\protected@file@percent }
-\newlabel{fig:tradeoffptrue}{{10}{24}{Offline tradeoff for the $\ptrue $ signals (pre-answer and post-draft)}{figure.10}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {F}Gate timing details}{24}{appendix.F}\protected@file@percent }
-\newlabel{app:gatedetail}{{F}{24}{Gate timing details}{appendix.F}{}}
-\newlabel{sec:thinking}{{F}{24}{Against the model's own thinking mode}{section*.29}{}}
-\@writefile{toc}{\contentsline {paragraph}{Against the model's own thinking mode.}{24}{section*.29}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {10}{\ignorespaces Deployment policies, frozen test split ($n{=}240$); latencies measured.}}{24}{table.10}\protected@file@percent }
-\newlabel{tab:policy}{{10}{24}{Deployment policies, frozen test split ($n{=}240$); latencies measured}{table.10}{}}
-\@writefile{toc}{\contentsline {paragraph}{Measurement protocol.}{24}{section*.30}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces Fork-depth Pareto: per-layer wall-time vs.\ gate quality.}}{25}{figure.11}\protected@file@percent }
-\newlabel{fig:fork}{{11}{25}{Fork-depth Pareto: per-layer wall-time vs.\ gate quality}{figure.11}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {12}{\ignorespaces Cloud round-trip vs.\ local answer duration: probability the expert result arrives before the local answer ends.}}{25}{figure.12}\protected@file@percent }
-\newlabel{fig:overlap}{{12}{25}{Cloud round-trip vs.\ local answer duration: probability the expert result arrives before the local answer ends}{figure.12}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {G}Live-loop details}{25}{appendix.G}\protected@file@percent }
-\newlabel{app:livedetail}{{G}{25}{Live-loop details}{appendix.G}{}}
-\@writefile{toc}{\contentsline {paragraph}{What the signal detects.}{25}{section*.31}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Full live tables.}{25}{section*.32}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Time to first audible audio.}{26}{section*.33}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {11}{\ignorespaces Live streaming sweep, paired bootstrap 95\% CIs ($B{=}10^4$). Top: speakable subset ($n{=}218$); bottom: full pool ($n{=}240$). Gold-inject = escalated rows re-scored with gold-text expert answers; channel cost = paired difference. $^{*}$ CI excludes 0; $^{\dagger }$ CI lower bound at zero.}}{26}{table.11}\protected@file@percent }
-\newlabel{tab:live}{{11}{26}{Live streaming sweep, paired bootstrap 95\% CIs ($B{=}10^4$). Top: speakable subset ($n{=}218$); bottom: full pool ($n{=}240$). Gold-inject = escalated rows re-scored with gold-text expert answers; channel cost = paired difference. $^{*}$ CI excludes 0; $^{\dagger }$ CI lower bound at zero}{table.11}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {12}{\ignorespaces Measured response latency (s), $n{=}240$ per arm (latency is channel-independent). P99 on $n{=}240$ is indicative only.}}{26}{table.12}\protected@file@percent }
-\newlabel{tab:latency}{{12}{26}{Measured response latency (s), $n{=}240$ per arm (latency is channel-independent). P99 on $n{=}240$ is indicative only}{table.12}{}}
-\@writefile{toc}{\contentsline {paragraph}{Speculative prefetch, measured and dropped.}{26}{section*.34}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Conflicting-injection controls (172 sessions).}{26}{section*.35}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Uplink diagnostics.}{26}{section*.36}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{What we do not claim.}{21}{section*.33}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Non-destructive decomposition of the probe's held-out score at every depth. \textbf  {Left:} share of score variance carried by the layer's five dominant directions. \textbf  {Right:} transfer AUC of the residual (distributed) component, intact to the output on both raw backbones and on the omni-streaming control, decaying to inversion over the final layers of both duplex models.}}{21}{figure.6}\protected@file@percent }
+\newlabel{fig:mech}{{6}{21}{Non-destructive decomposition of the probe's held-out score at every depth. \textbf {Left:} share of score variance carried by the layer's five dominant directions. \textbf {Right:} transfer AUC of the residual (distributed) component, intact to the output on both raw backbones and on the omni-streaming control, decaying to inversion over the final layers of both duplex models}{figure.6}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {F}Query-surface router audit}{21}{appendix.F}\protected@file@percent }
+\newlabel{app:router}{{F}{21}{Query-surface router audit}{appendix.F}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {G}Gate timing details}{21}{appendix.G}\protected@file@percent }
+\newlabel{app:gatedetail}{{G}{21}{Gate timing details}{appendix.G}{}}
+\newlabel{sec:thinking}{{G}{21}{Against the model's own thinking mode}{section*.34}{}}
+\@writefile{toc}{\contentsline {paragraph}{Against the model's own thinking mode.}{21}{section*.34}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Accuracy vs.\ escalation rate, frozen test split: gated escalation vs.\ random-escalation and pool-oracle (type-only) baselines between the small-only and big-only endpoints.}}{22}{figure.7}\protected@file@percent }
+\newlabel{fig:tradeoff}{{7}{22}{Accuracy vs.\ escalation rate, frozen test split: gated escalation vs.\ random-escalation and pool-oracle (type-only) baselines between the small-only and big-only endpoints}{figure.7}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Identical training receipt for the external router and the two internal probes: the router never clears the majority-class baseline; both probes do, by 9--29 points.}}{22}{figure.8}\protected@file@percent }
+\newlabel{fig:receipt}{{8}{22}{Identical training receipt for the external router and the two internal probes: the router never clears the majority-class baseline; both probes do, by 9--29 points}{figure.8}{}}
+\@writefile{toc}{\contentsline {paragraph}{Measurement protocol.}{22}{section*.35}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces Offline tradeoff for the $p(\mathrm  {True})$ signals (pre-answer and post-draft).}}{23}{figure.9}\protected@file@percent }
+\newlabel{fig:tradeoffptrue}{{9}{23}{Offline tradeoff for the $\ptrue $ signals (pre-answer and post-draft)}{figure.9}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {12}{\ignorespaces Deployment policies, frozen test split ($n{=}240$); latencies measured.}}{23}{table.12}\protected@file@percent }
+\newlabel{tab:policy}{{12}{23}{Deployment policies, frozen test split ($n{=}240$); latencies measured}{table.12}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {H}Live-loop details}{23}{appendix.H}\protected@file@percent }
+\newlabel{app:livedetail}{{H}{23}{Live-loop details}{appendix.H}{}}
+\@writefile{toc}{\contentsline {paragraph}{What the signal detects.}{23}{section*.36}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Benchmark and historical tables.}{23}{section*.37}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Historical turn-based time to first audible audio.}{23}{section*.38}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces Fork-depth Pareto: per-layer wall-time vs.\ gate quality.}}{24}{figure.10}\protected@file@percent }
+\newlabel{fig:fork}{{10}{24}{Fork-depth Pareto: per-layer wall-time vs.\ gate quality}{figure.10}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces Cloud round-trip vs.\ local answer duration: probability the expert result arrives before the local answer ends.}}{24}{figure.11}\protected@file@percent }
+\newlabel{fig:overlap}{{11}{24}{Cloud round-trip vs.\ local answer duration: probability the expert result arrives before the local answer ends}{figure.11}{}}
+\@writefile{toc}{\contentsline {paragraph}{Speculative prefetch, measured and dropped.}{24}{section*.39}\protected@file@percent }
 \citation{vu2023freshllms}
-\@writefile{lof}{\contentsline {figure}{\numberline {13}{\ignorespaces Accuracy vs.\ per-arm P50 latency (speakable subset), both scoring views, with the simulated-P50 random reference.}}{27}{figure.13}\protected@file@percent }
-\newlabel{fig:pareto-latency}{{13}{27}{Accuracy vs.\ per-arm P50 latency (speakable subset), both scoring views, with the simulated-P50 random reference}{figure.13}{}}
-\@writefile{toc}{\contentsline {paragraph}{Boundary query classes.}{27}{section*.37}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Demonstration system.}{27}{section*.38}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {14}{\ignorespaces Three real sessions from recorded timers: expert beats the stall phrase (seamless); expert outlives it (dead air, the P99 signature); gate stays closed (local answer fully decoded 0.4\,s after end of turn). Speech occupancy is estimated at 150\,wpm (hatched); the measured arms are text-out, so no vocoder onset is plotted.}}{28}{figure.14}\protected@file@percent }
-\newlabel{fig:timeline-live}{{14}{28}{Three real sessions from recorded timers: expert beats the stall phrase (seamless); expert outlives it (dead air, the P99 signature); gate stays closed (local answer fully decoded 0.4\,s after end of turn). Speech occupancy is estimated at 150\,wpm (hatched); the measured arms are text-out, so no vocoder onset is plotted}{figure.14}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {H}Duplex-validation sweep: the gate under the talker}{28}{appendix.H}\protected@file@percent }
-\newlabel{app:duplexval}{{H}{28}{Duplex-validation sweep: the gate under the talker}{appendix.H}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {13}{\ignorespaces Native-protocol answer-content sweep on the internal test set ($n{=}240$), query-bootstrap 95\% CIs ($B{=}5000$); one recorded run per query and tier. Random follows the original Table~\ref {tab:transfer} mixture convention, using the gate rate and the always-policy endpoint. Expert returned text scores 0.765 on 238 rows. Top: native sessions with the TTS relay. Bottom, for reference: the retired turn-based harness loop on the same queries (audio input, text output).}}{25}{table.13}\protected@file@percent }
+\newlabel{tab:live}{{13}{25}{Native-protocol answer-content sweep on the internal test set ($n{=}240$), query-bootstrap 95\% CIs ($B{=}5000$); one recorded run per query and tier. Random follows the original Table~\ref {tab:transfer} mixture convention, using the gate rate and the always-policy endpoint. Expert returned text scores 0.765 on 238 rows. Top: native sessions with the TTS relay. Bottom, for reference: the retired turn-based harness loop on the same queries (audio input, text output)}{table.13}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {14}{\ignorespaces Reconstructed time to first audio (TTFA, s), internal native benchmark, $n{=}240$ per arm. Escalated rows end when the relay waveform has been synthesized (expert wait plus blocking TTS); local rows end at answer-text completion, an upper bound on their first audio. The relay waveform's own playback duration (``play'', mean over escalated rows) is not latency and is listed separately; it is inflated by code, \LaTeX  , and markdown in expert answers being synthesized verbatim. These are not client-side audible completion times (Appendix~\ref {app:current-protocol}). P95/P99 summarize the sampled query distribution and are unstable at this sample size.}}{25}{table.14}\protected@file@percent }
+\newlabel{tab:latency}{{14}{25}{Reconstructed time to first audio (TTFA, s), internal native benchmark, $n{=}240$ per arm. Escalated rows end when the relay waveform has been synthesized (expert wait plus blocking TTS); local rows end at answer-text completion, an upper bound on their first audio. The relay waveform's own playback duration (``play'', mean over escalated rows) is not latency and is listed separately; it is inflated by code, \LaTeX , and markdown in expert answers being synthesized verbatim. These are not client-side audible completion times (Appendix~\ref {app:current-protocol}). P95/P99 summarize the sampled query distribution and are unstable at this sample size}{table.14}{}}
+\@writefile{toc}{\contentsline {paragraph}{Conflicting-injection controls (172 sessions).}{25}{section*.40}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Uplink diagnostics.}{25}{section*.41}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Boundary query classes.}{25}{section*.42}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {12}{\ignorespaces Historical plotting view of native answer-content accuracy against reconstructed P50 time to first audio; see the endpoint caveats in Appendix~\ref {app:current-protocol}.}}{26}{figure.12}\protected@file@percent }
+\newlabel{fig:pareto-latency}{{12}{26}{Historical plotting view of native answer-content accuracy against reconstructed P50 time to first audio; see the endpoint caveats in Appendix~\ref {app:current-protocol}}{figure.12}{}}
+\@writefile{toc}{\contentsline {paragraph}{Demonstration system.}{26}{section*.43}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {I}Duplex-validation sweep: the gate under the talker}{26}{appendix.I}\protected@file@percent }
+\newlabel{app:duplexval}{{I}{26}{Duplex-validation sweep: the gate under the talker}{appendix.I}{}}
 \citation{lin2025fdb}
-\@writefile{toc}{\contentsline {paragraph}{Floor control under escalation: barge-in vs.\ backchannel.}{29}{section*.39}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {13}{\ignorespaces Floor-control sweep over the deployed voice loop. Short backchannels (lexicon bursts) vs.\ genuine barge-ins (pool queries spoken over the talker), by the phase the overlap lands in; the last three phases exist only under escalation. Interrupt latency p50 1.39--1.40\,s from overlap onset in every phase; escalated-turn aborts discard the pending expert answer and the barge-in speech becomes the next turn.}}{29}{table.13}\protected@file@percent }
-\newlabel{tab:floor}{{13}{29}{Floor-control sweep over the deployed voice loop. Short backchannels (lexicon bursts) vs.\ genuine barge-ins (pool queries spoken over the talker), by the phase the overlap lands in; the last three phases exist only under escalation. Interrupt latency p50 1.39--1.40\,s from overlap onset in every phase; escalated-turn aborts discard the pending expert answer and the barge-in speech becomes the next turn}{table.13}{}}
-\@writefile{toc}{\contentsline {paragraph}{Concurrent prefill: interleaved listen/speak in one KV stream.}{29}{section*.40}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{The full loop in the concurrent regime.}{30}{section*.41}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{A serendipitous recovery behavior.}{30}{section*.42}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {14}{\ignorespaces The full escalation loop in the concurrent regime (exploratory: one session per arm, 360-row in-regime calibration, teacher-forced carrier), all pools, judge-matched to Table\nobreakspace  {}\ref  {tab:transfer} (OAB official for TriviaQA/WebQ/Llama; ours for SD-QA/Reasoning/internal; VoiceBench 1--5 for AlpacaEval). Gate = in-regime probe, per-pool label-free quantile thresholds; tier columns are headed by each pool's realized rate, and the \emph  {rand} row under each pool is the matched-rate random remix of the same never/always outcomes (20k draws; $p$ = P(random $\ge $ gate), marked $^{*}p{<}.05$, $^{**}p{<}.01$). Accuracies in \%; AUC = in-regime probe vs.\ always-local arm failure, decimals. Script: \texttt  {scripts/20\_conclive\_random\_check.py}.}}{31}{table.14}\protected@file@percent }
-\newlabel{tab:conclive}{{14}{31}{The full escalation loop in the concurrent regime (exploratory: one session per arm, 360-row in-regime calibration, teacher-forced carrier), all pools, judge-matched to Table~\ref {tab:transfer} (OAB official for TriviaQA/WebQ/Llama; ours for SD-QA/Reasoning/internal; VoiceBench 1--5 for AlpacaEval). Gate = in-regime probe, per-pool label-free quantile thresholds; tier columns are headed by each pool's realized rate, and the \emph {rand} row under each pool is the matched-rate random remix of the same never/always outcomes (20k draws; $p$ = P(random $\ge $ gate), marked $^{*}p{<}.05$, $^{**}p{<}.01$). Accuracies in \%; AUC = in-regime probe vs.\ always-local arm failure, decimals. Script: \texttt {scripts/20\_conclive\_random\_check.py}}{table.14}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {I}Fixed-threshold transfer and the expert-benefit oracle}{31}{appendix.I}\protected@file@percent }
-\newlabel{app:fixedthr}{{I}{31}{Fixed-threshold transfer and the expert-benefit oracle}{appendix.I}{}}
-\@writefile{toc}{\contentsline {paragraph}{One absolute threshold, six pools.}{31}{section*.43}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Does the gate find failures the expert can fix?}{31}{section*.44}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {15}{\ignorespaces One absolute threshold ($\tau {=}0.628$, frozen on the internal pool) applied verbatim to every pool; gold-inject view. $\Delta $ is fixed-$\tau $ accuracy minus a random reference at the same realized rate (paired bootstrap over ids, $B{=}10^4$, seed 42). AUC columns re-score the same frozen scores against local failure and against expert benefit ($y{=}$ local wrong $\wedge $ expert right, base rate in the last column). Rates and accuracies in \%; AUC in decimals.}}{32}{table.15}\protected@file@percent }
-\newlabel{tab:fixedthr}{{15}{32}{One absolute threshold ($\tau {=}0.628$, frozen on the internal pool) applied verbatim to every pool; gold-inject view. $\Delta $ is fixed-$\tau $ accuracy minus a random reference at the same realized rate (paired bootstrap over ids, $B{=}10^4$, seed 42). AUC columns re-score the same frozen scores against local failure and against expert benefit ($y{=}$ local wrong $\wedge $ expert right, base rate in the last column). Rates and accuracies in \%; AUC in decimals}{table.15}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {16}{\ignorespaces Oracle frontier at matched escalation budgets (gold-inject view): random reference / deployed quantile gate / benefit oracle, which escalates the true $y{=}1$ cases first. The gate clears random everywhere; the oracle column is the remaining headroom. Accuracies in \%.}}{32}{table.16}\protected@file@percent }
-\newlabel{tab:oracle}{{16}{32}{Oracle frontier at matched escalation budgets (gold-inject view): random reference / deployed quantile gate / benefit oracle, which escalates the true $y{=}1$ cases first. The gate clears random everywhere; the oracle column is the remaining headroom. Accuracies in \%}{table.16}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {J}Transfer latency shapes}{32}{appendix.J}\protected@file@percent }
-\newlabel{app:transferdetail}{{J}{32}{Transfer latency shapes}{appendix.J}{}}
-\@writefile{toc}{\contentsline {paragraph}{Matched-rate precision.}{32}{section*.45}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{The median left-fold.}{32}{section*.46}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {15}{\ignorespaces Mixture decomposition of Llama Questions latency per arm: kept-local P50 falls 1.52$\to $0.43\,s as the probe strips the slowest local decodes while escalated rows pay a flat $\sim $3\,s expert round-trip; the arm median (dashed) is their mixture.}}{33}{figure.15}\protected@file@percent }
-\newlabel{fig:transfer-decomp}{{15}{33}{Mixture decomposition of Llama Questions latency per arm: kept-local P50 falls 1.52$\to $0.43\,s as the probe strips the slowest local decodes while escalated rows pay a flat $\sim $3\,s expert round-trip; the arm median (dashed) is their mixture}{figure.15}{}}
-\@writefile{toc}{\contentsline {paragraph}{AlpacaEval scale caveats.}{33}{section*.47}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {K}Full-pool and per-family figures}{33}{appendix.K}\protected@file@percent }
-\newlabel{app:fullpool}{{K}{33}{Full-pool and per-family figures}{appendix.K}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {L}External-benchmark figure set}{33}{appendix.L}\protected@file@percent }
-\newlabel{app:families}{{L}{33}{External-benchmark figure set}{appendix.L}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {16}{\ignorespaces Dual-view live tradeoff, full pool ($n{=}240$); companion to Figure\nobreakspace  {}\ref  {fig:dualview}.}}{34}{figure.16}\protected@file@percent }
-\newlabel{fig:app-dualview-full}{{16}{34}{Dual-view live tradeoff, full pool ($n{=}240$); companion to Figure~\ref {fig:dualview}}{figure.16}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {17}{\ignorespaces Replication-noise audit: same query, same audio, re-run across arms. Kept-local verdicts flip 2.3--18.8\% by pool; repeated escalation 0.7--10.6\%; implied paired SE 0.009--0.028.}}{34}{figure.17}\protected@file@percent }
-\newlabel{fig:app-noise}{{17}{34}{Replication-noise audit: same query, same audio, re-run across arms. Kept-local verdicts flip 2.3--18.8\% by pool; repeated escalation 0.7--10.6\%; implied paired SE 0.009--0.028}{figure.17}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {18}{\ignorespaces Speech TriviaQA, Speech Web Questions, SD-QA: dual-view (left) and accuracy--latency (right).}}{35}{figure.18}\protected@file@percent }
-\newlabel{fig:app-fam1}{{18}{35}{Speech TriviaQA, Speech Web Questions, SD-QA: dual-view (left) and accuracy--latency (right)}{figure.18}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {19}{\ignorespaces Llama Questions, Reasoning QA (zh), VoiceBench AlpacaEval: dual-view (left) and accuracy--latency (right).}}{36}{figure.19}\protected@file@percent }
-\newlabel{fig:app-fam2}{{19}{36}{Llama Questions, Reasoning QA (zh), VoiceBench AlpacaEval: dual-view (left) and accuracy--latency (right)}{figure.19}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {M}Judge and self-evaluation prompts}{37}{appendix.M}\protected@file@percent }
-\newlabel{app:prompts}{{M}{37}{Judge and self-evaluation prompts}{appendix.M}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {N}Reproducibility}{37}{appendix.N}\protected@file@percent }
-\newlabel{app:repro}{{N}{37}{Reproducibility}{appendix.N}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {O}The native full-duplex regime}{37}{appendix.O}\protected@file@percent }
-\newlabel{app:native}{{O}{37}{The native full-duplex regime}{appendix.O}{}}
-\@writefile{toc}{\contentsline {paragraph}{Recalibration.}{37}{section*.48}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {17}{\ignorespaces Native-regime probe AUC at the deployed listen$\to $speak read point, under the OFFICIAL serving configuration (final deployed system; the chronological narrative above measured under inherited wrapper defaults). The merged refit adds the 2{,}700-row public-benchmark expansion (incl.\ 400 Mandarin rows) to the official core. En-4 mean .770 vs.\ turn-based .771: the English regime cost is eliminated; the Mandarin slice restores Reasoning-zh from the all-English chance collapse. The last column is the deployed gate: same 5{,}228 features, but every training label is the judged outcome of the same native-duplex answer the features were read from (instead of a separate deterministic turn-based answer). Label source is a wash for ranking (En-4 mean .771 either way; the paired bootstrap crosses zero on six of seven pools, TriviaQA $+$.035 [$+$.006,\,$+$.065] being the exception), so the deployed gate uses the in-regime definition. Internal test is scored against both the earlier harness labels and the native-judged labels of the same 240 queries.}}{38}{table.17}\protected@file@percent }
-\newlabel{tab:native-auc}{{17}{38}{Native-regime probe AUC at the deployed listen$\to $speak read point, under the OFFICIAL serving configuration (final deployed system; the chronological narrative above measured under inherited wrapper defaults). The merged refit adds the 2{,}700-row public-benchmark expansion (incl.\ 400 Mandarin rows) to the official core. En-4 mean .770 vs.\ turn-based .771: the English regime cost is eliminated; the Mandarin slice restores Reasoning-zh from the all-English chance collapse. The last column is the deployed gate: same 5{,}228 features, but every training label is the judged outcome of the same native-duplex answer the features were read from (instead of a separate deterministic turn-based answer). Label source is a wash for ranking (En-4 mean .771 either way; the paired bootstrap crosses zero on six of seven pools, TriviaQA $+$.035 [$+$.006,\,$+$.065] being the exception), so the deployed gate uses the in-regime definition. Internal test is scored against both the earlier harness labels and the native-judged labels of the same 240 queries}{table.17}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {18}{\ignorespaces Native-regime gated accuracy under the official serving config and the deployed merged (official$+$exp3) gate (8ad remix: native scores select, native local outcomes + cached always-arm expert outcomes mix). $p$ = permutation vs.\ matched-rate random; escalation rate in parentheses. Thresholds are the deployed per-language operating points: tier quantiles of the training-set out-of-fold scores, computed separately for the English and the Mandarin training rows (no evaluation pool is consulted); the Mandarin pool uses the zh thresholds. On frozen test the aggressive tier reaches the always-escalate ceiling at 49\% of the expert cost. Reasoning-zh, which the global English thresholds never reached (1--2\% escalation), now escalates at its nominal rates and beats matched-rate random at the two lower tiers. AlpacaEval (measured under the 2{,}542-row official gate) stays a clean honest negative.}}{38}{table.18}\protected@file@percent }
-\newlabel{tab:native-validity}{{18}{38}{Native-regime gated accuracy under the official serving config and the deployed merged (official$+$exp3) gate (8ad remix: native scores select, native local outcomes + cached always-arm expert outcomes mix). $p$ = permutation vs.\ matched-rate random; escalation rate in parentheses. Thresholds are the deployed per-language operating points: tier quantiles of the training-set out-of-fold scores, computed separately for the English and the Mandarin training rows (no evaluation pool is consulted); the Mandarin pool uses the zh thresholds. On frozen test the aggressive tier reaches the always-escalate ceiling at 49\% of the expert cost. Reasoning-zh, which the global English thresholds never reached (1--2\% escalation), now escalates at its nominal rates and beats matched-rate random at the two lower tiers. AlpacaEval (measured under the 2{,}542-row official gate) stays a clean honest negative}{table.18}{}}
-\@writefile{toc}{\contentsline {paragraph}{Validity.}{38}{section*.49}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Is the Mandarin gap a language gap?}{39}{section*.50}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Reasoning coverage and in-context rows: the read point saturates.}{39}{section*.51}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Ceiling, stability, and the pre-answer read.}{40}{section*.52}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Live validation.}{40}{section*.53}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Dialogue-act gating.}{40}{section*.54}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Multi-turn grounding.}{41}{section*.55}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Floor control, natively.}{41}{section*.56}\protected@file@percent }
-\gdef \@abspage@last{41}
+\citation{lin2025fdb}
+\@writefile{lof}{\contentsline {figure}{\numberline {13}{\ignorespaces Three real sessions from recorded timers: expert beats the stall phrase (seamless); expert outlives it (dead air, the P99 signature); gate stays closed (local answer fully decoded 0.4\,s after end of turn). Speech occupancy is estimated at 150\,wpm (hatched); the measured arms are text-out, so no vocoder onset is plotted.}}{27}{figure.13}\protected@file@percent }
+\newlabel{fig:timeline-live}{{13}{27}{Three real sessions from recorded timers: expert beats the stall phrase (seamless); expert outlives it (dead air, the P99 signature); gate stays closed (local answer fully decoded 0.4\,s after end of turn). Speech occupancy is estimated at 150\,wpm (hatched); the measured arms are text-out, so no vocoder onset is plotted}{figure.13}{}}
+\@writefile{toc}{\contentsline {paragraph}{Floor control under escalation: barge-in vs.\ backchannel.}{27}{section*.44}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {15}{\ignorespaces Floor-control sweep over the deployed voice loop. Short backchannels (lexicon bursts) vs.\ genuine barge-ins (pool queries spoken over the talker), by the phase the overlap lands in; the last three phases exist only under escalation. Interrupt latency p50 1.39--1.40\,s from overlap onset in every phase; escalated-turn aborts discard the pending expert answer and the barge-in speech becomes the next turn.}}{28}{table.15}\protected@file@percent }
+\newlabel{tab:floor}{{15}{28}{Floor-control sweep over the deployed voice loop. Short backchannels (lexicon bursts) vs.\ genuine barge-ins (pool queries spoken over the talker), by the phase the overlap lands in; the last three phases exist only under escalation. Interrupt latency p50 1.39--1.40\,s from overlap onset in every phase; escalated-turn aborts discard the pending expert answer and the barge-in speech becomes the next turn}{table.15}{}}
+\@writefile{toc}{\contentsline {paragraph}{Concurrent prefill: interleaved listen/speak in one KV stream.}{28}{section*.45}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{The full loop in the concurrent regime.}{28}{section*.46}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {16}{\ignorespaces The full escalation loop in the concurrent regime (exploratory: one session per arm, 360-row in-regime calibration, teacher-forced carrier), all pools, judge-matched to the MiniCPM upper block of Table~\ref {tab:transfer} (OAB official for TriviaQA/WebQ/Llama; ours for SD-QA/Reasoning/internal; VoiceBench 1--5 for AlpacaEval). Gate = in-regime probe, per-pool label-free quantile thresholds; tier columns are headed by each pool's realized rate, and the \emph  {rand} row under each pool is the matched-rate random remix of the same never/always outcomes (20k draws; $p$ = P(random $\ge $ gate), marked $^{*}p{<}.05$, $^{**}p{<}.01$). Accuracies in \%; AUC = in-regime probe vs.\ always-local arm failure, decimals. Script: \texttt  {scripts/20\_conclive\_random\_check.py}.}}{29}{table.16}\protected@file@percent }
+\newlabel{tab:conclive}{{16}{29}{The full escalation loop in the concurrent regime (exploratory: one session per arm, 360-row in-regime calibration, teacher-forced carrier), all pools, judge-matched to the MiniCPM upper block of Table~\ref {tab:transfer} (OAB official for TriviaQA/WebQ/Llama; ours for SD-QA/Reasoning/internal; VoiceBench 1--5 for AlpacaEval). Gate = in-regime probe, per-pool label-free quantile thresholds; tier columns are headed by each pool's realized rate, and the \emph {rand} row under each pool is the matched-rate random remix of the same never/always outcomes (20k draws; $p$ = P(random $\ge $ gate), marked $^{*}p{<}.05$, $^{**}p{<}.01$). Accuracies in \%; AUC = in-regime probe vs.\ always-local arm failure, decimals. Script: \texttt {scripts/20\_conclive\_random\_check.py}}{table.16}{}}
+\@writefile{toc}{\contentsline {paragraph}{A serendipitous recovery behavior.}{29}{section*.47}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {J}Fixed-threshold transfer and the expert-benefit oracle}{30}{appendix.J}\protected@file@percent }
+\newlabel{app:fixedthr}{{J}{30}{Fixed-threshold transfer and the expert-benefit oracle}{appendix.J}{}}
+\@writefile{toc}{\contentsline {paragraph}{One absolute threshold, six pools.}{30}{section*.48}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Does the gate find failures the expert can fix?}{30}{section*.49}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {K}Native escalation rates and historical transfer latency}{30}{appendix.K}\protected@file@percent }
+\newlabel{app:transferdetail}{{K}{30}{Native escalation rates and historical transfer latency}{appendix.K}{}}
+\@writefile{toc}{\contentsline {paragraph}{Rates for the main MiniCPM block.}{30}{section*.50}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Scope of the historical analysis below.}{30}{section*.51}\protected@file@percent }
+\citation{openbmb2026minicpmo}
+\@writefile{lot}{\contentsline {table}{\numberline {17}{\ignorespaces One absolute threshold ($\tau {=}0.628$, frozen on the internal pool) applied verbatim to every pool; gold-inject view. $\Delta $ is fixed-$\tau $ accuracy minus a random reference at the same realized rate (paired bootstrap over ids, $B{=}10^4$, seed 42). AUC columns re-score the same frozen scores against local failure and against expert benefit ($y{=}$ local wrong $\wedge $ expert right, base rate in the last column). Rates and accuracies in \%; AUC in decimals.}}{31}{table.17}\protected@file@percent }
+\newlabel{tab:fixedthr}{{17}{31}{One absolute threshold ($\tau {=}0.628$, frozen on the internal pool) applied verbatim to every pool; gold-inject view. $\Delta $ is fixed-$\tau $ accuracy minus a random reference at the same realized rate (paired bootstrap over ids, $B{=}10^4$, seed 42). AUC columns re-score the same frozen scores against local failure and against expert benefit ($y{=}$ local wrong $\wedge $ expert right, base rate in the last column). Rates and accuracies in \%; AUC in decimals}{table.17}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {18}{\ignorespaces Oracle frontier at matched escalation budgets (gold-inject view): random reference / deployed quantile gate / benefit oracle, which escalates the true $y{=}1$ cases first. The gate clears random everywhere; the oracle column is the remaining headroom. Accuracies in \%.}}{31}{table.18}\protected@file@percent }
+\newlabel{tab:oracle}{{18}{31}{Oracle frontier at matched escalation budgets (gold-inject view): random reference / deployed quantile gate / benefit oracle, which escalates the true $y{=}1$ cases first. The gate clears random everywhere; the oracle column is the remaining headroom. Accuracies in \%}{table.18}{}}
+\@writefile{toc}{\contentsline {paragraph}{Matched-rate precision.}{31}{section*.52}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{The median left-fold.}{31}{section*.53}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{AlpacaEval scale caveats.}{31}{section*.54}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {L}Full-pool and per-family figures}{31}{appendix.L}\protected@file@percent }
+\newlabel{app:fullpool}{{L}{31}{Full-pool and per-family figures}{appendix.L}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {19}{\ignorespaces Realized escalation rates (\%) for the MiniCPM native results in the upper block and caption of Table~\ref {tab:transfer}. These are measured rates, distinct from the nominal calibration budgets and from the NVDA replay budgets. Local-only makes no expert calls.}}{32}{table.19}\protected@file@percent }
+\newlabel{tab:native-rates}{{19}{32}{Realized escalation rates (\%) for the MiniCPM native results in the upper block and caption of Table~\ref {tab:transfer}. These are measured rates, distinct from the nominal calibration budgets and from the NVDA replay budgets. Local-only makes no expert calls}{table.19}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {14}{\ignorespaces Mixture decomposition of Llama Questions latency per arm: kept-local P50 falls 1.52$\to $0.43\,s as the probe strips the slowest local decodes while escalated rows pay a flat $\sim $3\,s expert round-trip; the arm median (dashed) is their mixture.}}{32}{figure.14}\protected@file@percent }
+\newlabel{fig:transfer-decomp}{{14}{32}{Mixture decomposition of Llama Questions latency per arm: kept-local P50 falls 1.52$\to $0.43\,s as the probe strips the slowest local decodes while escalated rows pay a flat $\sim $3\,s expert round-trip; the arm median (dashed) is their mixture}{figure.14}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {M}External-benchmark figure set}{32}{appendix.M}\protected@file@percent }
+\newlabel{app:families}{{M}{32}{External-benchmark figure set}{appendix.M}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {15}{\ignorespaces Local (never-arm) accuracy per pool: native full-duplex sessions vs.\ the retired turn-based harness loop, same judges. The native floor is 1--8 points lower on five pools and 2.5 points higher on the internal set; bars are bootstrap 95\% CIs.}}{33}{figure.15}\protected@file@percent }
+\newlabel{fig:app-dualview-full}{{15}{33}{Local (never-arm) accuracy per pool: native full-duplex sessions vs.\ the retired turn-based harness loop, same judges. The native floor is 1--8 points lower on five pools and 2.5 points higher on the internal set; bars are bootstrap 95\% CIs}{figure.15}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {16}{\ignorespaces Replication-noise audit: same query, same audio, re-run across arms. Kept-local verdicts flip 2.3--18.8\% by pool; repeated escalation 0.7--10.6\%; implied paired SE 0.009--0.028.}}{33}{figure.16}\protected@file@percent }
+\newlabel{fig:app-noise}{{16}{33}{Replication-noise audit: same query, same audio, re-run across arms. Kept-local verdicts flip 2.3--18.8\% by pool; repeated escalation 0.7--10.6\%; implied paired SE 0.009--0.028}{figure.16}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {17}{\ignorespaces Speech TriviaQA, Speech Web Questions, SD-QA: native full-duplex live arms, delivered accuracy vs.\ realized escalation rate (left) and vs.\ P50 time-to-answer (right). Orange dashed on TriviaQA and WebQ: the same gate with the retired talker-steering relay.}}{34}{figure.17}\protected@file@percent }
+\newlabel{fig:app-fam1}{{17}{34}{Speech TriviaQA, Speech Web Questions, SD-QA: native full-duplex live arms, delivered accuracy vs.\ realized escalation rate (left) and vs.\ P50 time-to-answer (right). Orange dashed on TriviaQA and WebQ: the same gate with the retired talker-steering relay}{figure.17}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {18}{\ignorespaces Llama Questions, Reasoning QA (zh), VoiceBench AlpacaEval: native full-duplex live arms, delivered accuracy (AlpacaEval: judge score, 1--5) vs.\ realized escalation rate (left) and vs.\ P50 time-to-answer (right).}}{35}{figure.18}\protected@file@percent }
+\newlabel{fig:app-fam2}{{18}{35}{Llama Questions, Reasoning QA (zh), VoiceBench AlpacaEval: native full-duplex live arms, delivered accuracy (AlpacaEval: judge score, 1--5) vs.\ realized escalation rate (left) and vs.\ P50 time-to-answer (right)}{figure.18}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {N}Judge and self-evaluation prompts}{36}{appendix.N}\protected@file@percent }
+\newlabel{app:prompts}{{N}{36}{Judge and self-evaluation prompts}{appendix.N}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {O}Reproducibility}{36}{appendix.O}\protected@file@percent }
+\newlabel{app:repro}{{O}{36}{Reproducibility}{appendix.O}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {P}The native full-duplex regime}{36}{appendix.P}\protected@file@percent }
+\newlabel{app:native}{{P}{36}{The native full-duplex regime}{appendix.P}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {20}{\ignorespaces Native-regime probe AUC at the deployed listen$\to $speak read point, under the OFFICIAL serving configuration (final deployed system; the chronological narrative above measured under inherited wrapper defaults). The merged refit adds the 2{,}700-row public-benchmark expansion (incl.\ 400 Mandarin rows) to the official core. En-4 mean .770 vs.\ turn-based .771: the English regime cost is eliminated; the Mandarin slice restores Reasoning-zh from the all-English chance collapse. The last column is the deployed gate: same 5{,}228 features, but every training label is the judged outcome of the same native-duplex answer the features were read from (instead of a separate deterministic turn-based answer). Label source is a wash for ranking (En-4 mean .771 either way; the paired bootstrap crosses zero on six of seven pools, TriviaQA $+$.035 [$+$.006,\,$+$.065] being the exception), so the deployed gate uses the in-regime definition. Internal test is scored against both the earlier harness labels and the native-judged labels of the same 240 queries.}}{37}{table.20}\protected@file@percent }
+\newlabel{tab:native-auc}{{20}{37}{Native-regime probe AUC at the deployed listen$\to $speak read point, under the OFFICIAL serving configuration (final deployed system; the chronological narrative above measured under inherited wrapper defaults). The merged refit adds the 2{,}700-row public-benchmark expansion (incl.\ 400 Mandarin rows) to the official core. En-4 mean .770 vs.\ turn-based .771: the English regime cost is eliminated; the Mandarin slice restores Reasoning-zh from the all-English chance collapse. The last column is the deployed gate: same 5{,}228 features, but every training label is the judged outcome of the same native-duplex answer the features were read from (instead of a separate deterministic turn-based answer). Label source is a wash for ranking (En-4 mean .771 either way; the paired bootstrap crosses zero on six of seven pools, TriviaQA $+$.035 [$+$.006,\,$+$.065] being the exception), so the deployed gate uses the in-regime definition. Internal test is scored against both the earlier harness labels and the native-judged labels of the same 240 queries}{table.20}{}}
+\@writefile{toc}{\contentsline {paragraph}{Recalibration.}{37}{section*.55}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Benchmark-overlap audit.}{37}{section*.56}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Validity.}{37}{section*.57}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {21}{\ignorespaces Native-regime gated accuracy under the official serving config and the deployed merged (official$+$exp3) gate (8ad remix: native scores select, native local outcomes + cached always-arm expert outcomes mix). $p$ = permutation vs.\ matched-rate random; escalation rate in parentheses. Thresholds are the deployed per-language operating points: tier quantiles of the training-set out-of-fold scores, computed separately for the English and the Mandarin training rows (no evaluation pool is consulted); the Mandarin pool uses the zh thresholds. On frozen test the aggressive tier reaches the always-escalate ceiling at 49\% of the expert cost. Reasoning-zh, which the global English thresholds never reached (1--2\% escalation), now escalates at its nominal rates and beats matched-rate random at the two lower tiers. AlpacaEval (measured under the 2{,}542-row official gate) stays a clean honest negative.}}{38}{table.21}\protected@file@percent }
+\newlabel{tab:native-validity}{{21}{38}{Native-regime gated accuracy under the official serving config and the deployed merged (official$+$exp3) gate (8ad remix: native scores select, native local outcomes + cached always-arm expert outcomes mix). $p$ = permutation vs.\ matched-rate random; escalation rate in parentheses. Thresholds are the deployed per-language operating points: tier quantiles of the training-set out-of-fold scores, computed separately for the English and the Mandarin training rows (no evaluation pool is consulted); the Mandarin pool uses the zh thresholds. On frozen test the aggressive tier reaches the always-escalate ceiling at 49\% of the expert cost. Reasoning-zh, which the global English thresholds never reached (1--2\% escalation), now escalates at its nominal rates and beats matched-rate random at the two lower tiers. AlpacaEval (measured under the 2{,}542-row official gate) stays a clean honest negative}{table.21}{}}
+\@writefile{toc}{\contentsline {paragraph}{Is the Mandarin gap a language gap?}{38}{section*.58}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Reasoning coverage and in-context rows: the read point saturates.}{38}{section*.59}\protected@file@percent }
+\citation{swayamdipta2020cartography,pleiss2020aum}
+\citation{cheang2025recall}
+\citation{david2025temporal}
+\@writefile{toc}{\contentsline {paragraph}{Ceiling, stability, and the pre-answer read.}{39}{section*.60}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Live validation.}{40}{section*.61}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Dialogue-act gating.}{40}{section*.62}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Multi-turn grounding.}{40}{section*.63}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Floor control, natively.}{41}{section*.64}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {P.1}Failure type and later-read diagnostics}{41}{subsection.P.1}\protected@file@percent }
+\newlabel{app:readtime}{{P.1}{41}{Failure type and later-read diagnostics}{subsection.P.1}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {22}{\ignorespaces Separate native read-time sweep: failure-prediction AUC. External macro equally weights five speech-QA pools. This evaluates representation availability during generation, not a live deferred routing policy or its audible latency.}}{41}{table.22}\protected@file@percent }
+\newlabel{tab:readtime}{{22}{41}{Separate native read-time sweep: failure-prediction AUC. External macro equally weights five speech-QA pools. This evaluates representation availability during generation, not a live deferred routing policy or its audible latency}{table.22}{}}
+\gdef \@abspage@last{42}

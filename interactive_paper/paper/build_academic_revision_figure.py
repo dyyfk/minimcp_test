@@ -106,8 +106,8 @@ def make_figure(native_path, weights_path, output_dir):
                xticklabels=LABELS, yticks=[1, 3, 10, 30, 100, 300],
                yticklabels=['1', '3', '10', '30', '100', '300'])
         tx.minorticks_off()
-        tx.set_ylabel('Reconstructed time (s)', labelpad=6)
-        tx.set_title('Timing diagnostic', loc='left', pad=5, fontweight='normal')
+        tx.set_ylabel('Time to first audio (s)', labelpad=6)
+        tx.set_title('Time to first audio', loc='left', pad=5, fontweight='normal')
         if row == 2:
             ax.set_xlabel('Realized expert call rate (%)', labelpad=5)
             tx.set_xlabel('Recorded arm', labelpad=5)
