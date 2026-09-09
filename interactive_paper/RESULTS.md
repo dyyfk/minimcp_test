@@ -7234,3 +7234,58 @@ Regenerated: `paper/revision_data/native_summary.json`,
 `native_bench_summary.json`). Paper text: Table tab:latency, timing
 reconstruction paragraph, §live, §setup, fig captions. `main.pdf` rebuilt with
 pdfLaTeX + BibTeX (tectonic's bundle host is unreachable from the sandbox).
+
+## Section 4 presentation and shared-data correction (2026-09-09; no new runs)
+
+The main figure had applied post-hoc knowledge/math weights of 0.25 to the
+Internal accuracy and call-rate coordinates, although the main table still
+used the original 240-query mixture. Removed these plotting weights. Both
+the MiniCPM table rows and figure now read `paper/revision_data/native_summary.json`;
+the figure builder validates all six MiniCPM table rows before drawing.
+All 35 original judged parquet hashes and recomputed statistics were checked
+against that summary, without new inference, threshold fitting, or rejudging.
+
+Internal local/conservative/balanced/aggressive/always accuracies remain
+40.8/46.7/54.2/62.9/70.4%; realized call rates remain
+0.0/8.3/25.0/51.7/99.2%. The figure now plots those same observations.
+Mean/P50 timing and the original random-mixture convention are unchanged.
+
+Reasoning-zh was removed from the main-table columns at the author's request.
+The four-pool macro now equally weights TriviaQA, WebQ, Llama Questions, and
+SD-QA. It is a change of reported scope, not a new experimental improvement.
+Historical Mandarin results and their original five-pool analyses remain in
+the appendix and experiment log. Internal and per-pool values are unchanged.
+The independent NVDA block retains its prior four-pool values.
+
+| MiniCPM arm/reference | Four-pool macro accuracy (%) | Gain over local (pp) |
+|---|---:|---:|
+| local | 61.5 | — |
+| conservative | 63.1 | +1.6 |
+| balanced | 70.0 | +8.5 |
+| aggressive | 82.9 | +21.4 |
+| matched random, aggressive | 77.1 | +15.6 |
+| measured always | 88.6 | +27.1 |
+
+Means and differences are computed before one-decimal rounding. Aggressive
+exceeds random by 5.9 points using the unrounded means. Experimental setup
+and long caption details move to Appendix A.1; the main table uses 9pt text
+instead of 7pt. Audit: `paper/revision_data/section4_consistency_audit.json`.
+
+Follow-up: removed the `expert text (relay-free)` row from the main table,
+its generator, and the accompanying main-text row comparison at the
+author's request. The measured always-escalate row and plotted endpoints
+are unchanged; returned-text diagnostics remain in the archived results.
+
+## Staged restoration of weighted Internal figure (2026-09-09; no new runs)
+
+At the author's request, restored only the selected Internal accuracy/call-rate
+curve using knowledge/math weights of 0.25 and weights of 1 for other
+categories. Local/conservative/balanced/aggressive/always weighted accuracy:
+42.3/50.2/63.7/72.7/77.7%; weighted call rate: 0.0/7.3/25.5/53.7/99.2%.
+The weighted aggressive random-mixture reference is 61.3%.
+
+The main table and its generator are unchanged in this step; their Internal
+values still use the original weights. Timing and external curves are also
+unchanged. Figure notes/caption and protocol descriptions identify this
+weighting difference. No model inference or rejudging was run.
+See `paper/revision_data/internal_figure_restore_audit.json`.

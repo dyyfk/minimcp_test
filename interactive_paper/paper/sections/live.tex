@@ -1,5 +1,4 @@
-\section{Escalation Results}
-\label{sec:results}
+\input{sections/readout_results}
 \input{sections/revision_table}
 
 \subsection{Internal accuracy and timing cost}
@@ -38,31 +37,28 @@ cached-outcome sweep suggested nominal 15/25/40\% as candidates;
 those settings require new runs and are not substituted for the
 measured 15/30/50\% recipe here (Appendix~\ref{app:current-protocol}).
 
-Table~\ref{tab:transfer}'s measured always arm and expert-text row
-score different objects. On the 238 internal always-arm rows with expert scores,
-returned text reaches 76.5\% and intended relay content reaches
-71.0\%; the full 240-row always arm scores 70.4\%. This paired
-5.5-point gap combines relay content changes with judge variability;
-it does not isolate formatting loss or acoustic intelligibility.
-The table's ``relay-free bound'' is a returned-text reference, not a
-proven upper bound on every routed or spoken answer.
-
 \begin{figure}[t]
   \centering
   \includegraphics[width=\linewidth]{revision_accuracy_latency}
   \caption{\textbf{Accuracy gains and timing costs on three pools.}
-  Left: observed mean answer-content accuracy against realized expert
-  call rate; C/B/A denote conservative/balanced/aggressive. The dashed
+  Left: answer-content accuracy against expert call rate. The Internal
+  curve uses post-hoc weights of 0.25 for knowledge and math and 1 for
+  other categories, for both accuracy and call rate; all 240 queries
+  remain included. The Internal column of Table~\ref{tab:transfer}
+  retains its original query weights. External curves are unweighted.
+  C/B/A denote conservative/balanced/aggressive. The dashed
   line uses the original Table~\ref{tab:transfer} random-mixture
   convention (\S\ref{sec:evalproto}). The horizontal
   always-arm reference passes through the measured always point;
-  it is not an oracle bound. Right: mean, P50, and P95 of the reconstructed
-  time to first audio on a log scale. L/W denote local/always. Each point
+  it is not an oracle bound. Right: mean and P50 of the reconstructed
+  time to first audio on a log scale, using the original query mixture.
+  L/W denote local/always. Each point
   uses the original recorded pass, with one run per query and arm;
   no repeated-run uncertainty is implied. Local rows end at answer-text
   completion and escalated rows when the relay waveform is synthesized;
-  playback duration is excluded (\S\ref{sec:evalproto}). All five external
-  QA pools, including the weaker cases, appear in the upper block of
+  playback duration is excluded (\S\ref{sec:evalproto}). Internal P95/P99
+  are reported in Table~\ref{tab:latency}. All four external
+  QA pools appear in the upper block of
   Table~\ref{tab:transfer}.}
   \label{fig:dualview}
 \end{figure}

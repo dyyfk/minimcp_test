@@ -1,0 +1,42 @@
+\subsection{Layer and position matter}
+\label{sec:duplex}
+We first evaluate the read location independently of the expert path.
+A layer-by-position sweep under leave-one-pool-out (LOPO) transfer
+localizes the text-input failure to late last-token states
+(Figure~\ref{fig:layersweep}). A last-token probe at L22 reaches
+\textbf{0.931} AUC on held-out math, compared with the final-layer
+baseline of 0.372, while mean pooling reduces the
+late-layer degradation. A raw Qwen backbone, subsampled to match
+per-pool failure rates, remains near 0.96; the Qwen2.5 control family
+shows a similar ordering (Table~\ref{tab:lopo}). These comparisons
+associate the degradation with the tested fine-tuned checkpoints,
+without isolating a causal training objective.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\linewidth]{layer_sweep}
+  \caption{\textbf{Text-input transfer depends on layer and position.}
+  LOPO math AUC across layers: late last-token reads deteriorate on
+  the duplex checkpoints, while mid-layer reads and raw-backbone
+  controls remain predictive. Layer 22 is the MiniCPM-o~4.5 read
+  location used for the native gate. This plot does not show an
+  equivalent collapse under audio calibration and audio input.}
+  \label{fig:layersweep}
+\end{figure}
+
+With audio calibration and audio input, the final-layer probe reaches
+0.936 on LOPO math. We retain L22 for robustness across the tested
+conditions; the mechanism behind the text-input degradation remains
+open (Appendix~\ref{app:mech}).
+
+\subsection{Text-to-speech representation transfer}
+\label{sec:xmodal}
+A text-calibrated L22 probe evaluated on speech-input states reaches
+\textbf{0.855} AUC. Transfer stabilizes around the middle of the
+network, replicates on MiniCPM-o~2.6 and Qwen2.5-Omni, and is weaker
+in the frozen-backbone Freeze-Omni adapter control. The mid-layer
+pattern also appears on 200 SD-QA human recordings
+(Appendix~\ref{app:signal}). These results concern representation
+transfer. The escalation experiments below use a separately fitted
+native probe with three L22 positions, as defined in
+\S\ref{sec:readlocation}.

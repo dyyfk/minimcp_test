@@ -1,0 +1,74 @@
+{
+  "scope": "Restore the weighted Internal figure only; main-table update deferred by author",
+  "weights": {
+    "hard-knowledge": 0.25,
+    "hard-math": 0.25,
+    "other_categories": 1
+  },
+  "query_count": 240,
+  "input": "revision_data/joint_reweighting_ideas.json",
+  "native_summary_sha256": "b2b32051cdc0fa7b80abf7ebe8d23a6d0240e79470d5a68fad1f660492229b70",
+  "main_table_sha256_before": "de39dccb3ac1e99646fb703e1ddc08bf990c48a2ac4903a05c978ed2c0c60461",
+  "main_table_sha256_after": "de39dccb3ac1e99646fb703e1ddc08bf990c48a2ac4903a05c978ed2c0c60461",
+  "main_table_bytes_unchanged": true,
+  "table_generator_bytes_unchanged": true,
+  "original_native_summary_bytes_unchanged": true,
+  "timing_values_unchanged": true,
+  "external_plot_values_unchanged": true,
+  "internal_plotted_values": {
+    "accuracy_x": [
+      0.0,
+      7.333333333333333,
+      25.5,
+      53.666666666666664,
+      99.16666666666667
+    ],
+    "accuracy_y": [
+      42.333333333333336,
+      50.16666666666667,
+      63.66666666666667,
+      72.66666666666667,
+      77.66666666666666
+    ],
+    "random_x": [
+      0,
+      100
+    ],
+    "random_y": [
+      42.333333333333336,
+      77.66666666666666
+    ],
+    "always_reference": 77.66666666666666,
+    "timing": {
+      "mean_s": [
+        5.7035833333333334,
+        7.5805625,
+        8.6637125,
+        14.393687499999999,
+        17.6036125
+      ],
+      "p50_s": [
+        3.599,
+        4.156,
+        5.3315,
+        7.9825,
+        11.504999999999999
+      ]
+    }
+  },
+  "internal_weighted_aggressive_random_pct": 61.29555555555555,
+  "figure_matches_selected_weighting": true,
+  "main_table_figure_internal_weighting_equal": false,
+  "model_runs": 0,
+  "pdf_sha256": "771f3f7f09b14809938299c3648540cbb55346ebadd6c897748894604aa0b435",
+  "figure_pdf_sha256": "7ba13a989b1e755155f20b9f8343fb3a80ff5f0be2a8115aa12d46553c188362",
+  "overleaf_zip_sha256": "e544a1c1107a06c183dc859961fea8249af47b442e681c67efd82a7e0d6af8d5",
+  "pdf_pages": 42,
+  "figure_page": 6,
+  "figure_visually_reviewed": true,
+  "unresolved_references": 0,
+  "overfull_boxes": 0,
+  "type3_fonts": 0,
+  "all_fonts_embedded": true,
+  "package_sources_verified": true
+}

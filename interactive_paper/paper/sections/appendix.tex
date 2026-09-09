@@ -5,11 +5,16 @@
 
 \section{Current benchmark protocol and evidence scope}
 \label{app:current-protocol}
-Table~\ref{tab:transfer} retains the original main-results presentation:
+Table~\ref{tab:transfer} reports the original recorded outcomes:
 its upper block reports MiniCPM native-benchmark accuracy, while its
 lower block reports NVDA native-frame replay. Figure~\ref{fig:dualview}
 is recomputed from the committed MiniCPM judged rows with the TTS relay
-and follows the upper block's random-mixture convention. The 35 input
+and follows the upper block's random-mixture formula. Its Internal
+accuracy and call rate use post-hoc knowledge/math weights of 0.25
+and weights of 1 for other categories; timing and the main table
+retain their original query weights. The main table covers four English
+external QA pools; archived Mandarin results remain in the appendix
+and do not enter that table's macro average. The 35 input
 parquets match the hashes in the accompanying benchmark audit.
 Steer-relay runs and later patched-model variants use different
 protocols and are not pooled with these arms. The
@@ -19,6 +24,8 @@ native variants. Their settings and denominators differ. They are
 not additional repeats of the main benchmark, and historical
 ``delivered'' or ``latency'' labels must be interpreted using each
 experiment's scored object and timer endpoint.
+
+\input{sections/setup_details}
 
 \paragraph{Calibration ledger.}
 Representation probes use 360 calibration queries from the original
@@ -67,8 +74,8 @@ text. Local generation uses \texttt{generate\_audio=False}; relay
 synthesis records a duration, but no local/relay audio or client
 playback timestamps are archived. The field named \texttt{transcript}
 is uplink ASR of the user's question, not transcription of an answer.
-The upper block's ``delivered accuracy'' therefore means answer-content
-accuracy. Each arm has 240 internal rows. The always
+The upper block reports answer-content accuracy; older artifacts
+call this ``delivered accuracy''. Each arm has 240 internal rows. The always
 policy commits and escalates on 238 (99.2\%); its two non-commit
 rows remain in the denominator. Expert-text scores exist for 238
 rows, and returned-text/relay comparisons use this matched subset.
@@ -113,8 +120,9 @@ overlap, missing fields are zero-filled by the plotting recipe, and
 the two paths end at different output events. Local $t_i^{\rm answer}$
 ends at text generation, an upper bound on the duplex talker's first
 audio; client-audible completion is not measured. Figure
-\ref{fig:dualview} reports the mean and within-arm P50/P95 over
-queries in the original recorded pass. These quantiles do not
+\ref{fig:dualview} reports the mean and within-arm P50 over
+queries in the original recorded pass; Table~\ref{tab:latency}
+retains internal P95/P99. These quantiles do not
 measure run-to-run uncertainty, and query bootstraps in historical
 figures are not substitutes for repeated executions.
 
@@ -316,9 +324,9 @@ mid-layer (L22) probe & 0.866 & \textbf{0.931} & \textbf{0.855} (text-calibrated
 \end{tabular}
 \end{table}
 
-\paragraph{The in-distribution shortcut, quantified.} The numbers
-behind \S\ref{sec:audit}'s claim that the final-layer probe's
-in-distribution AUC of 0.822 is mostly pool identity: a linear read of
+\paragraph{The in-distribution shortcut, quantified.} The final-layer
+probe's in-distribution AUC of 0.822 reflects substantial pool-identity
+signal: a linear read of
 the same hidden state classifies a query's source pool at 95.8\%
 accuracy; a pool-identity oracle alone reaches AUC 0.715; and
 appending true pool labels to the probe's features moves it
@@ -482,7 +490,8 @@ and in both cases the breakage is duplex-fine-tune-specific).
 \paragraph{The deployed probe, and which calibration each result
 uses.} The mechanistic probe is a single-position L22 read (4096-d),
 fit on the 360-query calibration split; every representational result
-(\S\ref{sec:signal}, Appendices~\ref{app:signal},~\ref{app:mech}) is
+(\S\ref{sec:duplex}--\ref{sec:xmodal},
+Appendices~\ref{app:signal},~\ref{app:mech}) is
 this probe. The deployed probe adds two zero-latency
 pooled positions (an 8-token tail mean and the running user-audio
 mean; 12{,}288-d), refit on a calibration mix widened to 2{,}310 public-benchmark
@@ -648,7 +657,7 @@ cliff is not the audio/text split that \S\ref{sec:xmodal} measures.
 (iii) \textbf{More shortcut available late.} Source-pool identity is
 linearly decodable at 0.88--0.96 at every depth, in the duplex
 model and its raw backbone alike: the query-type shortcut of
-\S\ref{sec:audit} is not something the late layers add; it is
+Appendix~\ref{app:signal} is not something the late layers add; it is
 what remains once the competence signal stops being readable.
 (iv) \textbf{Wholesale representational drift.} Raw linear CKA between
 the duplex model and its backbone appears to collapse late
@@ -1443,7 +1452,7 @@ internal frozen test & 46.3 & 49.2 & 53.3 & 54.3 & 60.8 & 68.3 & 65.0 & 74.2 & 8
 
 \paragraph{Rates for the main MiniCPM block.}
 Table~\ref{tab:native-rates} supplies the per-pool realized rates
-referenced by the caption of Table~\ref{tab:transfer}. They differ
+referenced by the MiniCPM block of Table~\ref{tab:transfer}. They differ
 from the nominal 15/30/50\% calibration budgets. The NVDA lower
 block uses its own 15/30/50\% replay budgets and is not covered by
 this rate table.
@@ -1619,9 +1628,16 @@ PyTorch 2.8.0, Transformers 4.51.0; single-H100 instances).
 The revised benchmark figures, appendix rate table, and MiniCPM
 metric summary are generated from judged native rows by \texttt{paper/build\_revision\_figures.py}; its summary
 records input hashes, sample counts, scoring fields, and the timing
-and mixture definitions. The original main Table~\ref{tab:transfer}
-is preserved and is not rewritten by this script; its NVDA block
-belongs to the separate replay experiment in Appendix~\ref{app:nvda}. Main thresholds are per-language calibration
+and mixture definitions. From this same summary,
+\texttt{paper/build\_main\_results.py} generates the MiniCPM rows of
+Table~\ref{tab:transfer}, and
+\texttt{paper/build\_academic\_revision\_figure.py} renders
+Figure~\ref{fig:dualview}, with Internal category weights from the
+archived joint-mixture sensitivity summary. The figure build checks
+source hashes, query counts, plotted coordinates, and unchanged timing;
+the main table currently retains the original weights.
+The NVDA block belongs to the separate replay experiment in
+Appendix~\ref{app:nvda}. Main thresholds are per-language calibration
 quantiles. Historical per-pool quantiles are confined to the experiments
 that explicitly use them. The audit snapshot
 \texttt{data/paper\_revision\_pr0907/} supplies the calibration manifest,
@@ -1894,7 +1910,7 @@ the training out-of-fold scores, and .767 against .876 on frozen
 test; AUC restricted to same-pool pairs is .743 (train) and .820
 (test). Per-question discrimination is thus $+$.06--.11 of AUC on
 top of the type prior, the same decomposition as the $n{=}600$ audit
-of Section~\ref{sec:audit}; at a 30\% budget the prior alone recovers
+in Appendix~\ref{app:signal}; at a 30\% budget the prior alone recovers
 .475 failure recall against the probe's .506 (random .299). The
 external pools, each a single source, measure the within-pool
 component directly (.70--.81, Table~\ref{tab:native-auc}).
@@ -1959,7 +1975,9 @@ expert p50 4.4--5.7\,s, wait p50 5--6 chunks, fire$\to$relay first
 audio p50 $\sim$7--8\,s. Selection is visible live: unfired subsets
 score .478/.573 against the .371 unconditional local floor.
 
-\paragraph{Dialogue-act gating.} Full duplex creates commits that are
+\paragraph{Dialogue-act gating.}
+\label{app:actgate}
+Full duplex creates commits that are
 not answers: after a barge-in or a backchannel the head speaks to
 manage the floor (``Okay.''), and the failure probe is
 out-of-distribution there, on 194 TTS'd floor-management stims
@@ -1970,9 +1988,16 @@ fix is a second linear head on the same L22 read,
 info-seeking vs.\ floor-management, which separates the two acts
 perfectly (OOF AUC 1.000); thresholded at the question-side 0.5th
 percentile it costs 0.5\% of true escalations and admits 0\% of floor
-stims. Escalation requires both heads:
-$\mathrm{act}\ge\tau_a \wedge P(\mathrm{fail})\ge\tau$. The deployed
-demo answers floor turns naturally and reports the act score per
+stims. Let $a(x)$ denote the information-seeking score and $\tau_a$
+its threshold. With failure score $s(x)$ and the risk threshold
+$\tau_{\ell}$ for language $\ell$, the complete escalation rule is
+\begin{equation}
+ d(x)=\mathbf{1}\{s(x)\geq\tau_{\ell}\}\,
+       \mathbf{1}\{a(x)\geq\tau_a\},
+ \label{eq:jointgate}
+\end{equation}
+where $d(x)=1$ requests the expert. The deployed demo answers floor
+turns naturally and reports the act score per
 commit; the failure probe's calibration is untouched.
 
 Live use then sharpened both heads within minutes: scripted pools

@@ -75,3 +75,30 @@ explicitly scoped; published AlpacaEval performance points to Table 4.
 See `revision_data/citation_audit_2026-09-08.md` for all 45 cited works and
 the limits of the numerical checks. RouterBench's exact experiment and
 FDB's per-sample results have not been independently recomputed.
+
+## Internal figure restoration (2026-09-09)
+
+The author requested restoring the selected weighted Internal curve first,
+while leaving the main table unchanged. The figure now uses knowledge/math
+weights of 0.25 and weights of 1 for the other categories, from
+`revision_data/joint_reweighting_ideas.json`. Accuracy and call rate are both
+weighted. All 240 queries remain included. Timing and external curves keep
+their original values from `revision_data/native_summary.json`.
+
+To rebuild only the figure:
+
+```bash
+python build_academic_revision_figure.py
+```
+
+This command validates source hashes, sample counts, plotted coordinates,
+and unchanged timing. It never writes the main table. The Internal figure
+and table intentionally use different weighting during this staged revision;
+`build_main_results.py --check --figure-values ...` will flag that difference.
+The table itself can still be checked with `python build_main_results.py --check`.
+
+`revision_data/internal_figure_restore_audit.json` records the restored
+coordinates and unchanged main-table hash. The earlier
+`section4_consistency_audit.json` is a historical unweighted snapshot.
+Experimental setup details and replay qualifications remain in
+`sections/setup_details.tex`.

@@ -1,0 +1,100 @@
+\subsection{Experimental setup details}
+\label{app:setup-details}
+\paragraph{Models, data, and calibration.}
+The target is MiniCPM-o~4.5 (9B, based on Qwen3-8B). Matched controls
+include raw backbones, a second MiniCPM generation, Qwen2.5-Omni,
+Qwen2-Audio, and Freeze-Omni (Table~\ref{tab:models}). Representation
+analyses use bf16, greedy decoding, and seed 42. The native benchmark
+uses sampled decoding under the serving configuration
+($T=0.7$, top-$k=20$); these are different experimental regimes.
+The escalation expert is \texttt{gpt-5.5} with low reasoning effort.
+
+The internal 600-query set contains SimpleQA traps
+\citep{wei2024simpleqa}, MMLU-Pro knowledge questions
+\citep{wang2024mmlupro}, TriviaQA facts \citep{joshi2017triviaqa},
+Dolly/Alpaca chat prompts \citep{conover2023dolly,taori2023alpaca},
+and GSM8K/MATH problems
+\citep{cobbe2021gsm8k,hendrycks2021math,lightman2024lets}.
+Its original 360/240 split and test composition remain fixed.
+LLM judges score answer adequacy. A stronger re-judge of the
+representation-study labels agrees on 96.2\% of text and 94.5\% of
+audio cases; this agreement is not a validation of speech delivery.
+
+Three calibration regimes must be distinguished: 360 examples for
+single-position representation probes; 2,310 for the earlier
+turn-based three-position gate; and 5,228 for the native gate, refitted
+on native features and judged native-answer outcomes. The native fit
+contains 4,986 core and 242 fresh training rows; thresholds use
+five-fold out-of-fold scores from the core rows, grouped by language.
+Conservative, balanced, and aggressive target nominal calibration
+rates of 15/30/50\%; realized rates on new pools can differ.
+Neither fresh-row scores nor external evaluation-pool quantiles enter
+these thresholds. Seven fitting rows overlap external questions.
+A 5,221-row deduplicated artifact is available, but was not used in
+the recorded benchmark; its reported offline effects are small
+(Appendix~\ref{app:current-protocol}).
+
+\paragraph{Native benchmark protocol and metrics.}
+The MiniCPM upper block of Table~\ref{tab:transfer} evaluates the
+internal test split and four external English speech-QA pools:
+Speech TriviaQA, Speech Web Questions, and Speech Llama Questions
+from OpenAudioBench
+\citep{openaudiobench2025}, plus SD-QA recordings from VoiceBench
+\citep{faisal2021sdqa,chen2024voicebench}. VoiceBench AlpacaEval is
+reported separately on its 1--5 scale. The archived Mandarin Speech
+Reasoning QA pool is retained in the appendix diagnostics and excluded
+from the main-table macro average. External audio comes from the
+benchmark releases; internal questions use a fixed TTS rendering.
+Each query has a separate native-protocol session for each arm:
+local-only, three gate tiers, and always-escalate. There is one
+recorded run per query and arm, without repeated-run averaging.
+
+Audio enters the local model in one-second chunks. At an escalation,
+transcription and the expert produce a text answer, which is cleaned
+and capped at 400 characters for teacher-forced TTS relay. We report
+\emph{answer-content accuracy}: the judge sees local generated text
+or the intended relay text, not a transcription of played audio.
+The benchmark disables local audio generation. Uplink transcription
+uses the final 30 seconds of the full prerecorded question: it can
+access unconsumed audio at early onset and loses the beginning of
+longer questions. Thus the experiment evaluates routing under this
+input protocol, without establishing strictly causal interaction.
+
+For the MiniCPM block, the reported random reference is
+\[
+ A_{\rm mix}(r)=(1-r)A_{\rm local}+rA_{\rm always},
+\]
+where $r$ is the gate's realized escalation rate. This follows
+Table~\ref{tab:transfer}'s convention of treating the always policy
+as the full-escalation endpoint; it is an analytical mixture, not a
+separately run randomized arm. Non-commits and a sensitivity check
+using the actual always-arm rate are reported in
+Appendix~\ref{app:current-protocol}.
+Timing is reconstructed from chunk offsets and logged stage durations
+as time to first audio: the relay path ends when its synthesized
+waveform is ready (expert wait plus blocking TTS), excluding the
+waveform's playback duration; the local path ends at text generation.
+Figure~\ref{fig:dualview} reports mean and P50 of this
+diagnostic; Table~\ref{tab:latency} retains internal P95/P99.
+These summaries do not measure client-audible completion
+(Appendix~\ref{app:current-protocol}).
+
+
+\paragraph{Main-table replay and open-ended scores.}
+The NVDA lower block re-mixes local and cached expert outcomes after
+pass-3 replay through the native frame protocol
+(Appendix~\ref{app:nvda}). External columns retain cached local
+outcomes and the prior 2,481-row fit. The Internal column judges the
+same pass-3 answers on all 240 queries and uses a 2,258-row refit that
+excludes these test IDs, with cached pass-2 training labels. All
+policies leave the 17 queries without an answer-onset read local,
+so 15/30/50\% scoreable-query budgets realize 14/28/47\% overall.
+This Internal result is post-selection because probe architecture
+selection included this split.
+
+AlpacaEval uses a separate 1--5 scale: MiniCPM changes from 3.68
+locally to 4.01 at 44\% escalation (rounded-anchor matched random
+3.91; always-escalate 4.20, compared with 4.95 for returned expert
+text). The pass-3 NVDA ranking changes from 3.55 to 4.51 versus
+4.23 for random. These open-ended scores do not enter the QA macro
+average.

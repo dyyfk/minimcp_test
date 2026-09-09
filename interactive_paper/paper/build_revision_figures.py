@@ -1,7 +1,7 @@
 """Regenerate benchmark figures and appendix rates from native benchmark rows.
 
-The original teaser_v2 figure and original main Table 1 are preserved unchanged.
-This script never rewrites sections/revision_table.tex.
+The MiniCPM main-table rows and Figure 3 use this same summary.
+The separate NVDA replay block and original teaser_v2 remain unchanged.
 
 Usage: python build_revision_figures.py --data-dir ../data/native_bench
 Requires numpy, pandas, pyarrow, matplotlib. Does not run models or call APIs.
@@ -14,11 +14,10 @@ import hashlib
 import json
 from pathlib import Path
 
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from build_main_results import write_table
+from build_academic_revision_figure import make_figure
 
 HERE = Path(__file__).resolve().parent
 ARMS = ['never', 'conservative', 'balanced', 'aggressive', 'always']
@@ -31,10 +30,6 @@ SPECS = {
     'sreason': ('Reasoning QA (zh)', 'adequate'),
     'valpaca': ('AlpacaEval', 'vb_score'),
 }
-BLUE, ORANGE, GREY, GREEN = '#2466A3', '#CB6B25', '#67727D', '#267968'
-plt.rcParams.update({'font.family': 'DejaVu Sans', 'font.size': 9,
-                     'axes.spines.top': False, 'axes.spines.right': False,
-                     'pdf.fonttype': 42, 'ps.fonttype': 42})
 
 
 def load_rows(data_dir, pool, arm, col):
@@ -102,14 +97,15 @@ def generate(data_dir):
            'timing_status': 'reconstructed time to first audio (TTFA): escalated = onset + stall + wait_chunks + relay TTS synthesis; local = onset + answer text complete. Relay playback duration (relay_audio_s) is excluded and reported as relay_playback_mean_s',
            'pools': summary}
     (out / 'native_summary.json').write_text(json.dumps(doc, indent=2) + '\n')
+    write_table(summary, HERE / 'sections/revision_table.tex')
     write_rate_table(summary)
-    draw_pairs(summary)
+    make_figure(out / 'native_summary.json', HERE / 'figures')
     print(json.dumps({p: {a: {k: v for k, v in x.items() if k in ['rate', 'mean_s','p95_s','gain_vs_mixture']} for a,x in q.items()} for p,q in summary.items() if p in ['frozen','striviaqa','sdqa']}, indent=2))
 
 
 def write_rate_table(s):
     lines = [r'\begin{table}[h]', r'\centering\small',
-        r'\caption{Realized escalation rates (\%) for the MiniCPM native results in the upper block and caption of Table~\ref{tab:transfer}. These are measured rates, distinct from the nominal calibration budgets and from the NVDA replay budgets. Local-only makes no expert calls.}',
+        r'\caption{Realized escalation rates (\%) for the MiniCPM native results in the upper block of Table~\ref{tab:transfer}, plus the archived Mandarin and separate AlpacaEval pools. These are measured rates, distinct from the nominal calibration budgets and from the NVDA replay budgets. Local-only makes no expert calls.}',
         r'\label{tab:native-rates}', r'\begin{tabular}{lrrrrr}', r'\toprule',
         r'Pool & $n$ & Conservative & Balanced & Aggressive & Always \\', r'\midrule']
     for pool in SPECS:
@@ -119,35 +115,6 @@ def write_rate_table(s):
     lines += [r'\bottomrule',r'\end{tabular}',r'\end{table}']
     (HERE/'sections/native_rates.tex').write_text('\n'.join(lines)+'\n')
 
-
-def draw_pairs(s):
-    fig, axes=plt.subplots(3,2,figsize=(7.1,6.35),gridspec_kw={'hspace':.42,'wspace':.31})
-    for i,pool in enumerate(['frozen','striviaqa','sdqa']):
-        p=s[pool];ax,tx=axes[i]
-        x=np.array([p[a]['rate']*100 for a in ARMS]);y=np.array([p[a]['accuracy']*100 for a in ARMS])
-        ax.grid(axis='y',color='#E5E9ED',lw=.65,zorder=0)
-        ax.plot([0,100],[y[0],y[-1]],'--',lw=1.2,color=GREY,label='Random mixture')
-        ax.axhline(y[-1],ls=':',lw=1.25,color=GREEN)
-        ax.plot(x,y,'o-',color=BLUE,lw=1.8,ms=4.7,zorder=4)
-        ax.scatter([x[-1]],[y[-1]],color=GREEN,marker='s',s=28,zorder=5)
-        for j,label in enumerate(['L','C','B','A','W']):
-            dx,dy = (4,-14) if j in [1,2,3] else ((3,6) if j==0 else (-15,-15))
-            ax.annotate(label,(x[j],y[j]),xytext=(dx,dy),textcoords='offset points',fontsize=8,color=BLUE if j<4 else GREEN)
-        ax.text(3,y[-1]+3,f"Always reference: {y[-1]:.1f}%",va='bottom',color=GREEN,fontsize=8)
-        ax.set_ylim(30,104);ax.set_xlim(-3,105);ax.set_yticks([40,60,80,100]);ax.set_xticks([0,25,50,75,100]);ax.set_ylabel('Accuracy (%)')
-        ax.set_title(f"{SPECS[pool][0]}  (n={p['never']['n']})",loc='left',fontweight='bold',fontsize=9.2,pad=5)
-        tx.grid(axis='y',color='#E5E9ED',lw=.65,zorder=0)
-        for key,lab,color,ls,marker in [('mean_s','Mean',BLUE,'-','o'),('p50_s','P50',GREY,'--','s'),('p95_s','P95',ORANGE,':','^')]:
-            tx.plot(range(5),[p[a][key] for a in ARMS],label=lab,color=color,ls=ls,lw=1.4,marker=marker,ms=4)
-        tx.set_yscale('log');tx.set_ylim(1,350);tx.set_yticks([1,3,10,30,100,300]);tx.set_yticklabels(['1','3','10','30','100','300']);tx.minorticks_off()
-        tx.set_xticks(range(5));tx.set_xticklabels(['L','C','B','A','W']);tx.set_xlim(-.15,4.15);tx.set_ylabel('Time to first audio (s)')
-        tx.set_title('Time to first audio',loc='left',fontsize=9.2,pad=5)
-        if i==0: tx.legend(frameon=False,fontsize=7.5,loc='upper left',ncol=3,handlelength=1.2,columnspacing=.7)
-        if i==2: ax.set_xlabel('Realized expert call rate (%)');tx.set_xlabel('Recorded arm')
-    fig.subplots_adjust(left=.09,right=.985,top=.95,bottom=.075)
-    fig.savefig(HERE/'figures/revision_accuracy_latency.pdf')
-    fig.savefig(HERE/'figures/revision_accuracy_latency.png',dpi=180)
-    plt.close(fig)
 
 
 if __name__=='__main__':

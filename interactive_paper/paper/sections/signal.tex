@@ -1,70 +1,22 @@
-\section{Reading Competence from Hidden States}
-\label{sec:signal}
-We first study failure prediction independently of the expert path.
-The representation experiments use 600 queries in five fixed pools,
-with a 360-query calibration split and a 240-query test split
-(\S\ref{sec:dataset}). Logistic probes read stored activations from
-frozen checkpoints. Higher scores predict local-answer failure.
+\subsection{Where should the probe read?}
+\label{sec:readlocation}
+The probe needs a place to read the model's internal state.
+The final-layer state is a natural starting point because it feeds
+the output head, but its ability to predict failure may change with
+the query distribution and input modality. Reading an earlier
+layer or pooling several token positions may provide a more
+transferable signal. Timing matters as well: a signal that requires
+a completed answer arrives too late to guide the initial handoff.
+We therefore examine layer, position, and read time together, asking
+where a useful failure signal is available early in the response
+(\S\ref{sec:duplex}--\ref{sec:xmodal}; Appendix~\ref{app:readtime}).
 
-\subsection{Distribution transfer exposes a readout failure}
-\label{sec:audit}
-The final-layer probe appears useful in distribution (AUC 0.822),
-but pool identity alone reaches 0.715, and the hidden state predicts
-source pool at 95.8\% accuracy (Appendix~\ref{app:signal}). We
-therefore emphasize leave-one-pool-out (LOPO) transfer rather than
-in-distribution performance alone. With text input, the final-layer,
-last-token read falls to AUC 0.372 on held-out math. Query-surface
-routers also depend strongly on pool structure
-(Appendix~\ref{app:router}).
-
-Verbalized self-evaluation has different failure modes. Pre-answer
-$\ptrue$ detects the held-out trap pool (AUC 0.945), where the
-final-layer probe fails. Post-draft $\ptrue$ reaches 0.899 in
-distribution but requires a completed draft, and can endorse
-confidently wrong answers. Table~\ref{tab:signals} reports these
-signals under their respective read conditions.
-
-\subsection{Layer and position matter}
-\label{sec:duplex}
-A layer-by-position sweep localizes the text-input failure to late
-last-token states (Figure~\ref{fig:layersweep}). Mean pooling degrades
-less, and a last-token probe at layer 22 reaches \textbf{0.931} on
-the same held-out math pool. A raw Qwen backbone, subsampled to match
-per-pool failure rates, remains near 0.96; the Qwen2.5 control family
-shows a similar ordering (Table~\ref{tab:lopo}). These comparisons
-associate the degradation with the tested fine-tuned checkpoints.
-They do not isolate a causal training objective.
-
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=\linewidth]{layer_sweep}
-  \caption{\textbf{Text-input transfer depends on layer and position.}
-  LOPO math AUC across layers: late last-token reads deteriorate on
-  the duplex checkpoints, while mid-layer reads and raw-backbone
-  controls remain predictive. Layer 22 is the MiniCPM-o~4.5 read
-  location used subsequently. This plot does not show an equivalent
-  collapse under audio calibration and audio input.}
-  \label{fig:layersweep}
-\end{figure}
-
-The input condition is essential: with audio calibration and audio
-input, the final-layer probe reaches 0.936 on LOPO math. We retain
-L22 for its robustness to shifted text queries and modality transfer.
-Mechanism tests find neither a shift in the degradation layer under
-speak mode nor alignment of the inverting direction with explicit
-listen/speak directions (Appendix~\ref{app:mech}). The layer sweep
-establishes a useful read location, while the mechanism remains open.
-
-\subsection{Text-to-speech representation transfer}
-\label{sec:xmodal}
-A probe trained on text-input hidden states and evaluated on
-speech-input states reaches AUC \textbf{0.855} at L22. Transfer
-stabilizes around the middle of the network, replicates on
-MiniCPM-o~2.6 and Qwen2.5-Omni, and is substantially weaker in the
-frozen-backbone Freeze-Omni adapter control. The mid-layer pattern
-also appears on 200 SD-QA human recordings. Conversely, audio-input
-verbal self-evaluation degrades on the two MiniCPM duplex generations;
-adding the question transcript restores it
-(Appendix~\ref{app:signal}). These are representation-transfer
-results. The native escalation gate below uses a larger,
-audio-derived calibration set and three positions at L22.
+The native system uses L22 and concatenates the latest tail state,
+the mean of the tail states, and the mean input state. It reads them
+when the generation call first returns a listen-to-speak transition.
+This call can already contain the first generated text unit, so we
+call the decision point \emph{answer onset}. Waiting for further
+answer chunks may reveal additional failure information, but delays
+the handoff. The native probe is fitted on features and answer
+labels collected in this serving regime; its calibration is
+separate from the representation-transfer study.

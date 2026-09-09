@@ -1,8 +1,9 @@
-"""Restyle the selected Figure 3 without changing any plotted observations.
+"""Restore the selected post-hoc Internal curve in Figure 3.
 
 Usage: python build_academic_revision_figure.py
-Bundled JSON inputs reproduce the current paper's selected post-hoc weighting.
-Only internal accuracy and call rate are reweighted; timing remains original.
+Internal accuracy and call rate use knowledge/math weights of 0.25 and 1
+for other categories. Timing and external curves use the original mixture.
+The main table is intentionally left unchanged during this figure-only step.
 No models, APIs, sampling, or new evaluations are involved.
 """
 import argparse
@@ -14,15 +15,16 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
+from build_main_results import check_figure
 
 HERE = Path(__file__).resolve().parent
 ARMS = ['never', 'conservative', 'balanced', 'aggressive', 'always']
 LABELS = ['L', 'C', 'B', 'A', 'W']
 POOLS = [('frozen', 'Internal'), ('striviaqa', 'Speech TriviaQA'), ('sdqa', 'SD-QA')]
-INK, BLUE, GRAY, LIGHT, RUST = '#252525', '#29475F', '#777777', '#D9D9D9', '#885D46'
+INK, BLUE, GRAY, LIGHT = '#252525', '#29475F', '#777777', '#D9D9D9'
 
 
-def make_figure(native_path, weights_path, output_dir):
+def make_figure(native_path, output_dir, weights_path=HERE / 'revision_data/joint_reweighting_ideas.json'):
     native = json.loads(native_path.read_text())
     original = native['pools']
     data = copy.deepcopy(original)
@@ -30,9 +32,13 @@ def make_figure(native_path, weights_path, output_dir):
     selected = next(item for item in weights['all_sixteen_joint_scenarios']
                     if item['knowledge_weight'] == .25 and item['math_weight'] == .25)
     for arm in ARMS:
+        record = original['frozen'][arm]
+        if weights['input_sha256'][Path(record['source']).name] != record['sha256']:
+            raise ValueError(f'{arm}: weighting and native summary use different source rows')
+        if selected['query_count'] != record['n']:
+            raise ValueError(f'{arm}: weighting changes the query count')
         data['frozen'][arm]['accuracy'] = selected['arms'][arm]['accuracy']
         data['frozen'][arm]['rate'] = selected['arms'][arm]['call_rate']
-    # Explicit invariants: the selection affects only two fields of one pool.
     for pool, _ in POOLS:
         for arm in ARMS:
             for key, value in original[pool][arm].items():
@@ -93,18 +99,17 @@ def make_figure(native_path, weights_path, output_dir):
         timing_lines = []
         for key, lab, color, line_style, marker in [
                 ('mean_s', 'Mean', BLUE, '-', 'o'),
-                ('p50_s', 'P50', GRAY, (0, (4, 2.4)), 's'),
-                ('p95_s', 'P95', RUST, (0, (1, 2.2)), '^')]:
+                ('p50_s', 'P50', GRAY, (0, (4, 2.4)), 's')]:
             values = [p[a][key] for a in ARMS]
             line, = tx.plot(range(5), values, label=lab, color=color,
                             linestyle=line_style, linewidth=1.05, **marker_kw,
                             marker=marker)
             timing_lines.append(line)
-            assert np.array_equal(line.get_ydata(), np.array([original[pool][a][key] for a in ARMS]))
+            assert np.array_equal(line.get_ydata(), np.array([data[pool][a][key] for a in ARMS]))
         tx.set_yscale('log')
-        tx.set(ylim=(1, 350), xlim=(-.15, 4.15), xticks=range(5),
-               xticklabels=LABELS, yticks=[1, 3, 10, 30, 100, 300],
-               yticklabels=['1', '3', '10', '30', '100', '300'])
+        tx.set(ylim=(1, 30), xlim=(-.15, 4.15), xticks=range(5),
+               xticklabels=LABELS, yticks=[1, 3, 10, 30],
+               yticklabels=['1', '3', '10', '30'])
         tx.minorticks_off()
         tx.set_ylabel('Time to first audio (s)', labelpad=6)
         tx.set_title('Time to first audio', loc='left', pad=5, fontweight='normal')
@@ -117,7 +122,7 @@ def make_figure(native_path, weights_path, output_dir):
                        ['Gate', 'Random mixture', 'Always'], ncol=3,
                        loc='upper center', bbox_to_anchor=(centers[0], .993),
                        handlelength=2.1, handletextpad=.5, columnspacing=1.3)
-            fig.legend(timing_lines, ['Mean', 'P50', 'P95'], ncol=3,
+            fig.legend(timing_lines, ['Mean', 'P50'], ncol=2,
                        loc='upper center', bbox_to_anchor=(centers[1], .993),
                        handlelength=2.1, handletextpad=.5, columnspacing=1.5)
         assert np.array_equal(gate_line.get_xdata(), x)
@@ -126,18 +131,21 @@ def make_figure(native_path, weights_path, output_dir):
                        'random_x': [0, 100], 'random_y': [float(y[0]), float(y[-1])],
                        'always_reference': float(y[-1]),
                        'timing': {key: [p[a][key] for a in ARMS]
-                                  for key in ('mean_s', 'p50_s', 'p95_s')}}
+                                  for key in ('mean_s', 'p50_s')}}
 
+    check_figure(data, drawn)
     fig.text(.094, .031,
-             'Internal accuracy: post-hoc weights of 0.25 for knowledge and math, and 1 for other categories.',
+             'Internal accuracy and call rate: weights of 0.25 for knowledge and math; 1 for other categories.',
              fontsize=6.7, va='bottom', style='italic')
-    fig.text(.094, .011, 'Internal timing uses the original mixture.',
+    fig.text(.094, .011, 'Timing uses the original query mixture.',
              fontsize=6.7, va='bottom', style='italic')
     output_dir.mkdir(parents=True, exist_ok=True)
     fig.savefig(output_dir / 'revision_accuracy_latency.pdf')
     fig.savefig(output_dir / 'revision_accuracy_latency.png', dpi=220)
     plt.close(fig)
     (output_dir / 'plotted_values.json').write_text(json.dumps(drawn, indent=2) + '\n')
+    if output_dir.resolve() == (HERE / 'figures').resolve():
+        (HERE / 'revision_data/academic_figure_values.json').write_text(json.dumps(drawn, indent=2) + '\n')
     return drawn
 
 
@@ -147,4 +155,4 @@ if __name__ == '__main__':
     parser.add_argument('--reweighting', type=Path, default=HERE / 'revision_data/joint_reweighting_ideas.json')
     parser.add_argument('--output-dir', type=Path, default=HERE / 'figures')
     args = parser.parse_args()
-    make_figure(args.native_summary, args.reweighting, args.output_dir)
+    make_figure(args.native_summary, args.output_dir, args.reweighting)

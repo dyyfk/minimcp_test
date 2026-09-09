@@ -1,27 +1,44 @@
-\subsection{From a failure score to an answer-onset decision}
+\section{Probe-Guided Expert Handoff}
+\label{sec:signal}
+
+\subsection{The local--expert loop}
 \label{sec:system}
-For native serving, we concatenate the last tail state, the mean of
-the tail states, and the mean input state at L22 into
-$\phi(x)\in\mathbb{R}^{12288}$. A logistic probe gives
+Our system pairs a local full-duplex speech model with a stronger
+external expert (Figure~\ref{fig:hero}). The local model processes
+incoming speech and decides when to respond. At that transition,
+the system chooses whether to continue with the local answer or
+request expert help. On the expert path, an audio uplink transcribes
+the question, the expert returns a text answer, and the local
+talker voices the prepared relay text. The expert request and relay
+add cost and waiting time. Our goal is to improve answer accuracy
+under a limited expert-call budget by selecting questions that
+benefit from expert help. We use local-answer failure risk to guide
+this selection; the benefit still depends on whether the expert
+repairs the error and the relay preserves its answer.
+
+\subsection{A probe for the handoff decision}
+\label{sec:probe}
+The local model already computes hidden states as it processes the
+question. If these states carry information about its ability to
+answer, a small classifier can read that signal without generating
+a separate self-evaluation. We use a linear \emph{probe} to test
+whether the existing representations contain a directly readable
+failure signal.
+
+Offline, we collect local answers to calibration questions and use
+a judge to assign correctness labels. Each label is paired with
+hidden-state features captured at the chosen read point. We fit a
+logistic probe to predict failure from these features while keeping
+the speech model frozen. For features $\phi(x)$ from input context
+$x$, the fitted weights $w,b$ give the risk score
 \begin{equation}
- s(x)=\sigma\!\left(w^\top\phi(x)+b\right),\qquad
- d(x)=\mathbf{1}\{s(x)\geq\tau_{\ell}\}\,
-       \mathbf{1}\{a(x)\geq\tau_a\},
+ s(x)=\sigma\!\left(w^\top\phi(x)+b\right).
  \label{eq:gate}
 \end{equation}
-where $a(x)$ is a separately fitted dialogue-act score that filters
-floor-management turns, and $\tau_{\ell}$ is a language-specific
-failure threshold. Calibration-score quantiles define three nominal
-budgets (15/30/50\%); realized rates can differ on a new pool.
-The model weights stay frozen, but both heads require fitting.
-
-The native capture occurs when a generation call first returns a
-listen-to-speak transition. It can include the first generated text
-unit, so we call it \emph{answer onset}. This differs from the earlier
-turn-based prefill read, whose measured P50 availability was 20\,ms
-for text and 45\,ms for audio on an H100. A separate turn-end replay
-reported about 30\,ms (Appendices~\ref{app:gatedetail}
-and~\ref{app:livedetail}); those measurements are not native-path
-end-to-end latency. Later native reads can improve reasoning-failure
-prediction, at the cost of waiting for answer chunks
-(Appendix~\ref{app:readtime}).
+At inference, the probe reads the current features without a
+reference answer or an online judge. Scores above a
+language-specific threshold $\tau_{\ell}$ favor escalation;
+thresholds are set from calibration scores and held fixed during
+evaluation (\S\ref{sec:models}). An auxiliary dialogue-act head
+restricts escalation to information requests, filtering turns such
+as acknowledgments and stop commands (Appendix~\ref{app:actgate}).

@@ -2,11 +2,11 @@
 \label{sec:transfer}
 \label{sec:transfer-neg}
 The native gate's weights, feature definition, layer, and per-language
-thresholds stay fixed across the five external QA pools. The upper
+thresholds stay fixed across the four external English QA pools. The upper
 block's \emph{avg} excludes the internal set; $\Delta$ is its gain
-over always-local. Aggressive macro accuracy rises from \textbf{59.4\% to 80.9\%}, compared with
-75.2\% for the reported random mixture: +21.5 points over local
-answering and +5.7 over random. Its realized call rate ranges
+over always-local. Aggressive macro accuracy rises from \textbf{61.5\% to 82.9\%}, compared with
+77.1\% for the reported random mixture: +21.4 points over local
+answering and +5.9 over random. Its realized call rate ranges
 from 18.8\% on Llama Questions to 66.0\% on SD-QA, so this is not a
 uniform 50\%-budget comparison. TriviaQA and SD-QA illustrate large
 improvements over local answering (+25.6 and +34.5 points) and over
@@ -17,10 +17,10 @@ The lower tiers are less reliable. Conservative accuracy falls by
 Llama Questions unchanged. Separately sampled sessions and limited
 expert headroom constrain the interpretation of small differences.
 The results support aggressive-tier gains across these pools, not
-improvement on every benchmark at every budget. On AlpacaEval, the
-table caption reports 3.68 locally and 4.01 at aggressive, with
+improvement on every benchmark at every budget. On AlpacaEval, we
+measure 3.68 locally and 4.01 at aggressive, with
 a random-mixture reference of approximately 3.9; the always arm scores 4.20 versus 4.95
-for returned expert text. The relay cap is particularly restrictive
+for returned expert text (Appendix~\ref{app:setup-details}). The relay cap is particularly restrictive
 for long, open-ended answers.
 
 Failure categories and later reads help explain the boundary. In the
@@ -34,7 +34,7 @@ mechanism (Appendix~\ref{app:readtime}).
 
 The lower block of Table~\ref{tab:transfer} reports the exploratory
 NemotronLabs-VoiceChat-11B (NVDA) study. Its \emph{avg} covers four
-English QA pools, with no internal or Mandarin entry. At a 50\%
+English QA pools and excludes the Internal column. At a 50\%
 replay budget, average accuracy rises from 43.8\% to 75.7\%
 ($\Delta=31.9$ points), compared with 67.0\% for random. This is
 native-frame replay with cached outcome mixtures, not another set
