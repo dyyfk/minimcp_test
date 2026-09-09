@@ -56,7 +56,7 @@ def fig_layer_sweep():
         ("qwen2.5-7b", "Qwen2.5-7B (raw)", C4, "--", 2.2),
         ("qwen2.5-omni-7b", "Qwen2.5-Omni (streaming)", C5, ":", 2.2),
     ]
-    fig, axes = plt.subplots(1, 2, figsize=(13, 4.8), sharey=True)
+    fig, axes = plt.subplots(1, 2, figsize=(8.6, 3.9), sharey=True)
     for ax, pool, ptitle in zip(axes, ("last", "mean"),
                                 ("last-token read (deployed position)",
                                  "mean-pooled read")):
@@ -79,8 +79,10 @@ def fig_layer_sweep():
     axes[1].text(0.015, 0.512, "chance", color=MUT, fontsize=11.5)
     axes[0].set_ylabel("LOPO hard-math AUC")
     axes[0].set_ylim(0.3, 1.0)
-    axes[0].legend(loc="lower left", framealpha=0.95, borderpad=0.7,
-                   handlelength=2.6)
+    handles, labels = axes[0].get_legend_handles_labels()
+    fig.legend(handles, labels, loc="lower center", ncol=3, fontsize=13.5,
+               frameon=False, handlelength=2.4, columnspacing=1.4,
+               bbox_to_anchor=(0.5, 1.0))
     fig.tight_layout()
     save(fig, "layer_sweep")
 
@@ -330,14 +332,17 @@ def fig_fair_dualview():
     fig, ax = plt.subplots(figsize=(8, 5.2))
     ax.plot([0, 100], [heard[0], always], color=MUT, lw=1.6,
             ls=(0, (4, 3)), zorder=2,
-            label="random escalation (pairs with gold view)")
+            label="matched-rate random (channel-controlled)")
+    ax.plot([0, 100], [heard[0], heard[-1]], color=C1, lw=1.4,
+            alpha=0.45, ls=(0, (4, 3)), zorder=2,
+            label="matched-rate random (deployed)")
     ax.errorbar(esc, gold, yerr=[gold - g_ci[:, 0], g_ci[:, 1] - gold],
                 fmt="--s", color=C3, lw=2.2, ms=9, capsize=5,
                 capthick=2, zorder=3,
-                label="gold-inject counterfactual (channel-controlled)")
+                label="channel-controlled: expert reads reference transcript")
     ax.errorbar(esc, heard, yerr=[heard - h_ci[:, 0], h_ci[:, 1] - heard],
                 fmt="-o", color=C1, lw=2.6, ms=10, capsize=5, capthick=2,
-                zorder=4, label="deployed-channel accuracy (live system)")
+                zorder=4, label="deployed: expert reads the talker's transcript")
     ax.plot([100], [always], marker="*", ms=20, color=C3, zorder=5)
     ax.annotate(f"always-escalate {always:.1f}%", (100, always),
                 textcoords="offset points", xytext=(-8, 4), ha="right",
@@ -350,7 +355,10 @@ def fig_fair_dualview():
     ax.set_xlim(-3, 104)
     ax.set_xlabel("realized escalation rate (%)")
     ax.set_ylabel(f"accuracy, speakable subset (%)  [n={d['n']}]")
-    ax.legend(loc="lower right", framealpha=0.95, borderpad=0.7)
+    handles, labels = ax.get_legend_handles_labels()
+    fig.legend(handles, labels, loc="lower center", ncol=2, fontsize=12,
+               frameon=False, handlelength=2.2, columnspacing=1.2,
+               bbox_to_anchor=(0.5, 1.0))
     fig.tight_layout()
     save(fig, "fair_dualview")
 
@@ -415,3 +423,73 @@ def fig_nvda_remix():
                    handlelength=3)
     fig.tight_layout()
     save(fig, "nvda_remix")
+
+
+# ------------------------------------------- native feature ablation (8cw)
+def fig_native_ablation():
+    """2x2 layer x readout ablation at the native audio commit point
+    (figures/native_feature_ablation.json, scripts/56)."""
+    d = json.load(open("figures/native_feature_ablation.json"))
+    POOLS5 = ["striviaqa", "swebq", "sllama", "sdqa", "sreason"]
+    CELLS = [("L22", "last"), ("L22", "agg"), ("L35", "last"),
+             ("L35", "agg")]
+    xs = [0.0, 0.38, 1.0, 1.38]
+    cols = {"last": C2, "agg": C1}
+    dep = d["deployed_gate_L22_agg"]
+
+    fig, (ax, bx) = plt.subplots(1, 2, figsize=(8.6, 3.7))
+    for x, (L, view) in zip(xs, CELLS):
+        c = d[f"{L}_{view}"]
+        au = c["auc"]["ext5_mean"]
+        ax.bar(x, au - 0.5, 0.34, bottom=0.5, color=cols[view], zorder=3)
+        ax.text(x - 0.055, au + 0.007, f".{round(au * 1000):03d}",
+                ha="center", fontsize=11.5, color=INK)
+        ax.scatter([x + 0.10] * 5, [c["auc"][p] for p in POOLS5], s=24,
+                   facecolor="white", edgecolor=MUT, lw=1.1, zorder=4)
+        dp = c["delta_pts"]["pooled"]
+        bx.bar(x, dp, 0.34, color=cols[view], zorder=3)
+        bx.text(x - 0.055, dp + 0.25, f"+{dp:.1f}", ha="center",
+                fontsize=11.5, color=INK)
+        bx.scatter([x + 0.10] * 5, [c["delta_pts"][p] for p in POOLS5],
+                   s=24, facecolor="white", edgecolor=MUT, lw=1.1,
+                   zorder=4)
+    bx.text(xs[0], -1.05, "$p$=.05", ha="center", fontsize=10.5,
+            color=MUT)
+
+    ax.axhline(0.5, color=MUT, lw=1.2, ls=(0, (3, 2)))
+    ax.text(-0.31, 0.489, "chance", color=MUT, fontsize=11, va="top")
+    ax.axhline(dep["auc"]["ext5_mean"], color=INK, lw=1.1,
+               ls=(0, (1, 2)))
+    ax.text(-0.31, dep["auc"]["ext5_mean"] + 0.006,
+            "deployed gate (full calibration)", color=INK, fontsize=10.5)
+    ax.set_ylim(0.45, 0.80)
+    ax.set_ylabel("failure AUC (ext-5 LOPO)")
+    ax.set_title("ranking", fontsize=14)
+
+    bx.axhline(0, color=MUT, lw=1.2, ls=(0, (3, 2)))
+    bx.text(1.72, -0.4, "random", color=MUT, fontsize=11, ha="right",
+            va="top")
+    bx.axhline(dep["delta_pts"]["pooled"], color=INK, lw=1.1,
+               ls=(0, (1, 2)))
+    bx.text(-0.31, dep["delta_pts"]["pooled"] + 0.18, "deployed gate",
+            color=INK, fontsize=10.5)
+    bx.set_ylim(-4.6, 7.2)
+    bx.set_ylabel("acc. over random @30% budget (pts)")
+    bx.set_title("routing", fontsize=14)
+
+    for a in (ax, bx):
+        a.set_xticks([0.19, 1.19])
+        a.set_xticklabels(["L22\n(mid, deployed)", "L35\n(final)"],
+                          fontsize=12.5)
+        a.set_xlim(-0.35, 1.73)
+        a.tick_params(axis="x", length=0)
+    from matplotlib.patches import Patch
+    from matplotlib.lines import Line2D
+    handles = [Patch(color=C2, label="last-token read (4,096-d)"),
+               Patch(color=C1, label="3-position aggregate (12,288-d)"),
+               Line2D([], [], marker="o", ls="", markerfacecolor="white",
+                      markeredgecolor=MUT, label="per-pool")]
+    fig.legend(handles=handles, loc="lower center", ncol=3, fontsize=12,
+               frameon=False, bbox_to_anchor=(0.5, 1.0))
+    fig.tight_layout()
+    save(fig, "native_feature_ablation")

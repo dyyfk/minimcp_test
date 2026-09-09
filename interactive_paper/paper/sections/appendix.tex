@@ -703,8 +703,12 @@ the distributed read, and it is the one that transfers: it holds
 (0.81$\to$0.52) and no decay on either raw backbone (Qwen3-8B
 0.86, Qwen2.5-7B 0.71 at their final layers) or on the omni-streaming
 control (Qwen2.5-Omni holds 0.75 to its output with a flat variance
-share): the decay tracks duplex fine-tuning specifically, not
-streaming or audio fine-tuning in general. On MiniCPM-o~4.5 the
+share): the decay follows the two duplex-trained checkpoints and
+spares the streaming-and-audio fine-tuned control. This is consistent
+with the duplex stage of training rather than streaming or audio
+fine-tuning in general, though both duplex recipes mix duplex data
+into multi-stage joint training, so the stage is implicated by
+exclusion, not isolated; intermediate checkpoints would settle it. On MiniCPM-o~4.5 the
 score also concentrates: the dominant subspace carries 39\% of the
 held-out score variance at the final layer against $\le$0.18 at every
 earlier depth and 0.05 for its backbone; on MiniCPM-o~2.6 this
@@ -1812,6 +1816,83 @@ alternative (each pool's own score quantile, or its online form, a
 100-turn sliding-window tracker with no labels and no pool identity) realizes nominal rates on every pool and converges within
 $\pm$.06 of nominal on the English pools.
 
+\paragraph{Oracle utilization: how much of the achievable routing
+gain does the probe capture?} Beating matched-rate random does not
+say how far the gate sits from the best possible router. The paired
+never/always arms give every query both outcomes --- local correct
+$L$ and expert correct $E$ --- so at an exact budget $k$ we can
+compare three routers on identical rows: matched-rate random, the
+probe (top-$k$ by score, isolating ranking from threshold
+calibration), and the paired-outcome oracle that spends the budget
+on fixable rows ($L{=}0,E{=}1$) first. We report
+$R_b=(\text{probe}-\text{random})/(\text{oracle}-\text{random})$
+with query-resampled bootstrap CIs, keeping the absolute deltas
+alongside because the ratio is unstable where the oracle--random gap
+is small. The ceiling is not low: fixable rows are 13--41\% of each
+pool (harmful rows, $L{=}1,E{=}0$, only 1--4\%), and the oracle
+clears random by $+$.105/$+$.182/$+$.168 (external-5 mean) at
+15/30/50\% budgets against the probe's $+$.031/$+$.056/$+$.059. The
+probe therefore captures \textbf{29--35\%} of the achievable routing
+gain ($R$ = .29 [.18,\,.40], .30 [.23,\,.39], .35 [.27,\,.44]),
+roughly flat across budgets and pools (WebQ is the weak end, $R
+\le .15$ with CIs crossing zero) --- about two thirds of what a
+commit-time router could in principle deliver is not read by the
+deployed probe. For scale, answer-free difficulty proxies available
+at the same instant (query audio length, chunk count, onset
+position, act score) reach only .55--.57 AUC (orientation-free,
+external-5 mean) against the probe's .75 on the same rows, so the
+unread two thirds is not recoverable from surface timing features
+either (\texttt{scripts/45\_oracle\_utilization.py},
+Figure~\ref{fig:oracleutil}). Nor from the LM head's own
+distribution: on a fresh official-config dump with same-generation
+labels, next-token entropy / top-1 / margin at the strictly causal
+pre-generate position read .51--.53 AUC on every pool (at the
+deployed-read moment .55, where the successor is a near-deterministic
+control token), against .74 for the probe on identical rows; and the
+final-layer cells close under the deployed regime too --- matched
+4096-d last-token LOPO across the external pools reads .626 at L35
+pre-norm, .602 post-final-RMSNorm, .620 at L22, so depth is flat at
+the audio commit point, post-norm buys nothing, and the deployed
+probe's margin (.730 on the same rows) comes from its three-part
+aggregate, not the layer (\texttt{scripts/47\_commit\_entropy.py});
+the same-batch layer $\times$ readout $2\times2$ of
+Figure~\ref{fig:native-ablation}
+(\texttt{scripts/56\_native\_feature\_ablation.py}) confirms this on
+an independent dump. Decomposing the miss
+(\texttt{scripts/46\_unread\_decomposition.py}): at the 30\% budget
+the probe misses 223 of 428 fixable rows. The misses are not a
+distinct failure type --- 71\% are confident-wrong, the class the
+probe catches elsewhere, and execution failures, which unfold only
+during the answer, are 8\% (concentrated in Reasoning-zh). Nor were
+they merely read too early: a two-answer-chunks-later probe (k2,
+8bw recipe) fires on only 10--29\% of them at its own matched
+budget, against 71--90\% of the rows the commit read already
+catches. What does separate them is outcome stability: 33\% of
+missed fixable rows flip to correct in an independent second
+generation of the same query (caught rows: 15\%), so roughly a
+third of the residual is the oracle exploiting the realized draw of
+stochastic decoding --- out of reach of any commit-time reader in
+principle, and with two samples per query this is a lower bound on
+the stochastic share. Discounting the flips, about half of the
+stably-fixable rows remain unread at commit and still unread two
+chunks in: a real gap, but one that the closed read-side ledger
+above says is not reachable by reading this state harder.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\linewidth]{oracle_utilization}
+  \caption{How much of the achievable routing gain does the probe
+  capture? Cached paired never/always native arms, exact top-$k$
+  budgets. Left: delivered accuracy (external-5 mean) for
+  matched-rate random, the probe, and the paired-outcome oracle that
+  spends the budget on fixable rows first; the probe holds 29--35\%
+  of the oracle's gain over random at the 15--50\% budgets. Right:
+  captured share $R_b$ per pool at three budgets (95\%
+  query-resampled bootstrap CIs); Speech WebQ is the weak end, with
+  CIs crossing zero.}
+  \label{fig:oracleutil}
+\end{figure}
+
 \paragraph{Is the Mandarin gap a language gap?} No: it is a task-type
 gap. A targeted 1{,}500-row Mandarin expansion (Chinese SimpleQA
 long-tail facts, C-Eval and CMMLU knowledge MC, the remaining
@@ -1860,8 +1941,10 @@ shifts without labels or pool identity. After a label-definition fix
 and three targeted expansions ($\approx$4{,}000 rows), external
 ranking sits where the 5{,}228-row gate left it. The head is not the
 bottleneck either: on the same features, per-dimension
-standardization costs .07 of English external AUC (the raw
-activation scale is informative), an elastic-net head is a wash
+standardization costs .07 of English external AUC (an effect of the
+interaction with the $\ell_2$ penalty --- rescaling preserves the
+class of linear readers but changes which directions regularization
+favors), an elastic-net head is a wash
 (internal $+$.008, external $-$.007), and non-linear heads are
 clearly worse (256-unit MLP .702, PCA-256 $+$ gradient-boosted trees
 .715, vs.\ .771). Nor are several heads: a three-way task-type
@@ -1869,11 +1952,12 @@ router trained on the same features is 97\% accurate, yet no
 family-specialized head beats the single head on its own family
 (facts .846 vs.\ .847, reasoning .761 vs.\ .766, chat .672 vs.\
 .720), and the routed mixture is flat-to-negative externally (SD-QA
-$-$.033 [$-$.060,\,$-$.007]). What the commit-chunk state encodes
-about the coming answer is extracted by one linear read; the
-remaining headroom lies in what is read: later into the
-answer, other layers, or a second signal family such as verbalized
-self-evaluation (Table~\ref{tab:rtjfusion}), not in how. The
+$-$.033 [$-$.060,\,$-$.007]). Within the head families tested, one
+linear read extracts what these methods reach --- an empirical
+plateau of the tested readers, not a bound on the state's
+information; the remaining headroom lies in what is read: later into
+the answer, other layers, or a second signal family such as
+verbalized self-evaluation (Table~\ref{tab:rtjfusion}), not in how. The
 talker's own local floor is lower
 in-regime (frozen .483$\to$.431 under the official serving
 configuration; the inherited-defaults harness measured .371, and the

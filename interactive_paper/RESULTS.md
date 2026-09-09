@@ -7289,3 +7289,55 @@ values still use the original weights. Timing and external curves are also
 unchanged. Figure notes/caption and protocol descriptions identify this
 weighting difference. No model inference or rejudging was run.
 See `paper/revision_data/internal_figure_restore_audit.json`.
+## 8db — layer x readout 2x2 at the native commit point: aggregation, not depth, carries the deployed read ($0, 2026-09-09)
+
+The evidence bridge the paper lacked: fig:layersweep's mid-layer
+story is a TEXT-input result, the deployed native gate reads three
+positions at the audio onset. scripts/56_native_feature_ablation.py
+recomputes all four {L22, L35} x {last-token, 3-position aggregate}
+cells on ONE batch under ONE protocol — the 8cu beta=0 agg0 startline
+dumps (official config, X22/X33/X34/X35 captured in the same session,
+own-generation gpt-5.4-mini labels, ext-5), scripts/47 head recipe
+(LR C=3e-4, LOPO), scripts/23 remix routing (per-pool top-30% budget,
+cached always-arm expert, 2000-draw matched random). Regression
+anchors reproduce: agg0_L22 ext5-mean AUC .6952 = agg_startline.json
+exactly; deployed gate on the same rows .750 ~ 8cu-2's .748.
+
+| ext-5 LOPO      | AUC   | acc@30 − rand (pts) | perm p |
+|-----------------|-------|---------------------|--------|
+| L22 last-token  | .595  | +1.2                | .05    |
+| L22 aggregate   | .695  | +2.8                | <5e-4  |
+| L35 last-token  | .654  | +3.5                | <5e-4  |
+| L35 aggregate   | .662  | +3.3                | <5e-4  |
+| deployed gate   | .750  | +4.8                | <5e-4  |
+
+1. INTERACTION, not two main effects: aggregation is worth +.10 AUC
+   at L22 and +.01 at L35; single-token depth is flat-to-REVERSED
+   (L35 > L22 by .06 — the 8cs *e batch read them equal at
+   .626/.620, both batches agree there is no mid-layer advantage at
+   the last token). The mid-layer edge exists ONLY for the
+   aggregated read (.695 vs .662).
+2. Routing at the matched 30% budget is insensitive once any decent
+   ranking exists (+2.8..+3.5 everywhere except L22-last's +1.2,
+   p=.05 — differences within the replication floor; consistent with
+   8by: ranking leverage does not convert to routing leverage).
+3. Sharpened paper claim: the text-condition cliff motivates L22 for
+   text robustness/TTS transfer, but at the native commit point the
+   POSITION AGGREGATION carries the read, with a residual mid-depth
+   ranking edge. sreason (zh) is the weak pool in every cell
+   (L22-last dips below chance there).
+
+No new GPU/API cost — pure local recompute from the agg0 raw
+features (the "retrieve raw features, one protocol" requirement;
+no cross-batch stitching). Paper: readout_results.tex new bridge
+paragraph + fig:native-ablation (main text; landed there after the
+pr-0908 restructure moved the sweep out of signal.tex), app:native
+pointer after the 8cs sentence, todo P2 updated. Merge note: the
+restructure had dropped the old live.tex figure hooks, so
+fig:oracleutil's figure env now lives in app:native next to its
+paragraph; failure_taxonomy_lift/readpoint_auc figure FILES are
+committed but currently unreferenced by the condensed text (coauthor
+call whether to re-hook them). Files: scripts/56_native_feature_ablation.py,
+figures/native_feature_ablation.{json,png,pdf},
+figures/paper_pdf_redraw.py (fig_native_ablation),
+paper/figures/native_feature_ablation.{png,pdf}.
