@@ -1,4 +1,4 @@
-\begin{thebibliography}{45}
+\begin{thebibliography}{38}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
@@ -30,12 +30,6 @@ Collin Burns, Haotian Ye, Dan Klein, and Jacob Steinhardt.
 \newblock In \emph{International Conference on Learning Representations
   (ICLR)}, 2023.
 \newblock arXiv:2212.03827.
-
-\bibitem[Cheang et~al.(2025)Cheang, Chan, Zhang, and Deng]{cheang2025recall}
-Chi~Seng Cheang, Hou~Pong Chan, Wenxuan Zhang, and Yang Deng.
-\newblock Do {LLM}s really know what they don't know? internal states mainly
-  reflect knowledge recall rather than truthfulness.
-\newblock \emph{arXiv preprint arXiv:2510.09033}, 2025.
 
 \bibitem[Chen et~al.(2023)Chen, Zaharia, and Zou]{chen2023frugalgpt}
 Lingjiao Chen, Matei Zaharia, and James Zou.
@@ -83,11 +77,6 @@ Junbo Cui, Bokai Xu, Chongyi Wang, Tianyu Yu, Weiyue Sun, Yingjing Xu, et~al.
   interaction.
 \newblock \emph{arXiv preprint arXiv:2604.27393}, 2026.
 
-\bibitem[David(2025)]{david2025temporal}
-Joey David.
-\newblock Temporal predictors of outcome in reasoning language models.
-\newblock \emph{arXiv preprint arXiv:2511.14773}, 2025.
-
 \bibitem[D{\'e}fossez et~al.(2024)D{\'e}fossez, Mazar{\'e}, Orsini, Royer,
   P{\'e}rez, J{\'e}gou, Grave, and Zeghidour]{defossez2024moshi}
 Alexandre D{\'e}fossez, Laurent Mazar{\'e}, Manu Orsini, Am{\'e}lie Royer,
@@ -134,13 +123,6 @@ Dan Hendrycks, Collin Burns, Saurav Kadavath, Akul Arora, Steven Basart, Eric
 \newblock In \emph{Advances in Neural Information Processing Systems (NeurIPS),
   Datasets and Benchmarks}, 2021.
 \newblock arXiv:2103.03874.
-
-\bibitem[Hu et~al.(2024)Hu, Bieker, Li, Jiang, Keigwin, Ranganath, Keutzer, and
-  Upadhyay]{hu2024routerbench}
-Qitian~Jason Hu, Jacob Bieker, Xiuyu Li, Nan Jiang, Benjamin Keigwin, Gaurav
-  Ranganath, Kurt Keutzer, and Shriyash~Kaustubh Upadhyay.
-\newblock {RouterBench}: A benchmark for multi-{LLM} routing system.
-\newblock \emph{arXiv preprint arXiv:2403.12031}, 2024.
 
 \bibitem[Huang et~al.(2026)Huang, Zhang, Yu, Shi, Ma, Xu, Gao, Hao, He, and
   Liu]{huang2026duplexomni}
@@ -200,14 +182,6 @@ Hunter Lightman, Vineet Kosaraju, Yura Burda, Harri Edwards, Bowen Baker, Teddy
   (ICLR)}, 2024.
 \newblock arXiv:2305.20050; source of the MATH-500 subset.
 
-\bibitem[Lin et~al.(2025)Lin, Lian, Li, Wang, Anumanchipalli, Liu, and
-  Lee]{lin2025fdb}
-Guan-Ting Lin, Jiachen Lian, Tingle Li, Qirui Wang, Gopala Anumanchipalli,
-  Alexander~H. Liu, and Hung-yi Lee.
-\newblock {Full-Duplex-Bench}: A benchmark to evaluate full-duplex spoken
-  dialogue models on turn-taking capabilities.
-\newblock \emph{arXiv preprint arXiv:2503.04721}, 2025.
-
 \bibitem[Lin et~al.(2022)Lin, Hilton, and Evans]{lin2022teaching}
 Stephanie Lin, Jacob Hilton, and Owain Evans.
 \newblock Teaching models to express their uncertainty in words.
@@ -254,12 +228,6 @@ Hadas Orgad, Michael Toker, Zorik Gekhman, Roi Reichart, Idan Szpektor, Hadas
   (ICLR)}, 2025.
 \newblock arXiv:2410.02707.
 
-\bibitem[Pleiss et~al.(2020)Pleiss, Zhang, Elenberg, and
-  Weinberger]{pleiss2020aum}
-Geoff Pleiss, Tianyi Zhang, Ethan Elenberg, and Kilian~Q. Weinberger.
-\newblock Identifying mislabeled data using the area under the margin ranking.
-\newblock In \emph{NeurIPS}, 2020.
-
 \bibitem[Stivers et~al.(2009)Stivers, Enfield, Brown, Englert, Hayashi,
   Heinemann, Hoymann, Rossano, de~Ruiter, Yoon, and
   Levinson]{stivers2009universals}
@@ -269,14 +237,6 @@ Tanya Stivers, N.~J. Enfield, Penelope Brown, Christina Englert, Makoto
 \newblock Universals and cultural variation in turn-taking in conversation.
 \newblock \emph{Proceedings of the National Academy of Sciences}, 106\penalty0
   (26):\penalty0 10587--10592, 2009.
-
-\bibitem[Swayamdipta et~al.(2020)Swayamdipta, Schwartz, Lourie, Wang,
-  Hajishirzi, Smith, and Choi]{swayamdipta2020cartography}
-Swabha Swayamdipta, Roy Schwartz, Nicholas Lourie, Yizhong Wang, Hannaneh
-  Hajishirzi, Noah~A. Smith, and Yejin Choi.
-\newblock Dataset cartography: Mapping and diagnosing datasets with training
-  dynamics.
-\newblock In \emph{EMNLP}, 2020.
 
 \bibitem[Taori et~al.(2023)Taori, Gulrajani, Zhang, Dubois, Li, Guestrin,
   Liang, and Hashimoto]{taori2023alpaca}
@@ -301,14 +261,6 @@ Bandhav Veluri, Benjamin~N. Peloquin, Bokai Yu, Hongyu Gong, and Shyamnath
   dialogue agents.
 \newblock In \emph{Proceedings of EMNLP (Main)}, 2024.
 \newblock arXiv:2409.15594.
-
-\bibitem[Vu et~al.(2023)Vu, Iyyer, Wang, Constant, Wei, Wei, Tar, Sung, Zhou,
-  Le, and Luong]{vu2023freshllms}
-Tu~Vu, Mohit Iyyer, Xuezhi Wang, Noah Constant, Jerry Wei, Jason Wei, Chris
-  Tar, Yun-Hsuan Sung, Denny Zhou, Quoc Le, and Thang Luong.
-\newblock Freshllms: Refreshing large language models with search engine
-  augmentation.
-\newblock \emph{arXiv preprint arXiv:2310.03214}, 2023.
 
 \bibitem[Wang et~al.(2024{\natexlab{a}})Wang, Lu, Tang, Yan, Xia, and
   Xiong]{wang2024fsm}
