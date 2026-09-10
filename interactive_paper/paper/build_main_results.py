@@ -153,6 +153,9 @@ def rendered_nvda_rows(internal_path=HERE / 'revision_data/internal_unweighted_s
         cells = ['---' if value is None else display(value*100),
                  *[display(v) for v in values], display(average),
                  '---' if arm == 'never' else display(average-baseline, signed=True)]
+        if arm == 'aggressive' and field == 'accuracy':
+            label = r'\;\textbf{+ gate, aggressive}'
+            cells = [r'\textbf{' + c + '}' for c in cells]
         lines.append(' & '.join([label, *cells]) + r' \\')
     return '\n'.join(lines) + '\n'
 
@@ -208,10 +211,11 @@ def check_table(pools, table_path, ttfa_path=HERE.parent / 'ttfa_real/nonnegativ
     nvda = text.split(NVDA_START, 1)[1].split(NVDA_END, 1)[0]
     if nvda != rendered_nvda_rows():
         raise ValueError('NVDA table cells differ from reporting sources')
-    if text.count(COST_START) != 1 or text.count(COST_END) != 1:
-        raise ValueError('Main table must contain exactly one cost block')
-    if text.split(COST_START, 1)[1].split(COST_END, 1)[0] != rendered_cost_rows(pools, ttfa_path):
-        raise ValueError('Cost cells differ from timing/routing summaries')
+    if COST_START in text or COST_END in text:
+        if text.count(COST_START) != 1 or text.count(COST_END) != 1:
+            raise ValueError('Optional cost panel must contain exactly one generated block')
+        if text.split(COST_START, 1)[1].split(COST_END, 1)[0] != rendered_cost_rows(pools, ttfa_path):
+            raise ValueError('Cost cells differ from timing/routing summaries')
     return native_rows(pools)
 
 
@@ -227,9 +231,12 @@ def write_table(pools, table_path, ttfa_path=HERE.parent / 'ttfa_real/nonnegativ
     _, after = rest.split(NVDA_END, 1)
     table_path.write_text(before + NVDA_START + rendered_nvda_rows() + NVDA_END + after)
     text = table_path.read_text()
-    before, rest = text.split(COST_START, 1)
-    _, after = rest.split(COST_END, 1)
-    table_path.write_text(before + COST_START + rendered_cost_rows(pools, ttfa_path) + COST_END + after)
+    if COST_START in text or COST_END in text:
+        if text.count(COST_START) != 1 or text.count(COST_END) != 1:
+            raise ValueError('Optional cost panel must contain exactly one generated block')
+        before, rest = text.split(COST_START, 1)
+        _, after = rest.split(COST_END, 1)
+        table_path.write_text(before + COST_START + rendered_cost_rows(pools, ttfa_path) + COST_END + after)
 
 
 def check_figure(pools, drawn):

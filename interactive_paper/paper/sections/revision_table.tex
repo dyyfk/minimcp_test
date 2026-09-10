@@ -2,17 +2,13 @@
 \centering\small
 \setlength{\tabcolsep}{3pt}
 \renewcommand{\arraystretch}{1.12}
-\caption{\textbf{Answer-content accuracy (\%), time, and expert use.}
+\caption{\textbf{Answer-content accuracy (\%).}
 Both models use all 240 Internal IDs with unit weights and four external
 English QA pools; avg is the equal-pool external mean and $\Delta$ its
 gain over local. MiniCPM uses one native session per query/arm and
 fixed thresholds; random mixes endpoints at the realized call rate
 (Appendix~\ref{app:transferdetail}). NVDA is cached native-frame replay;
-Internal is post-selection (Appendix~\ref{app:nvda}).
-MiniCPM costs use Int./Ext. for Internal/external macro; metric sources
-follow \S\ref{sec:evalproto}.
-\textbf{NR: dollar usage not recorded} (tokens/tools); escalation counts
-are a proxy. GPT costs exclude local compute, ASR, and TTS.}
+Internal is post-selection (Appendix~\ref{app:nvda}).}
 \label{tab:transfer}
 \begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lrrrrrrr@{}}
 \toprule
@@ -33,23 +29,10 @@ always-escalate & 70.4 & 96.0 & 79.6 & 91.6 & 87.0 & 88.6 & +27.1 \\
 always-local & 19.6 & 35.8 & 37.6 & 70.8 & 31.0 & 43.8 & --- \\
 \;+ gate, conservative & 31.7 & 48.4 & 48.8 & 80.7 & 42.0 & 55.0 & +11.2 \\
 \;+ gate, balanced & 44.6 & 61.0 & 59.2 & 85.8 & 54.0 & 65.0 & +21.2 \\
-\;+ gate, aggressive & 60.4 & 76.8 & 69.6 & 89.7 & 66.5 & 75.7 & +31.9 \\
+\;\textbf{+ gate, aggressive} & \textbf{60.4} & \textbf{76.8} & \textbf{69.6} & \textbf{89.7} & \textbf{66.5} & \textbf{75.7} & \textbf{+31.9} \\
 \;matched random, aggressive & 53.5 & 65.7 & 60.2 & 82.0 & 60.0 & 67.0 & +23.2 \\
 always-escalate & 91.7 & 95.5 & 82.8 & 93.1 & 89.0 & 90.1 & +46.3 \\
 % END GENERATED NVDA ROWS
-\bottomrule
-\end{tabular*}
-\vspace{4pt}
-\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lrrrrr@{}}
-\toprule
-\multicolumn{6}{l}{\emph{MiniCPM cost summary (all metrics lower is better)}} \\
-& local & conservative & balanced & aggressive & always \\
-\midrule
-% BEGIN GENERATED COST ROWS
-Mean TTFA (s), Int./Ext. & 1.06 / 1.85 & 2.71 / 2.46 & 3.97 / 2.69 & 6.10 / 4.57 & 9.43 / 6.04 \\
-Escalations/100, Int./Ext. & 0.0 / 0.0 & 8.3 / 3.9 & 25.0 / 17.8 & 51.7 / 50.3 & 99.2 / 99.8 \\
-GPT expert USD/query & 0 & NR & NR & NR & NR \\
-% END GENERATED COST ROWS
 \bottomrule
 \end{tabular*}
 \end{table}

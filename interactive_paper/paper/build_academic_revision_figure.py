@@ -61,6 +61,7 @@ def make_figure(native_path, output_dir, internal_path=HERE / 'revision_data/int
         random_line, = ax.plot([0, 100], [y[0], y[-1]], color=GRAY,
                                linestyle=(0, (4, 2.4)), linewidth=.95, zorder=2)
         frontier = pareto_indices(x, y)
+        ax.plot(x, y, color=BLUE, linewidth=.65, alpha=.65, zorder=2.5)
         gate_line, = ax.plot(x, y, color=BLUE, linewidth=0, marker='o',
                              zorder=4, **marker_kw)
         frontier_line, = ax.plot(x[frontier], y[frontier], color=BLUE, lw=1.35,
@@ -84,6 +85,7 @@ def make_figure(native_path, output_dir, internal_path=HERE / 'revision_data/int
         # The reporting convention retains judged accuracy and takes all TTFA
         # values from the full timing run. Dominance is over policy summaries.
         latency_frontier = sorted(pareto_indices(latency, y), key=lambda i: latency[i])
+        tx.plot(latency, y, color=BLUE, linewidth=.65, alpha=.65, zorder=2.5)
         latency_line, = tx.plot(latency[latency_frontier], y[latency_frontier],
                                 color=BLUE, lw=1.35, zorder=3)
         colors = [GRAY, BLUE, BLUE, BLUE, '#b35c20']
@@ -103,7 +105,7 @@ def make_figure(native_path, output_dir, internal_path=HERE / 'revision_data/int
         tx.set_ylabel('Accuracy (%)', labelpad=6)
         tx.set_title('Accuracy vs. latency', loc='left', pad=5, fontsize=8.6)
         if pool == 'frozen':
-            tx.text(.98, .08, 'W: always-escalate\nvia GPT-5.5 + relay', transform=tx.transAxes,
+            tx.text(.98, .08, 'W: always-escalate\nvia GPT-5.5', transform=tx.transAxes,
                     ha='right', va='bottom', color='#8a471b', fontsize=7.5)
         if row == 2:
             ax.set_xlabel('Realized expert call rate (%)', labelpad=5)
@@ -136,7 +138,7 @@ def make_figure(native_path, output_dir, internal_path=HERE / 'revision_data/int
 
     check_figure(data, drawn)
     fig.text(.085, .031,
-             'L: local; C/B/A: conservative/balanced/aggressive; W: always-escalate via GPT-5.5 and speech relay.',
+             'L: local; C/B/A: conservative/balanced/aggressive; W: always-escalate via GPT-5.5.',
              fontsize=6.7, va='bottom', style='italic')
     fig.text(.085, .011, 'Accuracy: judged benchmark. TTFA: full real-time timing run; early answer audio contributes zero wait.',
              fontsize=6.7, va='bottom', style='italic')

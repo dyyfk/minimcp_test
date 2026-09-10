@@ -132,18 +132,20 @@ benchmark values; client playback is unmeasured.
 
 ## Pareto, cost, and layer-decline reporting
 
-`build_main_results.py` also regenerates the Table 1 cost panel. Timing
-is mean nonnegative server TTFA from the full `ttfa1` / `ttfa-v3` run; expert use is
-the realized escalation rate from the content benchmark. Internal uses
-240 queries, and external entries average the four pools equally.
-Current native records do not contain token or tool billing usage, so
-non-local GPT dollar costs are marked NR. They cannot be reconstructed
-from escalation counts or historical costs from a different experiment.
+Table 1 currently reports accuracy only; the cost panel is omitted.
+`build_main_results.py` retains optional cost-panel generation when its
+markers are present in the table source, and does not restore an omitted
+panel. Timing and routing source data remain available. Current native
+records do not contain token or tool billing usage; dollar costs cannot
+be reconstructed from escalation counts or a different experiment.
 
 The 3-by-2 figure's left column connects nondominated observed policies
 in accuracy versus call rate. TriviaQA conservative is dominated by local.
 The right column connects nondominated policies in accuracy versus mean
 TTFA, using the retained accuracy values and latest full timing run.
+Thin solid lines also connect all five policy settings in both columns,
+including the dominated TriviaQA conservative point; thicker lines mark
+the Pareto frontier.
 The convention is a comparison of reported policy summaries; metric-specific
 input and recording details are documented once in the experimental setup
 and appendix. P50 and tail statistics

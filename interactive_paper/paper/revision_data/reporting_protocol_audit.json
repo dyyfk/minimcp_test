@@ -63,11 +63,12 @@
   "main_text_pages": 8,
   "total_pages": 17,
   "visual_qa_pages": [
-    4,
+    5,
+    6,
     8
   ],
   "overfull_boxes": 0,
-  "pdf_sha256": "ead93308874f5d5565c878733c60e3b34ae0b3d2d896f48363903415a63cc41c",
+  "pdf_sha256": "4cf5ecf0c078c6ec657206433ef9a5f8d8548742ba62333e3c3559d1fd6455c8",
   "output_pdf": "/Users/ruoyuhe/Documents/ChatGPT/minicpm_paper/output/pdf/minimcp_zhongzhu_feedback.pdf",
   "new_model_api_calls": 0,
   "figure2_caption": {
@@ -75,5 +76,16 @@
     "mechanism_citation": "https://arxiv.org/pdf/2604.27393, Section 3.3",
     "citation_support": "Binary Listen/Speak control prediction before content generation",
     "plotted_values_unchanged": true
-  }
+  },
+  "table1_cost_panel_displayed": false,
+  "figure3_display": {
+    "always_label": "always-escalate via GPT-5.5",
+    "policy_connections": "thin solid lines connect all five settings, including TriviaQA conservative",
+    "pareto_connections": "thick solid lines connect nondominated settings",
+    "plotted_values_unchanged": true
+  },
+  "table1_aggressive_rows_bold": [
+    "MiniCPM",
+    "NVDA"
+  ]
 }
