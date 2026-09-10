@@ -37,6 +37,7 @@
 \@writefile{toc}{\contentsline {section}{\numberline {2}Related Work}{2}{section.2}\protected@file@percent }
 \newlabel{sec:related}{{2}{2}{Related Work}{section.2}{}}
 \@writefile{toc}{\contentsline {paragraph}{Competence readout.}{2}{section*.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Selective routing.}{2}{section*.2}\protected@file@percent }
 \citation{defossez2024moshi,openbmb2026minicpmo}
 \citation{wang2024fsm,zhang2024duplex,veluri2024syncllm}
 \citation{wang2024freezeomni}
@@ -46,7 +47,6 @@
 \citation{alain2017understanding}
 \citation{azaria2023internal}
 \citation{lugoloobi2026failures}
-\@writefile{toc}{\contentsline {paragraph}{Selective routing.}{3}{section*.2}\protected@file@percent }
 \@writefile{toc}{\contentsline {paragraph}{Native duplex control.}{3}{section*.3}\protected@file@percent }
 \@writefile{toc}{\contentsline {paragraph}{Competence-aware handoff.}{3}{section*.4}\protected@file@percent }
 \@writefile{toc}{\contentsline {section}{\numberline {3}Probe-Guided Expert Handoff}{3}{section.3}\protected@file@percent }
@@ -79,8 +79,8 @@
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.3}External transfer and its limits}{5}{subsection.4.3}\protected@file@percent }
 \newlabel{sec:transfer}{{4.3}{5}{External transfer and its limits}{subsection.4.3}{}}
 \newlabel{sec:transfer-neg}{{4.3}{5}{External transfer and its limits}{subsection.4.3}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces \textbf  {Answer-content accuracy and separately measured serving time.} Left: accuracy against expert call rate. Internal uses post-hoc weights of 0.25 for knowledge/math and 1 otherwise; all 240 queries remain included. Table\nobreakspace  {}\ref  {tab:transfer} retains the original weights; external curves are unweighted. The dashed line is the random endpoint mixture; the horizontal line is the measured always accuracy. Right: mean and P50 of signed server PCM-ready TTFA from a separate serving run on the same query IDs, with original query weights and a different frozen gate snapshot (Appendix\nobreakspace  {}\ref  {app:ttfa}). Statistics use completed sessions; negative times retain early responses. The panels do not establish joint accuracy--latency performance. L/C/B/A/W denote local/conservative/balanced/aggressive/always. Table\nobreakspace  {}\ref  {tab:latency} gives counts and tails for all five pools.}}{6}{figure.2}\protected@file@percent }
-\newlabel{fig:dualview}{{2}{6}{\textbf {Answer-content accuracy and separately measured serving time.} Left: accuracy against expert call rate. Internal uses post-hoc weights of 0.25 for knowledge/math and 1 otherwise; all 240 queries remain included. Table~\ref {tab:transfer} retains the original weights; external curves are unweighted. The dashed line is the random endpoint mixture; the horizontal line is the measured always accuracy. Right: mean and P50 of signed server PCM-ready TTFA from a separate serving run on the same query IDs, with original query weights and a different frozen gate snapshot (Appendix~\ref {app:ttfa}). Statistics use completed sessions; negative times retain early responses. The panels do not establish joint accuracy--latency performance. L/C/B/A/W denote local/conservative/balanced/aggressive/always. Table~\ref {tab:latency} gives counts and tails for all five pools}{figure.2}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces \textbf  {Accuracy gains and timing costs on three pools.} Left: answer-content accuracy against expert call rate. The Internal curve uses post-hoc weights of 0.25 for knowledge and math and 1 for other categories, for both accuracy and call rate; all 240 queries remain included. The Internal column of Table\nobreakspace  {}\ref  {tab:transfer} retains its original query weights. External curves are unweighted. C/B/A denote conservative/balanced/aggressive. The dashed line uses the original Table\nobreakspace  {}\ref  {tab:transfer} random-mixture convention (\S  \ref  {sec:evalproto}). The horizontal always-arm reference passes through the measured always point; it is not an oracle bound. Right: mean and P50 of the reconstructed time to first audio on a log scale, using the original query mixture. L/W denote local/always. Each point uses the original recorded pass, with one run per query and arm; no repeated-run uncertainty is implied. Local rows end at answer-text completion and escalated rows when the relay waveform is synthesized; playback duration is excluded (\S  \ref  {sec:evalproto}). Internal P95/P99 are reported in Table\nobreakspace  {}\ref  {tab:latency}. All four external QA pools appear in the upper block of Table\nobreakspace  {}\ref  {tab:transfer}.}}{6}{figure.2}\protected@file@percent }
+\newlabel{fig:dualview}{{2}{6}{\textbf {Accuracy gains and timing costs on three pools.} Left: answer-content accuracy against expert call rate. The Internal curve uses post-hoc weights of 0.25 for knowledge and math and 1 for other categories, for both accuracy and call rate; all 240 queries remain included. The Internal column of Table~\ref {tab:transfer} retains its original query weights. External curves are unweighted. C/B/A denote conservative/balanced/aggressive. The dashed line uses the original Table~\ref {tab:transfer} random-mixture convention (\S \ref {sec:evalproto}). The horizontal always-arm reference passes through the measured always point; it is not an oracle bound. Right: mean and P50 of the reconstructed time to first audio on a log scale, using the original query mixture. L/W denote local/always. Each point uses the original recorded pass, with one run per query and arm; no repeated-run uncertainty is implied. Local rows end at answer-text completion and escalated rows when the relay waveform is synthesized; playback duration is excluded (\S \ref {sec:evalproto}). Internal P95/P99 are reported in Table~\ref {tab:latency}. All four external QA pools appear in the upper block of Table~\ref {tab:transfer}}{figure.2}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.4}Readout ablations}{6}{subsection.4.4}\protected@file@percent }
 \newlabel{sec:duplex}{{4.4}{6}{Readout ablations}{subsection.4.4}{}}
 \@writefile{toc}{\contentsline {paragraph}{Text-input transfer.}{6}{section*.5}\protected@file@percent }
@@ -177,16 +177,11 @@
 \newlabel{tab:native-rates}{{8}{15}{Realized escalation rates (\%) for the MiniCPM native results in the upper block of Table~\ref {tab:transfer}, plus the archived Mandarin and separate AlpacaEval pools. These are measured rates, distinct from the nominal calibration budgets and from the NVDA replay budgets. Local-only makes no expert calls}{table.8}{}}
 \@writefile{lot}{\contentsline {table}{\numberline {9}{\ignorespaces Internal native-protocol answer-content accuracy with query-bootstrap 95\% confidence intervals ($n=240$). Random follows Table\nobreakspace  {}\ref  {tab:transfer}'s endpoint-mixture convention.}}{15}{table.9}\protected@file@percent }
 \newlabel{tab:live}{{9}{15}{Internal native-protocol answer-content accuracy with query-bootstrap 95\% confidence intervals ($n=240$). Random follows Table~\ref {tab:transfer}'s endpoint-mixture convention}{table.9}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {D.2}Measured time to first answer audio}{15}{subsection.D.2}\protected@file@percent }
-\newlabel{app:ttfa}{{D.2}{15}{Measured time to first answer audio}{subsection.D.2}{}}
-\@writefile{toc}{\contentsline {paragraph}{Clock and endpoints.}{15}{section*.12}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Serving configuration and calibration scope.}{15}{section*.13}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Coverage, failures, and tails.}{16}{section*.14}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {10}{\ignorespaces Measured server PCM-ready TTFA (seconds). Each arm attempts every query in the pool. Statistics use completed sessions; Fail counts all other outcomes, and Early counts negative TTFA among completed sessions. Calls uses all attempted sessions as its denominator. One run per query and arm; quantiles describe query variation.}}{16}{table.10}\protected@file@percent }
-\newlabel{tab:latency}{{10}{16}{Measured server PCM-ready TTFA (seconds). Each arm attempts every query in the pool. Statistics use completed sessions; Fail counts all other outcomes, and Early counts negative TTFA among completed sessions. Calls uses all attempted sessions as its denominator. One run per query and arm; quantiles describe query variation}{table.10}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {D.3}Failure type and later reads}{16}{subsection.D.3}\protected@file@percent }
-\newlabel{app:readtime}{{D.3}{16}{Failure type and later reads}{subsection.D.3}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {E}Judge prompt and reproducibility}{17}{appendix.E}\protected@file@percent }
-\newlabel{app:prompts}{{E}{17}{Judge prompt and reproducibility}{appendix.E}{}}
-\newlabel{app:repro}{{E}{17}{Judge prompt and reproducibility}{appendix.E}{}}
-\gdef \@abspage@last{17}
+\@writefile{lot}{\contentsline {table}{\numberline {10}{\ignorespaces Internal reconstructed time to first audio (seconds, $n=236$--$239$ per arm). Local rows end at text completion and escalated rows when blocking TTS returns. Playback duration is excluded. Quantiles describe variation across queries within one run.}}{15}{table.10}\protected@file@percent }
+\newlabel{tab:latency}{{10}{15}{Internal reconstructed time to first audio (seconds, $n=236$--$239$ per arm). Local rows end at text completion and escalated rows when blocking TTS returns. Playback duration is excluded. Quantiles describe variation across queries within one run}{table.10}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {D.2}Failure type and later reads}{15}{subsection.D.2}\protected@file@percent }
+\newlabel{app:readtime}{{D.2}{15}{Failure type and later reads}{subsection.D.2}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {E}Judge prompt and reproducibility}{16}{appendix.E}\protected@file@percent }
+\newlabel{app:prompts}{{E}{16}{Judge prompt and reproducibility}{appendix.E}{}}
+\newlabel{app:repro}{{E}{16}{Judge prompt and reproducibility}{appendix.E}{}}
+\gdef \@abspage@last{16}

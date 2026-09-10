@@ -76,39 +76,32 @@ See `revision_data/citation_audit_2026-09-08.md` for all 45 cited works and
 the limits of the numerical checks. RouterBench's exact experiment and
 FDB's per-sample results have not been independently recomputed.
 
-## Accuracy and measured TTFA figure
+## Internal figure restoration (2026-09-09)
 
-The Internal accuracy curve retains the selected knowledge/math weights of
-0.25 and weights of 1 for other categories. The main accuracy table keeps
-its original mixture. The timing panels use the independent `ttfa1` run,
-with signed server PCM-ready endpoints and completed-session statistics.
-The timing gate is the frozen 5,228-row artifact, not the 5,221-row
-no-overlap gate described for accuracy evaluation. These are not joint
-accuracy-latency observations.
+The author requested restoring the selected weighted Internal curve first,
+while leaving the main table unchanged. The figure now uses knowledge/math
+weights of 0.25 and weights of 1 for the other categories, from
+`revision_data/joint_reweighting_ideas.json`. Accuracy and call rate are both
+weighted. All 240 queries remain included. Timing and external curves keep
+their original values from `revision_data/native_summary.json`.
 
-Rebuild and audit from the paper directory:
+To rebuild only the figure:
 
 ```bash
-python build_measured_ttfa.py
 python build_academic_revision_figure.py
-python build_main_results.py --check
-tectonic main.tex
 ```
 
-`build_measured_ttfa.py` checks all 5,950 formal rows, IDs, timing arithmetic,
-failures, frozen gate hashes, and recorded summaries. It generates
-`revision_data/measured_ttfa.json` and `sections/measured_ttfa_table.tex`.
-It reads the gate artifacts at the recorded source commit through Git.
-`build_academic_revision_figure.py` checks accuracy and timing against their
-respective sources, keeps all negative TTFA values, and mirrors the figure
-to `../figures/`. `build_main_results.py --check` validates the unchanged
-accuracy table. Historical timing audits and `native_summary.json` remain
-archived; they are not sources for the current timing panels.
+This command validates source hashes, sample counts, plotted coordinates,
+and unchanged timing. It never writes the main table. The Internal figure
+and table intentionally use different weighting during this staged revision;
+`build_main_results.py --check --figure-values ...` will flag that difference.
+The table itself can still be checked with `python build_main_results.py --check`.
 
-The primary paper changes use data from `ttfa_real/summary_ttfa1_final.json`
-and formal shards. The prose report's claimed 44 failures and single GPU
-type are superseded by the row audit: 46 failed attempts (44 non-commit,
-one empty response, one timeout), and three recorded GPU types.
+`revision_data/internal_figure_restore_audit.json` records the restored
+coordinates and unchanged main-table hash. The earlier
+`section4_consistency_audit.json` is a historical unweighted snapshot.
+Experimental setup details and replay qualifications remain in
+`sections/setup_details.tex`.
 
 ## Native ablation figure (2026-09-09)
 

@@ -14,7 +14,7 @@ external English speech-QA pools: Speech TriviaQA, Speech Web Questions,
 and Speech Llama Questions from OpenAudioBench \citep{openaudiobench2025},
 and SD-QA from VoiceBench \citep{faisal2021sdqa,chen2024voicebench}.
 The native probe is fitted on 5,221 calibration rows after excluding
-benchmark overlaps. The answer-content results were rerun
+benchmark overlaps. All reported native-benchmark results were rerun
 with this refitted probe; per-language thresholds use the remaining
 core rows' out-of-fold scores and stay fixed across pools.
 Calibration details and model controls are in
@@ -29,13 +29,9 @@ gate's realized call rate $r$. Table~\ref{tab:transfer} uses the original
 query weights; Figure~\ref{fig:dualview}'s Internal curve uses the
 category weights specified in its caption. Both use the same recorded
 outcomes. External averages weight the four QA pools equally.
-For content evaluation, the expert receives the final 30 seconds of
-the prerecorded question. A separate timing experiment replays the
-same query IDs at real-time speed, supplies only consumed audio to
-the expert, and enables audio on both paths. It measures signed
-server TTFA from the scheduled end of input to the first answer PCM
-block, excluding candidate and stall audio. This run uses a different
-frozen gate snapshot from the overlap-remediated content fit; its
-answers are unjudged and do not establish joint accuracy--latency
-performance (Appendix~\ref{app:ttfa}). Model, fitting, and judge
-configurations are in Appendix~\ref{app:setup-details}.
+The expert receives the final 30 seconds of the prerecorded question;
+timing is reconstructed from logged stages with different local and
+relay endpoints. These results therefore measure routing and content,
+without establishing causal streaming or client-audible latency.
+Model, probe-fitting, and judge configurations are in
+Appendix~\ref{app:setup-details}.

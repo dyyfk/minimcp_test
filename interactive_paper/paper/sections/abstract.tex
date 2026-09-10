@@ -11,9 +11,7 @@ hidden states and separately calibrate a gate for expert handoff at
 answer onset. We find that failure signals can transfer from text to
 speech, and that readout design matters in native audio generation.
 On our internal benchmark, selective expert handoff raises
-answer-content accuracy from 40.8\% to 62.9\%. A separate serving
-benchmark measures median time to first answer audio of 0.70\,s
-locally, 2.87\,s with aggressive handoff, and 6.67\,s with always
-handoff on the internal pool. These are server PCM-ready times;
-expert-path tails remain a constraint for real-time use.
+answer-content accuracy from 40.8\% to 62.9\%, while mean reconstructed
+time to first audio increases from $-0.6$ to 4.6\,s. Serving speed
+therefore remains a key constraint for real-time use.
 \end{abstract}

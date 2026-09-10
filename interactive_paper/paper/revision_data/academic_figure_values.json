@@ -38,9 +38,7 @@
         2.873,
         6.674
       ]
-    },
-    "timing_source": "revision_data/measured_ttfa.json",
-    "timing_run_id": "ttfa1"
+    }
   },
   "striviaqa": {
     "accuracy_x": [
@@ -81,9 +79,7 @@
         3.545,
         4.891
       ]
-    },
-    "timing_source": "revision_data/measured_ttfa.json",
-    "timing_run_id": "ttfa1"
+    }
   },
   "sdqa": {
     "accuracy_x": [
@@ -124,8 +120,6 @@
         4.197,
         5.095
       ]
-    },
-    "timing_source": "revision_data/measured_ttfa.json",
-    "timing_run_id": "ttfa1"
+    }
   }
 }

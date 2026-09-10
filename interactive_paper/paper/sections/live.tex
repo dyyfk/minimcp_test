@@ -3,19 +3,26 @@
 \begin{figure}[!t]
   \centering
   \includegraphics[width=\linewidth]{revision_accuracy_latency}
-  \caption{\textbf{Answer-content accuracy and separately measured serving time.}
-  Left: accuracy against expert call rate. Internal uses post-hoc
-  weights of 0.25 for knowledge/math and 1 otherwise; all 240 queries
-  remain included. Table~\ref{tab:transfer} retains the original weights;
-  external curves are unweighted. The dashed line is the random
-  endpoint mixture; the horizontal line is the measured always accuracy.
-  Right: mean and P50 of signed server PCM-ready TTFA from a separate
-  serving run on the same query IDs, with original query weights and
-  a different frozen gate snapshot (Appendix~\ref{app:ttfa}). Statistics
-  use completed sessions; negative times retain early responses.
-  The panels do not establish joint accuracy--latency performance.
-  L/C/B/A/W denote local/conservative/balanced/aggressive/always.
-  Table~\ref{tab:latency} gives counts and tails for all five pools.}
+  \caption{\textbf{Accuracy gains and timing costs on three pools.}
+  Left: answer-content accuracy against expert call rate. The Internal
+  curve uses post-hoc weights of 0.25 for knowledge and math and 1 for
+  other categories, for both accuracy and call rate; all 240 queries
+  remain included. The Internal column of Table~\ref{tab:transfer}
+  retains its original query weights. External curves are unweighted.
+  C/B/A denote conservative/balanced/aggressive. The dashed
+  line uses the original Table~\ref{tab:transfer} random-mixture
+  convention (\S\ref{sec:evalproto}). The horizontal
+  always-arm reference passes through the measured always point;
+  it is not an oracle bound. Right: mean and P50 of the reconstructed
+  time to first audio on a log scale, using the original query mixture.
+  L/W denote local/always. Each point
+  uses the original recorded pass, with one run per query and arm;
+  no repeated-run uncertainty is implied. Local rows end at answer-text
+  completion and escalated rows when the relay waveform is synthesized;
+  playback duration is excluded (\S\ref{sec:evalproto}). Internal P95/P99
+  are reported in Table~\ref{tab:latency}. All four external
+  QA pools appear in the upper block of
+  Table~\ref{tab:transfer}.}
   \label{fig:dualview}
 \end{figure}
 
@@ -41,15 +48,13 @@ results identify an input constraint and task differences, without
 attributing the accuracy gap to truncation or changing the test
 mixture (Appendix~\ref{app:internal-strata}).
 
-The separate serving run measures when the first answer audio becomes
-available (Figure~\ref{fig:dualview}). Internal TTFA P50 is 0.70\,s
-locally, 0.89\,s at conservative, 1.61\,s at balanced, 2.87\,s at
-aggressive, and 6.67\,s at always. Aggressive has mean 4.59\,s and
-P95 18.14\,s; always has mean 8.01\,s and P95 25.86\,s.
-Local mean is $-0.61$\,s because 17 of 239 completed sessions begin
-answering before the input ends. Such early responses do not establish
-successful turn-taking. Across 5,950 attempts, 5,904 complete and
-46 fail; distributions condition on completion and retain outliers
-(Table~\ref{tab:latency}). These measurements characterize server
-response time, while correctness under this causal input protocol
-and client-audible delay remain unmeasured.
+The timing diagnostic makes the cost visible
+(Figure~\ref{fig:dualview}). Internal mean time to first audio
+increases from $-0.6$\,s locally to 2.4\,s at balanced and 4.6\,s at
+aggressive; aggressive P95 is 18.1\,s. The always arm averages
+8.0\,s (P50 6.7\,s). The expert call itself accounts for 5.1\,s of
+that mean; the rest is the blocking, non-streaming synthesis of the
+expert text, whose tail is driven by code and markup voiced verbatim.
+A lower call rate
+can reduce expert-path exposure, but these tails do not support
+calling the current aggressive setting low latency.

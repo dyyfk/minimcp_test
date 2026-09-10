@@ -247,7 +247,25 @@ always & 99.2\% & .704 [.65,.76] & .704 \\
 \end{tabular}
 \end{table}
 
-\input{sections/measured_ttfa}
+\begin{table}[!ht]
+\centering\small
+\caption{Internal reconstructed time to first audio (seconds, $n=236$--$239$
+per arm). Local rows end at text completion and escalated rows when
+blocking TTS returns. Playback duration is excluded. Quantiles describe
+variation across queries within one run.}
+\label{tab:latency}
+\begin{tabular}{lrrrr}
+\toprule
+tier & mean & P50 & P95 & P99 \\
+\midrule
+local-only & -0.6 & 0.7 & 2.6 & 3.6 \\
+conservative & 1.5 & 0.9 & 10.9 & 34.1 \\
+balanced & 2.4 & 1.6 & 14.4 & 26.9 \\
+aggressive & 4.6 & 2.9 & 18.1 & 54.8 \\
+always & 8.0 & 6.7 & 25.9 & 60.8 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \subsection{Failure type and later reads}
 \label{app:readtime}

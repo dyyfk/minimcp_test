@@ -72,8 +72,7 @@ def write_table(pools, table_path):
     table_path.write_text(before + START + rendered_rows(pools) + END + after)
 
 
-def check_figure(pools, drawn, timing_pools=None):
-    timing_pools = pools if timing_pools is None else timing_pools
+def check_figure(pools, drawn):
     for pool, plot in drawn.items():
         arms = ['never', 'conservative', 'balanced', 'aggressive', 'always']
         expected_y = [pools[pool][arm]['accuracy'] * 100 for arm in arms]
@@ -85,7 +84,7 @@ def check_figure(pools, drawn, timing_pools=None):
         if plot['always_reference'] != expected_y[-1]:
             raise ValueError(f'{pool}: always reference differs')
         for key, values in plot['timing'].items():
-            if values != [timing_pools[pool][arm][key] for arm in arms]:
+            if values != [pools[pool][arm][key] for arm in arms]:
                 raise ValueError(f'{pool}: timing differs for {key}')
 
 
