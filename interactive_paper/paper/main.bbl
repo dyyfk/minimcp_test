@@ -1,4 +1,4 @@
-\begin{thebibliography}{38}
+\begin{thebibliography}{31}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
@@ -15,6 +15,11 @@ Pranjal Aggarwal, Aman Madaan, Ankit Anand, Srividya~Pranavi Potharaju, Swaroop
 \newblock In \emph{Advances in Neural Information Processing Systems
   (NeurIPS)}, 2024.
 \newblock arXiv:2310.12963.
+
+\bibitem[Alain and Bengio(2016)]{alain2017understanding}
+Guillaume Alain and Yoshua Bengio.
+\newblock Understanding intermediate layers using linear classifier probes.
+\newblock \emph{arXiv preprint arXiv:1610.01644}, 2016.
 
 \bibitem[Azaria and Mitchell(2023)]{azaria2023internal}
 Amos Azaria and Tom Mitchell.
@@ -52,23 +57,6 @@ Chung-Ming Chien, Manu Orsini, Eugene Kharitonov, Neil Zeghidour, Karen
   language models.
 \newblock In \emph{International Conference on Machine Learning (ICML)}, 2026.
 \newblock arXiv:2604.12928.
-
-\bibitem[Cobbe et~al.(2021)Cobbe, Kosaraju, Bavarian, Chen, Jun, Kaiser,
-  et~al.]{cobbe2021gsm8k}
-Karl Cobbe, Vineet Kosaraju, Mohammad Bavarian, Mark Chen, Heewoo Jun, Lukasz
-  Kaiser, et~al.
-\newblock Training verifiers to solve math word problems.
-\newblock \emph{arXiv preprint arXiv:2110.14168}, 2021.
-\newblock GSM8K.
-
-\bibitem[Conover et~al.(2023)Conover, Hayes, Mathur, Xie, Wan, Shah, Ghodsi,
-  Wendell, Zaharia, and Xin]{conover2023dolly}
-Mike Conover, Matt Hayes, Ankit Mathur, Jianwei Xie, Jun Wan, Sam Shah, Ali
-  Ghodsi, Patrick Wendell, Matei Zaharia, and Reynold Xin.
-\newblock Free dolly: Introducing the world's first truly open
-  instruction-tuned {LLM}.
-\newblock Databricks blog, 2023.
-\newblock databricks-dolly-15k.
 
 \bibitem[Cui et~al.(2026)Cui, Xu, Wang, Yu, Sun, Xu,
   et~al.]{openbmb2026minicpmo}
@@ -115,15 +103,6 @@ Sebastian Farquhar, Jannik Kossen, Lorenz Kuhn, and Yarin Gal.
   entropy.
 \newblock \emph{Nature}, 630:\penalty0 625--630, 2024.
 
-\bibitem[Hendrycks et~al.(2021)Hendrycks, Burns, Kadavath, Arora, Basart, Tang,
-  Song, and Steinhardt]{hendrycks2021math}
-Dan Hendrycks, Collin Burns, Saurav Kadavath, Akul Arora, Steven Basart, Eric
-  Tang, Dawn Song, and Jacob Steinhardt.
-\newblock Measuring mathematical problem solving with the {MATH} dataset.
-\newblock In \emph{Advances in Neural Information Processing Systems (NeurIPS),
-  Datasets and Benchmarks}, 2021.
-\newblock arXiv:2103.03874.
-
 \bibitem[Huang et~al.(2026)Huang, Zhang, Yu, Shi, Ma, Xu, Gao, Hao, He, and
   Liu]{huang2026duplexomni}
 Muye Huang, Lingling Zhang, Xingyu Yu, Lei Shi, Zhanyu Ma, Jun Xu, Jiuchong
@@ -131,14 +110,6 @@ Muye Huang, Lingling Zhang, Xingyu Yu, Lei Shi, Zhanyu Ma, Jun Xu, Jiuchong
 \newblock {DuplexOmni}: Real-time listening, seeing, thinking, and speaking for
   full-duplex interaction.
 \newblock \emph{arXiv preprint arXiv:2606.09186}, 2026.
-
-\bibitem[Joshi et~al.(2017)Joshi, Choi, Weld, and
-  Zettlemoyer]{joshi2017triviaqa}
-Mandar Joshi, Eunsol Choi, Daniel~S. Weld, and Luke Zettlemoyer.
-\newblock {TriviaQA}: A large scale distantly supervised challenge dataset for
-  reading comprehension.
-\newblock In \emph{Proceedings of the 55th Annual Meeting of the Association
-  for Computational Linguistics (ACL)}, 2017.
 
 \bibitem[Kadavath et~al.(2022)Kadavath, Conerly, Askell, Henighan, Drain,
   Perez, Schiefer, Hatfield-Dodds, DasSarma, Tran-Johnson,
@@ -172,15 +143,6 @@ Tianpeng Li, Jun Liu, Tao Zhang, Yuanbo Fang, Da~Pan, Mingrui Wang, et~al.
   interaction.
 \newblock \emph{arXiv preprint arXiv:2502.17239}, 2025.
 \newblock Introduces OpenAudioBench.
-
-\bibitem[Lightman et~al.(2024)Lightman, Kosaraju, Burda, Edwards, Baker, Lee,
-  Leike, Schulman, Sutskever, and Cobbe]{lightman2024lets}
-Hunter Lightman, Vineet Kosaraju, Yura Burda, Harri Edwards, Bowen Baker, Teddy
-  Lee, Jan Leike, John Schulman, Ilya Sutskever, and Karl Cobbe.
-\newblock Let's verify step by step.
-\newblock In \emph{International Conference on Learning Representations
-  (ICLR)}, 2024.
-\newblock arXiv:2305.20050; source of the MATH-500 subset.
 
 \bibitem[Lin et~al.(2022)Lin, Hilton, and Evans]{lin2022teaching}
 Stephanie Lin, Jacob Hilton, and Owain Evans.
@@ -238,14 +200,6 @@ Tanya Stivers, N.~J. Enfield, Penelope Brown, Christina Englert, Makoto
 \newblock \emph{Proceedings of the National Academy of Sciences}, 106\penalty0
   (26):\penalty0 10587--10592, 2009.
 
-\bibitem[Taori et~al.(2023)Taori, Gulrajani, Zhang, Dubois, Li, Guestrin,
-  Liang, and Hashimoto]{taori2023alpaca}
-Rohan Taori, Ishaan Gulrajani, Tianyi Zhang, Yann Dubois, Xuechen Li, Carlos
-  Guestrin, Percy Liang, and Tatsunori~B. Hashimoto.
-\newblock Stanford alpaca: An instruction-following {LLaMA} model.
-\newblock GitHub repository, 2023.
-\newblock zh split: shibing624/alpaca-zh.
-
 \bibitem[Varshney et~al.(2026)Varshney, Surla, Xu, Krishnan, Jeblick, Austin,
   Vaidya, and Onofrio]{varshney2026llmrouter}
 Tanay Varshney, Annie Surla, Michelle Xu, Gomathy~Venkata Krishnan, Maximilian
@@ -277,23 +231,6 @@ Xiong Wang, Yangze Li, Chaoyou Fu, Yunhang Shen, Lei Xie, Ke~Li, Xing Sun, and
 \newblock {Freeze-Omni}: A smart and low latency speech-to-speech dialogue
   model with frozen {LLM}.
 \newblock \emph{arXiv preprint arXiv:2411.00774v5}, 2024{\natexlab{b}}.
-
-\bibitem[Wang et~al.(2024{\natexlab{c}})Wang, Ma, Zhang, Ni,
-  et~al.]{wang2024mmlupro}
-Yubo Wang, Xueguang Ma, Ge~Zhang, Yuansheng Ni, et~al.
-\newblock {MMLU-Pro}: A more robust and challenging multi-task language
-  understanding benchmark.
-\newblock In \emph{Advances in Neural Information Processing Systems (NeurIPS),
-  Datasets and Benchmarks}, 2024{\natexlab{c}}.
-\newblock arXiv:2406.01574.
-
-\bibitem[Wei et~al.(2024)Wei, Karina, Chung, Jiao, Papay, Glaese, Schulman, and
-  Fedus]{wei2024simpleqa}
-Jason Wei, Nguyen Karina, Hyung~Won Chung, Yunxin~Joy Jiao, Spencer Papay,
-  Amelia Glaese, John Schulman, and William Fedus.
-\newblock Measuring short-form factuality in large language models.
-\newblock \emph{arXiv preprint arXiv:2411.04368}, 2024.
-\newblock SimpleQA.
 
 \bibitem[Wu et~al.(2026)Wu, Zhang, Chen, Zhang, Tian, Yang, Yu, Liu, Hou, Hu,
   and Chng]{chrono2026thinking}

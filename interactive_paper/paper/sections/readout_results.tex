@@ -52,49 +52,49 @@ routing gains are reported in Appendix~\ref{app:native-ablation}.
   \label{fig:native-ablation}
 \end{figure}
 
-\subsection{Text-to-speech representation transfer}
+\subsection{Text-trained probes transfer to unseen human speech}
 \label{sec:xmodal}
-A text-calibrated L22 probe evaluated on speech-input states reaches
-\textbf{0.855} AUC. Figure~\ref{fig:xmodal-transfer} (left) locates
-where this readability emerges: probes trained on text-input hidden
-states and scored on speech-input states for the same queries are
-near chance in early layers and stabilize from roughly the middle of
-the network on every end-to-end-trained model --- MiniCPM-o~4.5
-(plateau 0.82--0.87), MiniCPM-o~2.6 (0.74--0.80, onset
-$\sim$46\% depth), and the cross-family Qwen2.5-Omni control
-(0.80--0.83, onset $\sim$25\% depth). The frozen-backbone
-Freeze-Omni adapter control never leaves the 0.52--0.60 band on
-identical backbone weights: the modality-shared mid-layer
-representation is created by training the backbone on the modality,
-not by the adapter alone. The two panels answer different questions
-and we keep them distinct: the left panel is \emph{matched-query}
-modality transfer (same 600 queries as text and as TTS audio); the
-right panel is the strictly harder \emph{query-disjoint} test ---
-probes fitted on the calibration pool, evaluated on 200 held-out
-SD-QA human recordings --- where the text-calibrated read on real
-speech reaches 0.760 at the deployed layer (band 0.76--0.80 over
-L22--L26), confirming the recipe is neither a TTS artifact nor
-memorization of the calibration questions (full per-layer tables in
-Appendix~\ref{app:signal}). These results concern
-representation transfer. The escalation experiments below use a
-separately fitted native probe with three L22 positions, as defined
-in \S\ref{sec:readlocation}.
+We next test whether a probe fitted to text-input hidden states can
+predict failure under speech input. This tests a change of input
+modality; Figure~\ref{fig:layersweep} tests held-out task-pool transfer
+within text input.
+
+Figure~\ref{fig:xmodal-transfer} (left) holds question content fixed:
+the same 600 queries are presented as text and as TTS audio. The
+text-trained MiniCPM-o~4.5 probe reaches \textbf{0.855} AUC on audio
+states at L22. Transfer also appears in MiniCPM-o~2.6 and
+Qwen2.5-Omni, with plateau AUCs of 0.74--0.80 and 0.80--0.83,
+respectively; the frozen-backbone Freeze-Omni control shows much
+weaker transfer under the tested recipe. These matched-query tests
+measure modality transfer with question content shared across fitting
+and evaluation.
+
+The right panel tests generalization to \emph{new questions and human
+speech}: probes fitted on the calibration pool are evaluated on 200
+query-disjoint SD-QA recordings. The text-trained MiniCPM-o~4.5 probe
+reaches \textbf{0.760} AUC at L22, with a per-layer peak of 0.800 at
+L25. Audio-trained probes and evaluation on SD-QA text provide
+references for the modality change. Thus, transfer extends beyond
+matched TTS questions to held-out human speech. The two panels use
+different evaluation sets, so their AUC difference does not isolate
+a human-speech penalty (Appendix~\ref{app:signal}). These results
+concern representation transfer; native escalation uses a separately
+fitted probe with three L22 positions (\S\ref{sec:readlocation}).
 
 \begin{figure}[t]
   \centering
   \includegraphics[width=\linewidth]{xmodal_transfer}
-  \caption{\textbf{Cross-modal readability emerges at mid-depth in
-  end-to-end-trained models and transfers to real speech.} Left:
-  per-layer failure AUC of probes trained on text-input hidden states
-  and scored on speech-input states for the same queries (matched
-  pairs, TTS audio). Both duplex MiniCPM generations and the
-  cross-family Qwen2.5-Omni control develop a modality-shared
-  mid-layer representation; the frozen-backbone Freeze-Omni adapter
-  control does not. Right: the query-disjoint version on real human
-  speech --- calibration-pool probes evaluated on 200 held-out SD-QA
-  recordings. The text-calibrated read (solid) tracks the
-  audio-calibrated and text-target references and peaks in the same
-  mid-to-late band (0.800 at L25; 0.760 at the deployed L22). Matched
-  x-axes show depth relative to each model's layer count.}
+  \caption{\textbf{Text-trained failure probes transfer to unseen
+  human speech.} Left: matched-query modality transfer---probes
+  fitted on text-input states are evaluated on TTS-audio states for
+  the same 600 questions, across four models. MiniCPM-o~4.5 reaches
+  0.855 AUC at L22. Right: query-disjoint transfer---MiniCPM-o~4.5
+  probes fitted on the calibration pool are evaluated on 200 held-out
+  SD-QA human recordings. The text-trained probe (blue) reaches
+  0.760 AUC at L22 and peaks at 0.800 at L25; gray curves show
+  audio-trained and text-target references. These tests evaluate
+  cross-modal transfer, complementing the text-only task-pool
+  transfer in Figure~\ref{fig:layersweep}. Depth is normalized by
+  each model's layer count.}
   \label{fig:xmodal-transfer}
 \end{figure}

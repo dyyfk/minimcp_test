@@ -12,47 +12,6 @@ diagnostics are separate from the main-table macro average.
 
 \input{sections/setup_details}
 
-\paragraph{Calibration.}
-Representation analyses use a fixed 360-query calibration split and
-single-position 4,096-dimensional features. The native gate uses 5,221
-rows with native-answer labels and three L22 summaries: the last tail
-state, the tail mean, and the input mean. The logistic head uses
-$C=3\times10^{-4}$. Five-fold stratified cross-validation uses seed 42;
-thresholds are language-specific 15/30/50\% quantiles of the 4,979 core
-rows' out-of-fold scores. The 242 fresh rows enter fitting but not the
-quantile base. Exported scores reproduce thresholds to four decimals.
-The overlap audit identified seven calibration rows matching external
-questions. These rows were excluded from both fitting and threshold
-calibration, and the native benchmark was rerun with the resulting gate.
-All reported native-benchmark results use this deduplicated fit.
-Layer selection used internal LOPO results without nested selection
-within each held-out pool.
-
-\paragraph{Scoring and timing.}
-Each arm contains one native-protocol session per query. Answer-content
-accuracy is judged from local generated text or the intended expert relay
-text. The expert receives the last 30 seconds of the full question waveform.
-Of 240 internal questions, 46 exceed that window; the always arm escalates
-45 of these and drops their beginnings. The input includes not-yet-consumed
-audio for 18/240 aggressive sessions. Time to first audio is reconstructed
-from the onset chunk offset and generation, waiting, and synthesis times;
-relay playback duration is excluded. Local rows end at text generation,
-while escalated rows end when blocking TTS returns a waveform.
-The always arm fires on 238/240 queries. Adjusting the random reference
-for its 99.2\% call rate changes the aggressive reference from 56.1 to
-56.2\%, leaving a 6.7-point gate advantage.
-
-\paragraph{Repeated and audio-output checks.}
-Two additional internal passes put aggressive accuracy in the range
-62.9--65.4\% (mean 64.4\%, sample standard deviation 1.3 points). A
-separate 299-query validation uses only consumed input audio and saves both
-output waveforms. Local/always text accuracy is 50.8/77.3\%, while accuracy
-after output-audio transcription is 48.2/66.2\%. The validation uses a
-separate 4,922-row gate fit excluding its 299 queries and reports endpoint
-arms, rather than live gate-arm results. The repeats describe internal
-run variability; the transcription scores motivate direct speech evaluation.
-\label{app:revision-diagnostics}
-
 \subsection{Internal task strata}
 \label{app:internal-strata}
 \input{sections/internal_strata}
