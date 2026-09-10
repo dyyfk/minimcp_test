@@ -20,17 +20,17 @@ The results support aggressive-tier gains across these pools, not
 improvement on every benchmark at every budget. On AlpacaEval, we
 measure 3.68 locally and 4.01 at aggressive, with
 a random-mixture reference of approximately 3.9; the always arm scores 4.20 versus 4.95
-for returned expert text. The relay cap is particularly restrictive
-for long, open-ended answers.
+for returned expert text. The length cap on relayed answers is
+particularly restrictive for tasks requiring long, open-ended responses.
 
 Failure categories and later reads help explain the boundary. In the
 native failure-type audit, specific-but-wrong answers comprise
 70\% of failures and are ranked at AUC 0.81, while execution slips
 in multi-step reasoning are near chance (0.47). In a separate
 read-time sweep, external mean AUC increases from 0.755 at commitment
-to 0.791 after two answer chunks. This is consistent with some useful
-information emerging during generation, without proving a causal
-mechanism (Appendix~\ref{app:readtime}).
+to 0.791 after two answer chunks. Later chunks expose useful failure
+information without identifying the mechanism underlying this change
+(Appendix~\ref{app:readtime}).
 
 The lower block of Table~\ref{tab:transfer} reports the exploratory
 NemotronLabs-VoiceChat-11B (NVDA) study. Its \emph{avg} covers four

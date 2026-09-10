@@ -8,7 +8,8 @@ The main table reports the original internal query mixture and four
 external English QA pools. The figure's Internal accuracy and call-rate
 curve uses post-hoc knowledge/math weights of 0.25 and weights of 1 for
 other categories; timing retains the original mixture. Archived Mandarin
-diagnostics are separate from the main-table macro average.
+diagnostics are reported separately and excluded from the main table's
+English-pool macro accuracy average.
 
 \input{sections/setup_details}
 
@@ -52,7 +53,8 @@ Qwen2-7B & raw & --- & pair control \\
 \begin{table}[h]
 \centering\small
 \caption{Failure-prediction AUC on MiniCPM-o 4.5. In-dist uses
-five-fold out-of-fold predictions; LOPO holds out the named pool.}
+five-fold out-of-fold predictions; LOPO fits on other pools and
+evaluates on the named held-out query pool.}
 \label{tab:signals}
 \begin{tabular}{lccc}
 \toprule
@@ -73,7 +75,7 @@ rather than an in-distribution comparison. The depth sweep shows that the
 failure is localized: mid-layer last-token reads transfer while late reads
 degrade on both duplex models; mean pooling degrades less. In the signal
 table, the final-layer audio entry is audio-calibrated LOPO math, whereas
-the L22 audio entry tests a text-calibrated probe on speech states.
+L22 tests a text-calibrated probe on speech states.
 
 \begin{table}[h]
 \centering\small
@@ -96,8 +98,7 @@ MiniCPM-o 2.6 & \textbf{0.822 (L21/28)} & \textbf{0.540} & late cliff \\
 The text-to-audio result is not explained by synthetic speech alone: on
 200 human SD-QA recordings, the text-calibrated read remains at
 0.76--0.80 AUC across L22--L26. Audio-input verbal self-evaluation is less
-reliable, whereas adding a transcript restores it; the hidden-state probe
-does not require that extra generation step.
+reliable; transcripts restore it, while probing needs no extra generation.
 
 \subsection{Mechanism checks}
 \label{app:mech}
@@ -109,8 +110,9 @@ orthogonal to the failing probe, and source-pool identity is decodable at
 all depths. A residual-component analysis shows the distributed read
 holding through the middle layers and decaying only near the outputs of the
 two duplex models; it remains intact in their raw backbones and the
-omni-streaming control. This supports the practical choice of a mid-layer
-read while leaving the causal mechanism open.
+omni-streaming control. These controls support a mid-layer read in the
+tested conditions, while leaving the causal role of individual
+fine-tuning objectives unresolved.
 
 \subsection{Query-surface baseline}
 \label{app:router}
@@ -118,8 +120,7 @@ read while leaving the causal mechanism open.
 A TF--IDF logistic router reaches 0.669 out-of-fold AUC and 0.38--0.57
 under LOPO, including 0.230 on the all-failure trap pool. The hidden-state
 probe's advantage is therefore not explained by query wording or source
-identity alone. On audio labels the surface router improves to 0.814 but
-still trails the L22 probe at 0.879.
+identity alone. On audio labels it improves to 0.814, below L22's 0.879.
 
 \subsection{Native feature ablation}
 \label{app:native-ablation}
@@ -142,8 +143,7 @@ Table~\ref{tab:native-ablation-values} use the analytical 30\% random
 mixture. These are cached outcome comparisons, not new live gate sessions.
 For the L22 single-state read, 0.0505 of the random allocations matched or
 exceeded the observed accuracy; none did for the other three readouts.
-These comparisons test against random routing, not differences between
-the readouts.
+These tests compare each readout to random routing only.
 
 \begin{figure}[ht]
   \centering
@@ -152,7 +152,7 @@ the readouts.
   Accuracy gains over random escalation, pooled across the same five
   evaluation sets as Figure~\ref{fig:native-ablation}. Each bar uses
   the recorded local and expert outcomes; feature choices and colors
-  match the main figure.}
+  match the main ablation figure.}
   \label{fig:native-ablation-routing}
 \end{figure}
 
@@ -180,8 +180,9 @@ method transfer rather than end-to-end real-time serving.
 
 \begin{table}[h]
 \centering\small
-\caption{VoiceChat-11B transfer. Mean accuracy equally weights four
-English speech-QA pools; random is the matched-rate mixture.}
+\caption{VoiceChat-11B transfer. Accuracy equally weights the four
+external English speech-QA pools; the random reference uses the same
+escalation rate as the probe-guided policy.}
 \label{tab:nvda-summary}
 \begin{tabular}{lrrr}
 \toprule
@@ -196,7 +197,7 @@ random-mixture accuracy & 50.7 & 57.7 & 67.0 \\
 The three-layer read reaches 0.818 out-of-fold AUC and 0.816 mean external
 AUC under the pool-aligned judges. A strictly causal commit-only variant
 loses about 0.03 external AUC, making answer onset the closest matching
-read point across the two model families.
+read point across the two tested model families.
 
 \section{Native gate and serving details}
 \label{app:gatedetail}
@@ -213,7 +214,7 @@ because thresholds are calibration quantiles rather than per-pool quotas.
 A second linear head uses the same L22 read to distinguish information
 requests from floor-management turns. Escalation requires both the
 information-seeking score $a(x)$ and failure score $s(x)$ to exceed their
-respective thresholds:
+respective thresholds in the same turn:
 \begin{equation}
 d(x)=\mathbf{1}\{s(x)\geq\tau_\ell\}\,
      \mathbf{1}\{a(x)\geq\tau_a\}.
@@ -251,12 +252,12 @@ always & 99.2\% & .704 [.65,.76] & .704 \\
 \centering\small
 \caption{Internal server TTFA (seconds), independent
 \texttt{ttfa-v3} run: 240 attempts per arm, with 239/238/236/236/237
-completed and 1/2/4/4/3 failed in row order. TTFA is the wait from
-scheduled input end to first answer PCM, bounded below by zero.
-Statistics include all completed sessions; the 17/12/11/13/7 early
+completed and 1/2/4/4/3 failed in row order. TTFA is the nonnegative
+wait from scheduled input end to first answer PCM.
+All completed sessions count; the 17/12/11/13/7 early
 responses have zero wait. Failed attempts have no TTFA value.
-The endpoint is the first local PCM-bearing chunk return or relay PCM
-yield; candidate/stall PCM and client playback are excluded.}
+Timing ends at the first local PCM-bearing chunk return or relay PCM
+yield, excluding candidate/stall audio and client playback.}
 \label{tab:latency}
 \begin{tabular}{lrrrr}
 \toprule
@@ -278,7 +279,8 @@ This separate sweep fits a probe at each read point using 5,236 judged
 calibration rows, row-random five-fold fitting, and $C=3\times10^{-4}$.
 Later reads pad finished answers with the last available vector. Its
 five-pool macro includes Mandarin reasoning, unlike the main table's
-four-English-pool macro. Failure categories are model judgments.
+four-English-pool macro. Failure categories are assigned by a model
+judge from recorded answers.
 
 \begin{center}
 \begin{minipage}{\linewidth}
@@ -323,4 +325,5 @@ uses sampled decoding and retains one run per query and arm. MiniCPM-o 4.5
 runs with PyTorch 2.8.0 and Transformers 4.51.0 on single-H100 instances.
 The release includes the calibration manifest, out-of-fold scores,
 thresholds, overlap exclusions, benchmark hashes, and scripts that rebuild
-the figures and metric summaries from judged rows.
+the figures and accuracy and timing summaries from the original
+recorded data for these experiments.

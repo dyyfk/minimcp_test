@@ -1,0 +1,276 @@
+{
+  "base_commit": "b3111d9",
+  "conclusion": {
+    "number": "6",
+    "page": 8
+  },
+  "layer_sweep_before": {
+    "number": "3",
+    "page": 7
+  },
+  "layer_sweep_after": {
+    "number": "2",
+    "page": 4
+  },
+  "readout_method": {
+    "number": "3.3",
+    "page": 3
+  },
+  "intro_preserved_result_values": [
+    "0.760 AUC",
+    "22.1 percentage points",
+    "6.8 percentage points"
+  ],
+  "intro_removed_result_values": [
+    "0.372",
+    "0.931",
+    "0.595",
+    "0.695",
+    "0.855"
+  ],
+  "intro_contribution_words_before": 245,
+  "intro_contribution_words_after": 141,
+  "main_pages": 8,
+  "total_pages": 16,
+  "overfull_boxes": 0,
+  "undefined_references": 0,
+  "fonts_embedded": true,
+  "type3_fonts": 0,
+  "preamble_font_margins_and_spacing_unchanged": true,
+  "numeric_tabular_blocks_unchanged": 29,
+  "all_figure_assets_unchanged": true,
+  "ttfa_data_and_recomputation_unchanged": true,
+  "layout_measurement": {
+    "method": "Poppler full-width multiline body/caption blocks; references, headings, equations, and narrow table columns excluded",
+    "threshold": 0.7,
+    "before": {
+      "main": {
+        "eligible_blocks": 46,
+        "below_70": [
+          {
+            "page": 1,
+            "fraction": 0.09431804797979794,
+            "last_line": "response."
+          },
+          {
+            "page": 2,
+            "fraction": 0.14392998232323234,
+            "last_line": "speech model."
+          },
+          {
+            "page": 3,
+            "fraction": 0.43631837373737375,
+            "last_line": "predicting the beneﬁt of a particular expert."
+          },
+          {
+            "page": 3,
+            "fraction": 0.20715249494949495,
+            "last_line": "preserves its answer."
+          },
+          {
+            "page": 3,
+            "fraction": 0.20051073484848486,
+            "last_line": "a nonlinear readout."
+          },
+          {
+            "page": 4,
+            "fraction": 0.3012189368686869,
+            "last_line": "distribution or input modality."
+          },
+          {
+            "page": 4,
+            "fraction": 0.20071200000000003,
+            "last_line": "feature aggregation."
+          },
+          {
+            "page": 4,
+            "fraction": 0.6051257323232324,
+            "last_line": "probe-ﬁtting, and judge conﬁgurations are in Appendix A.1."
+          },
+          {
+            "page": 4,
+            "fraction": 0.562482244949495,
+            "last_line": "truncation or changing the test mixture (Appendix A.2)."
+          },
+          {
+            "page": 5,
+            "fraction": 0.5764746035353536,
+            "last_line": "separate results, not a demonstrated joint operating point."
+          },
+          {
+            "page": 5,
+            "fraction": 0.5320704116161616,
+            "last_line": "particularly restrictive for long, open-ended answers."
+          },
+          {
+            "page": 5,
+            "fraction": 0.12646974494949495,
+            "last_line": "pendix D.2)."
+          },
+          {
+            "page": 6,
+            "fraction": 0.27002279040404037,
+            "last_line": "all four external QA pools."
+          },
+          {
+            "page": 6,
+            "fraction": 0.6084506515151515,
+            "last_line": "position sweep and a native-audio layer-by-readout ablation."
+          },
+          {
+            "page": 7,
+            "fraction": 0.40122270959595957,
+            "last_line": "change from aggregation; chance is 0.5."
+          },
+          {
+            "page": 7,
+            "fraction": 0.36056446717171714,
+            "last_line": "nism remains open (Appendix B.2)."
+          },
+          {
+            "page": 8,
+            "fraction": 0.2047373080808081,
+            "last_line": "model’s layer count."
+          },
+          {
+            "page": 8,
+            "fraction": 0.288036047979798,
+            "last_line": "across ﬁtting and evaluation."
+          },
+          {
+            "page": 8,
+            "fraction": 0.16423141161616162,
+            "last_line": "positions (§3.3)."
+          },
+          {
+            "page": 8,
+            "fraction": 0.1809628282828283,
+            "last_line": "the speech model."
+          },
+          {
+            "page": 8,
+            "fraction": 0.5268375101010101,
+            "last_line": "and client playback timestamps remain unmeasured."
+          }
+        ]
+      },
+      "appendix": {
+        "eligible_blocks": 30,
+        "below_70": [
+          {
+            "page": 11,
+            "fraction": 0.48464723989898983,
+            "last_line": "are separate from the main-table macro average."
+          },
+          {
+            "page": 11,
+            "fraction": 0.06153693686868688,
+            "last_line": "effort."
+          },
+          {
+            "page": 11,
+            "fraction": 0.48910023737373737,
+            "last_line": "and arm; no samples are removed or reweighted."
+          },
+          {
+            "page": 11,
+            "fraction": 0.062191050505050506,
+            "last_line": "states."
+          },
+          {
+            "page": 12,
+            "fraction": 0.33264150505050505,
+            "last_line": "LOPO holds out the named pool."
+          },
+          {
+            "page": 12,
+            "fraction": 0.3370693459595959,
+            "last_line": "require that extra generation step."
+          },
+          {
+            "page": 12,
+            "fraction": 0.42341221212121216,
+            "last_line": "while leaving the causal mechanism open."
+          },
+          {
+            "page": 12,
+            "fraction": 0.33543406313131313,
+            "last_line": "still trails the L22 probe at 0.879."
+          },
+          {
+            "page": 13,
+            "fraction": 0.21867494191919196,
+            "last_line": "between the readouts."
+          },
+          {
+            "page": 13,
+            "fraction": 0.6731574949494948,
+            "last_line": "expert outcomes; feature choices and colors match the main ﬁgure."
+          },
+          {
+            "page": 14,
+            "fraction": 0.3654225909090909,
+            "last_line": "random is the matched-rate mixture."
+          },
+          {
+            "page": 14,
+            "fraction": 0.6850069999999999,
+            "last_line": "onset the closest matching read point across the two model families."
+          },
+          {
+            "page": 14,
+            "fraction": 0.5974312020202021,
+            "last_line": "and failure score s(x) to exceed their respective thresholds:"
+          },
+          {
+            "page": 15,
+            "fraction": 0.05240451767676765,
+            "last_line": "calls."
+          },
+          {
+            "page": 15,
+            "fraction": 0.23087665909090907,
+            "last_line": "playback are excluded."
+          },
+          {
+            "page": 15,
+            "fraction": 0.40240514393939397,
+            "last_line": "Failure categories are model judgments."
+          },
+          {
+            "page": 16,
+            "fraction": 0.2998352373737374,
+            "last_line": "summaries from judged rows."
+          }
+        ]
+      }
+    },
+    "after": {
+      "main": {
+        "eligible_blocks": 40,
+        "below_70": []
+      },
+      "appendix": {
+        "eligible_blocks": 29,
+        "below_70": []
+      }
+    }
+  },
+  "visually_reviewed_pages": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16
+  ],
+  "pdf_sha256": "0ffb1c9ad20b238acd278057f56d7642ba36e48806206689b4973e87efe2b5a1"
+}

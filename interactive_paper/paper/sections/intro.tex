@@ -2,11 +2,10 @@
 \label{sec:intro}
 Spoken interaction leaves little time to choose a response
 \citep{stivers2009universals}. One practical design pairs a local
-speech model, which keeps the conversation going, with a stronger
-expert that handles the hard questions. Calling the expert on every
-turn adds cost and waiting time. Selective escalation needs something
-else: an early estimate of whether the local answer will fail, made
-at the onset of a response.
+speech model that keeps the conversation going with a stronger expert
+for hard questions. Calling the expert on every turn adds cost and
+waiting time. Selective escalation requires an estimate of local-answer
+failure risk that is available when the model begins to respond.
 
 Prior work gives two starting points. For text models, hidden-state
 probes and verbal self-evaluation can predict whether an answer is
@@ -26,10 +25,10 @@ speech-input states after speech and duplex fine-tuning. Third, it is
 not known where in a streaming protocol the hidden state is actually
 available for a routing decision. A duplex model already decides when
 to speak, but this floor-management decision need not reveal whether
-it knows the answer. It is reasonable to expect that some competence
-information survives fine-tuning, because the backbone carried it
-before. The layer, position, and modality at which it can be read
-have not been measured on a duplex speech model.
+it knows the answer. Although the pretrained backbone can carry
+competence information, its accessibility across layers, read positions,
+and input modalities remains unclear in native streaming speech
+after duplex fine-tuning.
 
 This gap matters in practice. A gate placed at the wrong layer can
 look good on its calibration pool and then invert on a new one, so
@@ -56,28 +55,19 @@ decision that motivated escalation in the first place.
 
 We study these questions on frozen MiniCPM-o~4.5
 \citep{openbmb2026minicpmo}, with raw-backbone and other speech-model
-controls. Our contributions are three. First, a layer and position
-audit shows that text-input LOPO math AUC increases from 0.372 at the
-final layer to 0.931 at layer 22. With audio calibration and audio
-input, the final-layer probe does not show this failure, so we use
-the middle layer for its robustness across the tested conditions, not
-because the output layer never holds competence information. Matched
-controls link the late-layer degradation to the tested fine-tuned
-checkpoints but do not identify its cause. At native answer onset, a
-matched $2\times2$ layer-by-readout ablation separates depth from
-aggregation: combining three positions raises L22 mean AUC from
-0.595 to 0.695, while its single-state read trails the final layer
-(Figure~\ref{fig:native-ablation}). Second, a text-calibrated L22
-probe transfers to speech-input states at AUC 0.855 on matched TTS
-queries and 0.760 on 200 query-disjoint human recordings
-(Figure~\ref{fig:xmodal-transfer}). Cross-model comparisons extend
-the modality-transfer pattern to MiniCPM-o~2.6 and Qwen2.5-Omni, with
-weaker transfer in the frozen-backbone Freeze-Omni control. We
-separate this representation transfer from the extra calibration that
-native serving needs. Third, a native-protocol benchmark shows that a
-separately fitted answer-onset gate selects useful expert calls. It
-raises internal answer-content accuracy by 22.1 points and exceeds
-the reported random-mixture reference by 6.8 points at the aggressive
-tier. An independent real-time replay measures server waiting time
-after input end to first answer audio. Its answers remain unjudged; these timings do not
-establish joint accuracy--latency gains or client-audible delay.
+controls. We make three contributions. First, a layer and position
+audit shows that the accessibility of failure information depends on
+the input and calibration regime, motivating our L22 read
+(Figure~\ref{fig:layersweep}). A matched native ablation separates
+the contribution of feature aggregation from layer choice
+(Figure~\ref{fig:native-ablation}). Second, text-trained probes
+transfer to speech-input states, reaching 0.760 AUC on query-disjoint
+human recordings (Figure~\ref{fig:xmodal-transfer}). Cross-model
+controls test the breadth of this transfer, which remains distinct
+from the calibration needed for native serving. Third, a separately
+fitted answer-onset gate raises internal answer-content accuracy by
+22.1 percentage points and exceeds the reported random-mixture
+reference by 6.8 points at the aggressive tier. An independent
+real-time replay measures server waiting time after input end to
+first answer audio. These unjudged timing sessions do not establish
+joint accuracy--latency gains or client-audible delay.

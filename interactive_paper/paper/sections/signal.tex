@@ -1,16 +1,33 @@
+\begin{figure}[!t]
+  \centering
+  \includegraphics[width=\linewidth]{layer_sweep}
+  \caption{\textbf{Text-input transfer depends on layer and position.}
+  LOPO math AUC across layers: late last-token reads deteriorate on
+  the duplex checkpoints, while mid-layer reads and raw-backbone
+  controls remain predictive. Layer 22 is the MiniCPM-o~4.5 read
+  location used for the native gate. This plot does not show an
+  equivalent collapse under audio calibration and audio input.}
+  \label{fig:layersweep}
+\end{figure}
+
 \subsection{Where should the probe read?}
 \label{sec:readlocation}
 Adapting the probe to duplex speech requires choosing its layer,
 position, and read time. The final layer feeds the output head, but
-this does not ensure that its failure signal survives a change in
-query distribution or input modality.
+its failure signal can degrade under a change in query distribution
+or input modality. Figure~\ref{fig:layersweep} motivates L22 through
+text-input leave-one-pool-out (LOPO) evaluation: on held-out math,
+its last-token probe reaches 0.931 AUC, versus 0.372 at the final
+layer. This failure does not persist when both calibration and
+inference use audio input (\S\ref{sec:duplex}).
 
 The native feature vector concatenates the latest L22 tail state,
 the mean of the tail states, and the mean input state, allowing the
 probe to combine the current boundary state with pooled context.
-The choice of L22 is informed by the readout analyses in
-\S\ref{sec:duplex}, which also evaluate the contribution of feature
-aggregation.
+The matched native ablation in \S\ref{sec:duplex} shows that this
+aggregation matters: a single L22 state does not outperform a
+single final-layer state. Both depth and aggregation therefore
+define the native readout.
 
 We read these features when the generation call first returns a
 listen-to-speak transition. This makes the gate available at the

@@ -1,9 +1,5 @@
 \section{Discussion and Limitations}
 \label{sec:discussion}
-The central finding is that a mid-layer read remains predictive in tested
-conditions where a final-layer, last-token probe fails. This read location
-also supports selective expert calls without updating the speech model.
-
 Three boundaries define the scope of the results. First, coverage is
 limited to the tested checkpoints and predominantly single-turn speech QA.
 Broader conversational tasks, including multi-turn dialogue and expert
@@ -12,9 +8,5 @@ in-regime audio features and answer labels to fit the readout and set
 thresholds; representation transfer alone does not provide a zero-shot gate.
 Third, accuracy and server TTFA come from separate runs; timing-session
 correctness is unjudged. Early responses need not improve turn-taking.
-Human-rated speech quality and client playback timestamps remain unmeasured.
-
-These results motivate competence-aware handoff as a useful addition to a
-speech model's floor control. Appendix~\ref{app:current-protocol} provides
-the model and calibration details for the benchmark.
-\label{sec:main-end}
+Human-rated speech quality and timestamps of audio playback on the client
+remain unmeasured in these experiments.

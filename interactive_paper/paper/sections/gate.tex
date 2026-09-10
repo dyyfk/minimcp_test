@@ -13,9 +13,8 @@ chooses whether to continue locally or request expert help. On the
 expert path, an audio uplink transcribes the question, the expert
 returns a text answer, and the local talker voices the prepared relay
 text. The request and relay add cost and waiting time. We use
-local-answer failure risk as a proxy for the value of escalation:
-benefit still depends on whether the expert repairs the error and
-the relay preserves its answer.
+local-answer failure risk as a proxy for escalation value; gains
+depend on expert correction and faithful relay of the answer.
 
 \subsection{A probe for the handoff decision}
 \label{sec:probe}
@@ -27,8 +26,8 @@ classifiers have estimated statement truthfulness
 speech model's existing states contain a directly readable failure
 signal. Reusing these states avoids generating a separate
 self-evaluation and leaves the speech model unchanged. The linear
-restriction makes this a test of accessible information; poor
-performance does not rule out information requiring a nonlinear readout.
+restriction tests directly accessible information without ruling
+out information requiring a nonlinear readout.
 
 Offline, we collect local answers to calibration questions and use
 a judge to assign correctness labels. Each label is paired with
