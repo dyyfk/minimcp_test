@@ -249,23 +249,24 @@ always & 99.2\% & .704 [.65,.76] & .704 \\
 
 \begin{table}[!ht]
 \centering\small
-\caption{Internal measured server TTFA (seconds), independent
+\caption{Internal server TTFA (seconds), independent
 \texttt{ttfa-v3} run: 240 attempts per arm, with 239/238/236/236/237
-completed and 1/2/4/4/3 failed in row order. Statistics use completed
-sessions and retain signed times. Local has 17/240 early responses
-(7.1\%). The endpoint is the first local PCM-bearing chunk return or
-first relay PCM yield, relative to scheduled input end. Candidate/stall
-PCM and client playback are excluded. Quantiles describe query variation.}
+completed and 1/2/4/4/3 failed in row order. TTFA is the wait from
+scheduled input end to first answer PCM, bounded below by zero.
+Statistics include all completed sessions; the 17/12/11/13/7 early
+responses have zero wait. Failed attempts have no TTFA value.
+The endpoint is the first local PCM-bearing chunk return or relay PCM
+yield; candidate/stall PCM and client playback are excluded.}
 \label{tab:latency}
 \begin{tabular}{lrrrr}
 \toprule
 tier & mean & P50 & P95 & P99 \\
 \midrule
-local-only & -0.61 & 0.70 & 2.62 & 3.64 \\
-conservative & 1.53 & 0.89 & 10.85 & 34.08 \\
-balanced & 2.36 & 1.61 & 14.41 & 26.91 \\
-aggressive & 4.59 & 2.87 & 18.14 & 54.78 \\
-always & 8.01 & 6.67 & 25.86 & 60.83 \\
+local-only & 1.06 & 0.70 & 2.62 & 3.64 \\
+conservative & 2.71 & 0.89 & 10.85 & 34.08 \\
+balanced & 3.97 & 1.61 & 14.41 & 26.91 \\
+aggressive & 6.10 & 2.87 & 18.14 & 54.78 \\
+always & 9.43 & 6.67 & 25.86 & 60.83 \\
 \bottomrule
 \end{tabular}
 \end{table}

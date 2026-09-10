@@ -33,9 +33,9 @@ In this content benchmark, the expert receives the final 30 seconds
 of the prerecorded question. Timing comes from an independent
 \texttt{ttfa-v3} run on the same query IDs, using real-time input,
 only the consumed audio prefix for expert requests, audio generation
-on both paths, and prepared relay text. Server TTFA is the signed
-monotonic-clock difference between the first answer PCM block and
-the scheduled end of input. Candidate and stall audio are excluded;
+on both paths, and prepared relay text. Server TTFA measures the wait
+from scheduled input end until the first answer PCM block is ready;
+audio ready earlier incurs zero wait. Candidate and stall audio are excluded;
 client playback is unmeasured. These timing-session answers have not
 been judged, so accuracy and TTFA are not joint measurements.
 Model, probe-fitting, and judge configurations are in

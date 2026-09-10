@@ -7437,3 +7437,38 @@ audio generation on both paths, and prepared relay text. Its answers have
 not been judged, so 62.9% accuracy and 4.588 s mean TTFA are not claimed as
 a joint operating point. The paper's overlap-remediation account for the
 answer-content benchmark remains in place. No judging or GPU run was done.
+
+## Nonnegative TTFA used in the paper (2026-09-09)
+
+Current paper timing source: `ttfa_real/nonnegative/summary.json`, generated
+by `ttfa_real/recompute_nonnegative_ttfa.py` directly from the existing
+`ttfa-v3` timestamps. This supersedes the signed timing summaries above
+for paper reporting. Raw logs and the historical signed summary are retained.
+
+`TTFA = max(0, ts.first_answer_pcm - ts.input_end)` measures the waiting
+time after scheduled input end until answer audio is ready on the server.
+Completed early responses remain in the distribution with zero wait;
+failures have missing values and are counted separately. Candidate/stall
+audio and client playback are excluded. These answers have not been judged.
+
+| Internal arm | Attempts | Completed | Failed | Early / zero wait | Mean (s) | P50 | P95 | P99 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| local | 240 | 239 | 1 | 17 | 1.065 | 0.695 | 2.618 | 3.636 |
+| conservative | 240 | 238 | 2 | 12 | 2.709 | 0.887 | 10.852 | 34.083 |
+| balanced | 240 | 236 | 4 | 11 | 3.966 | 1.611 | 14.407 | 26.914 |
+| aggressive | 240 | 236 | 4 | 13 | 6.100 | 2.873 | 18.137 | 54.781 |
+| always | 240 | 237 | 3 | 7 | 9.431 | 6.674 | 25.862 | 60.829 |
+
+All 25 pool/arm combinations were recomputed: 5,950 attempts, 5,904 completed,
+46 failed, and 64 early responses. Each pool has the same query IDs across
+its five arms, with no duplicate or missing attempts. Local/relay answer
+endpoints and raw-file hashes were checked. Millisecond timestamp rounding
+accounts for differences of at most 0.001 s from the original signed records.
+`ttfa_real/nonnegative/report.md` contains all rows; the JSON also includes
+statistics on each pool's query IDs completed in all five arms.
+
+The timing panels, text, and Table 10 use this source consistently. Internal
+means at two-decimal display precision are 1.06 / 2.71 / 3.97 / 6.10 / 9.43 s.
+The main accuracy table and all plotted accuracy/call-rate coordinates are
+unchanged. Accuracy and timing still come from separate runs and do not
+establish a joint accuracy--latency operating point.

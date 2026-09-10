@@ -1,9 +1,9 @@
-"""Restore the selected post-hoc Internal curve in Figure 3.
+"""Plot answer-content accuracy and independent nonnegative server TTFA.
 
 Usage: python build_academic_revision_figure.py
 Internal accuracy and call rate use knowledge/math weights of 0.25 and 1
 for other categories. Timing and external curves use the original mixture.
-The main table is intentionally left unchanged during this figure-only step.
+TTFA is the wait after input end; completed early answers count as zero wait.
 No models, APIs, sampling, or new evaluations are involved.
 """
 import argparse
@@ -24,14 +24,18 @@ POOLS = [('frozen', 'Internal'), ('striviaqa', 'Speech TriviaQA'), ('sdqa', 'SD-
 INK, BLUE, GRAY, LIGHT = '#252525', '#29475F', '#777777', '#D9D9D9'
 
 
-def make_figure(native_path, output_dir, weights_path=HERE / 'revision_data/joint_reweighting_ideas.json'):
+def make_figure(native_path, output_dir, weights_path=HERE / 'revision_data/joint_reweighting_ideas.json',
+                ttfa_path=HERE.parent / 'ttfa_real/nonnegative/summary.json'):
     native = json.loads(native_path.read_text())
-    ttfa = json.loads((HERE.parent / 'ttfa_real/summary_ttfa1_final.json').read_text())
+    ttfa = json.loads(ttfa_path.read_text())
+    assert ttfa['formula'] == 'max(0, ts.first_answer_pcm - ts.input_end)'
     for pool, _ in POOLS:
         for arm in ARMS:
             measured = ttfa['pools'][pool]['arms']['local' if arm == 'never' else arm]
             for key in ('mean', 'p50'):
-                native['pools'][pool][arm][key + '_s'] = measured['ttfa_answer'][key]
+                value = measured['nonnegative_ttfa_s'][key]
+                assert value >= 0, (pool, arm, key)
+                native['pools'][pool][arm][key + '_s'] = value
     original = native['pools']
     data = copy.deepcopy(original)
     weights = json.loads(weights_path.read_text())
@@ -112,13 +116,11 @@ def make_figure(native_path, output_dir, weights_path=HERE / 'revision_data/join
                             marker=marker)
             timing_lines.append(line)
             assert np.array_equal(line.get_ydata(), np.array([data[pool][a][key] for a in ARMS]))
-        tx.set_yscale('symlog', linthresh=1)
-        tx.set(ylim=(-1, 30), xlim=(-.15, 4.15), xticks=range(5),
-               xticklabels=LABELS, yticks=[-1, 0, 1, 3, 10, 30],
-               yticklabels=['-1', '0', '1', '3', '10', '30'])
+        tx.set(ylim=(0, 10.5), xlim=(-.15, 4.15), xticks=range(5),
+               xticklabels=LABELS, yticks=[0, 2, 4, 6, 8, 10])
         tx.minorticks_off()
         tx.set_ylabel('Server TTFA (s)', labelpad=6)
-        tx.set_title('Measured first answer audio', loc='left', pad=5, fontweight='normal')
+        tx.set_title('Wait to first answer audio', loc='left', pad=5, fontweight='normal')
         if row == 2:
             ax.set_xlabel('Realized expert call rate (%)', labelpad=5)
             tx.set_xlabel('Recorded arm', labelpad=5)
@@ -143,7 +145,7 @@ def make_figure(native_path, output_dir, weights_path=HERE / 'revision_data/join
     fig.text(.094, .031,
              'Internal accuracy and call rate: weights of 0.25 for knowledge and math; 1 for other categories.',
              fontsize=6.7, va='bottom', style='italic')
-    fig.text(.094, .011, 'TTFA: independent ttfa-v3 sessions; original query mixture; signed values retained.',
+    fig.text(.094, .011, 'TTFA: completed ttfa-v3 sessions; original query mixture; early responses count as zero wait.',
              fontsize=6.7, va='bottom', style='italic')
     output_dir.mkdir(parents=True, exist_ok=True)
     fig.savefig(output_dir / 'revision_accuracy_latency.pdf')
@@ -159,6 +161,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--native-summary', type=Path, default=HERE / 'revision_data/native_summary.json')
     parser.add_argument('--reweighting', type=Path, default=HERE / 'revision_data/joint_reweighting_ideas.json')
+    parser.add_argument('--ttfa-summary', type=Path, default=HERE.parent / 'ttfa_real/nonnegative/summary.json')
     parser.add_argument('--output-dir', type=Path, default=HERE / 'figures')
     args = parser.parse_args()
-    make_figure(args.native_summary, args.output_dir, args.reweighting)
+    make_figure(args.native_summary, args.output_dir, args.reweighting, args.ttfa_summary)

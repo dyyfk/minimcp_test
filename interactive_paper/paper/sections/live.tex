@@ -13,12 +13,13 @@
   line uses the original Table~\ref{tab:transfer} random-mixture
   convention (\S\ref{sec:evalproto}). The horizontal
   always-arm reference passes through the measured always point;
-  it is not an oracle bound. Right: signed mean and P50 server TTFA
+  it is not an oracle bound. Right: mean and P50 server TTFA
   from the independent \texttt{ttfa-v3} run, with original query weights
-  and completed sessions. The symmetric log axis is linear near zero.
-  L/W denote local/always. Each query has one attempt per arm. TTFA
-  ends at first answer PCM, excluding candidate/stall audio and client
-  playback. These unjudged sessions do not establish the accuracy on
+  and completed sessions. TTFA is the nonnegative wait after input end
+  until first answer PCM; early answers have zero wait.
+  L/W denote local/always. Each query has one attempt per arm.
+  Candidate/stall audio and client playback are excluded.
+  These unjudged sessions do not establish the accuracy on
   the left. Table~\ref{tab:latency} gives Internal counts and tails;
   Table~\ref{tab:transfer} includes all four external QA pools.}
   \label{fig:dualview}
@@ -46,13 +47,13 @@ results identify an input constraint and task differences, without
 attributing the accuracy gap to truncation or changing the test
 mixture (Appendix~\ref{app:internal-strata}).
 
-The independent \texttt{ttfa-v3} run measures server time to first
-answer audio (Figure~\ref{fig:dualview}). Internal P50 is 0.70\,s
+The independent \texttt{ttfa-v3} run measures server waiting time to
+first answer audio after input end (Figure~\ref{fig:dualview}). Internal P50 is 0.70\,s
 locally, 1.61\,s at balanced, and 2.87\,s at aggressive. Aggressive
-has mean 4.59\,s and P95 18.14\,s; always has mean 8.01\,s and
-P50 6.67\,s. Local signed mean is $-0.61$\,s: 17/240 attempts
-(7.1\%) respond before input end. These early responses are retained
-without assuming better interaction or correctness. Table~\ref{tab:latency}
+has mean 6.10\,s and P95 18.14\,s; always has mean 9.43\,s and
+P50 6.67\,s. Local mean is 1.06\,s, including 17/240 attempts
+(7.1\%) that respond before input end and incur zero wait. Early
+responses do not establish better interaction or correctness. Table~\ref{tab:latency}
 counts failures and reports timing among completed sessions. These
-answers remain unjudged: 62.9\% accuracy and 4.59\,s mean TTFA are
+answers remain unjudged: 62.9\% accuracy and 6.10\,s mean TTFA are
 separate results, not a demonstrated joint operating point.

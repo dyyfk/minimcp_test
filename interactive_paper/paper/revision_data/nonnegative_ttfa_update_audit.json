@@ -1,0 +1,38 @@
+{
+  "base_commit": "5dac2660bc19e718fde21ebc149c77f701b6ac17",
+  "metric": "max(0, ts.first_answer_pcm - ts.input_end)",
+  "source_summary": "interactive_paper/ttfa_real/nonnegative/summary.json",
+  "attempts": 5950,
+  "completed": 5904,
+  "failed": 46,
+  "early_responses": 64,
+  "all_25_groups_match_approved_recomputation": true,
+  "figure_timing_matches_source": true,
+  "table_10_rounding_matches_source": true,
+  "accuracy_table_unchanged": true,
+  "accuracy_and_call_rate_coordinates_unchanged": true,
+  "raw_logs_and_original_signed_summary_unchanged": true,
+  "main_pages": 8,
+  "total_pages": 16,
+  "overfull_boxes": 0,
+  "undefined_references": 0,
+  "type3_fonts": 0,
+  "all_fonts_embedded": true,
+  "visually_reviewed_pages": [
+    1,
+    2,
+    4,
+    5,
+    6,
+    8,
+    15,
+    16
+  ],
+  "files_sha256": {
+    "interactive_paper/paper/main.pdf": "ae0d39a343efc930b80cc95468c231b887d4e22cb4a75a3636c2268b36c0c1be",
+    "interactive_paper/paper/figures/revision_accuracy_latency.pdf": "1c8581391151a3a26615d49cbbc97ffdbf5f1468912f221b6dc60ac3743261d2",
+    "interactive_paper/paper/sections/live.tex": "a97d23d12dd593cd290030a5916be45c2a2dc1026cb762087fdc537ae33663a4",
+    "interactive_paper/paper/sections/appendix_curated.tex": "2e7c9c55035351289a8759928ac7d4c3f707ba82a6a90b4d828b0b5738e72b25",
+    "interactive_paper/ttfa_real/nonnegative/summary.json": "deb1412c04ccc6e864d2d1d1a88ca1af4f6a0d9c95b1e1b72d0336777a5c8010"
+  }
+}

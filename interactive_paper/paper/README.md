@@ -82,8 +82,9 @@ The author requested restoring the selected weighted Internal curve first,
 while leaving the main table unchanged. The figure now uses knowledge/math
 weights of 0.25 and weights of 1 for the other categories, from
 `revision_data/joint_reweighting_ideas.json`. Accuracy and call rate are both
-weighted. All 240 queries remain included. Timing and external curves keep
-their original values from `revision_data/native_summary.json`.
+weighted. All 240 queries remain included. External accuracy curves use
+`revision_data/native_summary.json`; timing uses the independent measured
+run summarized in `../ttfa_real/nonnegative/summary.json`.
 
 To rebuild only the figure:
 
@@ -92,7 +93,7 @@ python build_academic_revision_figure.py
 ```
 
 This command validates source hashes, sample counts, plotted coordinates,
-and unchanged timing. It never writes the main table. The Internal figure
+and nonnegative timing. It never writes the main table. The Internal figure
 and table intentionally use different weighting during this staged revision;
 `build_main_results.py --check --figure-values ...` will flag that difference.
 The table itself can still be checked with `python build_main_results.py --check`.
@@ -102,6 +103,30 @@ coordinates and unchanged main-table hash. The earlier
 `section4_consistency_audit.json` is a historical unweighted snapshot.
 Experimental setup details and replay qualifications remain in
 `sections/setup_details.tex`.
+
+## Nonnegative server TTFA
+
+The paper reports waiting time after scheduled input end:
+`max(0, first_answer_pcm - input_end)`. Completed early responses remain
+in the statistics with zero wait and are counted separately. Failed
+attempts retain missing TTFA values and are excluded from timing statistics.
+The raw `ttfa-v3` logs and the historical signed summary remain unchanged.
+
+Recompute all 25 pool/arm combinations from the 5,950 recorded attempts,
+then redraw the paper figure, from this directory:
+
+```bash
+python ../ttfa_real/recompute_nonnegative_ttfa.py \
+  --results ../ttfa_real/results/ttfa1 --out-dir ../ttfa_real/nonnegative
+python build_academic_revision_figure.py
+```
+
+The recomputation validates query IDs, attempt counts, audio endpoint
+selection, and source hashes. The summary records 5,904 completed sessions,
+46 failures, and 64 early responses. Table 10 uses the Internal rows,
+rounded to two decimals; the figure uses unrounded mean and P50 values.
+These are server audio-ready statistics; timing-session correctness and
+client playback remain unmeasured.
 
 ## Native ablation figure (2026-09-09)
 
