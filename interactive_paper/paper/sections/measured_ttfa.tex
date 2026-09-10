@@ -1,0 +1,66 @@
+\subsection{Measured time to first answer audio}
+\label{app:ttfa}
+
+\paragraph{Clock and endpoints.}
+The serving experiment uses the same 1,190 query IDs across five pools
+and five arms, with one attempt per query and arm. Input chunks become
+available at their scheduled arrival times under real-time replay;
+consumption cannot precede arrival. A worker's monotonic clock measures
+\[
+  \mathrm{TTFA}_{\rm server}
+  = t_{\rm first\ answer\ PCM} - t_{\rm input\ end},
+\]
+where input end is the scheduled arrival of the last real audio sample.
+On the local path, the endpoint is the return of the first non-listen
+chunk containing nonempty PCM. This interface is chunk-blocking. On the
+expert path, the endpoint is the first nonempty PCM yielded by the
+teacher-forced talker, before whole-waveform synthesis completes.
+The onset chunk's candidate audio and subsequent stall audio are logged
+separately and excluded from answer TTFA. Negative times are retained:
+the model may answer or finish before all input arrives. The measurement
+does not include network delivery or client playback and does not certify
+answer correctness or full-input coverage.
+
+\paragraph{Serving configuration and calibration scope.}
+Audio generation is enabled on both paths, with top-$k=20$, three forced
+listen chunks, and an L22 read aggregating eight tail states and the
+input mean. At escalation, ASR receives only the consumed real audio
+prefix; \texttt{gpt-5.5} uses low reasoning effort, with web-enabled
+requests and a non-web fallback. Prepared expert text is relayed by the
+teacher-forced talker. After the local turn, expert completion is polled
+at 50\,ms intervals with a 150\,s wait limit. Each worker warms up with
+six chunks and one synthesis before processing sessions serially.
+
+The frozen timing gate was fitted on 5,228 rows, with English thresholds
+0.9057/0.7973/0.5534. It differs from the 5,221-row overlap-remediated fit
+described for content evaluation in Appendix~\ref{app:setup-details}.
+The seven external-question overlaps remain in this timing gate's
+calibration. These timings therefore characterize this serving
+configuration, not the generalization or joint accuracy--latency
+performance of the overlap-remediated gate. No correctness judgments
+were collected for the timing sessions. Hardware logs contain 5,719
+sessions on H100 80GB HBM3, 56 on H100 NVL, and 175 on H200; all 1,200
+Internal sessions use H100 80GB HBM3. External timings include this
+hardware variation and are not controlled hardware comparisons.
+
+\paragraph{Coverage, failures, and tails.}
+All 5,950 attempts are retained: 5,904 completed sessions, 44 without a
+speak commit, one empty response, and one expert timeout. Smoke runs are
+excluded. Table~\ref{tab:latency} conditions timing statistics on completed
+sessions with a recorded answer endpoint and reports failed attempts
+separately. Calls is the fraction of all attempted sessions that fired;
+this denominator includes sessions without onset. No timestamp is
+zero-filled and no negative value or outlier is clipped. Internal local
+TTFA has mean $-0.61$\,s but P50 0.70\,s, with 17 early responses.
+Speech Web Questions has long delayed-onset outliers: local TTFA reaches
+305.52\,s despite P95 3.60\,s. Quantiles describe variation across queries,
+not uncertainty over repeated runs.
+
+On the 235 Internal IDs valid in all five arms, paired-subset P50 values
+are 0.69/0.88/1.61/2.88/6.64\,s for local/conservative/balanced/aggressive/
+always. The corresponding common-ID counts for Speech TriviaQA, Speech
+Web Questions, Speech Llama Questions, and SD-QA are 248/237/242/199.
+The release records per-session timestamps, status, input identity,
+expert-prefix identity, audio metadata, and frozen configuration hashes.
+
+\input{sections/measured_ttfa_table}

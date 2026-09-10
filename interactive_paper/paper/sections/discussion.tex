@@ -10,10 +10,12 @@ Broader conversational tasks, including multi-turn dialogue and expert
 continuity, remain to be evaluated. Second, native serving requires
 in-regime audio features and answer labels to fit the readout and set
 thresholds; representation transfer alone does not provide a zero-shot gate.
-Third, the benchmark measures answer-content accuracy and reconstructed
-serving time. Its long expert-path tails do not establish a latency benefit;
-human-rated speech quality and common-clock measurements of audible
-responses would better capture the listener's experience.
+Third, answer-content accuracy and server TTFA come from separate
+runs with different gate snapshots. The timing run has unjudged answers,
+early responses, and long tails; it does not establish joint
+accuracy--latency gains for the overlap-remediated gate. Human-rated
+speech quality and client playback timestamps remain necessary to
+characterize the listener's experience.
 
 These results motivate competence-aware handoff as a useful addition to a
 speech model's floor control. Appendix~\ref{app:current-protocol} provides

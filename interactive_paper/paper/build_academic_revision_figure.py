@@ -1,15 +1,16 @@
-"""Restore the selected post-hoc Internal curve in Figure 3.
+"""Build the accuracy and independently measured TTFA panels.
 
 Usage: python build_academic_revision_figure.py
 Internal accuracy and call rate use knowledge/math weights of 0.25 and 1
-for other categories. Timing and external curves use the original mixture.
-The main table is intentionally left unchanged during this figure-only step.
+for other categories. Timing uses the separately audited ttfa1 sessions.
+Accuracy and timing do not measure the same generated answers.
 No models, APIs, sampling, or new evaluations are involved.
 """
 import argparse
 import copy
 import json
 from pathlib import Path
+import shutil
 
 import matplotlib
 matplotlib.use('Agg')
@@ -24,10 +25,19 @@ POOLS = [('frozen', 'Internal'), ('striviaqa', 'Speech TriviaQA'), ('sdqa', 'SD-
 INK, BLUE, GRAY, LIGHT = '#252525', '#29475F', '#777777', '#D9D9D9'
 
 
-def make_figure(native_path, output_dir, weights_path=HERE / 'revision_data/joint_reweighting_ideas.json'):
+def make_figure(native_path, output_dir, weights_path=HERE / 'revision_data/joint_reweighting_ideas.json',
+                timing_path=HERE / 'revision_data/measured_ttfa.json'):
     native = json.loads(native_path.read_text())
     original = native['pools']
     data = copy.deepcopy(original)
+    measured = json.loads(timing_path.read_text())
+    assert measured['run_id'] == 'ttfa1' and measured['summary_statistics_match']
+    timing = {
+        pool: {arm: {key + '_s': measured['pools'][pool]['arms'][
+                    'local' if arm == 'never' else arm]['ttfa_answer'][key]
+                    for key in ['mean', 'p50']}
+               for arm in ARMS}
+        for pool, _ in POOLS}
     weights = json.loads(weights_path.read_text())
     selected = next(item for item in weights['all_sixteen_joint_scenarios']
                     if item['knowledge_weight'] == .25 and item['math_weight'] == .25)
@@ -100,19 +110,18 @@ def make_figure(native_path, output_dir, weights_path=HERE / 'revision_data/join
         for key, lab, color, line_style, marker in [
                 ('mean_s', 'Mean', BLUE, '-', 'o'),
                 ('p50_s', 'P50', GRAY, (0, (4, 2.4)), 's')]:
-            values = [p[a][key] for a in ARMS]
+            values = [timing[pool][a][key] for a in ARMS]
             line, = tx.plot(range(5), values, label=lab, color=color,
                             linestyle=line_style, linewidth=1.05, **marker_kw,
                             marker=marker)
             timing_lines.append(line)
-            assert np.array_equal(line.get_ydata(), np.array([data[pool][a][key] for a in ARMS]))
-        tx.set_yscale('log')
-        tx.set(ylim=(1, 30), xlim=(-.15, 4.15), xticks=range(5),
-               xticklabels=LABELS, yticks=[1, 3, 10, 30],
-               yticklabels=['1', '3', '10', '30'])
+            assert np.array_equal(line.get_ydata(), np.array([timing[pool][a][key] for a in ARMS]))
+        tx.axhline(0, color=GRAY, linewidth=.65, linestyle=(0, (2, 2)))
+        tx.set(ylim=(-1.5, 9), xlim=(-.15, 4.15), xticks=range(5),
+               xticklabels=LABELS, yticks=[0, 3, 6, 9])
         tx.minorticks_off()
-        tx.set_ylabel('Time to first audio (s)', labelpad=6)
-        tx.set_title('Time to first audio', loc='left', pad=5, fontweight='normal')
+        tx.set_ylabel('Server TTFA (s)', labelpad=6)
+        tx.set_title('Measured first answer audio', loc='left', pad=5, fontweight='normal')
         if row == 2:
             ax.set_xlabel('Realized expert call rate (%)', labelpad=5)
             tx.set_xlabel('Recorded arm', labelpad=5)
@@ -130,14 +139,16 @@ def make_figure(native_path, output_dir, weights_path=HERE / 'revision_data/join
         drawn[pool] = {'accuracy_x': x.tolist(), 'accuracy_y': y.tolist(),
                        'random_x': [0, 100], 'random_y': [float(y[0]), float(y[-1])],
                        'always_reference': float(y[-1]),
-                       'timing': {key: [p[a][key] for a in ARMS]
-                                  for key in ('mean_s', 'p50_s')}}
+                       'timing': {key: [timing[pool][a][key] for a in ARMS]
+                                  for key in ('mean_s', 'p50_s')},
+                       'timing_source': str(timing_path.relative_to(HERE)),
+                       'timing_run_id': measured['run_id']}
 
-    check_figure(data, drawn)
+    check_figure(data, drawn, timing_pools=timing)
     fig.text(.094, .031,
              'Internal accuracy and call rate: weights of 0.25 for knowledge and math; 1 for other categories.',
              fontsize=6.7, va='bottom', style='italic')
-    fig.text(.094, .011, 'Timing uses the original query mixture.',
+    fig.text(.094, .011, 'TTFA: separate serving run; original query mixture; signed times retain early responses.',
              fontsize=6.7, va='bottom', style='italic')
     output_dir.mkdir(parents=True, exist_ok=True)
     fig.savefig(output_dir / 'revision_accuracy_latency.pdf')
@@ -146,6 +157,11 @@ def make_figure(native_path, output_dir, weights_path=HERE / 'revision_data/join
     (output_dir / 'plotted_values.json').write_text(json.dumps(drawn, indent=2) + '\n')
     if output_dir.resolve() == (HERE / 'figures').resolve():
         (HERE / 'revision_data/academic_figure_values.json').write_text(json.dumps(drawn, indent=2) + '\n')
+    if output_dir.resolve() == (HERE / 'figures').resolve():
+        (HERE.parent / 'figures').mkdir(parents=True, exist_ok=True)
+        for ext in ('pdf', 'png'):
+            shutil.copy2(output_dir / f'revision_accuracy_latency.{ext}',
+                         HERE.parent / 'figures' / f'revision_accuracy_latency.{ext}')
     return drawn
 
 
@@ -154,5 +170,6 @@ if __name__ == '__main__':
     parser.add_argument('--native-summary', type=Path, default=HERE / 'revision_data/native_summary.json')
     parser.add_argument('--reweighting', type=Path, default=HERE / 'revision_data/joint_reweighting_ideas.json')
     parser.add_argument('--output-dir', type=Path, default=HERE / 'figures')
+    parser.add_argument('--timing-summary', type=Path, default=HERE / 'revision_data/measured_ttfa.json')
     args = parser.parse_args()
-    make_figure(args.native_summary, args.output_dir, args.reweighting)
+    make_figure(args.native_summary, args.output_dir, args.reweighting, args.timing_summary)

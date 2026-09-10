@@ -1,0 +1,1045 @@
+{
+  "source_commit": "9e86247",
+  "run_id": "ttfa1",
+  "protocol": "ttfa-v3",
+  "definition": "first_answer_pcm - input_end; signed server PCM-ready seconds",
+  "population": "completed sessions with a non-null answer timestamp",
+  "n_sessions": 5950,
+  "status_counts": {
+    "completed": 5904,
+    "empty_response": 1,
+    "expert_timeout": 1,
+    "non_commit": 44
+  },
+  "hardware_counts": {
+    "NVIDIA H100 80GB HBM3": 5719,
+    "NVIDIA H100 NVL": 56,
+    "NVIDIA H200": 175
+  },
+  "timestamp_max_rounding_error_s": 0.001,
+  "duplicate_rows": 0,
+  "row_check_failures": 0,
+  "summary_statistics_match": true,
+  "gate_artifacts": {
+    "gate_native.json": {
+      "sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
+      "train_n": 5228,
+      "thresholds_en": {
+        "conservative": 0.9057239890098572,
+        "balanced": 0.7972545623779297,
+        "aggressive": 0.5533501505851746
+      }
+    },
+    "gate_native_noleak.json": {
+      "sha256": "2b9b9d29188fd8dc68183a1d3dff2039ab5eb38eb4d93d0314edac1cdf001f80",
+      "train_n": 5221,
+      "thresholds_en": {
+        "conservative": 0.9050160646438599,
+        "balanced": 0.794853687286377,
+        "aggressive": 0.5456203818321228
+      }
+    }
+  },
+  "scope": "Separate unjudged timing sessions; gate differs from the overlap-remediated accuracy fit. No joint accuracy-latency measurement.",
+  "source_hashes": {
+    "interactive_paper/ttfa_real/freeze.json": "558a83462f4c3a59e0f6ecd915a13acc47117a7f524c74875af2c526445c9f2d",
+    "interactive_paper/ttfa_real/summary_ttfa1_final.json": "1f90a11fa145ce21d0efa0aa8891c26d69f24532ba52017418cccaf787058fd3",
+    "interactive_paper/ttfa_real/summarize_ttfa.py": "2ebd31b8ec9ee7402d332b2b7f2de425ca5d49579d8bce630e37aada615d270d",
+    "interactive_paper/ttfa_real/verify_rows.py": "135dcde6e855cbee5de28f4f7b69ad472f054350106689ae5f83c9f7ea6762b5",
+    "interactive_paper/ttfa_real/frozen_manifest.jsonl": "dcb6e23ebae3efd7d844cc3ef91923de471e8ff7d7880fe0e06e2ddbf50d6ece",
+    "interactive_paper/ttfa_real/sdqa_manifest.jsonl": "b3a82f24c984c6bc587bf7b1eee5ba40a52a5d1803911b0dce88ac1a518f4e74",
+    "interactive_paper/ttfa_real/sllama_manifest.jsonl": "f84c6f21f2938c598725f02abee943230c469301447115c9660fc20e381cd1f9",
+    "interactive_paper/ttfa_real/striviaqa_manifest.jsonl": "8f88b492fef0b191a4125f84825508cab22b04a97b4c4af50a2e3bd1dc266565",
+    "interactive_paper/ttfa_real/swebq_manifest.jsonl": "0df2426123e47d282b9597bf0158b146ff47c8e3c6201908644e40ea5d2db68f",
+    "interactive_paper/ttfa_real/results/ttfa1/frozen/aggressive.jsonl.shard0": "d8defd9dd88cbb29710b7bf2cd03b4b66d16522011f40a7e6f73e27c2d9baf21",
+    "interactive_paper/ttfa_real/results/ttfa1/frozen/aggressive.jsonl.shard1": "7c27c5329e526bb155d70c869e2c4ce39a45d10f179d9927a6f2655ecf514afa",
+    "interactive_paper/ttfa_real/results/ttfa1/frozen/aggressive.jsonl.shard2": "c190b99cd63cc2cf137eb8629fc17236fad259e83dd40a3fcf6141e9752989ee",
+    "interactive_paper/ttfa_real/results/ttfa1/frozen/aggressive.jsonl.shard3": "51ebc59b884968aeeaa7ac4f34f716b0031cd94b83f6017d26b03f417b43d677",
+    "interactive_paper/ttfa_real/results/ttfa1/frozen/aggressive.jsonl.shard4": "8e60e9f2ceb7dee7a6f2109381c56f13d5861c55aa1229ce8b26d7a06b2f8b8d",
+    "interactive_paper/ttfa_real/results/ttfa1/frozen/aggressive.jsonl.shard5": "4710def61ea1e55f3b76c238301e0f07d866d4ca5c17556bd38cc2e445047faf",
+    "interactive_paper/ttfa_real/results/ttfa1/frozen/aggressive.jsonl.shard6": "7de1d68303afbf1695da0568172ad5adbace7c22de73a7a141db4b9851ddd345",
+    "interactive_paper/ttfa_real/results/ttfa1/frozen/aggressive.jsonl.shard7": "abd2660733f3594f0332d850c03f7fedc06276c2ea9dfd01eee81dd47c826969",
+    "interactive_paper/ttfa_real/results/ttfa1/frozen/always.jsonl.shard0": "96a921992b9c31c5ef67fff0dcf6e0cd4700a15bd85bdde840849eb48daa2dc6",
+    "interactive_paper/ttfa_real/results/ttfa1/frozen/always.jsonl.shard1": "8d852d3b2e7af22cc458c5d6d5b9f188ccafb34619acb7d022e9994f212051ac",
+    "interactive_paper/ttfa_real/results/ttfa1/frozen/always.jsonl.shard2": "5c629818e135205539235f1dd237772eb073a9726d8f81cbc5e44e0aec52ebd4",
+    "interactive_paper/ttfa_real/results/ttfa1/frozen/always.jsonl.shard3": "054c6a196a5a27dd8f8c7a5956a904e382210229b688eee2d6fe3330a3a40d84",
+    "interactive_paper/ttfa_real/results/ttfa1/frozen/always.jsonl.shard4": "b0a2626b482611b8f3a851832279bc254867fd1f489b9c8a8fa3d93f1bf720ff",
+    "interactive_paper/ttfa_real/results/ttfa1/frozen/always.jsonl.shard5": "b2b91f9104fc3ae8d24048e636c4e8f71dd05ad786329a90f129fb0f1a7d77bf",
+    "interactive_paper/ttfa_real/results/ttfa1/frozen/always.jsonl.shard6": "58ba6ad018927af7711002f1873d1e99c6ca5a3d2332722b15a69130c7524399",
+    "interactive_paper/ttfa_real/results/ttfa1/frozen/always.jsonl.shard7": "e6f36201dfc92d551f98d32af6476d6e595a3059c8b620d8980a04e03ee49261",
+    "interactive_paper/ttfa_real/results/ttfa1/frozen/balanced.jsonl.shard0": "4a53c32b5e150cb5c080fc22ff7879c8d8bae1f503a1c545c4f6f3f4ee47218a",
+    "interactive_paper/ttfa_real/results/ttfa1/frozen/balanced.jsonl.shard1": "5fead4a595dc529aab94ead66b8ec830da0024fdc69d3ca88865613a49f0903f",
+    "interactive_paper/ttfa_real/results/ttfa1/frozen/balanced.jsonl.shard2": "4ecf395a71f963b1bb60d6159a57e72535df00024aac3f9400b5ebd265a5efed",
+    "interactive_paper/ttfa_real/results/ttfa1/frozen/balanced.jsonl.shard3": "007b1401e6093e57325b6fecf90c61f28e8d6013aac0662025d25acfa02a54d3",
+    "interactive_paper/ttfa_real/results/ttfa1/frozen/balanced.jsonl.shard4": "5855ff505ef532e052e66b84ea3b300bed084f5d7dd897ee9ca57bd4606fff96",
+    "interactive_paper/ttfa_real/results/ttfa1/frozen/balanced.jsonl.shard5": "5caaaf4c806ea5c6a5a4ab9b8122d3add65d9ca5675bb2aad419204b800c3035",
+    "interactive_paper/ttfa_real/results/ttfa1/frozen/balanced.jsonl.shard6": "2c6ee9af4a3522d5e4974514d918991b7bfcdc70580a00dba6e0ccf6e45d5d16",
+    "interactive_paper/ttfa_real/results/ttfa1/frozen/balanced.jsonl.shard7": "d0cdd68933545f26b14707c52351a70f4bf27b11dbd35c5225b13a0b4398aa2d",
+    "interactive_paper/ttfa_real/results/ttfa1/frozen/conservative.jsonl.shard0": "b1f773a51d821502efcfe8a175ce9718ba8735fc35e3f95078ba03f74c210ab3",
+    "interactive_paper/ttfa_real/results/ttfa1/frozen/conservative.jsonl.shard1": "53a6f1008ee6c33abc821ec7a854b7e29e4618fd0cc1db936c86add3301d8d44",
+    "interactive_paper/ttfa_real/results/ttfa1/frozen/conservative.jsonl.shard2": "2cdd02a3fa9f7036f9cd6e5a42aa5f05bb995265c21efe3ae9a6f0f97cf1dbeb",
+    "interactive_paper/ttfa_real/results/ttfa1/frozen/conservative.jsonl.shard3": "20338810e5338a3531038f1e353aed51befcc5ca7d0cf157a556ca29ab1e75f5",
+    "interactive_paper/ttfa_real/results/ttfa1/frozen/conservative.jsonl.shard4": "9b41ecf7a3dddae5e7d2de5a613c342ac17d3c4d48ca3aee060184e3e78a6e8c",
+    "interactive_paper/ttfa_real/results/ttfa1/frozen/conservative.jsonl.shard5": "deafe826e1b278f50a00422a73361529da8e79c861d91b4c6663f31a1dd692eb",
+    "interactive_paper/ttfa_real/results/ttfa1/frozen/conservative.jsonl.shard6": "c76d764c19806fd37d9337e4b791b81c96f716b4704d1150e7888f4d3d416d7e",
+    "interactive_paper/ttfa_real/results/ttfa1/frozen/conservative.jsonl.shard7": "39c4f28600d169fa6a7311fb766a810857adee5b605f2812c65b14b04c094ca3",
+    "interactive_paper/ttfa_real/results/ttfa1/frozen/local.jsonl.shard0": "2d8f9c1a4b8bf92da8cb277477f39db9a9f5855116ce6edddf03df88961ce06e",
+    "interactive_paper/ttfa_real/results/ttfa1/frozen/local.jsonl.shard1": "9805991fb45d31a1f9ced64f94181229aa3ce01fb50bdc4b11e10fd82ea50b3f",
+    "interactive_paper/ttfa_real/results/ttfa1/frozen/local.jsonl.shard2": "49cbf1acf4dc55893122ae410e57c9bc908312b2861d9107a443774de97eb4bd",
+    "interactive_paper/ttfa_real/results/ttfa1/frozen/local.jsonl.shard3": "90353abf8fafda8e784a524524c352135415eb97ddd53dfcf4a04944b0b29e6c",
+    "interactive_paper/ttfa_real/results/ttfa1/frozen/local.jsonl.shard4": "bc768bedbb27b01eb8c5452bd967bb814a88b4beab251de8301626fa63c226f2",
+    "interactive_paper/ttfa_real/results/ttfa1/frozen/local.jsonl.shard5": "01d827083f0185f63b50c1c09801f0436e2b843d216eb48c22e0805cd8a5a567",
+    "interactive_paper/ttfa_real/results/ttfa1/frozen/local.jsonl.shard6": "d721cabc8d28839c769cd18a9b510d030d2921a71a0fa94fb15acfde969b73a0",
+    "interactive_paper/ttfa_real/results/ttfa1/frozen/local.jsonl.shard7": "c155f84d7216ac847de1be23c55a8c1d0c209562ae629c59add4a2833cfc19e9",
+    "interactive_paper/ttfa_real/results/ttfa1/sdqa/aggressive.jsonl.shard0": "973e5b41ccca7a7003cc9d67aaa4e90e42deb4304120bca7956233bb9a54cd16",
+    "interactive_paper/ttfa_real/results/ttfa1/sdqa/aggressive.jsonl.shard1": "bbfa5283ecb27a48e1f1d3c8c41e46c86448787c67c0a02cee1f24e19f185a21",
+    "interactive_paper/ttfa_real/results/ttfa1/sdqa/aggressive.jsonl.shard2": "27606898a209711f32b46f3b582e03e94f79143c05b07576fd1053886d9f3399",
+    "interactive_paper/ttfa_real/results/ttfa1/sdqa/aggressive.jsonl.shard3": "238b30ea2bd2d3d7c8398c37ae18c914d1df39c12cbbf1bf7fb1e806d870b9ef",
+    "interactive_paper/ttfa_real/results/ttfa1/sdqa/aggressive.jsonl.shard4": "32e240fc3dcbff94370de10a454c6235805fdf9cb1190abeee949ed32f044894",
+    "interactive_paper/ttfa_real/results/ttfa1/sdqa/aggressive.jsonl.shard5": "26f714963631bcced25e10045e57f7dba6bf014b325ee1ad783060442ac134b2",
+    "interactive_paper/ttfa_real/results/ttfa1/sdqa/aggressive.jsonl.shard6": "34f1df4da3b719a0587bfd624e2aff5425fa511a53d52ffbfa7421b8fe880f32",
+    "interactive_paper/ttfa_real/results/ttfa1/sdqa/aggressive.jsonl.shard7": "d120a4920b42921bacf49748e115121b585037772aad1174f4ece1012c0a32d6",
+    "interactive_paper/ttfa_real/results/ttfa1/sdqa/always.jsonl.shard0": "11c525853861224b02962ba4529e295f1fefd492a22ea320d241d337fbb76ef8",
+    "interactive_paper/ttfa_real/results/ttfa1/sdqa/always.jsonl.shard1": "412b6b8a7fa39a04230d7ce8cba32062b31edf8f8aeefd02a81ba1afc379cdce",
+    "interactive_paper/ttfa_real/results/ttfa1/sdqa/always.jsonl.shard2": "1e06a9b16edaaa3abb1b1ece8062f101023b6af2683402685306a33e87cdce84",
+    "interactive_paper/ttfa_real/results/ttfa1/sdqa/always.jsonl.shard3": "42edb73e079d05530bf2cd2b8b92ab7662084c54a32abb0eea71e1ea2d9a1c5a",
+    "interactive_paper/ttfa_real/results/ttfa1/sdqa/always.jsonl.shard4": "a2ec8a6fa70f917b8acdf81c7e07cc41ebd6917b561cd55521505405adef32f2",
+    "interactive_paper/ttfa_real/results/ttfa1/sdqa/always.jsonl.shard5": "6a2e4e86a45fc58e23e3f587004b240b2c083d1e35cafa80fc6a4694c6c14869",
+    "interactive_paper/ttfa_real/results/ttfa1/sdqa/always.jsonl.shard6": "d9824b6b76e5bafe2f7c178673bfb6478f9716b69034fc7041b47674fdb9a967",
+    "interactive_paper/ttfa_real/results/ttfa1/sdqa/always.jsonl.shard7": "eca47ea568af2cc694f0b859ca337f64a984edf6a523551ddcbaecb087360601",
+    "interactive_paper/ttfa_real/results/ttfa1/sdqa/balanced.jsonl.shard0": "b6d6b23bc14f0371c93bdbf26c13a27a4ebfbce053be29bb13e4acbeac4e3ac6",
+    "interactive_paper/ttfa_real/results/ttfa1/sdqa/balanced.jsonl.shard1": "d82afcca064e965c49901310856076996e8a5b1d3851db0d3f24d18ee7995f12",
+    "interactive_paper/ttfa_real/results/ttfa1/sdqa/balanced.jsonl.shard2": "96391044e6295f14d2fc355e0bcc4686a9493ce939a3fa332500b04ee6fcce14",
+    "interactive_paper/ttfa_real/results/ttfa1/sdqa/balanced.jsonl.shard3": "f84bb7aeb1012092c6e743bdbc89ed55631368189e3e09a8e45271a39d82009f",
+    "interactive_paper/ttfa_real/results/ttfa1/sdqa/balanced.jsonl.shard4": "78764f3a0f4bc968315933e3b9ae58ccb6c231a4d1510db0cca53c9cecebda8e",
+    "interactive_paper/ttfa_real/results/ttfa1/sdqa/balanced.jsonl.shard5": "7a7efd3295ba271fe7e08cad3c692e109a3d45900d1931676472fecc2a458c38",
+    "interactive_paper/ttfa_real/results/ttfa1/sdqa/balanced.jsonl.shard6": "c461f2b789116a0df1a1f847b114bd9ac022b5f960d39b2dd9e722295b4d0d32",
+    "interactive_paper/ttfa_real/results/ttfa1/sdqa/balanced.jsonl.shard7": "7680df8ab52ad97bb1bff8ebf190f348c5459054d9e255f208d068a78b10a6b1",
+    "interactive_paper/ttfa_real/results/ttfa1/sdqa/conservative.jsonl.shard0": "7737199db325758aa2dbadcf5bf508794019d5b275d8a0830856212503365a14",
+    "interactive_paper/ttfa_real/results/ttfa1/sdqa/conservative.jsonl.shard1": "720e99db4c54afd2be6e03053fbaa0296a23fa98d1183194a58e9cad7f90e1ab",
+    "interactive_paper/ttfa_real/results/ttfa1/sdqa/conservative.jsonl.shard2": "adfe97ce7d338ec67e62240acae533d551c524d1cf73f17b9e66e0d7e0f5e7b4",
+    "interactive_paper/ttfa_real/results/ttfa1/sdqa/conservative.jsonl.shard3": "c014197a8ec06dd04b1fcb3de26261bf27cef9fa4407982b5757c56c2bd8d097",
+    "interactive_paper/ttfa_real/results/ttfa1/sdqa/conservative.jsonl.shard4": "b9f00b159494ebfa530c1d6b5e3c344b0e2bb061d87ce97d513cd8bd2cade19b",
+    "interactive_paper/ttfa_real/results/ttfa1/sdqa/conservative.jsonl.shard5": "fd249cf7e4bfea41174e3477475390a46fc5216cb508c7e508f9c6acc6d1bb9c",
+    "interactive_paper/ttfa_real/results/ttfa1/sdqa/conservative.jsonl.shard6": "f5954b0da1090ea05641fedfa217ee94351bb767cd521e99b121ece2219a6fde",
+    "interactive_paper/ttfa_real/results/ttfa1/sdqa/conservative.jsonl.shard7": "144908ccce2b682d3793769dfc42614f14c7eaf0f99d9bc04ac92cb85f00eb5a",
+    "interactive_paper/ttfa_real/results/ttfa1/sdqa/local.jsonl.shard0": "dd823f00c3b9c266246d8ae6532d66d23b673b1fd34d2cbc2254ce9522841f97",
+    "interactive_paper/ttfa_real/results/ttfa1/sdqa/local.jsonl.shard1": "99c7a7ee5c1948412e7a3d6220814fb8051e11894ae9abb826a2f907a712e96e",
+    "interactive_paper/ttfa_real/results/ttfa1/sdqa/local.jsonl.shard2": "8f75fdf48672b36cfb0ad5ef86d9b9287f689f065c0ac1dd0c0f87889d91f28a",
+    "interactive_paper/ttfa_real/results/ttfa1/sdqa/local.jsonl.shard3": "1288e24da382ca4ee0ffe2898b6931031b1a1ab0f6d6c5a45e9d898b0c5463cc",
+    "interactive_paper/ttfa_real/results/ttfa1/sdqa/local.jsonl.shard4": "a9506c612254892f7346e7d7ac56a4a96f09fda717cd2f0c8c4a79d85c0f0c6e",
+    "interactive_paper/ttfa_real/results/ttfa1/sdqa/local.jsonl.shard5": "67d37f8122315e216e7753d06fb49f76fd595d1cb35bfe9664beae14429b5896",
+    "interactive_paper/ttfa_real/results/ttfa1/sdqa/local.jsonl.shard6": "b7b191c06b6543ab7f60efb293ee3041020440f9e0002062014640c475d99295",
+    "interactive_paper/ttfa_real/results/ttfa1/sdqa/local.jsonl.shard7": "a40ebbb027e8b56b0fc15b707570bda18bd66ab9c0cd49ef91939041a8db315b",
+    "interactive_paper/ttfa_real/results/ttfa1/sllama/aggressive.jsonl.shard0": "ac6e3e8406f71e30e54345d7c35d87a626a634d42354ab5f1f361087c0e09b2b",
+    "interactive_paper/ttfa_real/results/ttfa1/sllama/aggressive.jsonl.shard1": "c68a268712caeb933ce8f46a34291a0d46d8973939c23603a2237362482bf277",
+    "interactive_paper/ttfa_real/results/ttfa1/sllama/aggressive.jsonl.shard2": "42bcb9ecaf84ca6eee7ed44505b6be10ba8d8d84309569aa76b88ba9f400e2e8",
+    "interactive_paper/ttfa_real/results/ttfa1/sllama/aggressive.jsonl.shard3": "ed24aa988d02b8b6ed446685ebf13c34b959bf602d3e8acaa558ec242e6aa187",
+    "interactive_paper/ttfa_real/results/ttfa1/sllama/aggressive.jsonl.shard4": "f0223318ccd09edabf61c7398f68ee1e069eedcd635084e9c924f8a9959c4711",
+    "interactive_paper/ttfa_real/results/ttfa1/sllama/aggressive.jsonl.shard5": "d04a30b97419f8f03d7f289b6f476b5c7effd91f4675c608e7c1001f6aabd28f",
+    "interactive_paper/ttfa_real/results/ttfa1/sllama/aggressive.jsonl.shard6": "a477015e7be6e9a2d12d458b5684df111f552a9c60fa6ea9f08672fac054ecaf",
+    "interactive_paper/ttfa_real/results/ttfa1/sllama/aggressive.jsonl.shard7": "1fbb0288c0068b8d7d7fd4e8b1a91690a172d92e4b08fb918d38eb35772406ce",
+    "interactive_paper/ttfa_real/results/ttfa1/sllama/always.jsonl.shard0": "0c7d3de7abbbc6a23ed426bfc61ef922bc521a83c77ec72930adb43e085c51d4",
+    "interactive_paper/ttfa_real/results/ttfa1/sllama/always.jsonl.shard1": "429a396e531de2aff02066a0f33110f4a5c24a2afcb283ec82766876287c323e",
+    "interactive_paper/ttfa_real/results/ttfa1/sllama/always.jsonl.shard2": "e46cc8b55cb2a5dd8b5c86d50a07321d764e065b329d40bce2ed0154cc28d064",
+    "interactive_paper/ttfa_real/results/ttfa1/sllama/always.jsonl.shard3": "f475b91590cef8aa1cc95289b02a3d6ae54088e305615a8fef8de92b6273d103",
+    "interactive_paper/ttfa_real/results/ttfa1/sllama/always.jsonl.shard4": "fe18e026663ea7cb7dbd854bf3998d10aac7cbbbcfdba04200791006dc8e00a5",
+    "interactive_paper/ttfa_real/results/ttfa1/sllama/always.jsonl.shard5": "ffb19facfa2241475006b73ba25f74bcca20115906c2f707bf6abf3a9adbf4a3",
+    "interactive_paper/ttfa_real/results/ttfa1/sllama/always.jsonl.shard6": "82cc81b8d0782aa3215e610ad19c4a5d52737e8612070b5b3f57a44e4b4d7018",
+    "interactive_paper/ttfa_real/results/ttfa1/sllama/always.jsonl.shard7": "d89b56ee38b1321baf5704c4815ec513a9727e528e026badea6b04f38f46867c",
+    "interactive_paper/ttfa_real/results/ttfa1/sllama/balanced.jsonl.shard0": "ed3f3899c237f8036ef16d3652fa93429c5f46d831ab0a447453c9e0dca4dd84",
+    "interactive_paper/ttfa_real/results/ttfa1/sllama/balanced.jsonl.shard1": "d96f20e7ae75ef88855637fa89ef1207f5060d444925412edb212e100dbc3795",
+    "interactive_paper/ttfa_real/results/ttfa1/sllama/balanced.jsonl.shard2": "9b698770807f6c7e1d0b7e3dff866267ad185b7d9de13bb8ecbe151546a20c4e",
+    "interactive_paper/ttfa_real/results/ttfa1/sllama/balanced.jsonl.shard3": "5b5d0c1e97edac38f3951541f2d75c3a3fa0378a95af1392e690134df6e98a61",
+    "interactive_paper/ttfa_real/results/ttfa1/sllama/balanced.jsonl.shard4": "73550c1bf1a3a7a50ee254c01bb578c7c998720f8846a5b59e14e00a3dfe825e",
+    "interactive_paper/ttfa_real/results/ttfa1/sllama/balanced.jsonl.shard5": "a7f11368d33232d8d5a7833cb2eb13b66c6d25e109c4089183f5db157f42387a",
+    "interactive_paper/ttfa_real/results/ttfa1/sllama/balanced.jsonl.shard6": "6e0d209827794a6ecb134d11c111deaaa9ebdfd933d05e9d98d319bb89057deb",
+    "interactive_paper/ttfa_real/results/ttfa1/sllama/balanced.jsonl.shard7": "97129bc8992cbf43fba7e0ee9d018c1a5cf3c7d17db25da445f091bbc34a14de",
+    "interactive_paper/ttfa_real/results/ttfa1/sllama/conservative.jsonl.shard0": "ea0121f7003124e578394bf93c3a72cc2c7450ce65a18a9f67f2e86570f5c6c0",
+    "interactive_paper/ttfa_real/results/ttfa1/sllama/conservative.jsonl.shard1": "11ee1550dfb9205b3a2f3c1fc619d6098c4086cf14bdb3e2a63b0889b0d4fd8f",
+    "interactive_paper/ttfa_real/results/ttfa1/sllama/conservative.jsonl.shard2": "4d48b2b86615060b312f75b07b04d765169c3b9ea5f3c60c0a39bd9fa79bdce1",
+    "interactive_paper/ttfa_real/results/ttfa1/sllama/conservative.jsonl.shard3": "c4dff0f76956f882c9b2f111997e870fe4fb7cde400a00f42bbcf8d26319352c",
+    "interactive_paper/ttfa_real/results/ttfa1/sllama/conservative.jsonl.shard4": "ef815ef95b34851ebe369e5ee37ca166e385c57d8c58919c41d387f946607ece",
+    "interactive_paper/ttfa_real/results/ttfa1/sllama/conservative.jsonl.shard5": "4f283f173469664d0d138018e33696688b308743e187a94169a8493ffb5b2396",
+    "interactive_paper/ttfa_real/results/ttfa1/sllama/conservative.jsonl.shard6": "da105f98638725102a17eeb616ed15386ed795f1709eaff0f8881f9591747b1c",
+    "interactive_paper/ttfa_real/results/ttfa1/sllama/conservative.jsonl.shard7": "626d7c251e0ab0b8d73545957988bc8aff26d04050f5f67cf07d3e0042444e3e",
+    "interactive_paper/ttfa_real/results/ttfa1/sllama/local.jsonl.shard0": "d7769c4bdcdd570c5813996afaed7233dfd588495863d1be3c20b0cb3f713368",
+    "interactive_paper/ttfa_real/results/ttfa1/sllama/local.jsonl.shard1": "6e788f1c885e8755e57603475ec9cc9920c008f2dd1ba4035b70a91a7ba3bd34",
+    "interactive_paper/ttfa_real/results/ttfa1/sllama/local.jsonl.shard2": "fff6477a5aacbdf80127c2d3a585d1b57ae98c7a4bb6f0624d58257f3892e3a9",
+    "interactive_paper/ttfa_real/results/ttfa1/sllama/local.jsonl.shard3": "4be51c0d9f8568661cdbf3e0175aa438a85066cb7b7b69376ec6c32cf3dfa2de",
+    "interactive_paper/ttfa_real/results/ttfa1/sllama/local.jsonl.shard4": "ac7631b078c30965dd97632b569dc4dcc84a661180fbe5438898ace12d35d2ba",
+    "interactive_paper/ttfa_real/results/ttfa1/sllama/local.jsonl.shard5": "708f409e83a2d2bac1c7984dd8242cd7e01d55d926030ee12d45ab006d90493a",
+    "interactive_paper/ttfa_real/results/ttfa1/sllama/local.jsonl.shard6": "a34ce878761aa65398080bfbfafcf6c436ede5eb81f563b1ee7f6c9aa11ac434",
+    "interactive_paper/ttfa_real/results/ttfa1/sllama/local.jsonl.shard7": "518944636e41d2eb059f503544524f7a7ad4b4e5413c93a1e8ae389cc3ae108f",
+    "interactive_paper/ttfa_real/results/ttfa1/striviaqa/aggressive.jsonl.shard0": "5b8bbc14e497e33e72df9e89a656c1124caaa03f135fe999a037e52150851b4f",
+    "interactive_paper/ttfa_real/results/ttfa1/striviaqa/aggressive.jsonl.shard1": "6f895596029d35bd3f5cccafec0c8e8c5ae7a666d2a2cd7339c450aef90f2c18",
+    "interactive_paper/ttfa_real/results/ttfa1/striviaqa/aggressive.jsonl.shard2": "054051b4c298c2692e60647984a9b99e1ae1390f809554e1b57d1c7e48085cd6",
+    "interactive_paper/ttfa_real/results/ttfa1/striviaqa/aggressive.jsonl.shard3": "b1cfdfafe865e0ec7b48ce2a018d633929fb04faf9efec4ad68c696699957838",
+    "interactive_paper/ttfa_real/results/ttfa1/striviaqa/aggressive.jsonl.shard4": "bbcc39120140723793690959e07381c9ee999e7e4a28ae7a550b467db6d9d94f",
+    "interactive_paper/ttfa_real/results/ttfa1/striviaqa/aggressive.jsonl.shard5": "90d11bb0101aad3f7c41fe2d67d2dacf7de509252c1e946a957e9608c927a378",
+    "interactive_paper/ttfa_real/results/ttfa1/striviaqa/aggressive.jsonl.shard6": "43d2f5273424a4d1880f058e72749b452fd736a8b693018d5fb6d61c252f87d2",
+    "interactive_paper/ttfa_real/results/ttfa1/striviaqa/aggressive.jsonl.shard7": "8a42f2f096942feeaa0cd94356e2960cb2affd856010919fa02e214197c6c2db",
+    "interactive_paper/ttfa_real/results/ttfa1/striviaqa/always.jsonl.shard0": "b6dac485171f4bdacb328840e017c2ba2cc1a7717c0bcedad7f3a7d669b98901",
+    "interactive_paper/ttfa_real/results/ttfa1/striviaqa/always.jsonl.shard1": "f9e1ceaad5f4e94bcdecdbb421489576b34e67e2dba57ca5ead13d2d98ee4d32",
+    "interactive_paper/ttfa_real/results/ttfa1/striviaqa/always.jsonl.shard2": "ac0d4dd04fc9bb3f8779dcacc84e9562ffd7501352c78c886a23ffe324545bd4",
+    "interactive_paper/ttfa_real/results/ttfa1/striviaqa/always.jsonl.shard3": "8dccb9ad7147c9af225d57adafba66de209c1204e65d8f0646b3ac3e5770016a",
+    "interactive_paper/ttfa_real/results/ttfa1/striviaqa/always.jsonl.shard4": "334144b5e80d515159362f4479e984c8c2f81ac2587daa223c6ef4a7b6151347",
+    "interactive_paper/ttfa_real/results/ttfa1/striviaqa/always.jsonl.shard5": "8ab3a2262b39b23c161ad91a61de2db021198dfe8755de0303ef28ac875df0fd",
+    "interactive_paper/ttfa_real/results/ttfa1/striviaqa/always.jsonl.shard6": "924cb69ce9b54611d19cd8280c46b714b6dcc4588e098caa123e72a432c5b6b3",
+    "interactive_paper/ttfa_real/results/ttfa1/striviaqa/always.jsonl.shard7": "4167813276403dc9b6e373394fcbaaeb09e8557bda76dfdbee369a27e4d9702a",
+    "interactive_paper/ttfa_real/results/ttfa1/striviaqa/balanced.jsonl.shard0": "a5b180625a3f02fcf7ebcd05de8cd655daa961ae4cfe86dd2b39361b18d44ccd",
+    "interactive_paper/ttfa_real/results/ttfa1/striviaqa/balanced.jsonl.shard1": "e535460cf009cbfde594a610a52ba1123c39477a9a6a6b8341614e70e2a385f7",
+    "interactive_paper/ttfa_real/results/ttfa1/striviaqa/balanced.jsonl.shard2": "e2d76fa01d7a5f144d2d3f006558fc5306e0651040a050b79ff2c2d1623d564d",
+    "interactive_paper/ttfa_real/results/ttfa1/striviaqa/balanced.jsonl.shard3": "80cdc45c4c73a273f5cd7654059e6252f55fcea9290ba1758508ac12a8e82f95",
+    "interactive_paper/ttfa_real/results/ttfa1/striviaqa/balanced.jsonl.shard4": "87df91b7efac19afbcaa5402929cfee40720e59d7b0bc938c5834bc0ebd79d39",
+    "interactive_paper/ttfa_real/results/ttfa1/striviaqa/balanced.jsonl.shard5": "061afa5b48c9df2c988b6c1f31d0284c8f18b41b73d616cc67f023d74a862a2f",
+    "interactive_paper/ttfa_real/results/ttfa1/striviaqa/balanced.jsonl.shard6": "2e490518ad1c4f2c7bed537caec648461d654051a719e674938556287c98ac6a",
+    "interactive_paper/ttfa_real/results/ttfa1/striviaqa/balanced.jsonl.shard7": "37c0579d55095410b7019c3e15a6b0d4753dd311d9cbea05bde9b9271fcf4ca1",
+    "interactive_paper/ttfa_real/results/ttfa1/striviaqa/conservative.jsonl.shard0": "3e221643216917c7880f13fd24ef02a89b40d350cb0881ff6bc0f00fa94b8972",
+    "interactive_paper/ttfa_real/results/ttfa1/striviaqa/conservative.jsonl.shard1": "d74a961c1a2cc89e565c851c4d2bb7ee371cd8264bff899348306e65ad57b102",
+    "interactive_paper/ttfa_real/results/ttfa1/striviaqa/conservative.jsonl.shard2": "3aad847b2277b7b43f5bcc1d6f7a2a93bb6d6fa5841c3bb4e41433733174bbdd",
+    "interactive_paper/ttfa_real/results/ttfa1/striviaqa/conservative.jsonl.shard3": "39010d6daa7496fd650c4fa616776c313da8af233bd7b0862c32a6ab933e4653",
+    "interactive_paper/ttfa_real/results/ttfa1/striviaqa/conservative.jsonl.shard4": "66585043b2cb0fae7229d635f79bd75faee942e9d7699d4cb76da100eb85f15e",
+    "interactive_paper/ttfa_real/results/ttfa1/striviaqa/conservative.jsonl.shard5": "4f5311399839b7acf9c308967476b23186b4f22702e48cd9ac6cc97bf47d98a4",
+    "interactive_paper/ttfa_real/results/ttfa1/striviaqa/conservative.jsonl.shard6": "67ce7ff755e08b546cd89921aeef4c500c48883b5dfe1dc03cb20aabf83f6f64",
+    "interactive_paper/ttfa_real/results/ttfa1/striviaqa/conservative.jsonl.shard7": "f9d7298b1f7355e24db793bb4c75db76a638e5eab8b37d1fcdab98153a9337a7",
+    "interactive_paper/ttfa_real/results/ttfa1/striviaqa/local.jsonl.shard0": "cc028a5d56c900fd0c05bc7f68bf5f7137785fd2a3b62b215014843224e622ba",
+    "interactive_paper/ttfa_real/results/ttfa1/striviaqa/local.jsonl.shard1": "5f25ce84f7952ccd6ae57cee85f9fe5a39235024778175c88a8f20a5288ff65d",
+    "interactive_paper/ttfa_real/results/ttfa1/striviaqa/local.jsonl.shard2": "03312f30f76c3fdbca3861073354a6391aa574355fe228338a9c2fef77f54323",
+    "interactive_paper/ttfa_real/results/ttfa1/striviaqa/local.jsonl.shard3": "e6d167dd36822d315de379b38b2e0343e63c045909b886c56318890ebe624873",
+    "interactive_paper/ttfa_real/results/ttfa1/striviaqa/local.jsonl.shard4": "8993af5b221386b08f6d686d8fccddd4f18d6b34d2deee44c42ecbee4656a42d",
+    "interactive_paper/ttfa_real/results/ttfa1/striviaqa/local.jsonl.shard5": "3ff990c044c68e86294ef002e0e00927efb541f26f084dd8b9e79eb4cd5d5183",
+    "interactive_paper/ttfa_real/results/ttfa1/striviaqa/local.jsonl.shard6": "46e5ccc0609063c9568259601e3720d45c152d08eed531ab7a50fb3cb1de257f",
+    "interactive_paper/ttfa_real/results/ttfa1/striviaqa/local.jsonl.shard7": "7341fad2ef671634956354e7dd26629232b50ede1009e831b40523e6883c382d",
+    "interactive_paper/ttfa_real/results/ttfa1/swebq/aggressive.jsonl.shard0": "826bc390ea1b2fd4d68ce42a1ef56f46f6f27501873175cd33b71890ce8a7d73",
+    "interactive_paper/ttfa_real/results/ttfa1/swebq/aggressive.jsonl.shard1": "d224cd27acc337742babd65033796df7bdf25cf0a9530e5b52f51f2ad83c2333",
+    "interactive_paper/ttfa_real/results/ttfa1/swebq/aggressive.jsonl.shard2": "18f3f57e04883c1962ab56a0e561a2538347931481503033243cefd5ae1350cc",
+    "interactive_paper/ttfa_real/results/ttfa1/swebq/aggressive.jsonl.shard3": "dd631c712519e05f5cddc49916883fba095a70d3f79cf01141964159eb937e94",
+    "interactive_paper/ttfa_real/results/ttfa1/swebq/aggressive.jsonl.shard4": "fa5cb2aec2ec7374ea59fff345a39ca984636dd16ce4f83153e71bcc9b68e2de",
+    "interactive_paper/ttfa_real/results/ttfa1/swebq/aggressive.jsonl.shard5": "7cfeacfbc2c2e9b5d62ae0264ad78ac4817452d5e1d43b6d6ac279a33852aec3",
+    "interactive_paper/ttfa_real/results/ttfa1/swebq/aggressive.jsonl.shard6": "21d5551e442fdffa099d7edbd44599798d2e3f243c9ddb0973fb7dee281c2d6d",
+    "interactive_paper/ttfa_real/results/ttfa1/swebq/aggressive.jsonl.shard7": "0ec2ee84e2233049459e6044b8f8829161d304304bab70c292017e609851e7ca",
+    "interactive_paper/ttfa_real/results/ttfa1/swebq/always.jsonl.shard0": "ec6b6fcc788e1f9b720ac47aeae80f3f8f9b89365dff78f5822af4d79c8564f5",
+    "interactive_paper/ttfa_real/results/ttfa1/swebq/always.jsonl.shard1": "9f71f640c747279967a627ef4deb222905728ef57fd5fa196ac8c5bdf204c7f2",
+    "interactive_paper/ttfa_real/results/ttfa1/swebq/always.jsonl.shard2": "41d1f267cd8e7a4a2ae529a83adf05c7af375d8585c81c0bb97fe66180fc221e",
+    "interactive_paper/ttfa_real/results/ttfa1/swebq/always.jsonl.shard3": "4ee30de1a6e49592872f589ba41af32b68f5a82b698ffdea46696ab3e7d9c9d9",
+    "interactive_paper/ttfa_real/results/ttfa1/swebq/always.jsonl.shard4": "5346b8345bb533a1430718d40457c00c259e2e699e7b9cff3598fa831fc5a438",
+    "interactive_paper/ttfa_real/results/ttfa1/swebq/always.jsonl.shard5": "07c22d0dcb8cc932a7f55180127745c41b318eb0426f7139a23f0440383e955f",
+    "interactive_paper/ttfa_real/results/ttfa1/swebq/always.jsonl.shard6": "91083de22bd69dfc0e86760656bc61a8dfc3ba82e75f70307962178063b27b9e",
+    "interactive_paper/ttfa_real/results/ttfa1/swebq/always.jsonl.shard7": "f5ca56fb68f8c38a3c0b26d1295f2cbace5aa5534a0849a3252883d7482dc201",
+    "interactive_paper/ttfa_real/results/ttfa1/swebq/balanced.jsonl.shard0": "6f77d809dfe9893b9465a88e3651e7023779708bf47f3ff8c45ffc4059418294",
+    "interactive_paper/ttfa_real/results/ttfa1/swebq/balanced.jsonl.shard1": "0275c1d880e793be0bc5a5e85d243cff67415e617ed8c7d7bc07261bbeb8446d",
+    "interactive_paper/ttfa_real/results/ttfa1/swebq/balanced.jsonl.shard2": "655a74e49f50dcd189751182d6f6e80b7dfeac9f1ebe58b30065dcb152b44698",
+    "interactive_paper/ttfa_real/results/ttfa1/swebq/balanced.jsonl.shard3": "8059ac64f7f09f3bc9125f4afccd51492edd801b5bc6bd23b30357289dd35452",
+    "interactive_paper/ttfa_real/results/ttfa1/swebq/balanced.jsonl.shard4": "74a6cb086780d7485e25b7a02526e9e4ebf0ba8267fc87d8d1a571c69c57344c",
+    "interactive_paper/ttfa_real/results/ttfa1/swebq/balanced.jsonl.shard5": "d385938b34ee36809234d0228dd56c527ad5f04bc2c07e756ba028fae082ffbc",
+    "interactive_paper/ttfa_real/results/ttfa1/swebq/balanced.jsonl.shard6": "a9989164e4b2bdb2202b83c81f36c115267d9d01f81b106a6354e1c9472f6175",
+    "interactive_paper/ttfa_real/results/ttfa1/swebq/balanced.jsonl.shard7": "de374e037919e33963dcc4c1cfd49359c274fc9412bad85084368b87e5c165a3",
+    "interactive_paper/ttfa_real/results/ttfa1/swebq/conservative.jsonl.shard0": "da6af0a3d003c632b92fe5b4ccaaa680dc7cf3063b840efa8020b20b1fb3c875",
+    "interactive_paper/ttfa_real/results/ttfa1/swebq/conservative.jsonl.shard1": "c0c8f130ae4d1cc2b1cd1a63485d89e17f8a4de556e808c6dcb14ad462302471",
+    "interactive_paper/ttfa_real/results/ttfa1/swebq/conservative.jsonl.shard2": "44b9590e41b8654095006e546dc5b0cbb836a7036ff1df713ccc607ac154c968",
+    "interactive_paper/ttfa_real/results/ttfa1/swebq/conservative.jsonl.shard3": "3f68636ace6a7e2263a1b8267a9c7fd9254641bb0de866fb22c3aafc09ab911e",
+    "interactive_paper/ttfa_real/results/ttfa1/swebq/conservative.jsonl.shard4": "dcead1e03fba32ba1b944ad91640c17dafa68bde2b8282a96b8646069e275be8",
+    "interactive_paper/ttfa_real/results/ttfa1/swebq/conservative.jsonl.shard5": "a5ffc5e34256992489df81ca2de0927ec5d1f84b39df685c657615d02b3eae6d",
+    "interactive_paper/ttfa_real/results/ttfa1/swebq/conservative.jsonl.shard6": "0df6fa9a588b698fb58344203ff9067b3b097f7576b3152b0a92db75c649460f",
+    "interactive_paper/ttfa_real/results/ttfa1/swebq/conservative.jsonl.shard7": "6935703e8f7803f305b6954c0eb60b9c5cc1c4f2ba5e598b71d233630cf64e3a",
+    "interactive_paper/ttfa_real/results/ttfa1/swebq/local.jsonl.shard0": "d6018f8cb27459f2815569c3ede50ce7ce81155a90cca3ba6dcbea1ed6d6f14e",
+    "interactive_paper/ttfa_real/results/ttfa1/swebq/local.jsonl.shard1": "ac0fe07a6ea599d3f5dd186b762b7825d2109fe9af86eeddf7a32d874d247e08",
+    "interactive_paper/ttfa_real/results/ttfa1/swebq/local.jsonl.shard2": "c9cb74185d4f32e425129d3eca3bffb59ad283fc46a16d6a1c58ecc52e7062f7",
+    "interactive_paper/ttfa_real/results/ttfa1/swebq/local.jsonl.shard3": "5a69554cb2e66969c5fcd7089659d7613bb2f050104c058ce1551d01b70aa984",
+    "interactive_paper/ttfa_real/results/ttfa1/swebq/local.jsonl.shard4": "ede33768efa7c293fcc02b3125f29d7a9f2440ac6440d45e740bf5417c825582",
+    "interactive_paper/ttfa_real/results/ttfa1/swebq/local.jsonl.shard5": "092c60d395e28fa83615a5bce1132eca94847588e1272478b6e46bae97932c1c",
+    "interactive_paper/ttfa_real/results/ttfa1/swebq/local.jsonl.shard6": "c8f002b5769bc48678eb1ad495f9047d3bb9e960b7c23c88a9ea4d2985bef70b",
+    "interactive_paper/ttfa_real/results/ttfa1/swebq/local.jsonl.shard7": "6ddc5183fda6412f3988dba26f43e11525791e9fa3b7952cf8ad7a82044b926f"
+  },
+  "pools": {
+    "frozen": {
+      "arms": {
+        "local": {
+          "n": 240,
+          "valid": 239,
+          "failed": 1,
+          "early": 17,
+          "calls": 0,
+          "onset": 239,
+          "call_rate_all_sessions": 0.0,
+          "ttfa_answer": {
+            "n": 239,
+            "mean": -0.611,
+            "p50": 0.695,
+            "p95": 2.619,
+            "p99": 3.636,
+            "min": -78.666,
+            "max": 4.675
+          },
+          "hardware_counts": {
+            "NVIDIA H100 80GB HBM3": 240
+          }
+        },
+        "conservative": {
+          "n": 240,
+          "valid": 238,
+          "failed": 2,
+          "early": 12,
+          "calls": 23,
+          "onset": 238,
+          "call_rate_all_sessions": 0.09583333333333334,
+          "ttfa_answer": {
+            "n": 238,
+            "mean": 1.528,
+            "p50": 0.887,
+            "p95": 10.853,
+            "p99": 34.082,
+            "min": -78.415,
+            "max": 63.053
+          },
+          "hardware_counts": {
+            "NVIDIA H100 80GB HBM3": 240
+          }
+        },
+        "balanced": {
+          "n": 240,
+          "valid": 236,
+          "failed": 4,
+          "early": 11,
+          "calls": 61,
+          "onset": 236,
+          "call_rate_all_sessions": 0.25416666666666665,
+          "ttfa_answer": {
+            "n": 236,
+            "mean": 2.36,
+            "p50": 1.611,
+            "p95": 14.407,
+            "p99": 26.914,
+            "min": -104.789,
+            "max": 61.19
+          },
+          "hardware_counts": {
+            "NVIDIA H100 80GB HBM3": 240
+          }
+        },
+        "aggressive": {
+          "n": 240,
+          "valid": 236,
+          "failed": 4,
+          "early": 13,
+          "calls": 122,
+          "onset": 236,
+          "call_rate_all_sessions": 0.5083333333333333,
+          "ttfa_answer": {
+            "n": 236,
+            "mean": 4.588,
+            "p50": 2.873,
+            "p95": 18.137,
+            "p99": 54.781,
+            "min": -109.664,
+            "max": 63.139
+          },
+          "hardware_counts": {
+            "NVIDIA H100 80GB HBM3": 240
+          }
+        },
+        "always": {
+          "n": 240,
+          "valid": 237,
+          "failed": 3,
+          "early": 7,
+          "calls": 238,
+          "onset": 238,
+          "call_rate_all_sessions": 0.9916666666666667,
+          "ttfa_answer": {
+            "n": 237,
+            "mean": 8.008,
+            "p50": 6.674,
+            "p95": 25.861,
+            "p99": 60.829,
+            "min": -108.867,
+            "max": 69.451
+          },
+          "hardware_counts": {
+            "NVIDIA H100 80GB HBM3": 240
+          }
+        }
+      },
+      "paired": {
+        "n_common_valid_ids": 235,
+        "local": {
+          "n": 235,
+          "mean": -0.486,
+          "p50": 0.694,
+          "p95": 2.603,
+          "p99": 3.25,
+          "min": -78.666,
+          "max": 3.672
+        },
+        "conservative": {
+          "n": 235,
+          "mean": 1.519,
+          "p50": 0.875,
+          "p95": 11.012,
+          "p99": 34.28,
+          "min": -78.415,
+          "max": 63.053
+        },
+        "balanced": {
+          "n": 235,
+          "mean": 2.363,
+          "p50": 1.611,
+          "p95": 14.421,
+          "p99": 26.94,
+          "min": -104.789,
+          "max": 61.19
+        },
+        "aggressive": {
+          "n": 235,
+          "mean": 4.601,
+          "p50": 2.88,
+          "p95": 18.22,
+          "p99": 54.921,
+          "min": -109.664,
+          "max": 63.139
+        },
+        "always": {
+          "n": 235,
+          "mean": 7.913,
+          "p50": 6.641,
+          "p95": 24.663,
+          "p99": 60.873,
+          "min": -108.867,
+          "max": 69.451
+        }
+      }
+    },
+    "striviaqa": {
+      "arms": {
+        "local": {
+          "n": 250,
+          "valid": 250,
+          "failed": 0,
+          "early": 1,
+          "calls": 0,
+          "onset": 250,
+          "call_rate_all_sessions": 0.0,
+          "ttfa_answer": {
+            "n": 250,
+            "mean": 1.141,
+            "p50": 0.897,
+            "p95": 1.923,
+            "p99": 2.708,
+            "min": -3.848,
+            "max": 2.882
+          },
+          "hardware_counts": {
+            "NVIDIA H100 80GB HBM3": 250
+          }
+        },
+        "conservative": {
+          "n": 250,
+          "valid": 248,
+          "failed": 2,
+          "early": 0,
+          "calls": 9,
+          "onset": 249,
+          "call_rate_all_sessions": 0.036,
+          "ttfa_answer": {
+            "n": 248,
+            "mean": 1.551,
+            "p50": 0.982,
+            "p95": 2.628,
+            "p99": 14.878,
+            "min": 0.386,
+            "max": 20.135
+          },
+          "hardware_counts": {
+            "NVIDIA H100 80GB HBM3": 250
+          }
+        },
+        "balanced": {
+          "n": 250,
+          "valid": 250,
+          "failed": 0,
+          "early": 0,
+          "calls": 46,
+          "onset": 250,
+          "call_rate_all_sessions": 0.184,
+          "ttfa_answer": {
+            "n": 250,
+            "mean": 2.454,
+            "p50": 1.463,
+            "p95": 8.461,
+            "p99": 23.74,
+            "min": 0.356,
+            "max": 41.138
+          },
+          "hardware_counts": {
+            "NVIDIA H100 80GB HBM3": 188,
+            "NVIDIA H200": 62
+          }
+        },
+        "aggressive": {
+          "n": 250,
+          "valid": 250,
+          "failed": 0,
+          "early": 0,
+          "calls": 141,
+          "onset": 250,
+          "call_rate_all_sessions": 0.564,
+          "ttfa_answer": {
+            "n": 250,
+            "mean": 3.616,
+            "p50": 3.545,
+            "p95": 7.919,
+            "p99": 16.072,
+            "min": 0.328,
+            "max": 40.917
+          },
+          "hardware_counts": {
+            "NVIDIA H100 80GB HBM3": 250
+          }
+        },
+        "always": {
+          "n": 250,
+          "valid": 250,
+          "failed": 0,
+          "early": 0,
+          "calls": 250,
+          "onset": 250,
+          "call_rate_all_sessions": 1.0,
+          "ttfa_answer": {
+            "n": 250,
+            "mean": 5.708,
+            "p50": 4.891,
+            "p95": 10.297,
+            "p99": 21.759,
+            "min": 2.842,
+            "max": 38.164
+          },
+          "hardware_counts": {
+            "NVIDIA H100 80GB HBM3": 250
+          }
+        }
+      },
+      "paired": {
+        "n_common_valid_ids": 248,
+        "local": {
+          "n": 248,
+          "mean": 1.141,
+          "p50": 0.897,
+          "p95": 1.923,
+          "p99": 2.712,
+          "min": -3.848,
+          "max": 2.882
+        },
+        "conservative": {
+          "n": 248,
+          "mean": 1.551,
+          "p50": 0.982,
+          "p95": 2.628,
+          "p99": 14.878,
+          "min": 0.386,
+          "max": 20.135
+        },
+        "balanced": {
+          "n": 248,
+          "mean": 2.372,
+          "p50": 1.463,
+          "p95": 8.32,
+          "p99": 20.042,
+          "min": 0.356,
+          "max": 41.138
+        },
+        "aggressive": {
+          "n": 248,
+          "mean": 3.563,
+          "p50": 3.439,
+          "p95": 7.885,
+          "p99": 14.263,
+          "min": 0.328,
+          "max": 40.917
+        },
+        "always": {
+          "n": 248,
+          "mean": 5.583,
+          "p50": 4.891,
+          "p95": 10.246,
+          "p99": 17.124,
+          "min": 2.842,
+          "max": 24.965
+        }
+      }
+    },
+    "swebq": {
+      "arms": {
+        "local": {
+          "n": 250,
+          "valid": 246,
+          "failed": 4,
+          "early": 0,
+          "calls": 0,
+          "onset": 246,
+          "call_rate_all_sessions": 0.0,
+          "ttfa_answer": {
+            "n": 246,
+            "mean": 3.689,
+            "p50": 1.708,
+            "p95": 3.595,
+            "p99": 4.246,
+            "min": 0.475,
+            "max": 305.515
+          },
+          "hardware_counts": {
+            "NVIDIA H100 80GB HBM3": 194,
+            "NVIDIA H100 NVL": 56
+          }
+        },
+        "conservative": {
+          "n": 250,
+          "valid": 246,
+          "failed": 4,
+          "early": 0,
+          "calls": 14,
+          "onset": 246,
+          "call_rate_all_sessions": 0.056,
+          "ttfa_answer": {
+            "n": 246,
+            "mean": 5.14,
+            "p50": 1.809,
+            "p95": 7.708,
+            "p99": 80.258,
+            "min": 0.463,
+            "max": 275.81
+          },
+          "hardware_counts": {
+            "NVIDIA H100 80GB HBM3": 250
+          }
+        },
+        "balanced": {
+          "n": 250,
+          "valid": 244,
+          "failed": 6,
+          "early": 0,
+          "calls": 53,
+          "onset": 244,
+          "call_rate_all_sessions": 0.212,
+          "ttfa_answer": {
+            "n": 244,
+            "mean": 3.62,
+            "p50": 2.179,
+            "p95": 9.884,
+            "p99": 20.613,
+            "min": 0.441,
+            "max": 59.582
+          },
+          "hardware_counts": {
+            "NVIDIA H100 80GB HBM3": 250
+          }
+        },
+        "aggressive": {
+          "n": 250,
+          "valid": 247,
+          "failed": 3,
+          "early": 0,
+          "calls": 149,
+          "onset": 247,
+          "call_rate_all_sessions": 0.596,
+          "ttfa_answer": {
+            "n": 247,
+            "mean": 7.396,
+            "p50": 5.07,
+            "p95": 13.254,
+            "p99": 24.503,
+            "min": 0.539,
+            "max": 261.886
+          },
+          "hardware_counts": {
+            "NVIDIA H100 80GB HBM3": 250
+          }
+        },
+        "always": {
+          "n": 250,
+          "valid": 248,
+          "failed": 2,
+          "early": 0,
+          "calls": 248,
+          "onset": 248,
+          "call_rate_all_sessions": 0.992,
+          "ttfa_answer": {
+            "n": 248,
+            "mean": 7.492,
+            "p50": 6.127,
+            "p95": 16.711,
+            "p99": 23.129,
+            "min": 2.877,
+            "max": 46.428
+          },
+          "hardware_counts": {
+            "NVIDIA H100 80GB HBM3": 250
+          }
+        }
+      },
+      "paired": {
+        "n_common_valid_ids": 237,
+        "local": {
+          "n": 237,
+          "mean": 3.714,
+          "p50": 1.702,
+          "p95": 3.595,
+          "p99": 4.32,
+          "min": 0.475,
+          "max": 305.515
+        },
+        "conservative": {
+          "n": 237,
+          "mean": 3.519,
+          "p50": 1.792,
+          "p95": 5.96,
+          "p99": 14.406,
+          "min": 0.463,
+          "max": 239.77
+        },
+        "balanced": {
+          "n": 237,
+          "mean": 3.567,
+          "p50": 1.727,
+          "p95": 9.794,
+          "p99": 21.04,
+          "min": 0.441,
+          "max": 59.582
+        },
+        "aggressive": {
+          "n": 237,
+          "mean": 7.427,
+          "p50": 5.07,
+          "p95": 13.18,
+          "p99": 24.678,
+          "min": 0.539,
+          "max": 261.886
+        },
+        "always": {
+          "n": 237,
+          "mean": 7.527,
+          "p50": 6.125,
+          "p95": 16.88,
+          "p99": 23.16,
+          "min": 2.877,
+          "max": 46.428
+        }
+      }
+    },
+    "sllama": {
+      "arms": {
+        "local": {
+          "n": 250,
+          "valid": 249,
+          "failed": 1,
+          "early": 0,
+          "calls": 0,
+          "onset": 249,
+          "call_rate_all_sessions": 0.0,
+          "ttfa_answer": {
+            "n": 249,
+            "mean": 1.606,
+            "p50": 1.524,
+            "p95": 2.551,
+            "p99": 3.66,
+            "min": 0.268,
+            "max": 51.635
+          },
+          "hardware_counts": {
+            "NVIDIA H100 80GB HBM3": 250
+          }
+        },
+        "conservative": {
+          "n": 250,
+          "valid": 249,
+          "failed": 1,
+          "early": 0,
+          "calls": 0,
+          "onset": 249,
+          "call_rate_all_sessions": 0.0,
+          "ttfa_answer": {
+            "n": 249,
+            "mean": 1.634,
+            "p50": 1.537,
+            "p95": 2.551,
+            "p99": 3.714,
+            "min": 0.264,
+            "max": 51.583
+          },
+          "hardware_counts": {
+            "NVIDIA H100 80GB HBM3": 250
+          }
+        },
+        "balanced": {
+          "n": 250,
+          "valid": 247,
+          "failed": 3,
+          "early": 0,
+          "calls": 10,
+          "onset": 247,
+          "call_rate_all_sessions": 0.04,
+          "ttfa_answer": {
+            "n": 247,
+            "mean": 2.095,
+            "p50": 1.532,
+            "p95": 3.82,
+            "p99": 22.782,
+            "min": 0.296,
+            "max": 51.69
+          },
+          "hardware_counts": {
+            "NVIDIA H100 80GB HBM3": 250
+          }
+        },
+        "aggressive": {
+          "n": 250,
+          "valid": 246,
+          "failed": 4,
+          "early": 0,
+          "calls": 48,
+          "onset": 246,
+          "call_rate_all_sessions": 0.192,
+          "ttfa_answer": {
+            "n": 246,
+            "mean": 2.609,
+            "p50": 1.678,
+            "p95": 8.489,
+            "p99": 13.207,
+            "min": 0.416,
+            "max": 14.238
+          },
+          "hardware_counts": {
+            "NVIDIA H100 80GB HBM3": 137,
+            "NVIDIA H200": 113
+          }
+        },
+        "always": {
+          "n": 250,
+          "valid": 249,
+          "failed": 1,
+          "early": 0,
+          "calls": 249,
+          "onset": 249,
+          "call_rate_all_sessions": 0.996,
+          "ttfa_answer": {
+            "n": 249,
+            "mean": 5.126,
+            "p50": 4.315,
+            "p95": 9.453,
+            "p99": 15.69,
+            "min": 2.418,
+            "max": 28.076
+          },
+          "hardware_counts": {
+            "NVIDIA H100 80GB HBM3": 250
+          }
+        }
+      },
+      "paired": {
+        "n_common_valid_ids": 242,
+        "local": {
+          "n": 242,
+          "mean": 1.385,
+          "p50": 1.522,
+          "p95": 2.497,
+          "p99": 2.633,
+          "min": 0.268,
+          "max": 32.468
+        },
+        "conservative": {
+          "n": 242,
+          "mean": 1.413,
+          "p50": 1.534,
+          "p95": 2.487,
+          "p99": 2.965,
+          "min": 0.264,
+          "max": 32.456
+        },
+        "balanced": {
+          "n": 242,
+          "mean": 1.887,
+          "p50": 1.531,
+          "p95": 3.655,
+          "p99": 17.355,
+          "min": 0.296,
+          "max": 32.438
+        },
+        "aggressive": {
+          "n": 242,
+          "mean": 2.617,
+          "p50": 1.678,
+          "p95": 8.51,
+          "p99": 13.267,
+          "min": 0.416,
+          "max": 14.238
+        },
+        "always": {
+          "n": 242,
+          "mean": 5.139,
+          "p50": 4.322,
+          "p95": 9.527,
+          "p99": 15.881,
+          "min": 2.418,
+          "max": 28.076
+        }
+      }
+    },
+    "sdqa": {
+      "arms": {
+        "local": {
+          "n": 200,
+          "valid": 200,
+          "failed": 0,
+          "early": 1,
+          "calls": 0,
+          "onset": 200,
+          "call_rate_all_sessions": 0.0,
+          "ttfa_answer": {
+            "n": 200,
+            "mean": 0.934,
+            "p50": 0.622,
+            "p95": 1.666,
+            "p99": 2.242,
+            "min": -0.245,
+            "max": 3.099
+          },
+          "hardware_counts": {
+            "NVIDIA H100 80GB HBM3": 200
+          }
+        },
+        "conservative": {
+          "n": 200,
+          "valid": 199,
+          "failed": 1,
+          "early": 2,
+          "calls": 13,
+          "onset": 199,
+          "call_rate_all_sessions": 0.065,
+          "ttfa_answer": {
+            "n": 199,
+            "mean": 1.499,
+            "p50": 0.754,
+            "p95": 7.181,
+            "p99": 11.935,
+            "min": -0.277,
+            "max": 14.687
+          },
+          "hardware_counts": {
+            "NVIDIA H100 80GB HBM3": 200
+          }
+        },
+        "balanced": {
+          "n": 200,
+          "valid": 200,
+          "failed": 0,
+          "early": 0,
+          "calls": 49,
+          "onset": 200,
+          "call_rate_all_sessions": 0.245,
+          "ttfa_answer": {
+            "n": 200,
+            "mean": 2.599,
+            "p50": 0.867,
+            "p95": 10.814,
+            "p99": 15.516,
+            "min": 0.1,
+            "max": 18.377
+          },
+          "hardware_counts": {
+            "NVIDIA H100 80GB HBM3": 200
+          }
+        },
+        "aggressive": {
+          "n": 200,
+          "valid": 200,
+          "failed": 0,
+          "early": 0,
+          "calls": 130,
+          "onset": 200,
+          "call_rate_all_sessions": 0.65,
+          "ttfa_answer": {
+            "n": 200,
+            "mean": 4.659,
+            "p50": 4.197,
+            "p95": 10.169,
+            "p99": 14.522,
+            "min": 0.398,
+            "max": 36.07
+          },
+          "hardware_counts": {
+            "NVIDIA H100 80GB HBM3": 200
+          }
+        },
+        "always": {
+          "n": 200,
+          "valid": 200,
+          "failed": 0,
+          "early": 0,
+          "calls": 200,
+          "onset": 200,
+          "call_rate_all_sessions": 1.0,
+          "ttfa_answer": {
+            "n": 200,
+            "mean": 5.847,
+            "p50": 5.095,
+            "p95": 10.636,
+            "p99": 13.997,
+            "min": 2.645,
+            "max": 37.673
+          },
+          "hardware_counts": {
+            "NVIDIA H100 80GB HBM3": 200
+          }
+        }
+      },
+      "paired": {
+        "n_common_valid_ids": 199,
+        "local": {
+          "n": 199,
+          "mean": 0.931,
+          "p50": 0.62,
+          "p95": 1.666,
+          "p99": 2.244,
+          "min": -0.245,
+          "max": 3.099
+        },
+        "conservative": {
+          "n": 199,
+          "mean": 1.499,
+          "p50": 0.754,
+          "p95": 7.181,
+          "p99": 11.935,
+          "min": -0.277,
+          "max": 14.687
+        },
+        "balanced": {
+          "n": 199,
+          "mean": 2.582,
+          "p50": 0.863,
+          "p95": 10.877,
+          "p99": 15.522,
+          "min": 0.1,
+          "max": 18.377
+        },
+        "aggressive": {
+          "n": 199,
+          "mean": 4.649,
+          "p50": 4.186,
+          "p95": 10.181,
+          "p99": 14.536,
+          "min": 0.398,
+          "max": 36.07
+        },
+        "always": {
+          "n": 199,
+          "mean": 5.847,
+          "p50": 5.094,
+          "p95": 10.652,
+          "p99": 14.003,
+          "min": 2.645,
+          "max": 37.673
+        }
+      }
+    }
+  }
+}

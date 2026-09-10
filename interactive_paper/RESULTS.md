@@ -7403,3 +7403,62 @@ query-disjoint distinction, app:signal pointer kept); rebuilt via
 `modal run _build_pdf.py::build` — fig lands as Figure 4 p.6, clean.
 Colors follow the 40_lopo_layer_matrix.py model→color convention;
 palette CVD-validated. Spend ≈ $0.
+
+
+## Measured server TTFA integrated into the paper (ttfa1, 2026-09-09)
+
+Source: commit `9e86247`, `ttfa_real/results/ttfa1/*/*.jsonl.shard*`,
+`freeze.json`, and `summary_ttfa1_final.json`. The paper builder independently
+checks all 5,950 unique attempt-1 sessions and reproduces all 25 arm summaries
+and common-valid-ID subsets. Smoke files are excluded. Differences between
+saved TTFA and subtraction of rounded timestamps are at most 1 ms.
+
+Definition: signed `first_answer_pcm - input_end` on the worker's monotonic
+clock. `input_end` is the scheduled end of real-time input. The local endpoint
+is the first non-listen chunk return containing PCM; escalation uses the
+first nonempty relay-generator yield. Candidate/stall audio is excluded.
+The expert receives the consumed audio prefix, with ASR and web-enabled
+expert calls; relay text uses `clean_expert_v2`. This is server PCM-ready
+TTFA, without client playback timestamps. Timing answers were not judged.
+
+| Internal arm | Valid / attempted | Failed | Early | Mean (s) | P50 | P95 | P99 |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| local | 239 / 240 | 1 | 17 | -0.611 | 0.695 | 2.619 | 3.636 |
+| conservative | 238 / 240 | 2 | 12 | 1.528 | 0.887 | 10.853 | 34.082 |
+| balanced | 236 / 240 | 4 | 11 | 2.360 | 1.611 | 14.407 | 26.914 |
+| aggressive | 236 / 240 | 4 | 13 | 4.588 | 2.873 | 18.137 | 54.781 |
+| always | 237 / 240 | 3 | 7 | 8.008 | 6.674 | 25.861 | 60.829 |
+
+All five pools and arms are in the generated appendix table. Mean and
+quantiles condition on completed sessions and retain negatives and outliers.
+The 235 common-valid Internal IDs have P50 0.694/0.875/1.611/2.880/6.641 s.
+Calls in the paper's TTFA table uses all attempted sessions as denominator;
+the source summary instead divides by sessions with onset. The content
+accuracy and its recorded call rates remain in their separate ledger.
+
+Corrections to the accompanying prose report, established from raw shards:
+
+- 5,904 completed and 46 failed attempts (44 `non_commit`, one `empty_response`,
+  one `expert_timeout`), not 5,906 completed / 44 failures.
+- Hardware: 5,719 H100 80GB HBM3, 56 H100 NVL, 175 H200 sessions. All 1,200
+  Internal sessions are H100 80GB HBM3; external results include variation.
+- The recorded gate SHA-256 is
+  `0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372`,
+  matching the committed 5,228-row `gate_native.json`. It does not match the
+  5,221-row `gate_native_noleak.json`
+  (`2b9b9d29188fd8dc68183a1d3dff2039ab5eb38eb4d93d0314edac1cdf001f80`).
+  English thresholds are .905724/.797255/.553350. The seven external-question
+  calibration overlaps remain in this timing gate. This batch cannot be
+  claimed as the no-overlap gate's joint accuracy-latency evaluation.
+
+The abstract, setup, results, limitations, and figure now use measured TTFA;
+the appendix supplies protocol, failure counts, full distributions, and gate
+scope. The figure uses a linear axis to retain the negative Internal local
+mean; its accuracy coordinates and the main accuracy table are unchanged.
+No inference, judging, external API call, or audio revalidation was performed
+in this integration. Audio presence is checked through log metadata; the
+waveforms stored on the remote volume were not downloaded or audited.
+
+Reproduce: `python paper/build_measured_ttfa.py`, then
+`python paper/build_academic_revision_figure.py`. The audit and source hashes
+are in `paper/revision_data/measured_ttfa.json`.

@@ -1,0 +1,20 @@
+{
+  "source_commit": "9e86247",
+  "sessions_audited": 5950,
+  "completed": 5904,
+  "failed": 46,
+  "all_25_table_rows_match_rendered_pdf": true,
+  "all_25_accuracy_arm_id_sets_match_timing_manifests": true,
+  "accuracy_table_unchanged": true,
+  "accuracy_figure_coordinates_unchanged": true,
+  "main_text_pages": 8,
+  "pdf_pages": 17,
+  "type3_fonts": false,
+  "all_fonts_embedded": true,
+  "overfull_or_undefined_references": false,
+  "all_17_pages_visually_reviewed": true,
+  "figure_mirrors_identical": true,
+  "pdf_sha256": "438d7f29eb991aa3a570c84bde6d27ae0684ae2a9676a5c3dbc0957c6dcc4248",
+  "ttfa_figure_sha256": "636c9ed51ad7a5affba446859c47a2e025006894b54ad7b1ebebdc4102e63cf7",
+  "verification_scope": "Recomputed recorded logs; no inference or waveform audit; timings are separate from content accuracy."
+}

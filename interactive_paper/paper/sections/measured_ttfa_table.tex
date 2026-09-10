@@ -1,0 +1,46 @@
+\begin{table}[!ht]
+\centering\small
+\caption{Measured server PCM-ready TTFA (seconds). Each arm attempts every query in the pool. Statistics use completed sessions; Fail counts all other outcomes, and Early counts negative TTFA among completed sessions. Calls uses all attempted sessions as its denominator. One run per query and arm; quantiles describe query variation.}
+\label{tab:latency}
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{lrrrrrrrr}
+\toprule
+arm & Valid & Fail & Early & Calls (\%) & Mean & P50 & P95 & P99 \\
+\midrule
+\multicolumn{9}{l}{\textit{Internal ($n=240$ per arm)}} \\
+local & 239 & 1 & 17 & 0.0 & -0.61 & 0.70 & 2.62 & 3.64 \\
+conservative & 238 & 2 & 12 & 9.6 & 1.53 & 0.89 & 10.85 & 34.08 \\
+balanced & 236 & 4 & 11 & 25.4 & 2.36 & 1.61 & 14.41 & 26.91 \\
+aggressive & 236 & 4 & 13 & 50.8 & 4.59 & 2.87 & 18.14 & 54.78 \\
+always & 237 & 3 & 7 & 99.2 & 8.01 & 6.67 & 25.86 & 60.83 \\
+\midrule
+\multicolumn{9}{l}{\textit{Speech TriviaQA ($n=250$ per arm)}} \\
+local & 250 & 0 & 1 & 0.0 & 1.14 & 0.90 & 1.92 & 2.71 \\
+conservative & 248 & 2 & 0 & 3.6 & 1.55 & 0.98 & 2.63 & 14.88 \\
+balanced & 250 & 0 & 0 & 18.4 & 2.45 & 1.46 & 8.46 & 23.74 \\
+aggressive & 250 & 0 & 0 & 56.4 & 3.62 & 3.55 & 7.92 & 16.07 \\
+always & 250 & 0 & 0 & 100.0 & 5.71 & 4.89 & 10.30 & 21.76 \\
+\midrule
+\multicolumn{9}{l}{\textit{Speech Web Questions ($n=250$ per arm)}} \\
+local & 246 & 4 & 0 & 0.0 & 3.69 & 1.71 & 3.60 & 4.25 \\
+conservative & 246 & 4 & 0 & 5.6 & 5.14 & 1.81 & 7.71 & 80.26 \\
+balanced & 244 & 6 & 0 & 21.2 & 3.62 & 2.18 & 9.88 & 20.61 \\
+aggressive & 247 & 3 & 0 & 59.6 & 7.40 & 5.07 & 13.25 & 24.50 \\
+always & 248 & 2 & 0 & 99.2 & 7.49 & 6.13 & 16.71 & 23.13 \\
+\midrule
+\multicolumn{9}{l}{\textit{Speech Llama Questions ($n=250$ per arm)}} \\
+local & 249 & 1 & 0 & 0.0 & 1.61 & 1.52 & 2.55 & 3.66 \\
+conservative & 249 & 1 & 0 & 0.0 & 1.63 & 1.54 & 2.55 & 3.71 \\
+balanced & 247 & 3 & 0 & 4.0 & 2.10 & 1.53 & 3.82 & 22.78 \\
+aggressive & 246 & 4 & 0 & 19.2 & 2.61 & 1.68 & 8.49 & 13.21 \\
+always & 249 & 1 & 0 & 99.6 & 5.13 & 4.32 & 9.45 & 15.69 \\
+\midrule
+\multicolumn{9}{l}{\textit{SD-QA ($n=200$ per arm)}} \\
+local & 200 & 0 & 1 & 0.0 & 0.93 & 0.62 & 1.67 & 2.24 \\
+conservative & 199 & 1 & 2 & 6.5 & 1.50 & 0.75 & 7.18 & 11.94 \\
+balanced & 200 & 0 & 0 & 24.5 & 2.60 & 0.87 & 10.81 & 15.52 \\
+aggressive & 200 & 0 & 0 & 65.0 & 4.66 & 4.20 & 10.17 & 14.52 \\
+always & 200 & 0 & 0 & 100.0 & 5.85 & 5.10 & 10.64 & 14.00 \\
+\bottomrule
+\end{tabular}
+\end{table}
