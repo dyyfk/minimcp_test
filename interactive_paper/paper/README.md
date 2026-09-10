@@ -102,8 +102,8 @@ tectonic main.tex
 
 The Internal builder accepts `--data-dir`, `--queries`, `--nvda-expert`, and
 `--ttfa-results` for source locations. It verifies archived hashes and IDs.
-The current table, figure, captions, and numerical prose share this unweighted
-report. Historical weighted and 180-query subset summaries and scripts are
+Accuracy and call rate use this unweighted report; current timing values
+come directly from `../ttfa_real/nonnegative/summary.json`. Historical weighted and 180-query subset summaries and scripts are
 retained as analysis archives; they are not inputs to the current manuscript.
 
 ## Nonnegative server TTFA
@@ -127,8 +127,40 @@ The recomputation validates query IDs, attempt counts, audio endpoint
 selection, and source hashes. The summary records 5,904 completed sessions,
 46 failures, and 64 early responses. The Internal latency table uses all 240 Internal query IDs,
 rounded to two decimals; the figure uses unrounded mean and P50 values.
-These are server audio-ready statistics; timing-session correctness and
-client playback remain unmeasured.
+These are server audio-ready statistics. Accuracy retains the judged
+benchmark values; client playback is unmeasured.
+
+## Pareto, cost, and layer-decline reporting
+
+`build_main_results.py` also regenerates the Table 1 cost panel. Timing
+is mean nonnegative server TTFA from the full `ttfa1` / `ttfa-v3` run; expert use is
+the realized escalation rate from the content benchmark. Internal uses
+240 queries, and external entries average the four pools equally.
+Current native records do not contain token or tool billing usage, so
+non-local GPT dollar costs are marked NR. They cannot be reconstructed
+from escalation counts or historical costs from a different experiment.
+
+The 3-by-2 figure's left column connects nondominated observed policies
+in accuracy versus call rate. TriviaQA conservative is dominated by local.
+The right column connects nondominated policies in accuracy versus mean
+TTFA, using the retained accuracy values and latest full timing run.
+The convention is a comparison of reported policy summaries; metric-specific
+input and recording details are documented once in the experimental setup
+and appendix. P50 and tail statistics
+remain in the timing summary and the Internal appendix table.
+
+`revision_data/reporting_protocol.json` pins the metric source files and
+hashes. Accuracy and call rate must not switch to timing-session outputs;
+TTFA must not fall back to reconstructed timing or older cached means.
+All displayed pool/arm timing values come from the same full timing run.
+
+`python build_layer_sweep.py` reproduces Figure 2 from the five archived
+layer-sweep JSON files and highlights the late decline. It records source
+hashes and plotted arrays in `revision_data/layer_sweep_values.json`.
+The caption treats Listen/Speak specialization as unproven, consistent
+with the archived `interp_turncontrol.json` interventions. No probe refit
+or API calls are needed. Both figure builders mirror the PDF/PNG assets
+to `../figures/`.
 
 ## Native ablation figure (2026-09-09)
 

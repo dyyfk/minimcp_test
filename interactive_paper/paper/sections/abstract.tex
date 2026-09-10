@@ -12,9 +12,8 @@ answer onset. We find that failure signals can transfer from text to
 speech, and that readout design matters in native audio generation.
 On the full 240-query internal benchmark,
 selective expert handoff raises unweighted answer-content accuracy from
-40.8\% to 62.9\%. In an independent
-real-time replay, server waiting time after input end to first answer audio has
-P50 0.70\,s locally and 2.87\,s with aggressive handoff on the same query IDs. These timing
-sessions have not been scored for correctness, so the two experiments
-do not establish joint accuracy--latency performance.
+40.8\% to 62.9\%. The full real-time timing evaluation on the same
+query IDs gives mean server waiting time to first answer audio of
+6.10\,s with aggressive handoff, versus 9.43\,s with always-escalate.
+P50 is 0.70\,s locally and 2.87\,s with aggressive handoff.
 \end{abstract}

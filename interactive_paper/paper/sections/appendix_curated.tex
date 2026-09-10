@@ -9,12 +9,29 @@ families: chat 60, factual QA 40, knowledge 60, math 60, and SimpleQA traps 20.
 Each query has unit weight in accuracy and call-rate calculations.
 All original queries remain in the reported accuracy denominator.
 Table~\ref{tab:live} reports per-tier MiniCPM accuracy, uncertainty, and
-matched random references on this full test set. Independent timing
+matched random references on this full test set. The reported timing
 statistics use the same 240 IDs; external pools retain their original membership.
 Archived Mandarin diagnostics remain separate from the four-pool English
 macro average.
 
 \input{sections/setup_details}
+
+\subsection{Metric provenance and recording details}
+\label{app:metric-sources}
+Accuracy and escalation rates retain the judged native benchmark
+records. In that benchmark, the expert receives up to the final
+30 seconds of the prerecorded question. Server TTFA uses the complete
+\texttt{ttfa-v3} timing run (run ID \texttt{ttfa1}) on the same query
+cohorts and named policies, with one attempt per query and policy.
+Input is replayed in real time, expert requests use the audio prefix
+consumed at the trigger, and both local and relay paths produce audio.
+The reported accuracy values are retained from the judged benchmark;
+the timing run supplies the latency values. These sources are combined
+at the policy-summary level in the Pareto figures.
+The timing statistics include 5,904 completed sessions out of 5,950
+attempts; 46 failed attempts have no TTFA value. The 64 completed
+early responses contribute zero waiting time. Candidate and stall audio
+do not define the answer endpoint, and client playback is unmeasured.
 
 \subsection{Internal task strata}
 \label{app:internal-strata}
@@ -116,6 +133,14 @@ two duplex models; it remains intact in their raw backbones and the
 omni-streaming control. These controls support a mid-layer read in the
 tested conditions, while leaving the causal role of individual
 fine-tuning objectives unresolved.
+
+Direct tests further constrain the Listen/Speak hypothesis. The final
+probe's maximum cosine with control-token unembeddings is 0.069,
+versus 0.068 for the random control. A listen/speak prompt intervention
+on 60 calibration queries gives cue--probe cosine 0.019, near the
+0.016 chance reference. These tests do not support a simple
+turn-control takeover of the failing probe direction; they do not rule
+out more distributed effects of duplex fine-tuning.
 
 \subsection{Query-surface baseline}
 \label{app:router}

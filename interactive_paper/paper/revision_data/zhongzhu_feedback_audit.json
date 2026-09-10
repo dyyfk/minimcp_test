@@ -1,0 +1,390 @@
+{
+  "source_commit": "04cab106d57d071edf1f2720c3b9230c4a7df55c",
+  "raw_source_checks": [
+    {
+      "pool": "frozen",
+      "arm": "never",
+      "n": 240,
+      "n_completed": 239,
+      "source_sha256": "082df3b3ae133a5c871d9ad97812c9ce206140caa26cb95f4616b4e42023a825",
+      "escalation_rate": 0.0,
+      "mean_ttfa_s": 1.064652719665272,
+      "billing_fields": []
+    },
+    {
+      "pool": "frozen",
+      "arm": "conservative",
+      "n": 240,
+      "n_completed": 238,
+      "source_sha256": "e42abdd53deebf54012d36d3097f5cacac6d0a0cedbb0a48b2bee198175f2d33",
+      "escalation_rate": 0.08333333333333333,
+      "mean_ttfa_s": 2.7089915966386555,
+      "billing_fields": []
+    },
+    {
+      "pool": "frozen",
+      "arm": "balanced",
+      "n": 240,
+      "n_completed": 236,
+      "source_sha256": "5f7846ec52ca5eef09b566cb70ebfa85d5f8d4c853f885833ddf58411592739f",
+      "escalation_rate": 0.25,
+      "mean_ttfa_s": 3.9663516949152546,
+      "billing_fields": []
+    },
+    {
+      "pool": "frozen",
+      "arm": "aggressive",
+      "n": 240,
+      "n_completed": 236,
+      "source_sha256": "213b32296a4c1e449e1f9e325d08f3298eb264b5c2c7644d034759b99ac98652",
+      "escalation_rate": 0.5166666666666667,
+      "mean_ttfa_s": 6.100063559322033,
+      "billing_fields": []
+    },
+    {
+      "pool": "frozen",
+      "arm": "always",
+      "n": 240,
+      "n_completed": 237,
+      "source_sha256": "9ac19665fbc00c80e83986ca8d42f030d880ac9cc160bf70589071df0cdd05c8",
+      "escalation_rate": 0.9916666666666667,
+      "mean_ttfa_s": 9.4313417721519,
+      "billing_fields": []
+    },
+    {
+      "pool": "striviaqa",
+      "arm": "never",
+      "n": 250,
+      "n_completed": 250,
+      "source_sha256": "89c899c15c711e008ab0a46b354dfdd1b645f5cdec574086795eb9355ab35188",
+      "escalation_rate": 0.0,
+      "mean_ttfa_s": 1.1562000000000001,
+      "billing_fields": []
+    },
+    {
+      "pool": "striviaqa",
+      "arm": "conservative",
+      "n": 250,
+      "n_completed": 248,
+      "source_sha256": "e3499afd5cb25da8beb169bf0765e66e0271e2b593e0734e508fa75c37ae6a14",
+      "escalation_rate": 0.04,
+      "mean_ttfa_s": 1.5514274193548387,
+      "billing_fields": []
+    },
+    {
+      "pool": "striviaqa",
+      "arm": "balanced",
+      "n": 250,
+      "n_completed": 250,
+      "source_sha256": "f0379ce8d865d5b185e8918af23882d08fa65484f14b58e5b3bcd4871185467e",
+      "escalation_rate": 0.184,
+      "mean_ttfa_s": 2.4542960000000003,
+      "billing_fields": []
+    },
+    {
+      "pool": "striviaqa",
+      "arm": "aggressive",
+      "n": 250,
+      "n_completed": 250,
+      "source_sha256": "95c00310adaf40b29fa0fa0275d4b114367bfab93f9f88e357b796b9ce6b8952",
+      "escalation_rate": 0.564,
+      "mean_ttfa_s": 3.615808,
+      "billing_fields": []
+    },
+    {
+      "pool": "striviaqa",
+      "arm": "always",
+      "n": 250,
+      "n_completed": 250,
+      "source_sha256": "6b4c30876c50f4e7b518296f51e38b73c3315db78f9924ca583dab1aa6023396",
+      "escalation_rate": 1.0,
+      "mean_ttfa_s": 5.7075439999999995,
+      "billing_fields": []
+    },
+    {
+      "pool": "swebq",
+      "arm": "never",
+      "n": 250,
+      "n_completed": 246,
+      "source_sha256": "46debc70d24b885dbb001a1b5f4bb60842616375ffc57c23667e0e56dcc9aa71",
+      "escalation_rate": 0.0,
+      "mean_ttfa_s": 3.6892154471544707,
+      "billing_fields": []
+    },
+    {
+      "pool": "swebq",
+      "arm": "conservative",
+      "n": 250,
+      "n_completed": 246,
+      "source_sha256": "83717f59af33575e62d9c846fd07405397303ab340c92b5fd10e9a8409eda740",
+      "escalation_rate": 0.048,
+      "mean_ttfa_s": 5.1400447154471545,
+      "billing_fields": []
+    },
+    {
+      "pool": "swebq",
+      "arm": "balanced",
+      "n": 250,
+      "n_completed": 244,
+      "source_sha256": "9386c25b03348db75e559583010fe09f53551a5502c697c9a831031a4ea1900f",
+      "escalation_rate": 0.22,
+      "mean_ttfa_s": 3.620225409836065,
+      "billing_fields": []
+    },
+    {
+      "pool": "swebq",
+      "arm": "aggressive",
+      "n": 250,
+      "n_completed": 247,
+      "source_sha256": "76b424713925774289c684933511d3ed5b4046e0fafecb73129dbba0697347b7",
+      "escalation_rate": 0.6,
+      "mean_ttfa_s": 7.395562753036438,
+      "billing_fields": []
+    },
+    {
+      "pool": "swebq",
+      "arm": "always",
+      "n": 250,
+      "n_completed": 248,
+      "source_sha256": "6cfd758fab83bd3f3c1dd48d71abd799ad070eade55c6a411b7091d9115d473f",
+      "escalation_rate": 0.992,
+      "mean_ttfa_s": 7.492254032258065,
+      "billing_fields": []
+    },
+    {
+      "pool": "sllama",
+      "arm": "never",
+      "n": 250,
+      "n_completed": 249,
+      "source_sha256": "e5be47e932cf9ed9e0a61e379b6b7659eef02da946dc0455231338e0e4023a1a",
+      "escalation_rate": 0.0,
+      "mean_ttfa_s": 1.6060481927710841,
+      "billing_fields": []
+    },
+    {
+      "pool": "sllama",
+      "arm": "conservative",
+      "n": 250,
+      "n_completed": 249,
+      "source_sha256": "98564f869adbd1ceb53a91e7943e9544e4448ff5d095cc13cc2e702729f36d0b",
+      "escalation_rate": 0.004,
+      "mean_ttfa_s": 1.634425702811245,
+      "billing_fields": []
+    },
+    {
+      "pool": "sllama",
+      "arm": "balanced",
+      "n": 250,
+      "n_completed": 247,
+      "source_sha256": "260bcbb47ff5dd4e2eb1bfa37c84905bd3dcca0ea6fbbd0b86d5044605212008",
+      "escalation_rate": 0.036,
+      "mean_ttfa_s": 2.0947044534412957,
+      "billing_fields": []
+    },
+    {
+      "pool": "sllama",
+      "arm": "aggressive",
+      "n": 250,
+      "n_completed": 246,
+      "source_sha256": "3e8317c8b9d45c6a86c09b3beece3bca150313314181bff0d33069e343659731",
+      "escalation_rate": 0.188,
+      "mean_ttfa_s": 2.609008130081301,
+      "billing_fields": []
+    },
+    {
+      "pool": "sllama",
+      "arm": "always",
+      "n": 250,
+      "n_completed": 249,
+      "source_sha256": "a82d74aed1db32228cc9e8d787f70655bd0c943f0c1bb38afe95b01275b04a8f",
+      "escalation_rate": 1.0,
+      "mean_ttfa_s": 5.1262931726907635,
+      "billing_fields": []
+    },
+    {
+      "pool": "sdqa",
+      "arm": "never",
+      "n": 200,
+      "n_completed": 200,
+      "source_sha256": "27b5cb3f89a8b33594787fa15498bb84874c56427bd7f4ce2c91a69f38ea7a34",
+      "escalation_rate": 0.0,
+      "mean_ttfa_s": 0.935215,
+      "billing_fields": []
+    },
+    {
+      "pool": "sdqa",
+      "arm": "conservative",
+      "n": 200,
+      "n_completed": 199,
+      "source_sha256": "02e78ac9f9be8ebc8ba1863c40c4ee86aeae7949733fcddfac66cdaac294a389",
+      "escalation_rate": 0.065,
+      "mean_ttfa_s": 1.5003517587939699,
+      "billing_fields": []
+    },
+    {
+      "pool": "sdqa",
+      "arm": "balanced",
+      "n": 200,
+      "n_completed": 200,
+      "source_sha256": "3007bc12214ac175b43f13134e5801f7e3d8a0f9303d32de9412547fbe88767d",
+      "escalation_rate": 0.27,
+      "mean_ttfa_s": 2.599185,
+      "billing_fields": []
+    },
+    {
+      "pool": "sdqa",
+      "arm": "aggressive",
+      "n": 200,
+      "n_completed": 200,
+      "source_sha256": "e8a1b9e09f3da86c08954733b161e31bb13bbfd6afd4fedb8e58ed82e10fcd76",
+      "escalation_rate": 0.66,
+      "mean_ttfa_s": 4.65897,
+      "billing_fields": []
+    },
+    {
+      "pool": "sdqa",
+      "arm": "always",
+      "n": 200,
+      "n_completed": 200,
+      "source_sha256": "dc74452608123570f9a2b1748bc21a0822c0bc686505673c217e8bab6fbf32b7",
+      "escalation_rate": 1.0,
+      "mean_ttfa_s": 5.846785,
+      "billing_fields": []
+    }
+  ],
+  "timing_files_sha256_checked": 200,
+  "main_text_pages": 8,
+  "total_pdf_pages": 16,
+  "pdf_sha256": "ae968f4ad8096df8134079df3144ab50777632e814d6a0e768da6fb484d0b898",
+  "costs": [
+    {
+      "label": "always-local",
+      "arm": "never",
+      "values": [
+        1.064652719665272,
+        1.846669659981389,
+        0.0,
+        0.0
+      ],
+      "cells": [
+        "1.06",
+        "1.85",
+        "0.0",
+        "0.0",
+        "0"
+      ]
+    },
+    {
+      "label": "\\;+ gate, conservative",
+      "arm": "conservative",
+      "values": [
+        2.7089915966386555,
+        2.456562399101802,
+        8.333333333333332,
+        3.925
+      ],
+      "cells": [
+        "2.71",
+        "2.46",
+        "8.3",
+        "3.9",
+        "NR"
+      ]
+    },
+    {
+      "label": "\\;+ gate, balanced",
+      "arm": "balanced",
+      "values": [
+        3.966351694915254,
+        2.69210271581934,
+        25.0,
+        17.75
+      ],
+      "cells": [
+        "3.97",
+        "2.69",
+        "25.0",
+        "17.8",
+        "NR"
+      ]
+    },
+    {
+      "label": "\\;+ gate, aggressive",
+      "arm": "aggressive",
+      "values": [
+        6.100063559322034,
+        4.569837220779434,
+        51.66666666666667,
+        50.3
+      ],
+      "cells": [
+        "6.10",
+        "4.57",
+        "51.7",
+        "50.3",
+        "NR"
+      ]
+    },
+    {
+      "label": "always-escalate",
+      "arm": "always",
+      "values": [
+        9.4313417721519,
+        6.043219051237207,
+        99.16666666666667,
+        99.8
+      ],
+      "cells": [
+        "9.43",
+        "6.04",
+        "99.2",
+        "99.8",
+        "NR"
+      ]
+    }
+  ],
+  "pareto_arms": {
+    "frozen": [
+      "never",
+      "conservative",
+      "balanced",
+      "aggressive",
+      "always"
+    ],
+    "striviaqa": [
+      "never",
+      "balanced",
+      "aggressive",
+      "always"
+    ],
+    "sdqa": [
+      "never",
+      "conservative",
+      "balanced",
+      "aggressive",
+      "always"
+    ]
+  },
+  "latency_frontier_claimed": false,
+  "gpt_dollar_values": "unavailable except zero expert usage in local arm",
+  "mechanism_claim": "simple Listen/Speak takeover unsupported by recorded interventions",
+  "new_model_api_calls": 0,
+  "notes": [
+    "Source accuracy outcomes are unchanged.",
+    "All 25 source arms lack token/billing columns.",
+    "Right-side accuracy and TTFA are independent protocol summaries, not jointly achieved operating points.",
+    "Figure 2 paragraph final AUC matches its source sweep (0.366); 0.372 remains in the separate signal-comparison table."
+  ],
+  "visual_qa_pages": [
+    4,
+    5,
+    6,
+    8,
+    12,
+    13
+  ],
+  "visual_qa": "passed: no clipping or overlap in inspected pages",
+  "output_pdf": "/Users/ruoyuhe/Documents/ChatGPT/minicpm_paper/output/pdf/minimcp_zhongzhu_feedback.pdf",
+  "status": "superseded by user clarification of metric sources",
+  "superseded_by": "reporting_protocol_audit.json"
+}

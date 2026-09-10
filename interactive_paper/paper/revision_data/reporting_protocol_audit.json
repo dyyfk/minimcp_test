@@ -1,0 +1,77 @@
+{
+  "status": "passed",
+  "reporting_convention": {
+    "convention": {
+      "accuracy": "retained_judged_benchmark",
+      "call_rate": "retained_judged_benchmark",
+      "ttfa": "full_ttfa_v3_run_nonnegative_wait"
+    },
+    "comparison_unit": "reported policy summary on the same query cohort",
+    "accuracy_sources": [
+      {
+        "path": "interactive_paper/paper/revision_data/native_summary.json",
+        "sha256": "b2b32051cdc0fa7b80abf7ebe8d23a6d0240e79470d5a68fad1f660492229b70"
+      },
+      {
+        "path": "interactive_paper/paper/revision_data/internal_unweighted_summary.json",
+        "sha256": "30bf1dd07814e672291be212ee170ea3d7805b036478210b94b36c5179a5344d"
+      }
+    ],
+    "timing_source": {
+      "path": "interactive_paper/ttfa_real/nonnegative/summary.json",
+      "sha256": "deb1412c04ccc6e864d2d1d1a88ca1af4f6a0d9c95b1e1b72d0336777a5c8010"
+    },
+    "timing_freeze": {
+      "path": "interactive_paper/ttfa_real/freeze.json",
+      "sha256": "558a83462f4c3a59e0f6ecd915a13acc47117a7f524c74875af2c526445c9f2d"
+    },
+    "timing_run_id": "ttfa1",
+    "timing_protocol": "ttfa-v3",
+    "timing_formula": "max(0, ts.first_answer_pcm - ts.input_end)",
+    "timing_attempts": 5950,
+    "timing_completed": 5904,
+    "timing_failed": 46,
+    "query_weighting": "unit",
+    "external_average": "equal weight across four external English QA pools",
+    "gpt_usd": "not recorded for expert-using arms; no imputation from call rate"
+  },
+  "accuracy_source_bytes_unchanged": true,
+  "timing_files_sha256_checked": 200,
+  "accuracy_latency_frontiers": {
+    "frozen": [
+      "never",
+      "conservative",
+      "balanced",
+      "aggressive",
+      "always"
+    ],
+    "striviaqa": [
+      "never",
+      "balanced",
+      "aggressive",
+      "always"
+    ],
+    "sdqa": [
+      "never",
+      "conservative",
+      "balanced",
+      "aggressive",
+      "always"
+    ]
+  },
+  "internal_aggressive_mean_wait_reduction_pct": 35.32136034626795,
+  "main_text_pages": 8,
+  "total_pages": 17,
+  "visual_qa_pages": [
+    1,
+    4,
+    5,
+    6,
+    8,
+    11
+  ],
+  "overfull_boxes": 0,
+  "pdf_sha256": "c6aac0580a18b0fe34a77373054a81b25614487a9d7624fcaf8d04aced018df7",
+  "output_pdf": "/Users/ruoyuhe/Documents/ChatGPT/minicpm_paper/output/pdf/minimcp_zhongzhu_feedback.pdf",
+  "new_model_api_calls": 0
+}

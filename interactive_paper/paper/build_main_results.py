@@ -7,6 +7,7 @@ NVDA replay results remain a separate block.
 """
 import argparse
 import copy
+import hashlib
 from decimal import Decimal, ROUND_HALF_UP
 import json
 import subprocess
@@ -28,6 +29,11 @@ START = '% BEGIN GENERATED MINICPM ROWS\n'
 END = '% END GENERATED MINICPM ROWS'
 NVDA_START = '% BEGIN GENERATED NVDA ROWS\n'
 NVDA_END = '% END GENERATED NVDA ROWS'
+COST_START = '% BEGIN GENERATED COST ROWS\n'
+COST_END = '% END GENERATED COST ROWS'
+METRIC_SOURCES = {'accuracy': 'retained_judged_benchmark',
+                  'call_rate': 'retained_judged_benchmark',
+                  'ttfa': 'full_ttfa_v3_run_nonnegative_wait'}
 
 
 def load_result_pools(native_path=HERE / 'revision_data/native_summary.json',
@@ -57,13 +63,12 @@ def load_figure_pools(native_path=HERE / 'revision_data/native_summary.json',
                       ttfa_path=HERE.parent / 'ttfa_real/nonnegative/summary.json'):
     pools = load_result_pools(native_path, internal_path)
     ttfa = json.loads(ttfa_path.read_text())
-    internal_timing = json.loads(internal_path.read_text())['timing']
     assert ttfa['formula'] == 'max(0, ts.first_answer_pcm - ts.input_end)'
     for pool in ('frozen', 'striviaqa', 'sdqa'):
         for arm, result in pools[pool].items():
             if arm not in ('never', 'conservative', 'balanced', 'aggressive', 'always'):
                 continue
-            timing = internal_timing if pool == 'frozen' else ttfa['pools'][pool]
+            timing = ttfa['pools'][pool]
             measured = timing['arms']['local' if arm == 'never' else arm]
             assert measured['n_attempts'] == result['n']
             for key in ('mean', 'p50'):
@@ -77,6 +82,37 @@ def display(value, signed=False):
     # Remove binary-float noise before applying conventional one-decimal rounding.
     rounded = Decimal(str(round(value, 10))).quantize(Decimal('0.1'), rounding=ROUND_HALF_UP)
     return format(rounded, '+.1f' if signed else '.1f')
+
+
+def reporting_manifest(native_path, internal_path, ttfa_path):
+    """Pin the retained accuracy sources and authoritative full timing run."""
+    def source(path):
+        path = Path(path).resolve()
+        try:
+            name = str(path.relative_to(HERE.parents[1]))
+        except ValueError:
+            name = str(path)
+        return {'path': name, 'sha256': hashlib.sha256(path.read_bytes()).hexdigest()}
+    timing = json.loads(ttfa_path.read_text())
+    freeze_path = ttfa_path.parent.parent / 'freeze.json'
+    freeze = json.loads(freeze_path.read_text()) if freeze_path.exists() else {}
+    arms = [a for p in TABLE_POOLS for a in timing['pools'][p]['arms'].values()]
+    return {
+        'convention': METRIC_SOURCES,
+        'comparison_unit': 'reported policy summary on the same query cohort',
+        'accuracy_sources': [source(native_path), source(internal_path)],
+        'timing_source': source(ttfa_path),
+        'timing_freeze': source(freeze_path) if freeze else None,
+        'timing_run_id': freeze.get('run_id'),
+        'timing_protocol': freeze.get('protocol'),
+        'timing_formula': timing['formula'],
+        'timing_attempts': sum(a['n_attempts'] for a in arms),
+        'timing_completed': sum(a['n_completed'] for a in arms),
+        'timing_failed': sum(a['n_failed'] for a in arms),
+        'query_weighting': 'unit',
+        'external_average': 'equal weight across four external English QA pools',
+        'gpt_usd': 'not recorded for expert-using arms; no imputation from call rate',
+    }
 
 
 def native_rows(pools):
@@ -121,7 +157,46 @@ def rendered_nvda_rows(internal_path=HERE / 'revision_data/internal_unweighted_s
     return '\n'.join(lines) + '\n'
 
 
-def check_table(pools, table_path):
+def cost_rows(pools, ttfa_path=HERE.parent / 'ttfa_real/nonnegative/summary.json'):
+    """Keep timing, routing frequency, and missing dollar usage distinct."""
+    ttfa = json.loads(ttfa_path.read_text())
+    assert ttfa['formula'] == 'max(0, ts.first_answer_pcm - ts.input_end)'
+    rows = []
+    for label, arm, _ in (row for row in ROWS if row[2] == 'accuracy'):
+        timing_arm = 'local' if arm == 'never' else arm
+        def mean_s(pool):
+            measured = ttfa['pools'][pool]['arms'][timing_arm]
+            assert measured['n_attempts'] == pools[pool][arm]['n']
+            return measured['nonnegative_ttfa_s']['mean']
+        values = [mean_s('frozen'), fsum(mean_s(p) for p in EXTERNAL_POOLS)/4,
+                  pools['frozen'][arm]['rate']*100,
+                  fsum(pools[p][arm]['rate']*100 for p in EXTERNAL_POOLS)/4]
+        cells = [f'{v:.2f}' for v in values[:2]] + [display(v) for v in values[2:]]
+        # A routing event can trigger tool calls/retries; it is not a billable request count.
+        cells.append('0' if arm == 'never' else 'NR')
+        rows.append({'label':label, 'arm':arm, 'values':values, 'cells':cells})
+    return rows
+
+
+def rendered_cost_rows(pools, ttfa_path=HERE.parent / 'ttfa_real/nonnegative/summary.json'):
+    rows = cost_rows(pools, ttfa_path)
+    metrics = [
+        ('Mean TTFA (s), Int./Ext.', [r['cells'][0]+' / '+r['cells'][1] for r in rows]),
+        ('Escalations/100, Int./Ext.', [r['cells'][2]+' / '+r['cells'][3] for r in rows]),
+        ('GPT expert USD/query', [r['cells'][4] for r in rows]),
+    ]
+    return '\n'.join(' & '.join([label, *cells]) + r' \\'
+                     for label, cells in metrics) + '\n'
+
+
+def pareto_indices(cost, accuracy):
+    """Minimize cost and maximize accuracy among the reported discrete policies."""
+    return [i for i, (x, y) in enumerate(zip(cost, accuracy))
+            if not any(xx <= x and yy >= y and (xx < x or yy > y)
+                       for xx, yy in zip(cost, accuracy))]
+
+
+def check_table(pools, table_path, ttfa_path=HERE.parent / 'ttfa_real/nonnegative/summary.json'):
     text = table_path.read_text()
     if text.count(START) != 1 or text.count(END) != 1:
         raise ValueError('Main table must contain exactly one generated MiniCPM block')
@@ -133,10 +208,14 @@ def check_table(pools, table_path):
     nvda = text.split(NVDA_START, 1)[1].split(NVDA_END, 1)[0]
     if nvda != rendered_nvda_rows():
         raise ValueError('NVDA table cells differ from reporting sources')
+    if text.count(COST_START) != 1 or text.count(COST_END) != 1:
+        raise ValueError('Main table must contain exactly one cost block')
+    if text.split(COST_START, 1)[1].split(COST_END, 1)[0] != rendered_cost_rows(pools, ttfa_path):
+        raise ValueError('Cost cells differ from timing/routing summaries')
     return native_rows(pools)
 
 
-def write_table(pools, table_path):
+def write_table(pools, table_path, ttfa_path=HERE.parent / 'ttfa_real/nonnegative/summary.json'):
     text = table_path.read_text()
     if text.count(START) != 1 or text.count(END) != 1:
         raise ValueError('Main table must contain exactly one generated MiniCPM block')
@@ -147,6 +226,10 @@ def write_table(pools, table_path):
     before, rest = text.split(NVDA_START, 1)
     _, after = rest.split(NVDA_END, 1)
     table_path.write_text(before + NVDA_START + rendered_nvda_rows() + NVDA_END + after)
+    text = table_path.read_text()
+    before, rest = text.split(COST_START, 1)
+    _, after = rest.split(COST_END, 1)
+    table_path.write_text(before + COST_START + rendered_cost_rows(pools, ttfa_path) + COST_END + after)
 
 
 def check_figure(pools, drawn):
@@ -163,6 +246,18 @@ def check_figure(pools, drawn):
         for key, values in plot['timing'].items():
             if values != [pools[pool][arm][key] for arm in arms]:
                 raise ValueError(f'{pool}: timing differs for {key}')
+        expected_frontier = [arms[i] for i in pareto_indices(expected_x, expected_y)]
+        if plot.get('call_rate_pareto_arms') != expected_frontier:
+            raise ValueError(f'{pool}: incorrect empirical call-rate frontier')
+        latency = [pools[pool][arm]['mean_s'] for arm in arms]
+        expected_latency_frontier = [arms[i] for i in sorted(
+            pareto_indices(latency, expected_y), key=lambda i: latency[i])]
+        if plot.get('latency_pareto_arms') != expected_latency_frontier:
+            raise ValueError(f'{pool}: incorrect accuracy/TTFA frontier')
+        if plot.get('latency_comparison_x') != latency:
+            raise ValueError(f'{pool}: plotted latency differs from the latest timing summary')
+        if plot.get('metric_sources') != METRIC_SOURCES:
+            raise ValueError('Use retained accuracy/call rates and the full ttfa-v3 timing run')
 
 
 if __name__ == '__main__':
@@ -173,11 +268,16 @@ if __name__ == '__main__':
     parser.add_argument('--table', type=Path, default=HERE / 'sections/revision_table.tex')
     parser.add_argument('--figure-values', type=Path)
     parser.add_argument('--ttfa-summary', type=Path, default=HERE.parent / 'ttfa_real/nonnegative/summary.json')
+    parser.add_argument('--reporting-manifest', type=Path, default=HERE / 'revision_data/reporting_protocol.json')
     args = parser.parse_args()
     pools = load_result_pools(args.native_summary, args.internal_summary)
+    manifest = reporting_manifest(args.native_summary, args.internal_summary, args.ttfa_summary)
     if not args.check:
-        write_table(pools, args.table)
-    rows = check_table(pools, args.table)
+        write_table(pools, args.table, args.ttfa_summary)
+        args.reporting_manifest.write_text(json.dumps(manifest, indent=2) + '\n')
+    elif json.loads(args.reporting_manifest.read_text()) != manifest:
+        raise ValueError('Metric source manifest differs; verify the reporting convention before rebuilding')
+    rows = check_table(pools, args.table, args.ttfa_summary)
     if args.figure_values:
         check_figure(load_figure_pools(args.native_summary, args.internal_summary, args.ttfa_summary),
                      json.loads(args.figure_values.read_text()))

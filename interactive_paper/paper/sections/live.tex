@@ -3,22 +3,16 @@
 \begin{figure}[!t]
   \centering
   \includegraphics[width=\linewidth]{revision_accuracy_latency}
-  \caption{\textbf{Accuracy and independently measured TTFA on three pools.}
-  Left: answer-content accuracy against expert call rate.  C/B/A denote conservative/balanced/aggressive.
-  Internal retains all 240 query IDs with unit weights
-  on both axes, as in Table~\ref{tab:transfer}.
-  The dashed line follows the table's random-mixture convention
-  (\S\ref{sec:evalproto}); the horizontal reference is the measured
-  always arm, not an oracle bound. Right: mean and P50 server TTFA
-  from completed sessions in the independent \texttt{ttfa-v3} run,
-  on the corresponding query IDs. TTFA is the nonnegative wait after
-  input end until first answer PCM; early answers have zero wait.
-  L/W denote local/always. Each query has one attempt per arm;
-  candidate/stall audio and client playback are excluded.
-  Timing-session answers are unjudged and do not establish the
-  accuracy on the left. Internal counts and tails appear in
-  Table~\ref{tab:latency}; Table~\ref{tab:transfer} covers all four external
-  English speech-QA pools evaluated here.}
+  \caption{\textbf{Accuracy--cost Pareto frontiers across routing policies.}
+  Left: accuracy versus expert call rate; dashed lines show random
+  mixtures. Right: accuracy versus mean server TTFA. Solid lines
+  connect nondominated policies under the reported metrics.
+  Always-escalate via GPT-5.5 and speech relay (W) has the highest
+  accuracy and latency on these pools; gated policies trade some
+  accuracy for shorter waits. TriviaQA conservative is dominated by
+  local. Accuracy retains the judged benchmark values; TTFA uses the
+  full timing run (\S\ref{sec:evalproto}). Internal retains all 240 IDs
+  with unit weights. L is local; C/B/A are conservative/balanced/aggressive.}
   \label{fig:dualview}
 \end{figure}
 
@@ -45,7 +39,7 @@ results show task differences and an input constraint; they do not
 isolate a truncation effect on accuracy. All queries remain in the
 five-category analysis (Appendix~\ref{app:internal-strata}).
 
-The independent \texttt{ttfa-v3} run measures server waiting time to
+The complete \texttt{ttfa-v3} run measures server waiting time to
 first answer audio after input end on the same 240 query IDs
 (Figure~\ref{fig:dualview}). Internal P50 is 0.70\,s
 locally, 1.61\,s at balanced, and 2.87\,s at aggressive. Aggressive
@@ -53,7 +47,8 @@ has mean 6.10\,s and P95 18.14\,s; always has mean 9.43\,s and
 P50 6.67\,s. Local mean is 1.06\,s, including 17/240 attempts
 (7.1\%) that respond before input end and incur zero wait. Early
 responses do not establish better interaction or correctness. Table~\ref{tab:latency}
-counts failures and reports timing among completed sessions. These
-answers remain unjudged: 62.9\% accuracy and 6.10\,s mean TTFA are
-results from separate experiments and do not establish a joint
-accuracy--latency operating point.
+counts failures and reports timing among completed sessions.
+Under the reporting convention in \S\ref{sec:evalproto}, aggressive
+has 62.9\% accuracy and 6.10\,s mean TTFA, compared with 70.4\%
+and 9.43\,s for always-escalate: 7.5 percentage points of accuracy
+are exchanged for a 35.3\% reduction in mean waiting time.

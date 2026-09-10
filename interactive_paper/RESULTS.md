@@ -7509,3 +7509,28 @@ build_academic_revision_figure.py. check_internal_reporting.py checks raw
 hashes, table and figure values, intervals, rates, current prose, and TeX
 cross-references. Appendix tables use internal_unweighted_results.tex and
 internal_latency.tex; historical subset tables are no longer included.
+
+
+## Paper cost and Pareto reporting (2026-09-10)
+
+Recomputed the five-pool, five-arm time/expert-use display from the unchanged native content archives and independent nonnegative ttfa-v3 timestamps. All 25 content hashes and 200 timing-file hashes match; query-ID sets match across experiments, whose expert-input protocols differ. No new model/API runs.
+
+| Policy | Mean TTFA s, Internal / external macro | Escalations per 100, Internal / external macro | GPT expert USD/query |
+|---|---:|---:|---:|
+| never | 1.06 / 1.85 | 0.0 / 0.0 | 0 |
+| conservative | 2.71 / 2.46 | 8.3 / 3.9 | NR |
+| balanced | 3.97 / 2.69 | 25.0 / 17.8 | NR |
+| aggressive | 6.10 / 4.57 | 51.7 / 50.3 | NR |
+| always | 9.43 / 6.04 | 99.2 / 99.8 | NR |
+
+External macro weights TriviaQA, WebQ, Llama Q., and SD-QA equally. Dollar billing is absent in all 25 native schemas: NR is missing, not zero; escalation frequency is not a proportional billing estimate. GPT costs exclude ASR/TTS and local compute.
+
+Accuracy-call-rate frontiers are over the five reported policies; TriviaQA conservative is dominated by local. Accuracy versus mean TTFA is shown only as an explicitly marked cross-run comparison, not a measured joint frontier. Figure 2 highlights the late-layer drop and identifies Listen/Speak specialization as unproven, consistent with interp_turncontrol.json. The source sweep has L22 AUC 0.931 and final AUC 0.366; the nearby text now uses that sweep rather than 0.372 from the separate signal comparison.
+
+Audit: paper/revision_data/zhongzhu_feedback_audit.json; source sweep arrays: paper/revision_data/layer_sweep_values.json.
+
+## Metric-source clarification and policy Pareto frontiers (2026-09-10)
+
+User-specified reporting convention: retain the existing judged accuracy and call rates, and use the latest full ttfa1 / ttfa-v3 run for all latency values. This supersedes the earlier decision above to omit the latency frontier. Both columns now connect nondominated reported policy summaries. The experiment setup and appendix record the metric sources and input/recording details. Raw accuracy and TTFA records and all numeric values are unchanged.
+
+Internal aggressive: 62.9% accuracy and 6.10 s mean TTFA; always: 70.4% and 9.43 s. The difference is 7.5 accuracy points and 35.3% mean-wait reduction (calculated before rounding). Figure, Table 1, abstract, introduction, main results, discussion, and timing appendix use this single convention. Source files and hashes are pinned in paper/revision_data/reporting_protocol.json.

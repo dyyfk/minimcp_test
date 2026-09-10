@@ -10,7 +10,7 @@ from pathlib import Path
 import re
 
 from build_internal_unweighted import table_text, format_number
-from build_main_results import check_figure, check_table, display, load_figure_pools
+from build_main_results import check_figure, check_table, display, load_figure_pools, reporting_manifest
 
 HERE = Path(__file__).resolve().parent
 ARMS = ['never', 'conservative', 'balanced', 'aggressive', 'always']
@@ -49,6 +49,9 @@ def check():
     assert plotted == json.loads((HERE/'figures/plotted_values.json').read_text())
     assert plotted['frozen']['n'] == 240 and plotted['frozen']['query_weighting'] == 'unit'
     pools = load_figure_pools()
+    assert json.loads((HERE/'revision_data/reporting_protocol.json').read_text()) == reporting_manifest(
+        HERE/'revision_data/native_summary.json', HERE/'revision_data/internal_unweighted_summary.json',
+        HERE.parent/'ttfa_real/nonnegative/summary.json'), 'Metric source manifest mismatch'
     check_table(pools, HERE/'sections/revision_table.tex')
     check_figure(pools, plotted)
     for name, expected in table_text(report).items():

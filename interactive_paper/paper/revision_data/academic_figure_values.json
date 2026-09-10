@@ -25,6 +25,32 @@
       70.41666666666667
     ],
     "always_reference": 70.41666666666667,
+    "call_rate_pareto_arms": [
+      "never",
+      "conservative",
+      "balanced",
+      "aggressive",
+      "always"
+    ],
+    "latency_pareto_arms": [
+      "never",
+      "conservative",
+      "balanced",
+      "aggressive",
+      "always"
+    ],
+    "metric_sources": {
+      "accuracy": "retained_judged_benchmark",
+      "call_rate": "retained_judged_benchmark",
+      "ttfa": "full_ttfa_v3_run_nonnegative_wait"
+    },
+    "latency_comparison_x": [
+      1.064652719665272,
+      2.7089915966386555,
+      3.966351694915254,
+      6.100063559322034,
+      9.4313417721519
+    ],
     "timing": {
       "mean_s": [
         1.064652719665272,
@@ -68,6 +94,30 @@
       96.0
     ],
     "always_reference": 96.0,
+    "call_rate_pareto_arms": [
+      "never",
+      "balanced",
+      "aggressive",
+      "always"
+    ],
+    "latency_pareto_arms": [
+      "never",
+      "balanced",
+      "aggressive",
+      "always"
+    ],
+    "metric_sources": {
+      "accuracy": "retained_judged_benchmark",
+      "call_rate": "retained_judged_benchmark",
+      "ttfa": "full_ttfa_v3_run_nonnegative_wait"
+    },
+    "latency_comparison_x": [
+      1.1562000000000001,
+      1.5514274193548387,
+      2.454296,
+      3.615808,
+      5.7075439999999995
+    ],
     "timing": {
       "mean_s": [
         1.1562000000000001,
@@ -111,6 +161,32 @@
       87.0
     ],
     "always_reference": 87.0,
+    "call_rate_pareto_arms": [
+      "never",
+      "conservative",
+      "balanced",
+      "aggressive",
+      "always"
+    ],
+    "latency_pareto_arms": [
+      "never",
+      "conservative",
+      "balanced",
+      "aggressive",
+      "always"
+    ],
+    "metric_sources": {
+      "accuracy": "retained_judged_benchmark",
+      "call_rate": "retained_judged_benchmark",
+      "ttfa": "full_ttfa_v3_run_nonnegative_wait"
+    },
+    "latency_comparison_x": [
+      0.935215,
+      1.5003517587939699,
+      2.599185,
+      4.65897,
+      5.846785
+    ],
     "timing": {
       "mean_s": [
         0.935215,

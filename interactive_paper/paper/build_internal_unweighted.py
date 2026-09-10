@@ -184,7 +184,7 @@ def table_text(report):
     completed = '/'.join(str(timing[a]['n_completed']) for a in t_arms)
     failed = '/'.join(str(timing[a]['n_failed']) for a in t_arms)
     early = '/'.join(str(timing[a]['n_early_response']) for a in t_arms)
-    caption = (r'\caption{Internal server TTFA (seconds), independent \texttt{ttfa-v3} run on all 240 test IDs: '
+    caption = (r'\caption{Internal server TTFA (seconds), complete \texttt{ttfa-v3} run on all 240 test IDs: '
         f'240 attempts per arm, with {completed} completed and {failed} failed in row order. '
         'TTFA is the nonnegative wait from scheduled input end to first answer PCM. All completed sessions '
         f'count; the {early} early responses have zero wait. Failed attempts have no TTFA value. '

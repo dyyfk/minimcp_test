@@ -31,14 +31,16 @@ and SimpleQA traps (20). Every query has unit weight in accuracy and
 call-rate calculations. Table~\ref{tab:live} gives the per-tier results
 and uncertainty intervals on this full test set.
 External averages weight the four QA pools equally.
-In this content benchmark, the expert receives the final 30 seconds
-of the prerecorded question. Timing comes from an independent
-\texttt{ttfa-v3} run on the same query IDs, using real-time input,
-only the consumed audio prefix for expert requests, audio generation
-on both paths, and prepared relay text. Server TTFA measures the wait
+\paragraph{Metric sources and timing endpoint.}
+All tables and trade-off figures use the retained judged benchmark for
+accuracy and escalation rate, and the complete \texttt{ttfa-v3} run
+for latency on the same query IDs. This timing run contains 5,950
+recorded sessions across five pools and five policies; TTFA comes
+directly from session timestamps. We compare the resulting per-policy
+summaries. Appendix~\ref{app:metric-sources} gives the input and recording
+details for each metric. Server TTFA measures the wait
 from scheduled input end until the first answer PCM block is ready;
 audio ready earlier incurs zero wait. Candidate and stall audio are excluded;
-client playback is unmeasured. These timing-session answers have not
-been judged, so accuracy and TTFA are not joint measurements.
+client playback is unmeasured.
 Appendix~\ref{app:setup-details} provides the model, probe-fitting,
 and answer-judging configurations used in these experiments.

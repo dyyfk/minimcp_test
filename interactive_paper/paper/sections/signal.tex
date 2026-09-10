@@ -2,11 +2,12 @@
   \centering
   \includegraphics[width=\linewidth]{layer_sweep}
   \caption{\textbf{Text-input transfer depends on layer and position.}
-  LOPO math AUC across layers: late last-token reads deteriorate on
-  the duplex checkpoints, while mid-layer reads and raw-backbone
-  controls remain predictive. Layer 22 is the MiniCPM-o~4.5 read
-  location used for the native gate. This plot does not show an
-  equivalent collapse under audio calibration and audio input.}
+  The arrow marks the blue MiniCPM-o~4.5 curve's late decline;
+  shading marks the final 15\% of depth. L22 is the native readout.
+  \textbf{Listen/Speak specialization is an unproven hypothesis:}
+  direct tests do not support a simple turn-control takeover
+  (Appendix~\ref{app:mech}). This text-input LOPO math decline is not
+  established under matched audio calibration and input.}
   \label{fig:layersweep}
 \end{figure}
 
@@ -17,7 +18,7 @@ position, and read time. The final layer feeds the output head, but
 its failure signal can degrade under a change in query distribution
 or input modality. Figure~\ref{fig:layersweep} motivates L22 through
 text-input leave-one-pool-out (LOPO) evaluation: on held-out math,
-its last-token probe reaches 0.931 AUC, versus 0.372 at the final
+its last-token probe reaches 0.931 AUC, versus 0.366 at the final
 layer. This failure does not persist when both calibration and
 inference use audio input (\S\ref{sec:duplex}).
 
