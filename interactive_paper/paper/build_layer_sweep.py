@@ -71,7 +71,7 @@ def make_layer_figure():
     handles, labels = axes[0].get_legend_handles_labels()
     fig.legend(handles, labels, loc='upper center', bbox_to_anchor=(.52, 1.015),
                ncol=3, frameon=False, columnspacing=1.2, handlelength=2.4)
-    fig.text(.083, .018, 'Shading marks late depth; a Listen/Speak cause is unproven (see caption).',
+    fig.text(.083, .018, 'Text-input LOPO math; shading marks the final 15% of layer depth.',
              color='#444444', fontsize=8, style='italic')
     out = HERE/'figures'
     out.mkdir(parents=True, exist_ok=True)

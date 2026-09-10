@@ -157,9 +157,11 @@ All displayed pool/arm timing values come from the same full timing run.
 `python build_layer_sweep.py` reproduces Figure 2 from the five archived
 layer-sweep JSON files and highlights the late decline. It records source
 hashes and plotted arrays in `revision_data/layer_sweep_values.json`.
-The caption treats Listen/Speak specialization as unproven, consistent
-with the archived `interp_turncontrol.json` interventions. No probe refit
-or API calls are needed. Both figure builders mirror the PDF/PNG assets
+The caption says the decline may reflect specialization for duplex
+interaction control and cites MiniCPM-o 4.5, Section 3.3, for its binary
+Listen/Speak decision before content generation. The recorded mechanism
+controls remain in the appendix. No probe refit or API calls are needed.
+Both figure builders mirror the PDF/PNG assets
 to `../figures/`.
 
 ## Native ablation figure (2026-09-09)

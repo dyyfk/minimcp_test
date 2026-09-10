@@ -63,15 +63,17 @@
   "main_text_pages": 8,
   "total_pages": 17,
   "visual_qa_pages": [
-    1,
     4,
-    5,
-    6,
-    8,
-    11
+    8
   ],
   "overfull_boxes": 0,
-  "pdf_sha256": "c6aac0580a18b0fe34a77373054a81b25614487a9d7624fcaf8d04aced018df7",
+  "pdf_sha256": "ead93308874f5d5565c878733c60e3b34ae0b3d2d896f48363903415a63cc41c",
   "output_pdf": "/Users/ruoyuhe/Documents/ChatGPT/minicpm_paper/output/pdf/minimcp_zhongzhu_feedback.pdf",
-  "new_model_api_calls": 0
+  "new_model_api_calls": 0,
+  "figure2_caption": {
+    "interpretation": "This decline may reflect specialization for duplex interaction control.",
+    "mechanism_citation": "https://arxiv.org/pdf/2604.27393, Section 3.3",
+    "citation_support": "Binary Listen/Speak control prediction before content generation",
+    "plotted_values_unchanged": true
+  }
 }
