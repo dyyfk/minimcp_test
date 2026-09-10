@@ -10,9 +10,9 @@ its upper block reports MiniCPM native-benchmark accuracy, while its
 lower block reports NVDA native-frame replay. Figure~\ref{fig:dualview}
 is recomputed from the committed MiniCPM judged rows with the TTS relay
 and follows the upper block's random-mixture formula. Its Internal
-accuracy and call rate use post-hoc knowledge/math weights of 0.25
-and weights of 1 for other categories; timing and the main table
-retain their original query weights. The main table covers four English
+accuracy and call rate give all 240 original queries equal weight,
+as in the main table. Independent timing statistics use the same query IDs.
+The main table covers four English
 external QA pools; archived Mandarin results remain in the appendix
 and do not enter that table's macro average. The 35 input
 parquets match the hashes in the accompanying benchmark audit.
@@ -1636,10 +1636,11 @@ and mixture definitions. From this same summary,
 \texttt{paper/build\_main\_results.py} generates the MiniCPM rows of
 Table~\ref{tab:transfer}, and
 \texttt{paper/build\_academic\_revision\_figure.py} renders
-Figure~\ref{fig:dualview}, with Internal category weights from the
-archived joint-mixture sensitivity summary. The figure build checks
-source hashes, query counts, plotted coordinates, and unchanged timing;
-the main table currently retains the original weights.
+Figure~\ref{fig:dualview}. Both use the full 240-query Internal test set
+with unit query weights, recorded in
+\texttt{revision\_data/internal\_unweighted\_summary.json}.
+The figure build checks source hashes, query counts, plotted coordinates,
+and the independent nonnegative TTFA statistics.
 The NVDA block belongs to the separate replay experiment in
 Appendix~\ref{app:nvda}. Main thresholds are per-language calibration
 quantiles. Historical per-pool quantiles are confined to the experiments

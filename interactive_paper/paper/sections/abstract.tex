@@ -10,10 +10,11 @@ MiniCPM-o~4.5. We use lightweight probes to read failure signals from
 hidden states and separately calibrate a gate for expert handoff at
 answer onset. We find that failure signals can transfer from text to
 speech, and that readout design matters in native audio generation.
-On our internal benchmark, selective expert handoff raises
-answer-content accuracy from 42.3\% to 72.6\%. In an independent
+On the full 240-query internal benchmark,
+selective expert handoff raises unweighted answer-content accuracy from
+40.8\% to 62.9\%. In an independent
 real-time replay, server waiting time after input end to first answer audio has
-P50 0.70\,s locally and 2.87\,s with aggressive handoff. These timing
+P50 0.70\,s locally and 2.87\,s with aggressive handoff on the same query IDs. These timing
 sessions have not been scored for correctness, so the two experiments
 do not establish joint accuracy--latency performance.
 \end{abstract}

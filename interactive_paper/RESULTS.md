@@ -7472,3 +7472,40 @@ means at two-decimal display precision are 1.06 / 2.71 / 3.97 / 6.10 / 9.43 s.
 The main accuracy table and all plotted accuracy/call-rate coordinates are
 unchanged. Accuracy and timing still come from separate runs and do not
 establish a joint accuracy--latency operating point.
+
+
+## Full-cohort unweighted Internal reporting (2026-09-10; archived outcomes)
+
+The current manuscript retains all 240 original test IDs, including 60 chat
+queries, with unit weights in accuracy and expert call-rate calculations.
+This supersedes the staged weighted figure and the exploratory 180-query
+subset as manuscript inputs; those analysis artifacts remain archived.
+No inference, judging, probe refit, or threshold change was performed.
+
+MiniCPM local/conservative/balanced/aggressive/always answer-content accuracy
+is 40.8/46.7/54.2/62.9/70.4%, from 98/112/130/151/169 correct out of 240.
+Call rates are 0.0/8.3/25.0/51.7/99.2%. The aggressive matched random reference
+is 56.1%, and the gain is 6.8 percentage points (computed before rounding).
+The gain over local is 22.1 points; 74.6% of the local-to-always gap is recovered.
+Pointwise accuracy intervals were recomputed with 100,000 paired query
+bootstrap resamples, seed 42, over the archived outcomes on all 240 IDs.
+
+NVDA retains its original full-cohort pass-3 replay: local/conservative/
+balanced/aggressive/always accuracy 19.6/31.7/44.6/60.4/91.7%, with aggressive
+scoreability-matched random accuracy 53.5%. Archived selective accuracies are
+retained, not a newly rerun ranking. The local/expert outcomes, 223 scoreable
+and 17 no-onset rows, and random references were checked from source records.
+The architecture-selection caveat remains.
+
+Independent ttfa-v3 logs were rechecked on the same 240 IDs. Completed session
+counts are 239/238/236/236/237 out of 240 attempts per arm. Nonnegative server
+TTFA mean is 1.06/2.71/3.97/6.10/9.43 s; P50 is 0.70/0.89/1.61/2.87/6.67 s.
+Timing-session answers remain unjudged. External results and equal-pool
+averaging retain their existing definitions.
+
+Shared source: paper/revision_data/internal_unweighted_summary.json.
+Builders: build_internal_unweighted.py, build_main_results.py, and
+build_academic_revision_figure.py. check_internal_reporting.py checks raw
+hashes, table and figure values, intervals, rates, current prose, and TeX
+cross-references. Appendix tables use internal_unweighted_results.tex and
+internal_latency.tex; historical subset tables are no longer included.

@@ -9,7 +9,7 @@
 \label{sec:liveproto}
 \label{sec:inject}
 We evaluate frozen MiniCPM-o~4.5 (9B), with \texttt{gpt-5.5} as the
-escalation expert, on the fixed 240-query internal test set and four
+escalation expert, on the full 240-query internal test set and four
 external English speech-QA pools: Speech TriviaQA, Speech Web Questions,
 and Speech Llama Questions from OpenAudioBench \citep{openaudiobench2025},
 and SD-QA from VoiceBench \citep{faisal2021sdqa,chen2024voicebench}.
@@ -25,10 +25,12 @@ conservative, balanced, aggressive, and always-escalate.
 We report \emph{answer-content accuracy}, scored from generated local
 text or intended relay text. The random reference is the analytical
 mixture $A_{\rm mix}(r)=(1-r)A_{\rm local}+rA_{\rm always}$ at the
-gate's realized call rate $r$. Table~\ref{tab:transfer} uses the original
-query weights; Figure~\ref{fig:dualview}'s Internal curve uses the
-category weights specified in its caption. Both accuracy views use the same recorded
-outcomes. External averages weight the four QA pools equally.
+gate's realized call rate $r$. Both model families use all 240
+Internal query IDs: chat (60), factual QA (40), knowledge (60), math (60),
+and SimpleQA traps (20). Every query has unit weight in accuracy and
+call-rate calculations. Table~\ref{tab:live} gives the per-tier results
+and uncertainty intervals on this full test set.
+External averages weight the four QA pools equally.
 In this content benchmark, the expert receives the final 30 seconds
 of the prerecorded question. Timing comes from an independent
 \texttt{ttfa-v3} run on the same query IDs, using real-time input,

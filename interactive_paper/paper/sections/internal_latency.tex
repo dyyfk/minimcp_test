@@ -1,0 +1,16 @@
+\begin{table}[!ht]
+\centering\small
+\caption{Internal server TTFA (seconds), independent \texttt{ttfa-v3} run on all 240 test IDs: 240 attempts per arm, with 239/238/236/236/237 completed and 1/2/4/4/3 failed in row order. TTFA is the nonnegative wait from scheduled input end to first answer PCM. All completed sessions count; the 17/12/11/13/7 early responses have zero wait. Failed attempts have no TTFA value. Timing ends at the first local PCM-bearing chunk return or relay PCM yield, excluding candidate/stall audio and client playback.}
+\label{tab:latency}
+\begin{tabular}{lrrrr}
+\toprule
+tier & mean & P50 & P95 & P99 \\
+\midrule
+local-only & 1.06 & 0.70 & 2.62 & 3.64 \\
+conservative & 2.71 & 0.89 & 10.85 & 34.08 \\
+balanced & 3.97 & 1.61 & 14.41 & 26.91 \\
+aggressive & 6.10 & 2.87 & 18.14 & 54.78 \\
+always & 9.43 & 6.67 & 25.86 & 60.83 \\
+\bottomrule
+\end{tabular}
+\end{table}

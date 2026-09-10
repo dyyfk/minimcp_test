@@ -1,0 +1,41 @@
+{
+  "status": "pass",
+  "n": 240,
+  "unit_query_weights": true,
+  "minicpm_accuracy_pct": {
+    "never": "40.8",
+    "conservative": "46.7",
+    "balanced": "54.2",
+    "aggressive": "62.9",
+    "always": "70.4"
+  },
+  "nvda_gate_accuracy_pct": {
+    "conservative": "31.7",
+    "balanced": "44.6",
+    "aggressive": "60.4"
+  },
+  "checked_tex_files": 20,
+  "checked_labels": 59,
+  "checked_bibliography_keys": 30,
+  "checks": [
+    "source hashes",
+    "full cohort and unit weights",
+    "both main-table blocks",
+    "figure axes and TTFA",
+    "appendix tables and CI cells",
+    "call rates",
+    "stratum aggregation",
+    "numeric prose",
+    "cross references and citations"
+  ],
+  "main_text_pages": 8,
+  "total_pages": 16,
+  "reference_start_page": 9,
+  "pdf_visual_check": "All 16 pages inspected as rendered contact sheets; pages 5, 6, 11 and 15 inspected at full page resolution.",
+  "pdf_fonts": "All fonts embedded; no Type 3 fonts.",
+  "pdf_sha256": "1f003a5907431aee2d9ddd6d6b18ef3c07d019eb279af59ff1aa10a4541f811f",
+  "pdf_output": "/Users/ruoyuhe/Documents/ChatGPT/minicpm_paper/output/pdf/MiniMCP_unweighted_240.pdf",
+  "source_snapshot_matches": true,
+  "source_backup": "/Users/ruoyuhe/Documents/ChatGPT/minicpm_paper/tmp/pdfs/restore-unweighted-20260909-235216/before",
+  "scope": "All 240 original Internal queries; no inference, rejudging, or refitting. Existing external results and concurrent prose edits preserved."
+}

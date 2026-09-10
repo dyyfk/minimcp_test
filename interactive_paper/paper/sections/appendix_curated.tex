@@ -4,12 +4,15 @@
 \section{Benchmark and calibration details}
 \label{app:current-protocol}
 
-The main table reports the original internal query mixture and four
-external English QA pools. The figure's Internal accuracy and call-rate
-curve uses post-hoc knowledge/math weights of 0.25 and weights of 1 for
-other categories; timing retains the original mixture. Archived Mandarin
-diagnostics are reported separately and excluded from the main table's
-English-pool macro accuracy average.
+The Internal test set contains the same 240 query IDs for both model
+families: chat 60, factual QA 40, knowledge 60, math 60, and SimpleQA traps 20.
+Each query has unit weight in accuracy and call-rate calculations.
+All original queries remain in the reported accuracy denominator.
+Table~\ref{tab:live} reports per-tier MiniCPM accuracy, uncertainty, and
+matched random references on this full test set. Independent timing
+statistics use the same 240 IDs; external pools retain their original membership.
+Archived Mandarin diagnostics remain separate from the four-pool English
+macro average.
 
 \input{sections/setup_details}
 
@@ -194,6 +197,22 @@ random-mixture accuracy & 50.7 & 57.7 & 67.0 \\
 \end{tabular}
 \end{table}
 
+\paragraph{Internal test set.}
+The Internal replay uses a separate fit on 2,258 committed calibration
+rows, excluding all 240 original internal test IDs. Its local labels
+judge the exact pass-3 answers; expert outcomes come from the frozen
+expert-answer cache. The same 240 IDs as MiniCPM contain
+223 valid onset reads and 17 no-onset queries. The latter remain local
+under selective policies and stay in the accuracy denominator.
+Local and always-expert accuracy are 19.6\% and 91.7\%.
+The archived 15/30/50\% scoreable-cohort policies select 33/67/112 queries,
+realizing 13.8/27.9/46.7\% calls over all 240 and attaining
+31.7/44.6/60.4\% accuracy. Random escalation is
+restricted to this same scoreable cohort; its expected accuracy is
+29.6/39.9/53.5\%. These are the original full-cohort replay results.
+The selected layers and feature recipe were reviewed using
+the original Internal split, making this a post-selection diagnostic.
+
 The three-layer read reaches 0.818 out-of-fold AUC and 0.816 mean external
 AUC under the pool-aligned judges. A strictly causal commit-only variant
 loses about 0.03 external AUC, making answer onset the closest matching
@@ -229,54 +248,17 @@ escalations and admits no floor-management stimuli.
 \label{app:transferdetail}
 \input{sections/native_rates}
 
-\begin{table}[h]
-\centering\small
-\caption{Internal native-protocol answer-content accuracy with
-query-bootstrap 95\% confidence intervals ($n=240$). Random follows
-Table~\ref{tab:transfer}'s endpoint-mixture convention.}
-\label{tab:live}
-\begin{tabular}{lrrr}
-\toprule
-tier & realized calls & accuracy & random reference \\
-\midrule
-local-only & 0.0\% & .423 [.351,.497] & .423 \\
-conservative & 8.3\% & .501 [.428,.575] & .433 \\
-balanced & 25.0\% & .636 [.566,.704] & .482 \\
-aggressive & 51.7\% & .726 [.663,.787] & .561 \\
-always & 99.2\% & .776 [.717,.832] & .776 \\
-\bottomrule
-\end{tabular}
-\end{table}
+\input{sections/internal_unweighted_results}
 
-\begin{table}[!ht]
-\centering\small
-\caption{Internal server TTFA (seconds), independent
-\texttt{ttfa-v3} run: 240 attempts per arm, with 239/238/236/236/237
-completed and 1/2/4/4/3 failed in row order. TTFA is the nonnegative
-wait from scheduled input end to first answer PCM.
-All completed sessions count; the 17/12/11/13/7 early
-responses have zero wait. Failed attempts have no TTFA value.
-Timing ends at the first local PCM-bearing chunk return or relay PCM
-yield, excluding candidate/stall audio and client playback.}
-\label{tab:latency}
-\begin{tabular}{lrrrr}
-\toprule
-tier & mean & P50 & P95 & P99 \\
-\midrule
-local-only & 1.06 & 0.70 & 2.62 & 3.64 \\
-conservative & 2.71 & 0.89 & 10.85 & 34.08 \\
-balanced & 3.97 & 1.61 & 14.41 & 26.91 \\
-aggressive & 6.10 & 2.87 & 18.14 & 54.78 \\
-always & 9.43 & 6.67 & 25.86 & 60.83 \\
-\bottomrule
-\end{tabular}
-\end{table}
+\input{sections/internal_latency}
 
 \subsection{Failure type and later reads}
 \label{app:readtime}
 
 This separate sweep fits a probe at each read point using 5,236 judged
 calibration rows, row-random five-fold fitting, and $C=3\times10^{-4}$.
+Its Internal column retains the original 240-query cohort, as in the
+main accuracy table, but uses this sweep's separately fitted readouts.
 Later reads pad finished answers with the last available vector. Its
 five-pool macro includes Mandarin reasoning, unlike the main table's
 four-English-pool macro. Failure categories are assigned by a model

@@ -1,11 +1,19 @@
 \section{Conclusion}
 \label{sec:conclusion}
-We find failure information in frozen speech models that transfers
-from text to unseen human speech. At native answer onset, an
-aggregated readout supports selective expert calls and improves
-answer-content accuracy without updating the speech model. These
-results connect representation analysis to a calibrated handoff
-decision, complementing the model's control of when to speak.
-Establishing conversational benefits requires joint evaluation of
-correctness, audible latency, and turn-taking.
+We find that failure information remains readable in the tested
+frozen speech models and can transfer from text to unseen human speech. Its
+accessibility depends on the input regime and readout design. With
+native calibration, an aggregated answer-onset readout turns that
+information into selective expert calls and improves answer-content
+accuracy without updating the speech model.
+
+The broader implication is that control of when to speak can be
+complemented by an estimate of when to seek help. Local failure risk
+provides a useful basis for that decision, although it does not by
+itself establish that an expert will help or that the handoff will
+feel worthwhile to the user. The next step is to evaluate the whole
+exchange: whether the answer improves, how long the user waits to
+hear it, and whether the system preserves turn-taking and continuity
+across the handoff. Such joint evaluation is needed to turn selective
+expert use into demonstrated conversational benefit.
 \label{sec:main-end}

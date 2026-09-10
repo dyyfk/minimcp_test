@@ -1,0 +1,16 @@
+\begin{table}[h]
+\centering\small
+\caption{Internal results on all 240 original test queries (\%), with unit query weights. Random mixes the measured local/always endpoints at the corresponding call rate. Accuracy has pointwise 95\% percentile intervals from 100,000 paired query-bootstrap resamples (seed 42), conditional on the fixed test set and recorded arms. The intervals exclude judging and model-rerun uncertainty.}
+\label{tab:live}
+\begin{tabular}{lrrr}
+\toprule
+tier & calls & accuracy [95\% CI] & random \\
+\midrule
+local-only & 0.0 & 40.8 [34.6,47.1] & --- \\
+conservative & 8.3 & 46.7 [40.4,52.9] & 43.3 \\
+balanced & 25.0 & 54.2 [47.9,60.4] & 48.2 \\
+aggressive & 51.7 & 62.9 [56.7,68.8] & 56.1 \\
+always & 99.2 & 70.4 [64.6,76.3] & --- \\
+\bottomrule
+\end{tabular}
+\end{table}

@@ -3,16 +3,19 @@
 \setlength{\tabcolsep}{3pt}
 \renewcommand{\arraystretch}{1.12}
 \caption{\textbf{Main results: answer-content accuracy (\%).}
-Both blocks report the internal test set and four external English
+Both blocks report the same full 240-query internal test set and four external English
 speech-QA pools; avg is the equal-pool external mean and $\Delta$
 is its gain over always-local, computed before rounding.
 MiniCPM uses one recorded native session per query and arm, with
-fixed calibration thresholds. Matched random mixes its local and
+fixed calibration thresholds. All queries have unit weight; Internal
+retains all five categories, including the 60 chat queries.
+Matched random mixes its local and
 measured always arms at each pool's realized gate rate
 (Appendix~\ref{app:transferdetail}). NVDA uses native-frame replay
 with cached outcomes; its Internal
-column is a post-selection diagnostic. Replay details are in
-Appendix~\ref{app:nvda}.}
+column is a post-selection diagnostic. Its original replay policies,
+endpoints, and scoreability-matched random reference use all 240 IDs.
+Replay details are in Appendix~\ref{app:nvda}.}
 \label{tab:transfer}
 \begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lrrrrrrr@{}}
 \toprule
@@ -20,21 +23,23 @@ Appendix~\ref{app:nvda}.}
 \midrule
 \multicolumn{8}{l}{\emph{MiniCPM native sessions (answer-content accuracy)}} \\
 % BEGIN GENERATED MINICPM ROWS
-always-local & 42.3 & 62.8 & 52.8 & 82.4 & 48.0 & 61.5 & --- \\
-\;+ gate, conservative & 50.1 & 60.4 & 59.2 & 78.8 & 54.0 & 63.1 & +1.6 \\
-\;+ gate, balanced & 63.6 & 70.0 & 62.4 & 82.4 & 65.0 & 70.0 & +8.5 \\
-\;\textbf{+ gate, aggressive} & \textbf{72.6} & \textbf{88.4} & \textbf{75.2} & \textbf{85.6} & \textbf{82.5} & \textbf{82.9} & \textbf{+21.4} \\
+always-local & 40.8 & 62.8 & 52.8 & 82.4 & 48.0 & 61.5 & --- \\
+\;+ gate, conservative & 46.7 & 60.4 & 59.2 & 78.8 & 54.0 & 63.1 & +1.6 \\
+\;+ gate, balanced & 54.2 & 70.0 & 62.4 & 82.4 & 65.0 & 70.0 & +8.5 \\
+\;\textbf{+ gate, aggressive} & \textbf{62.9} & \textbf{88.4} & \textbf{75.2} & \textbf{85.6} & \textbf{82.5} & \textbf{82.9} & \textbf{+21.4} \\
 \;matched random, aggressive & 56.1 & 81.5 & 68.9 & 84.1 & 73.7 & 77.1 & +15.6 \\
-always-escalate & 77.6 & 96.0 & 79.6 & 91.6 & 87.0 & 88.6 & +27.1 \\
+always-escalate & 70.4 & 96.0 & 79.6 & 91.6 & 87.0 & 88.6 & +27.1 \\
 % END GENERATED MINICPM ROWS
 \midrule
 \multicolumn{8}{l}{\emph{NVDA three-layer answer-onset probe (pass-3 native-frame replay)}} \\
-always-local          & 19.6 & 35.8 & 37.6 & 70.8 & 31.0 & 43.8 & --- \\
+% BEGIN GENERATED NVDA ROWS
+always-local & 19.6 & 35.8 & 37.6 & 70.8 & 31.0 & 43.8 & --- \\
 \;+ gate, conservative & 31.7 & 48.4 & 48.8 & 80.7 & 42.0 & 55.0 & +11.2 \\
 \;+ gate, balanced & 44.6 & 61.0 & 59.2 & 85.8 & 54.0 & 65.0 & +21.2 \\
 \;+ gate, aggressive & 60.4 & 76.8 & 69.6 & 89.7 & 66.5 & 75.7 & +31.9 \\
 \;matched random, aggressive & 53.5 & 65.7 & 60.2 & 82.0 & 60.0 & 67.0 & +23.2 \\
 always-escalate & 91.7 & 95.5 & 82.8 & 93.1 & 89.0 & 90.1 & +46.3 \\
+% END GENERATED NVDA ROWS
 \bottomrule
 \end{tabular*}
 \end{table}

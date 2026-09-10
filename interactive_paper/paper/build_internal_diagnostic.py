@@ -67,7 +67,7 @@ def build(data_dir, queries):
                aggressive_rate=("aggressive_rate", "mean")).reset_index().to_dict("records")}
     (out / "internal_diagnostic.json").write_text(json.dumps(doc, indent=2) + "\n")
     lines = [r"\begin{table}[h]", r"\centering\small",
-             r"\caption{Descriptive strata of the fixed internal test set. Local, aggressive (A), and always report answer-content accuracy (\%); call rate is the aggressive arm's realized rate. The final column counts question waveforms longer than the expert's 30-second input window. One recorded run per query and arm; no samples are removed or reweighted.}",
+             r"\caption{Descriptive strata of the fixed internal test set. Local, aggressive (A), and always report answer-content accuracy (\%); call rate is the aggressive arm's realized rate. The final column counts question waveforms longer than the expert's 30-second input window. All queries are retained. All 240 queries have unit weight, as in \S\ref{sec:evalproto}.}",
              r"\label{tab:internal-strata}", r"\begin{tabular}{lrrrrrr}",
              r"\toprule",
              r"Stratum & $n$ & Local & A & Always & A call rate & $>30$\,s ($n$) \\",

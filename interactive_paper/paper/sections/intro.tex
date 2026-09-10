@@ -1,41 +1,45 @@
 \section{Introduction}
 \label{sec:intro}
-Spoken interaction leaves little time to choose a response
-\citep{stivers2009universals}. One practical design pairs a local
-speech model that keeps the conversation going with a stronger expert
-for hard questions. Calling the expert on every turn adds cost and
-waiting time. Selective escalation requires an estimate of local-answer
-failure risk that is available when the model begins to respond.
+As a spoken question arrives, a conversational agent must decide both
+when to respond and whether it can answer reliably. A local speech
+model can manage the exchange, while a stronger expert can help with
+questions beyond its competence. Routine expert calls also make
+locally answerable questions incur the cost and wait of a handoff.
+The useful intervention is selective: retain local
+answers when they are likely to succeed and request help when they
+are likely to fail. This requires a signal available at the moment
+the speech model begins to respond.
 
-Prior work gives two starting points. For text models, hidden-state
-probes and verbal self-evaluation can predict whether an answer is
-correct \citep{kadavath2022language,azaria2023internal,kossen2024semantic},
-and intermediate layers can carry information that the output does
-not show \citep{orgad2024llms}. Text routers use such signals to
-divide queries between models of different cost
-\citep{chen2023frugalgpt,ong2024routellm,varshney2026llmrouter}.
-For speech, native duplex models decide for themselves when to listen
-and when to speak \citep{defossez2024moshi,openbmb2026minicpmo}.
+Native duplex models already decide when to listen and when to speak
+\citep{defossez2024moshi,openbmb2026minicpmo}. That ability creates a
+natural place to intervene, but the decision to take the floor need
+not reveal whether the model knows the answer. A model can be ready
+to speak while lacking the knowledge or reasoning needed for a correct
+response. Waiting until it has finished an answer would allow a later
+check, but would also postpone expert help.
 
-Three things remain unknown. First, it is not known whether a failure
-probe still works when the query pool changes; a high in-distribution
-AUC can come from pool identity rather than from competence. Second,
-it is not known whether a probe fit on text input still reads
-speech-input states after speech and duplex fine-tuning. Third, it is
-not known where in a streaming protocol the hidden state is actually
-available for a routing decision. A duplex model already decides when
-to speak, but this floor-management decision need not reveal whether
-it knows the answer. Although the pretrained backbone can carry
-competence information, its accessibility across layers, read positions,
-and input modalities remains unclear in native streaming speech
-after duplex fine-tuning.
+Text models offer a starting point. Hidden-state probes and verbal
+self-evaluation can predict answer correctness
+\citep{kadavath2022language,azaria2023internal,kossen2024semantic}, and
+intermediate layers can expose information absent from the output
+\citep{orgad2024llms}. Text routers allocate queries across models of
+different cost \citep{chen2023frugalgpt,ong2024routellm,varshney2026llmrouter}.
+In native speech, the model receives an evolving audio context, and
+the state used for routing must be produced by its
+listen/speak protocol. A useful text-input signal may change after
+speech and duplex fine-tuning, or become inaccessible at the point
+where a serving system needs it.
 
-This gap matters in practice. A gate placed at the wrong layer can
-look good on its calibration pool and then invert on a new one, so
-the expert is called on the wrong turns. A probe that fails on audio
-input cannot be used in a speech system at all. And a read that only
-becomes available after the answer is generated removes the early
-decision that motivated escalation in the first place.
+We ask whether failure information remains readable across these
+changes and can support an actionable handoff. Generalization matters:
+a probe may distinguish familiar query pools without recognizing
+failure on a new kind of question. Modality matters because a probe
+fit on text must be tested on speech-input states, including unseen
+human recordings. Readout design matters because the layer, position,
+and aggregation determine what information the gate receives. These
+questions connect representation analysis to deployment: a predictive
+score is useful only if it remains informative in the intended input
+regime and arrives in time to guide the response.
 
 \begin{figure}[t]
   \centering
@@ -48,26 +52,31 @@ decision that motivated escalation in the first place.
   \textbf{(3)} Lower-risk turns stay local; higher-risk turns
   are sent to a cloud expert while the talker stalls. \textbf{(4)} The
   returned answer is spoken verbatim in the talker's own voice.
-  Delivered accuracy on the internal test set rises from 42.3\% to
-  72.6\% at 52\% escalation in native full-duplex sessions.}
+  Unweighted answer-content accuracy on the full 240-query internal test set
+  rises from 40.8\% to 62.9\% at 51.7\% escalation
+  (\S\ref{sec:evalproto}).}
   \label{fig:hero}
 \end{figure}
 
-We study these questions on frozen MiniCPM-o~4.5
-\citep{openbmb2026minicpmo}, with raw-backbone and other speech-model
-controls. We make three contributions. First, a layer and position
-audit shows that the accessibility of failure information depends on
-the input and calibration regime, motivating our L22 read
-(Figure~\ref{fig:layersweep}). A matched native ablation separates
-the contribution of feature aggregation from layer choice
-(Figure~\ref{fig:native-ablation}). Second, text-trained probes
-transfer to speech-input states, reaching 0.760 AUC on query-disjoint
-human recordings (Figure~\ref{fig:xmodal-transfer}). Cross-model
-controls test the breadth of this transfer, which remains distinct
-from the calibration needed for native serving. Third, a separately
-fitted answer-onset gate raises internal answer-content accuracy by
-30.3 percentage points and exceeds the reported random-mixture
-reference by 16.5 points at the aggressive tier. An independent
-real-time replay measures server waiting time after input end to
-first answer audio. These unjudged timing sessions do not establish
-joint accuracy--latency gains or client-audible delay.
+We study frozen MiniCPM-o \citep{openbmb2026minicpmo}, with
+raw-backbone and other speech-model controls. Our layer and position
+audit traces how failure readout depends on the input and calibration
+regime (Figure~\ref{fig:layersweep}); a matched native ablation
+separates aggregation from layer choice
+(Figure~\ref{fig:native-ablation}). Text-trained probes also transfer
+to speech-input states on unseen human recordings
+(Figure~\ref{fig:xmodal-transfer}). To turn this evidence into a
+serving decision, we separately fit an aggregated answer-onset gate
+on native audio features. It reuses the local model's hidden states
+without updating the model or waiting for a completed answer. Lower-risk
+turns continue locally; higher-risk turns request an expert answer
+that the local talker then voices.
+
+The resulting handoff improves answer-content accuracy and, at the
+aggressive tier, exceeds the matched random-mixture reference. This
+connects readable failure information to selective expert use, while
+leaving an essential conversational question open: whether the improved
+answer is worth the interruption and wait. An independent real-time
+replay measures server waiting time to first answer audio, but its
+unjudged sessions do not establish joint accuracy--latency gains or
+client-audible delay.

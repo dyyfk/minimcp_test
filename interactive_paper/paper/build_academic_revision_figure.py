@@ -1,13 +1,12 @@
 """Plot answer-content accuracy and independent nonnegative server TTFA.
 
 Usage: python build_academic_revision_figure.py
-Internal accuracy and call rate use knowledge/math weights of 0.25 and 1
-for other categories. Timing and external curves use the original mixture.
+Internal accuracy, call rate, and timing use the same full 240 query IDs with
+unit weights. External curves use their original query pools.
 TTFA is the wait after input end; completed early answers count as zero wait.
 No models, APIs, sampling, or new evaluations are involved.
 """
 import argparse
-import copy
 import json
 from pathlib import Path
 
@@ -15,7 +14,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
-from build_main_results import check_figure
+from build_main_results import check_figure, load_figure_pools
 
 HERE = Path(__file__).resolve().parent
 ARMS = ['never', 'conservative', 'balanced', 'aggressive', 'always']
@@ -24,37 +23,9 @@ POOLS = [('frozen', 'Internal'), ('striviaqa', 'Speech TriviaQA'), ('sdqa', 'SD-
 INK, BLUE, GRAY, LIGHT = '#252525', '#29475F', '#777777', '#D9D9D9'
 
 
-def make_figure(native_path, output_dir, weights_path=HERE / 'revision_data/joint_reweighting_ideas.json',
+def make_figure(native_path, output_dir, internal_path=HERE / 'revision_data/internal_unweighted_summary.json',
                 ttfa_path=HERE.parent / 'ttfa_real/nonnegative/summary.json'):
-    native = json.loads(native_path.read_text())
-    ttfa = json.loads(ttfa_path.read_text())
-    assert ttfa['formula'] == 'max(0, ts.first_answer_pcm - ts.input_end)'
-    for pool, _ in POOLS:
-        for arm in ARMS:
-            measured = ttfa['pools'][pool]['arms']['local' if arm == 'never' else arm]
-            for key in ('mean', 'p50'):
-                value = measured['nonnegative_ttfa_s'][key]
-                assert value >= 0, (pool, arm, key)
-                native['pools'][pool][arm][key + '_s'] = value
-    original = native['pools']
-    data = copy.deepcopy(original)
-    weights = json.loads(weights_path.read_text())
-    selected = next(item for item in weights['all_sixteen_joint_scenarios']
-                    if item['knowledge_weight'] == .25 and item['math_weight'] == .25)
-    for arm in ARMS:
-        record = original['frozen'][arm]
-        if weights['input_sha256'][Path(record['source']).name] != record['sha256']:
-            raise ValueError(f'{arm}: weighting and native summary use different source rows')
-        if selected['query_count'] != record['n']:
-            raise ValueError(f'{arm}: weighting changes the query count')
-        data['frozen'][arm]['accuracy'] = selected['arms'][arm]['accuracy']
-        data['frozen'][arm]['rate'] = selected['arms'][arm]['call_rate']
-    for pool, _ in POOLS:
-        for arm in ARMS:
-            for key, value in original[pool][arm].items():
-                if pool == 'frozen' and key in ('accuracy', 'rate'):
-                    continue
-                assert data[pool][arm][key] == value, (pool, arm, key)
+    data = load_figure_pools(native_path, internal_path, ttfa_path)
 
     plt.rcParams.update({
         'font.family': 'serif', 'font.serif': ['Times New Roman', 'STIXGeneral'],
@@ -103,7 +74,7 @@ def make_figure(native_path, output_dir, weights_path=HERE / 'revision_data/join
                         textcoords='offset points', fontsize=7.5, color=INK)
         ax.set(xlim=(-3, 105), ylim=(30, 104),
                xticks=[0, 25, 50, 75, 100], yticks=[40, 60, 80, 100])
-        ax.set_ylabel('Accuracy (%)' if row == 0 else 'Accuracy (%)', labelpad=6)
+        ax.set_ylabel('Accuracy (%)', labelpad=6)
         ax.set_title(f'{title}  ($n={p["never"]["n"]}$)', loc='left', pad=5,
                      fontweight='normal')
         timing_lines = []
@@ -135,7 +106,7 @@ def make_figure(native_path, output_dir, weights_path=HERE / 'revision_data/join
                        handlelength=2.1, handletextpad=.5, columnspacing=1.5)
         assert np.array_equal(gate_line.get_xdata(), x)
         assert np.array_equal(gate_line.get_ydata(), y)
-        drawn[pool] = {'accuracy_x': x.tolist(), 'accuracy_y': y.tolist(),
+        drawn[pool] = {'n': p['never']['n'], 'query_weighting': 'unit', 'accuracy_x': x.tolist(), 'accuracy_y': y.tolist(),
                        'random_x': [0, 100], 'random_y': [float(y[0]), float(y[-1])],
                        'always_reference': float(y[-1]),
                        'timing': {key: [p[a][key] for a in ARMS]
@@ -143,9 +114,9 @@ def make_figure(native_path, output_dir, weights_path=HERE / 'revision_data/join
 
     check_figure(data, drawn)
     fig.text(.094, .031,
-             'Internal accuracy and call rate: weights of 0.25 for knowledge and math; 1 for other categories.',
+             'Internal: all 240 queries retained; accuracy and call rate give every query equal weight.',
              fontsize=6.7, va='bottom', style='italic')
-    fig.text(.094, .011, 'TTFA: completed ttfa-v3 sessions; original query mixture; early responses count as zero wait.',
+    fig.text(.094, .011, 'TTFA: independent ttfa-v3 sessions on the same query IDs; completed early responses count as zero wait.',
              fontsize=6.7, va='bottom', style='italic')
     output_dir.mkdir(parents=True, exist_ok=True)
     fig.savefig(output_dir / 'revision_accuracy_latency.pdf')
@@ -160,8 +131,8 @@ def make_figure(native_path, output_dir, weights_path=HERE / 'revision_data/join
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--native-summary', type=Path, default=HERE / 'revision_data/native_summary.json')
-    parser.add_argument('--reweighting', type=Path, default=HERE / 'revision_data/joint_reweighting_ideas.json')
+    parser.add_argument('--internal-summary', '--reweighting', dest='internal_summary', type=Path, default=HERE / 'revision_data/internal_unweighted_summary.json')
     parser.add_argument('--ttfa-summary', type=Path, default=HERE.parent / 'ttfa_real/nonnegative/summary.json')
     parser.add_argument('--output-dir', type=Path, default=HERE / 'figures')
     args = parser.parse_args()
-    make_figure(args.native_summary, args.output_dir, args.reweighting, args.ttfa_summary)
+    make_figure(args.native_summary, args.output_dir, args.internal_summary, args.ttfa_summary)

@@ -76,33 +76,35 @@ See `revision_data/citation_audit_2026-09-08.md` for all 45 cited works and
 the limits of the numerical checks. RouterBench's exact experiment and
 FDB's per-sample results have not been independently recomputed.
 
-## Internal figure restoration (2026-09-09)
+## Internal reporting: all 240 queries, unit weights
 
-The author requested restoring the selected weighted Internal curve first,
-while leaving the main table unchanged. The figure now uses knowledge/math
-weights of 0.25 and weights of 1 for the other categories, from
-`revision_data/joint_reweighting_ideas.json`. Accuracy and call rate are both
-weighted. All 240 queries remain included. External accuracy curves use
-`revision_data/native_summary.json`; timing uses the independent measured
-run summarized in `../ttfa_real/nonnegative/summary.json`.
+Current manuscript results retain all 240 original Internal test IDs,
+including 60 chat queries. Every query has weight 1 in accuracy and call-rate
+calculations. Both model blocks use this full cohort. External pool means
+retain their existing equal-pool convention.
 
-To rebuild only the figure:
+`revision_data/internal_unweighted_summary.json` is the shared reporting
+source. Its MiniCPM accuracy and call rates reproduce `native_summary.json`;
+it also records fresh paired bootstrap intervals over the same archived
+outcomes, original NVDA pass-3 replay results, and independently recorded
+nonnegative TTFA on the same query IDs. NVDA architecture selection remains
+post-selection, and accuracy and timing remain separate experiments.
+
+From this directory, with numpy, pandas, pyarrow, and matplotlib available:
 
 ```bash
+python build_internal_unweighted.py
+python build_main_results.py
 python build_academic_revision_figure.py
+python check_internal_reporting.py
+tectonic main.tex
 ```
 
-This command validates source hashes, sample counts, plotted coordinates,
-and nonnegative timing. It never writes the main table. The Internal figure
-and table intentionally use different weighting during this staged revision;
-`build_main_results.py --check --figure-values ...` will flag that difference.
-The table itself can still be checked with `python build_main_results.py --check`.
-
-`revision_data/internal_figure_restore_audit.json` records the restored
-coordinates and unchanged main-table hash. The earlier
-`section4_consistency_audit.json` is a historical unweighted snapshot.
-Experimental setup details and replay qualifications remain in
-`sections/setup_details.tex`.
+The Internal builder accepts `--data-dir`, `--queries`, `--nvda-expert`, and
+`--ttfa-results` for source locations. It verifies archived hashes and IDs.
+The current table, figure, captions, and numerical prose share this unweighted
+report. Historical weighted and 180-query subset summaries and scripts are
+retained as analysis archives; they are not inputs to the current manuscript.
 
 ## Nonnegative server TTFA
 
@@ -123,7 +125,7 @@ python build_academic_revision_figure.py
 
 The recomputation validates query IDs, attempt counts, audio endpoint
 selection, and source hashes. The summary records 5,904 completed sessions,
-46 failures, and 64 early responses. Table 10 uses the Internal rows,
+46 failures, and 64 early responses. The Internal latency table uses all 240 Internal query IDs,
 rounded to two decimals; the figure uses unrounded mean and P50 values.
 These are server audio-ready statistics; timing-session correctness and
 client playback remain unmeasured.
