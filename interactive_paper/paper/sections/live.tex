@@ -26,12 +26,12 @@
 \label{sec:livecurve}
 The upper MiniCPM block of Table~\ref{tab:transfer} reports
 answer-content accuracy on the fixed 240-query internal test set:
-40.8\% locally, then 46.7\%, 54.2\%, and 62.9\% for conservative,
+42.3\% locally, then 50.1\%, 63.6\%, and 72.6\% for conservative,
 balanced, and aggressive. Their realized escalation rates are
 8.3\%, 25.0\%, and 51.7\% (Appendix~\ref{app:transferdetail}).
 Aggressive exceeds the table's random reference of 56.1\% by
-6.8 percentage points. Per-tier internal comparisons are in
-Table~\ref{tab:live}. Aggressive recovers 74.6\% of the measured
+16.5 percentage points. Per-tier internal comparisons are in
+Table~\ref{tab:live}. Aggressive recovers 85.8\% of the measured
 local-to-always accuracy gap while using 51.7\% expert calls.
 This measures selection value relative to the recorded endpoints.
 
@@ -50,6 +50,6 @@ P50 6.67\,s. Local mean is 1.06\,s, including 17/240 attempts
 (7.1\%) that respond before input end and incur zero wait. Early
 responses do not establish better interaction or correctness. Table~\ref{tab:latency}
 counts failures and reports timing among completed sessions. These
-answers remain unjudged: 62.9\% accuracy and 6.10\,s mean TTFA are
+answers remain unjudged: 72.6\% accuracy and 6.10\,s mean TTFA are
 results from separate experiments and do not establish a joint
 accuracy--latency operating point.
