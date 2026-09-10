@@ -7193,7 +7193,8 @@ L26/L30/L34 and the four-block architecture were selected in analyses
 that included the internal split. Reproduction artifacts:
 `judge_nvda_internal.py`,
 `data/gate_pull/new/probe_doc/internal_pass3_judged.json`,
-`remix_eval3_internal.py`, and `internal_pass3_remix.json`.
+`remix_eval3_internal.py`, `internal_pass3_scores.jsonl`, and
+`internal_pass3_remix.json`.
 
 ## 8da — timing diagnostic switched to time to first audio; always arm 45.1 → 17.6 s ($0, 2026-09-09)
 

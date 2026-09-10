@@ -8,7 +8,19 @@
     "no_onset_policy": "17 rows remain local and cannot escalate",
     "n_total": 240,
     "n_scoreable": 223,
-    "n_no_onset": 17
+    "n_no_onset": 17,
+    "per_query_archive": "internal_pass3_scores.jsonl",
+    "input_sha256": {
+      "gate_pull/queries.jsonl": "61618dca1a9532dceb0b9a774ca28c3d8837ade098876d694de2ad1b1b93f0f3",
+      "gate_pull/new/probe_doc/internal_pass3_judged.json": "d36ccffa5500a99b4f207dc696b0a571991793f23ca6386a74bb8e44dec4bbb4",
+      "eval_expert.parquet": "23fa82c3c52273c03eaf6f4c8aabffc2819cd446a85cdbb506b1e1386c5e5915",
+      "gate_pull/onset3/nvda_h3_frozen.L22-38.npz": "9ab521cdec910a048489b0d038fcd47f3b8459ddedce4a31d76663e6ecf3746c",
+      "gate_pull/onset3/nvda_h3_expansion.L22-38.npz": "3036550f1682127db97326f0dde3a59facd45c6cfb5b405e80b93ddb68d7b8f3",
+      "gate_pull/onset3/nvda_h3_expansion2.L22-38.npz": "2570159ec401ec7efb8f7d76f5c6f2bac049a00e6b4746c14e4f394bf50efbe3",
+      "gate_pull/onset_fit/nvda_frozen.parquet": "9c0d3fa7e68a8dae6f51acd007a5721af400ac646204b90782fccec32a8d590d",
+      "gate_pull/onset_fit/nvda_expansion.parquet": "28c60370ec82cefa22d5fd1eae9bd91b4f1e79d55808a8f8751990b259c587ae",
+      "gate_pull/onset_fit/nvda_expansion2.parquet": "e255eba3c71fe79e174d1c38a7c8c1dbfea6b017735685c2798aed3f3a7aca86"
+    }
   },
   "scoreable_auc_fresh_labels": 0.8761548064918852,
   "pass2_to_fresh_label_flips_on_scoreable": 11,
