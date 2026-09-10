@@ -18,7 +18,7 @@ ROWS = [
     (r'\;+ gate, balanced', 'balanced', 'accuracy'),
     (r'\;+ gate, aggressive', 'aggressive', 'accuracy'),
     (r'\;matched random, aggressive', 'aggressive', 'matched_mixture_accuracy'),
-    ('always-escalate (measured)', 'always', 'accuracy'),
+    ('always-escalate', 'always', 'accuracy'),
 ]
 START = '% BEGIN GENERATED MINICPM ROWS\n'
 END = '% END GENERATED MINICPM ROWS'
