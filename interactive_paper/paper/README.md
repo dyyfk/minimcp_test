@@ -132,12 +132,21 @@ benchmark values; client playback is unmeasured.
 
 ## Pareto, cost, and layer-decline reporting
 
-Table 1 currently reports accuracy only; the cost panel is omitted.
-`build_main_results.py` retains optional cost-panel generation when its
-markers are present in the table source, and does not restore an omitted
-panel. Timing and routing source data remain available. Current native
-records do not contain token or tool billing usage; dollar costs cannot
-be reconstructed from escalation counts or a different experiment.
+The Table 1 cost panel is restored with measured dollar costs
+(2026-09-10; it had been briefly omitted while the dollar row was NR).
+`build_main_results.py` regenerates it when its markers are present in
+the table source. Timing is mean nonnegative server TTFA from the full
+`ttfa1` / `ttfa-v3` run; expert use is the realized escalation rate from
+the content benchmark. Internal uses 240 queries, and external entries
+average the four pools equally.
+The native records do not contain token or tool billing usage, so GPT
+dollar costs are measured directly: `modal_expert_cost.py` replays every
+escalated call's recorded uplink transcript through the identical expert
+configuration (gpt-5.5, reasoning effort low, web_search, same system
+prompt) and records billed usage; `build_expert_cost.py` prices it at
+official rates and writes `revision_data/expert_cost_usd.json`, which
+`build_main_results.py` reads. Identical transcripts are billed once and
+shared; a non-escalated query costs $0.
 
 The 3-by-2 figure's left column connects nondominated observed policies
 in accuracy versus call rate. TriviaQA conservative is dominated by local.

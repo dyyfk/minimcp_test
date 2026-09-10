@@ -1,0 +1,267 @@
+{
+  "method": "replay of every escalated call's recorded uplink transcript through the identical expert path (gpt-5.5, reasoning effort=low, web_search tool, EXPERT_SYSTEM instructions); billed usage priced at official rates; cached input priced at the cached rate as billed",
+  "prices_usd": {
+    "input_per_tok": 5e-06,
+    "cached_input_per_tok": 5e-07,
+    "output_per_tok": 3e-05,
+    "web_search_per_call": 0.01
+  },
+  "pricing_checked": "2026-09-10",
+  "replay_source": {
+    "path": "interactive_paper/data/expert_cost_replay.jsonl",
+    "sha256": "7ae3ee6cc7c7a8104b9658c06feeb889589adecbf09bca835e31d000048b0eab",
+    "n_unique_calls": 1209
+  },
+  "n_escalations": 2060,
+  "n_zero_cost_missing_transcript": 1,
+  "usd_per_query": {
+    "conservative": {
+      "internal": 0.004514,
+      "external": 0.001279
+    },
+    "balanced": {
+      "internal": 0.009148,
+      "external": 0.005348
+    },
+    "aggressive": {
+      "internal": 0.013777,
+      "external": 0.010474
+    },
+    "always": {
+      "internal": 0.019261,
+      "external": 0.014831
+    }
+  },
+  "pools": {
+    "frozen": {
+      "aggressive": {
+        "n_pool": 240,
+        "n_escalated": 124,
+        "total_usd": 3.306436,
+        "web_calls": 45,
+        "input_tokens": 770456,
+        "cached_tokens": 440832,
+        "output_tokens": 32930,
+        "usd_per_query": 0.013777,
+        "usd_per_escalation": 0.026665
+      },
+      "always": {
+        "n_pool": 240,
+        "n_escalated": 238,
+        "total_usd": 4.622613,
+        "web_calls": 48,
+        "input_tokens": 1309431,
+        "cached_tokens": 857856,
+        "output_tokens": 48527,
+        "usd_per_query": 0.019261,
+        "usd_per_escalation": 0.019423
+      },
+      "balanced": {
+        "n_pool": 240,
+        "n_escalated": 60,
+        "total_usd": 2.195456,
+        "web_calls": 35,
+        "input_tokens": 431016,
+        "cached_tokens": 210432,
+        "output_tokens": 21244,
+        "usd_per_query": 0.009148,
+        "usd_per_escalation": 0.036591
+      },
+      "conservative": {
+        "n_pool": 240,
+        "n_escalated": 20,
+        "total_usd": 1.083369,
+        "web_calls": 18,
+        "input_tokens": 173529,
+        "cached_tokens": 66048,
+        "output_tokens": 11098,
+        "usd_per_query": 0.004514,
+        "usd_per_escalation": 0.054168
+      }
+    },
+    "sdqa": {
+      "aggressive": {
+        "n_pool": 200,
+        "n_escalated": 132,
+        "total_usd": 3.193918,
+        "web_calls": 58,
+        "input_tokens": 858828,
+        "cached_tokens": 462336,
+        "output_tokens": 13343,
+        "usd_per_query": 0.01597,
+        "usd_per_escalation": 0.024196
+      },
+      "always": {
+        "n_pool": 200,
+        "n_escalated": 200,
+        "total_usd": 3.839434,
+        "web_calls": 60,
+        "input_tokens": 1175126,
+        "cached_tokens": 703488,
+        "output_tokens": 17650,
+        "usd_per_query": 0.019197,
+        "usd_per_escalation": 0.019197
+      },
+      "balanced": {
+        "n_pool": 200,
+        "n_escalated": 54,
+        "total_usd": 1.68965,
+        "web_calls": 34,
+        "input_tokens": 401306,
+        "cached_tokens": 188160,
+        "output_tokens": 6328,
+        "usd_per_query": 0.008448,
+        "usd_per_escalation": 0.03129
+      },
+      "conservative": {
+        "n_pool": 200,
+        "n_escalated": 13,
+        "total_usd": 0.305777,
+        "web_calls": 6,
+        "input_tokens": 83989,
+        "cached_tokens": 45184,
+        "output_tokens": 972,
+        "usd_per_query": 0.001529,
+        "usd_per_escalation": 0.023521
+      }
+    },
+    "sllama": {
+      "aggressive": {
+        "n_pool": 250,
+        "n_escalated": 47,
+        "total_usd": 0.836736,
+        "web_calls": 11,
+        "input_tokens": 262850,
+        "cached_tokens": 161152,
+        "output_tokens": 4589,
+        "usd_per_query": 0.003347,
+        "usd_per_escalation": 0.017803
+      },
+      "always": {
+        "n_pool": 250,
+        "n_escalated": 250,
+        "total_usd": 2.473785,
+        "web_calls": 15,
+        "input_tokens": 1196349,
+        "cached_tokens": 881920,
+        "output_tokens": 10356,
+        "usd_per_query": 0.009895,
+        "usd_per_escalation": 0.009895
+      },
+      "balanced": {
+        "n_pool": 250,
+        "n_escalated": 9,
+        "total_usd": 0.163268,
+        "web_calls": 2,
+        "input_tokens": 49080,
+        "cached_tokens": 30336,
+        "output_tokens": 1146,
+        "usd_per_query": 0.000653,
+        "usd_per_escalation": 0.018141
+      },
+      "conservative": {
+        "n_pool": 250,
+        "n_escalated": 1,
+        "total_usd": 0.039271,
+        "web_calls": 1,
+        "input_tokens": 8619,
+        "cached_tokens": 3712,
+        "output_tokens": 96,
+        "usd_per_query": 0.000157,
+        "usd_per_escalation": 0.039271
+      }
+    },
+    "striviaqa": {
+      "aggressive": {
+        "n_pool": 250,
+        "n_escalated": 141,
+        "total_usd": 2.26421,
+        "web_calls": 29,
+        "input_tokens": 783576,
+        "cached_tokens": 504960,
+        "output_tokens": 10955,
+        "usd_per_query": 0.009057,
+        "usd_per_escalation": 0.016058
+      },
+      "always": {
+        "n_pool": 250,
+        "n_escalated": 250,
+        "total_usd": 3.206006,
+        "web_calls": 31,
+        "input_tokens": 1286846,
+        "cached_tokens": 878592,
+        "output_tokens": 13848,
+        "usd_per_query": 0.012824,
+        "usd_per_escalation": 0.012824
+      },
+      "balanced": {
+        "n_pool": 250,
+        "n_escalated": 46,
+        "total_usd": 1.362043,
+        "web_calls": 25,
+        "input_tokens": 335733,
+        "cached_tokens": 166656,
+        "output_tokens": 6111,
+        "usd_per_query": 0.005448,
+        "usd_per_escalation": 0.02961
+      },
+      "conservative": {
+        "n_pool": 250,
+        "n_escalated": 10,
+        "total_usd": 0.582118,
+        "web_calls": 12,
+        "input_tokens": 112262,
+        "cached_tokens": 36096,
+        "output_tokens": 2108,
+        "usd_per_query": 0.002328,
+        "usd_per_escalation": 0.058212
+      }
+    },
+    "swebq": {
+      "aggressive": {
+        "n_pool": 250,
+        "n_escalated": 150,
+        "total_usd": 3.380138,
+        "web_calls": 54,
+        "input_tokens": 914404,
+        "cached_tokens": 519296,
+        "output_tokens": 20165,
+        "usd_per_query": 0.013521,
+        "usd_per_escalation": 0.022534
+      },
+      "always": {
+        "n_pool": 250,
+        "n_escalated": 248,
+        "total_usd": 4.351694,
+        "web_calls": 58,
+        "input_tokens": 1373810,
+        "cached_tokens": 867328,
+        "output_tokens": 26854,
+        "usd_per_query": 0.017407,
+        "usd_per_escalation": 0.017547
+      },
+      "balanced": {
+        "n_pool": 250,
+        "n_escalated": 55,
+        "total_usd": 1.710851,
+        "web_calls": 31,
+        "input_tokens": 400229,
+        "cached_tokens": 186752,
+        "output_tokens": 8003,
+        "usd_per_query": 0.006843,
+        "usd_per_escalation": 0.031106
+      },
+      "conservative": {
+        "n_pool": 250,
+        "n_escalated": 12,
+        "total_usd": 0.275121,
+        "web_calls": 4,
+        "input_tokens": 74449,
+        "cached_tokens": 41472,
+        "output_tokens": 1650,
+        "usd_per_query": 0.0011,
+        "usd_per_escalation": 0.022927
+      }
+    }
+  }
+}

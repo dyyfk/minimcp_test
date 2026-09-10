@@ -111,7 +111,9 @@ def reporting_manifest(native_path, internal_path, ttfa_path):
         'timing_failed': sum(a['n_failed'] for a in arms),
         'query_weighting': 'unit',
         'external_average': 'equal weight across four external English QA pools',
-        'gpt_usd': 'not recorded for expert-using arms; no imputation from call rate',
+        'gpt_usd': 'replayed billed usage of every escalated call at official '
+                   'pricing (build_expert_cost.py); source pinned in '
+                   'revision_data/expert_cost_usd.json',
     }
 
 
@@ -160,10 +162,12 @@ def rendered_nvda_rows(internal_path=HERE / 'revision_data/internal_unweighted_s
     return '\n'.join(lines) + '\n'
 
 
-def cost_rows(pools, ttfa_path=HERE.parent / 'ttfa_real/nonnegative/summary.json'):
-    """Keep timing, routing frequency, and missing dollar usage distinct."""
+def cost_rows(pools, ttfa_path=HERE.parent / 'ttfa_real/nonnegative/summary.json',
+              cost_path=HERE / 'revision_data/expert_cost_usd.json'):
+    """Keep timing, routing frequency, and measured dollar usage distinct."""
     ttfa = json.loads(ttfa_path.read_text())
     assert ttfa['formula'] == 'max(0, ts.first_answer_pcm - ts.input_end)'
+    cost = json.loads(cost_path.read_text())
     rows = []
     for label, arm, _ in (row for row in ROWS if row[2] == 'accuracy'):
         timing_arm = 'local' if arm == 'never' else arm
@@ -175,8 +179,18 @@ def cost_rows(pools, ttfa_path=HERE.parent / 'ttfa_real/nonnegative/summary.json
                   pools['frozen'][arm]['rate']*100,
                   fsum(pools[p][arm]['rate']*100 for p in EXTERNAL_POOLS)/4]
         cells = [f'{v:.2f}' for v in values[:2]] + [display(v) for v in values[2:]]
-        # A routing event can trigger tool calls/retries; it is not a billable request count.
-        cells.append('0' if arm == 'never' else 'NR')
+        if arm == 'never':
+            cells += ['0', '0']
+        else:
+            # Replayed billed usage of every escalated call (build_expert_cost.py);
+            # a non-escalated query costs 0.
+            for pool in TABLE_POOLS:
+                measured = cost['pools'][pool][arm]
+                assert measured['n_pool'] == pools[pool][arm]['n']
+                assert measured['n_escalated'] == round(
+                    pools[pool][arm]['rate'] * pools[pool][arm]['n'])
+            usd = cost['usd_per_query'][arm]
+            cells += [f"{usd['internal']:.3f}", f"{usd['external']:.3f}"]
         rows.append({'label':label, 'arm':arm, 'values':values, 'cells':cells})
     return rows
 
@@ -186,7 +200,7 @@ def rendered_cost_rows(pools, ttfa_path=HERE.parent / 'ttfa_real/nonnegative/sum
     metrics = [
         ('Mean TTFA (s), Int./Ext.', [r['cells'][0]+' / '+r['cells'][1] for r in rows]),
         ('Escalations/100, Int./Ext.', [r['cells'][2]+' / '+r['cells'][3] for r in rows]),
-        ('GPT expert USD/query', [r['cells'][4] for r in rows]),
+        ('GPT expert USD/query, Int./Ext.', [r['cells'][4]+' / '+r['cells'][5] for r in rows]),
     ]
     return '\n'.join(' & '.join([label, *cells]) + r' \\'
                      for label, cells in metrics) + '\n'

@@ -7,21 +7,21 @@
   "comparison_unit": "reported policy summary on the same query cohort",
   "accuracy_sources": [
     {
-      "path": "interactive_paper/paper/revision_data/native_summary.json",
-      "sha256": "b2b32051cdc0fa7b80abf7ebe8d23a6d0240e79470d5a68fad1f660492229b70"
+      "path": "interactive_paper\\paper\\revision_data\\native_summary.json",
+      "sha256": "c83893873c37cbdc11bc55187976ae5fb33298523f55912437ea563974699b5f"
     },
     {
-      "path": "interactive_paper/paper/revision_data/internal_unweighted_summary.json",
-      "sha256": "30bf1dd07814e672291be212ee170ea3d7805b036478210b94b36c5179a5344d"
+      "path": "interactive_paper\\paper\\revision_data\\internal_unweighted_summary.json",
+      "sha256": "acb856c91492a8388f120521809e7a3daa78f2eb5fe46ce061c4eb4276d01877"
     }
   ],
   "timing_source": {
-    "path": "interactive_paper/ttfa_real/nonnegative/summary.json",
-    "sha256": "deb1412c04ccc6e864d2d1d1a88ca1af4f6a0d9c95b1e1b72d0336777a5c8010"
+    "path": "interactive_paper\\ttfa_real\\nonnegative\\summary.json",
+    "sha256": "5e850796a65aa1d8ec38fe278d055fd6e14fe9e967c72b8d5925151d40e7fef3"
   },
   "timing_freeze": {
-    "path": "interactive_paper/ttfa_real/freeze.json",
-    "sha256": "558a83462f4c3a59e0f6ecd915a13acc47117a7f524c74875af2c526445c9f2d"
+    "path": "interactive_paper\\ttfa_real\\freeze.json",
+    "sha256": "1e195c51a9db1d11f66f0d8479ec1c3003725959ae884e5d2ddd6ca3872d88b6"
   },
   "timing_run_id": "ttfa1",
   "timing_protocol": "ttfa-v3",
@@ -31,5 +31,5 @@
   "timing_failed": 46,
   "query_weighting": "unit",
   "external_average": "equal weight across four external English QA pools",
-  "gpt_usd": "not recorded for expert-using arms; no imputation from call rate"
+  "gpt_usd": "replayed billed usage of every escalated call at official pricing (build_expert_cost.py); source pinned in revision_data/expert_cost_usd.json"
 }

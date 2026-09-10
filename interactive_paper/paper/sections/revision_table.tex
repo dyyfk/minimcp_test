@@ -2,13 +2,19 @@
 \centering\small
 \setlength{\tabcolsep}{3pt}
 \renewcommand{\arraystretch}{1.12}
-\caption{\textbf{Answer-content accuracy (\%).}
+\caption{\textbf{Answer-content accuracy (\%), time, and expert use.}
 Both models use all 240 Internal IDs with unit weights and four external
 English QA pools; avg is the equal-pool external mean and $\Delta$ its
 gain over local. MiniCPM uses one native session per query/arm and
 fixed thresholds; random mixes endpoints at the realized call rate
 (Appendix~\ref{app:transferdetail}). NVDA is cached native-frame replay;
-Internal is post-selection (Appendix~\ref{app:nvda}).}
+Internal is post-selection (Appendix~\ref{app:nvda}).
+MiniCPM costs use Int./Ext. for Internal/external macro; metric sources
+follow \S\ref{sec:evalproto}.
+Expert USD/query is measured by replaying every escalated call's recorded
+uplink transcript through the identical expert configuration and pricing
+billed tokens and tool calls at official rates (Appendix~\ref{app:expertcost});
+non-escalated queries cost \$0. GPT costs exclude local compute, ASR, and TTS.}
 \label{tab:transfer}
 \begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lrrrrrrr@{}}
 \toprule
@@ -33,6 +39,19 @@ always-local & 19.6 & 35.8 & 37.6 & 70.8 & 31.0 & 43.8 & --- \\
 \;matched random, aggressive & 53.5 & 65.7 & 60.2 & 82.0 & 60.0 & 67.0 & +23.2 \\
 always-escalate & 91.7 & 95.5 & 82.8 & 93.1 & 89.0 & 90.1 & +46.3 \\
 % END GENERATED NVDA ROWS
+\bottomrule
+\end{tabular*}
+\vspace{4pt}
+\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lrrrrr@{}}
+\toprule
+\multicolumn{6}{l}{\emph{MiniCPM cost summary (all metrics lower is better)}} \\
+& local & conservative & balanced & aggressive & always \\
+\midrule
+% BEGIN GENERATED COST ROWS
+Mean TTFA (s), Int./Ext. & 1.06 / 1.85 & 2.71 / 2.46 & 3.97 / 2.69 & 6.10 / 4.57 & 9.43 / 6.04 \\
+Escalations/100, Int./Ext. & 0.0 / 0.0 & 8.3 / 3.9 & 25.0 / 17.8 & 51.7 / 50.3 & 99.2 / 99.8 \\
+GPT expert USD/query, Int./Ext. & 0 / 0 & 0.005 / 0.001 & 0.009 / 0.005 & 0.014 / 0.010 & 0.019 / 0.015 \\
+% END GENERATED COST ROWS
 \bottomrule
 \end{tabular*}
 \end{table}

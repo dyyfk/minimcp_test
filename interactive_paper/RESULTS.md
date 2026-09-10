@@ -7534,3 +7534,36 @@ Audit: paper/revision_data/zhongzhu_feedback_audit.json; source sweep arrays: pa
 User-specified reporting convention: retain the existing judged accuracy and call rates, and use the latest full ttfa1 / ttfa-v3 run for all latency values. This supersedes the earlier decision above to omit the latency frontier. Both columns now connect nondominated reported policy summaries. The experiment setup and appendix record the metric sources and input/recording details. Raw accuracy and TTFA records and all numeric values are unchanged.
 
 Internal aggressive: 62.9% accuracy and 6.10 s mean TTFA; always: 70.4% and 9.43 s. The difference is 7.5 accuracy points and 35.3% mean-wait reduction (calculated before rounding). Figure, Table 1, abstract, introduction, main results, discussion, and timing appendix use this single convention. Source files and hashes are pinned in paper/revision_data/reporting_protocol.json.
+
+## Measured GPT expert USD/query fills the NR cells (2026-09-10)
+
+The Table 1 cost panel's dollar row is now measured, not NR. Method: the
+native runs never persisted API billing usage, but every escalated call's
+uplink ASR transcript is in the retained parquets, so `modal_expert_cost.py`
+replays all 2,060 escalations (20 retained pool x arm runs; 1,209 unique
+transcripts, each billed once and shared) through the identical expert path
+— gpt-5.5, reasoning effort=low, web_search tool, same EXPERT_SYSTEM — and
+records billed usage. `paper/build_expert_cost.py` prices it at official
+rates (input $5/M, cached input $0.5/M, output $30/M incl. hidden
+reasoning, web search $10/1k calls; checked 2026-09-10) and writes
+`paper/revision_data/expert_cost_usd.json`; `build_main_results.py` reads
+that for the table row.
+
+| Policy | GPT expert USD/query, Internal / external macro |
+|---|---:|
+| never | 0 / 0 |
+| conservative | 0.005 / 0.001 |
+| balanced | 0.009 / 0.005 |
+| aggressive | 0.014 / 0.010 |
+| always | 0.019 / 0.015 |
+
+Mean cost per escalation is $0.020, dominated by the web_search tool
+definition's input overhead (mean billed input 5,341 tokens, 3,530 cached)
+against 101 output tokens; 13.9% of calls invoke web search. Non-escalated
+queries cost $0; external macro is the equal-pool mean, matching the
+escalation row. Replay caveat: token counts vary with decoding
+stochasticity and cache state; costs exclude ASR/TTS and local compute.
+Replay spend: ~$19 (unique calls; dedupe + cache discounts). Appendix
+app:expertcost documents the method; raw usage in
+`data/expert_cost_replay.jsonl`, task list in
+`data/_expert_cost_tasks.jsonl`.

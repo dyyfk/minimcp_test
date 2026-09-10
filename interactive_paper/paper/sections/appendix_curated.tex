@@ -273,6 +273,28 @@ escalations and admits no floor-management stimuli.
 \label{app:transferdetail}
 \input{sections/native_rates}
 
+\subsection{Measured expert dollar cost}
+\label{app:expertcost}
+The benchmark runs did not persist API billing usage, so the
+USD/query row of Table~\ref{tab:transfer} is measured by replay: every
+escalated call's recorded uplink transcript (2{,}060 escalations across
+the twenty retained pool$\times$arm runs; 1{,}209 unique transcripts,
+each billed once and shared) is re-sent through the identical expert
+configuration --- the same model, low reasoning effort, web-search tool,
+and system prompt as the benchmark --- and the billed usage is priced at
+the provider's published rates (input \$5/M tokens, cached input
+\$0.5/M, output \$30/M including hidden reasoning tokens, web search
+\$10/1k calls; checked 2026-09-10). A pool$\times$arm entry is the sum
+of its escalated calls' costs over the pool size; non-escalated queries
+cost \$0, and the external entry is the equal-pool mean, matching the
+escalation row. The mean cost per escalation is \$0.020: billed input
+averages 5{,}341 tokens (3{,}530 cached) --- dominated by the web-search
+tool definition rather than the short transcripts --- against 101 output
+tokens, and 13.9\% of calls invoke web search. Replay token counts vary
+with decoding stochasticity and cache state; costs exclude local
+compute, ASR, and TTS. Sources and per-cell tallies are pinned in
+\texttt{revision\_data/expert\_cost\_usd.json}.
+
 \input{sections/internal_unweighted_results}
 
 \input{sections/internal_latency}
