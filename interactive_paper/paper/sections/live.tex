@@ -3,7 +3,7 @@
 \begin{figure}[!t]
   \centering
   \includegraphics[width=\linewidth]{revision_accuracy_latency}
-  \caption{\textbf{Accuracy gains and timing costs on three pools.}
+  \caption{\textbf{Accuracy and independently measured TTFA on three pools.}
   Left: answer-content accuracy against expert call rate. The Internal
   curve uses post-hoc weights of 0.25 for knowledge and math and 1 for
   other categories, for both accuracy and call rate; all 240 queries
@@ -13,16 +13,14 @@
   line uses the original Table~\ref{tab:transfer} random-mixture
   convention (\S\ref{sec:evalproto}). The horizontal
   always-arm reference passes through the measured always point;
-  it is not an oracle bound. Right: mean and P50 of the reconstructed
-  time to first audio on a log scale, using the original query mixture.
-  L/W denote local/always. Each point
-  uses the original recorded pass, with one run per query and arm;
-  no repeated-run uncertainty is implied. Local rows end at answer-text
-  completion and escalated rows when the relay waveform is synthesized;
-  playback duration is excluded (\S\ref{sec:evalproto}). Internal P95/P99
-  are reported in Table~\ref{tab:latency}. All four external
-  QA pools appear in the upper block of
-  Table~\ref{tab:transfer}.}
+  it is not an oracle bound. Right: signed mean and P50 server TTFA
+  from the independent \texttt{ttfa-v3} run, with original query weights
+  and completed sessions. The symmetric log axis is linear near zero.
+  L/W denote local/always. Each query has one attempt per arm. TTFA
+  ends at first answer PCM, excluding candidate/stall audio and client
+  playback. These unjudged sessions do not establish the accuracy on
+  the left. Table~\ref{tab:latency} gives Internal counts and tails;
+  Table~\ref{tab:transfer} includes all four external QA pools.}
   \label{fig:dualview}
 \end{figure}
 
@@ -48,13 +46,13 @@ results identify an input constraint and task differences, without
 attributing the accuracy gap to truncation or changing the test
 mixture (Appendix~\ref{app:internal-strata}).
 
-The timing diagnostic makes the cost visible
-(Figure~\ref{fig:dualview}). Internal mean time to first audio
-increases from $-0.6$\,s locally to 2.4\,s at balanced and 4.6\,s at
-aggressive; aggressive P95 is 18.1\,s. The always arm averages
-8.0\,s (P50 6.7\,s). The expert call itself accounts for 5.1\,s of
-that mean; the rest is the blocking, non-streaming synthesis of the
-expert text, whose tail is driven by code and markup voiced verbatim.
-A lower call rate
-can reduce expert-path exposure, but these tails do not support
-calling the current aggressive setting low latency.
+The independent \texttt{ttfa-v3} run measures server time to first
+answer audio (Figure~\ref{fig:dualview}). Internal P50 is 0.70\,s
+locally, 1.61\,s at balanced, and 2.87\,s at aggressive. Aggressive
+has mean 4.59\,s and P95 18.14\,s; always has mean 8.01\,s and
+P50 6.67\,s. Local signed mean is $-0.61$\,s: 17/240 attempts
+(7.1\%) respond before input end. These early responses are retained
+without assuming better interaction or correctness. Table~\ref{tab:latency}
+counts failures and reports timing among completed sessions. These
+answers remain unjudged: 62.9\% accuracy and 4.59\,s mean TTFA are
+separate results, not a demonstrated joint operating point.

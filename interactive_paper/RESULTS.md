@@ -7421,3 +7421,19 @@ statistics used in the existing timing table and figure:
 The existing Speech TriviaQA and SD-QA timing panels use the same source
 summary's per-arm mean and P50. The Internal always-arm mean expert
 request duration is 5.075 s over its 237 completed sessions.
+
+
+## TTFA measurement wording (2026-09-09)
+
+The paper now identifies `ttfa1` / `ttfa-v3` as an independent measured
+server PCM-ready experiment. Abstract P50 is 0.70 s local / 2.87 s
+aggressive. Signed local mean remains -0.611 s; 17/240 attempts (7.1%)
+respond before scheduled input end. Timing conditions on completion, with
+failures reported separately. The five Internal rows in Table 10 now show
+two decimal places from the unchanged source summary.
+
+Accuracy results are unchanged. The timing run uses causal audio prefixes,
+audio generation on both paths, and prepared relay text. Its answers have
+not been judged, so 62.9% accuracy and 4.588 s mean TTFA are not claimed as
+a joint operating point. The paper's overlap-remediation account for the
+answer-content benchmark remains in place. No judging or GPU run was done.

@@ -117,8 +117,8 @@ def make_figure(native_path, output_dir, weights_path=HERE / 'revision_data/join
                xticklabels=LABELS, yticks=[-1, 0, 1, 3, 10, 30],
                yticklabels=['-1', '0', '1', '3', '10', '30'])
         tx.minorticks_off()
-        tx.set_ylabel('Time to first audio (s)', labelpad=6)
-        tx.set_title('Time to first audio', loc='left', pad=5, fontweight='normal')
+        tx.set_ylabel('Server TTFA (s)', labelpad=6)
+        tx.set_title('Measured first answer audio', loc='left', pad=5, fontweight='normal')
         if row == 2:
             ax.set_xlabel('Realized expert call rate (%)', labelpad=5)
             tx.set_xlabel('Recorded arm', labelpad=5)
@@ -143,7 +143,7 @@ def make_figure(native_path, output_dir, weights_path=HERE / 'revision_data/join
     fig.text(.094, .031,
              'Internal accuracy and call rate: weights of 0.25 for knowledge and math; 1 for other categories.',
              fontsize=6.7, va='bottom', style='italic')
-    fig.text(.094, .011, 'Timing uses the original query mixture.',
+    fig.text(.094, .011, 'TTFA: independent ttfa-v3 sessions; original query mixture; signed values retained.',
              fontsize=6.7, va='bottom', style='italic')
     output_dir.mkdir(parents=True, exist_ok=True)
     fig.savefig(output_dir / 'revision_accuracy_latency.pdf')

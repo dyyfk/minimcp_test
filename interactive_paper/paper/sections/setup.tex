@@ -13,8 +13,8 @@ escalation expert, on the fixed 240-query internal test set and four
 external English speech-QA pools: Speech TriviaQA, Speech Web Questions,
 and Speech Llama Questions from OpenAudioBench \citep{openaudiobench2025},
 and SD-QA from VoiceBench \citep{faisal2021sdqa,chen2024voicebench}.
-The native probe is fitted on 5,221 calibration rows after excluding
-benchmark overlaps. All reported native-benchmark results were rerun
+For the answer-content benchmark, the native probe is fitted on 5,221
+calibration rows after excluding benchmark overlaps. Its results were rerun
 with this refitted probe; per-language thresholds use the remaining
 core rows' out-of-fold scores and stay fixed across pools.
 Calibration details and model controls are in
@@ -27,11 +27,16 @@ text or intended relay text. The random reference is the analytical
 mixture $A_{\rm mix}(r)=(1-r)A_{\rm local}+rA_{\rm always}$ at the
 gate's realized call rate $r$. Table~\ref{tab:transfer} uses the original
 query weights; Figure~\ref{fig:dualview}'s Internal curve uses the
-category weights specified in its caption. Both use the same recorded
+category weights specified in its caption. Both accuracy views use the same recorded
 outcomes. External averages weight the four QA pools equally.
-The expert receives the final 30 seconds of the prerecorded question;
-timing is reconstructed from logged stages with different local and
-relay endpoints. These results therefore measure routing and content,
-without establishing causal streaming or client-audible latency.
+In this content benchmark, the expert receives the final 30 seconds
+of the prerecorded question. Timing comes from an independent
+\texttt{ttfa-v3} run on the same query IDs, using real-time input,
+only the consumed audio prefix for expert requests, audio generation
+on both paths, and prepared relay text. Server TTFA is the signed
+monotonic-clock difference between the first answer PCM block and
+the scheduled end of input. Candidate and stall audio are excluded;
+client playback is unmeasured. These timing-session answers have not
+been judged, so accuracy and TTFA are not joint measurements.
 Model, probe-fitting, and judge configurations are in
 Appendix~\ref{app:setup-details}.
