@@ -1,8 +1,13 @@
-\subsection{Layer and position matter}
+\subsection{Readout ablations}
 \label{sec:duplex}
-We first evaluate the read location independently of the expert path.
-A layer-by-position sweep under leave-one-pool-out (LOPO) transfer
-localizes the text-input failure to late last-token states
+We evaluate the readout independently of the expert path using two
+protocols: a text-input layer-and-position sweep and a native-audio
+layer-by-readout ablation.
+
+\paragraph{Text-input transfer.}
+We test whether late-layer degradation persists across read positions
+and raw-backbone controls. Under leave-one-pool-out (LOPO) evaluation,
+probes are fitted on non-math pools and tested on held-out math
 (Figure~\ref{fig:layersweep}). A last-token probe at L22 reaches
 \textbf{0.931} AUC on held-out math, compared with the final-layer
 baseline of 0.372, while mean pooling reduces the
@@ -25,19 +30,23 @@ without isolating a causal training objective.
 \end{figure}
 
 With audio calibration and audio input, the final-layer probe reaches
-0.936 on LOPO math. We retain L22 for robustness across the tested
-conditions; the mechanism behind the text-input degradation remains
-open (Appendix~\ref{app:mech}).
+0.936 on LOPO math. The observed late-layer degradation is therefore
+conditional on the input and calibration setting; its mechanism
+remains open (Appendix~\ref{app:mech}).
 
-At native answer onset, we separate the effect of layer from the
-effect of combining positions. All four readouts use one audio batch
-with identical training pools, labels, splits, and head recipe
-(Figure~\ref{fig:native-ablation}). At L22, aggregation raises mean
+\paragraph{Native layer and aggregation.}
+We test whether predictive gains at native answer onset come from
+layer choice or feature aggregation. A $2\times2$ comparison crosses
+L22 versus the final layer with a single tail state versus the
+three-part aggregate defined in \S\ref{sec:readlocation}. All four
+readouts use one audio batch with identical training pools, labels,
+splits, and head recipe (Figure~\ref{fig:native-ablation}). At L22,
+aggregation raises mean
 failure-prediction AUC from 0.595 to 0.695; at the final layer, the
 change is smaller (0.654 to 0.662). The single-state L22 read has no
-advantage over the final layer. Thus, the evidence supports using
-aggregation with L22, rather than attributing the native signal to
-middle-layer selection alone. Named per-pool results and cached
+advantage over the final layer. These results identify an aggregation
+benefit at L22, without establishing an advantage from middle-layer
+selection alone. Named per-pool results and cached
 routing gains are reported in Appendix~\ref{app:native-ablation}.
 
 \begin{figure}[t]

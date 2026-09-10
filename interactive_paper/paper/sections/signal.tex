@@ -3,17 +3,14 @@
 Adapting the probe to duplex speech requires choosing its layer,
 position, and read time. The final layer feeds the output head, but
 this does not ensure that its failure signal survives a change in
-query distribution or input modality. We select L22 based on its
-robustness in the text-input layer audit and representation-transfer
-tests (\S\ref{sec:duplex}--\ref{sec:xmodal}); those results alone do
-not establish the best readout for native audio serving.
+query distribution or input modality.
 
 The native feature vector concatenates the latest L22 tail state,
 the mean of the tail states, and the mean input state, allowing the
 probe to combine the current boundary state with pooled context.
-The separate native layer-by-readout ablation
-(Figure~\ref{fig:native-ablation}) supports aggregation at L22;
-it does not show a mid-layer advantage for a single-token read.
+The choice of L22 is informed by the readout analyses in
+\S\ref{sec:duplex}, which also evaluate the contribution of feature
+aggregation.
 
 We read these features when the generation call first returns a
 listen-to-speak transition. This makes the gate available at the
@@ -24,5 +21,6 @@ chunks may expose additional failure information, at the cost of a
 later handoff (Appendix~\ref{app:readtime}). We fit the native probe
 and thresholds on features and answer labels from this serving regime
 to match its audio input and generation behavior. This calibration
-is separate from the representation-transfer study, which alone
-does not provide a zero-shot native gate.
+is separate from the representation-transfer study
+(\S\ref{sec:xmodal}), which alone does not provide a zero-shot native
+gate.
