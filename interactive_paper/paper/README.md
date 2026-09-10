@@ -141,9 +141,9 @@ be reconstructed from escalation counts or a different experiment.
 
 The 3-by-2 figure's left column connects nondominated observed policies
 in accuracy versus call rate. TriviaQA conservative is dominated by local.
-The right column connects nondominated policies in accuracy versus mean
+The right column shows unconnected policy points in accuracy versus mean
 TTFA, using the retained accuracy values and latest full timing run.
-Thin solid lines also connect all five policy settings in both columns,
+In the left column, thin solid lines also connect all five policy settings,
 including the dominated TriviaQA conservative point; thicker lines mark
 the Pareto frontier.
 The convention is a comparison of reported policy summaries; metric-specific

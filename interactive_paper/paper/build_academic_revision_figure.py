@@ -1,4 +1,4 @@
-"""Plot policy Pareto frontiers using retained accuracy and latest measured TTFA.
+"""Plot call-rate frontiers and accuracy/TTFA policy scatter plots.
 
 Usage: python build_academic_revision_figure.py
 Internal accuracy, call rate, and timing use the same full 240 query IDs with
@@ -85,9 +85,6 @@ def make_figure(native_path, output_dir, internal_path=HERE / 'revision_data/int
         # The reporting convention retains judged accuracy and takes all TTFA
         # values from the full timing run. Dominance is over policy summaries.
         latency_frontier = sorted(pareto_indices(latency, y), key=lambda i: latency[i])
-        tx.plot(latency, y, color=BLUE, linewidth=.65, alpha=.65, zorder=2.5)
-        latency_line, = tx.plot(latency[latency_frontier], y[latency_frontier],
-                                color=BLUE, lw=1.35, zorder=3)
         colors = [GRAY, BLUE, BLUE, BLUE, '#b35c20']
         for j, label in enumerate(LABELS):
             tx.plot(latency[j], y[j], linestyle='None', color=colors[j],
@@ -117,7 +114,8 @@ def make_figure(native_path, output_dir, internal_path=HERE / 'revision_data/int
                        loc='upper center', bbox_to_anchor=(centers[0], .987),
                        handlelength=2.1, handletextpad=.5, columnspacing=1.1)
             always_proxy = Line2D([], [], color='#b35c20', marker='s', ls='', mfc='white')
-            fig.legend([latency_line, always_proxy], ['Pareto frontier', 'W: GPT-5.5'], ncol=2,
+            gate_proxy = Line2D([], [], color=BLUE, marker='o', ls='', mfc='white')
+            fig.legend([gate_proxy, always_proxy], ['C/B/A: gate', 'W: GPT-5.5'], ncol=2,
                        loc='upper center', bbox_to_anchor=(centers[1], .987),
                        handletextpad=.4, columnspacing=1.1)
             fig.text(centers[0], .927, 'Higher accuracy, fewer expert calls',

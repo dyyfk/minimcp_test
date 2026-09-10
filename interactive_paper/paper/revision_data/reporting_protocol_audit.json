@@ -63,12 +63,10 @@
   "main_text_pages": 8,
   "total_pages": 17,
   "visual_qa_pages": [
-    5,
-    6,
-    8
+    6
   ],
   "overfull_boxes": 0,
-  "pdf_sha256": "4cf5ecf0c078c6ec657206433ef9a5f8d8548742ba62333e3c3559d1fd6455c8",
+  "pdf_sha256": "b394af9c8564f07a44b8a7cd508b1c2b26087e6df51b48c7c730efeea0bd53d8",
   "output_pdf": "/Users/ruoyuhe/Documents/ChatGPT/minicpm_paper/output/pdf/minimcp_zhongzhu_feedback.pdf",
   "new_model_api_calls": 0,
   "figure2_caption": {
@@ -80,9 +78,10 @@
   "table1_cost_panel_displayed": false,
   "figure3_display": {
     "always_label": "always-escalate via GPT-5.5",
-    "policy_connections": "thin solid lines connect all five settings, including TriviaQA conservative",
-    "pareto_connections": "thick solid lines connect nondominated settings",
-    "plotted_values_unchanged": true
+    "policy_connections": "left column only: thin solid lines connect all five settings, including TriviaQA conservative",
+    "pareto_connections": "left column only: thick solid lines connect nondominated settings",
+    "plotted_values_unchanged": true,
+    "latency_points": "unconnected scatter points for all five settings"
   },
   "table1_aggressive_rows_bold": [
     "MiniCPM",
