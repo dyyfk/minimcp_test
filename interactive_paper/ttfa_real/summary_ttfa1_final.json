@@ -1,0 +1,1472 @@
+{
+  "pools": {
+    "frozen": {
+      "arms": {
+        "local": {
+          "n_sessions": 240,
+          "status_counts": {
+            "completed": 239,
+            "non_commit": 1
+          },
+          "n_valid_ttfa": 239,
+          "n_missing_or_failed": 1,
+          "n_early_response": 17,
+          "escalation_rate": 0.0,
+          "ttfa_answer": {
+            "n": 239,
+            "mean": -0.611,
+            "p50": 0.695,
+            "p95": 2.619,
+            "p99": 3.636,
+            "min": -78.666,
+            "max": 4.675
+          },
+          "ttfa_first_any": {
+            "n": 239,
+            "mean": -0.611,
+            "p50": 0.695,
+            "p95": 2.619,
+            "p99": 3.636,
+            "min": -78.666,
+            "max": 4.675
+          },
+          "feed_lag_max_ms": {
+            "n": 240,
+            "mean": 35.837,
+            "p50": 0.0,
+            "p95": 285.75,
+            "p99": 647.05,
+            "min": 0.0,
+            "max": 943.0
+          }
+        },
+        "conservative": {
+          "n_sessions": 240,
+          "status_counts": {
+            "completed": 238,
+            "non_commit": 2
+          },
+          "n_valid_ttfa": 238,
+          "n_missing_or_failed": 2,
+          "n_early_response": 12,
+          "escalation_rate": 0.0966,
+          "ttfa_answer": {
+            "n": 238,
+            "mean": 1.528,
+            "p50": 0.887,
+            "p95": 10.853,
+            "p99": 34.082,
+            "min": -78.415,
+            "max": 63.053
+          },
+          "ttfa_first_any": {
+            "n": 238,
+            "mean": -0.163,
+            "p50": 0.809,
+            "p95": 2.664,
+            "p99": 3.664,
+            "min": -78.415,
+            "max": 5.507
+          },
+          "feed_lag_max_ms": {
+            "n": 240,
+            "mean": 186.171,
+            "p50": 0.0,
+            "p95": 802.75,
+            "p99": 3674.73,
+            "min": 0.0,
+            "max": 5603.0
+          },
+          "ttfa_local_path": {
+            "n": 215,
+            "mean": -0.164,
+            "p50": 0.807,
+            "p95": 2.729,
+            "p99": 3.67,
+            "min": -78.415,
+            "max": 5.507
+          },
+          "ttfa_escalated_path": {
+            "n": 23,
+            "mean": 17.34,
+            "p50": 11.757,
+            "p95": 39.093,
+            "p99": 57.845,
+            "min": 5.074,
+            "max": 63.053
+          }
+        },
+        "balanced": {
+          "n_sessions": 240,
+          "status_counts": {
+            "completed": 236,
+            "non_commit": 4
+          },
+          "n_valid_ttfa": 236,
+          "n_missing_or_failed": 4,
+          "n_early_response": 11,
+          "escalation_rate": 0.2585,
+          "ttfa_answer": {
+            "n": 236,
+            "mean": 2.36,
+            "p50": 1.611,
+            "p95": 14.407,
+            "p99": 26.914,
+            "min": -104.789,
+            "max": 61.19
+          },
+          "ttfa_first_any": {
+            "n": 236,
+            "mean": -0.563,
+            "p50": 0.909,
+            "p95": 2.703,
+            "p99": 4.221,
+            "min": -115.48,
+            "max": 7.04
+          },
+          "feed_lag_max_ms": {
+            "n": 240,
+            "mean": 1428.004,
+            "p50": 0.0,
+            "p95": 8376.0,
+            "p99": 17936.71,
+            "min": 0.0,
+            "max": 21772.0
+          },
+          "ttfa_local_path": {
+            "n": 175,
+            "mean": -0.167,
+            "p50": 1.063,
+            "p95": 2.896,
+            "p99": 4.355,
+            "min": -78.669,
+            "max": 7.04
+          },
+          "ttfa_escalated_path": {
+            "n": 61,
+            "mean": 9.609,
+            "p50": 9.258,
+            "p95": 25.169,
+            "p99": 42.337,
+            "min": -104.789,
+            "max": 61.19
+          }
+        },
+        "aggressive": {
+          "n_sessions": 240,
+          "status_counts": {
+            "completed": 236,
+            "non_commit": 4
+          },
+          "n_valid_ttfa": 236,
+          "n_missing_or_failed": 4,
+          "n_early_response": 13,
+          "escalation_rate": 0.5169,
+          "ttfa_answer": {
+            "n": 236,
+            "mean": 4.588,
+            "p50": 2.873,
+            "p95": 18.137,
+            "p99": 54.781,
+            "min": -109.664,
+            "max": 63.139
+          },
+          "ttfa_first_any": {
+            "n": 236,
+            "mean": -0.765,
+            "p50": 0.855,
+            "p95": 2.727,
+            "p99": 3.304,
+            "min": -116.484,
+            "max": 3.881
+          },
+          "feed_lag_max_ms": {
+            "n": 240,
+            "mean": 219.221,
+            "p50": 0.0,
+            "p95": 964.55,
+            "p99": 3323.17,
+            "min": 0.0,
+            "max": 4172.0
+          },
+          "ttfa_local_path": {
+            "n": 114,
+            "mean": 0.421,
+            "p50": 0.945,
+            "p95": 2.782,
+            "p99": 3.526,
+            "min": -53.093,
+            "max": 3.881
+          },
+          "ttfa_escalated_path": {
+            "n": 122,
+            "mean": 8.483,
+            "p50": 7.803,
+            "p95": 30.286,
+            "p99": 60.97,
+            "min": -109.664,
+            "max": 63.139
+          }
+        },
+        "always": {
+          "n_sessions": 240,
+          "status_counts": {
+            "completed": 237,
+            "non_commit": 2,
+            "empty_response": 1
+          },
+          "n_valid_ttfa": 237,
+          "n_missing_or_failed": 3,
+          "n_early_response": 7,
+          "escalation_rate": 1.0,
+          "ttfa_answer": {
+            "n": 237,
+            "mean": 8.008,
+            "p50": 6.674,
+            "p95": 25.861,
+            "p99": 60.829,
+            "min": -108.867,
+            "max": 69.451
+          },
+          "ttfa_first_any": {
+            "n": 238,
+            "mean": -0.676,
+            "p50": 0.853,
+            "p95": 2.679,
+            "p99": 3.252,
+            "min": -116.51,
+            "max": 4.841
+          },
+          "feed_lag_max_ms": {
+            "n": 240,
+            "mean": 372.254,
+            "p50": 201.5,
+            "p95": 1082.65,
+            "p99": 3213.65,
+            "min": 0.0,
+            "max": 7358.0
+          }
+        }
+      },
+      "paired": {
+        "n_common_valid_ids": 235,
+        "local": {
+          "n": 235,
+          "mean": -0.486,
+          "p50": 0.694,
+          "p95": 2.603,
+          "p99": 3.25,
+          "min": -78.666,
+          "max": 3.672
+        },
+        "conservative": {
+          "n": 235,
+          "mean": 1.519,
+          "p50": 0.875,
+          "p95": 11.012,
+          "p99": 34.28,
+          "min": -78.415,
+          "max": 63.053
+        },
+        "balanced": {
+          "n": 235,
+          "mean": 2.363,
+          "p50": 1.611,
+          "p95": 14.421,
+          "p99": 26.94,
+          "min": -104.789,
+          "max": 61.19
+        },
+        "aggressive": {
+          "n": 235,
+          "mean": 4.601,
+          "p50": 2.88,
+          "p95": 18.22,
+          "p99": 54.921,
+          "min": -109.664,
+          "max": 63.139
+        },
+        "always": {
+          "n": 235,
+          "mean": 7.913,
+          "p50": 6.641,
+          "p95": 24.663,
+          "p99": 60.873,
+          "min": -108.867,
+          "max": 69.451
+        }
+      }
+    },
+    "striviaqa": {
+      "arms": {
+        "local": {
+          "n_sessions": 250,
+          "status_counts": {
+            "completed": 250
+          },
+          "n_valid_ttfa": 250,
+          "n_missing_or_failed": 0,
+          "n_early_response": 1,
+          "escalation_rate": 0.0,
+          "ttfa_answer": {
+            "n": 250,
+            "mean": 1.141,
+            "p50": 0.897,
+            "p95": 1.923,
+            "p99": 2.708,
+            "min": -3.848,
+            "max": 2.882
+          },
+          "ttfa_first_any": {
+            "n": 250,
+            "mean": 1.141,
+            "p50": 0.897,
+            "p95": 1.923,
+            "p99": 2.708,
+            "min": -3.848,
+            "max": 2.882
+          },
+          "feed_lag_max_ms": {
+            "n": 250,
+            "mean": 13.52,
+            "p50": 0.0,
+            "p95": 97.55,
+            "p99": 136.65,
+            "min": 0.0,
+            "max": 145.0
+          }
+        },
+        "conservative": {
+          "n_sessions": 250,
+          "status_counts": {
+            "completed": 248,
+            "expert_timeout": 1,
+            "non_commit": 1
+          },
+          "n_valid_ttfa": 248,
+          "n_missing_or_failed": 2,
+          "n_early_response": 0,
+          "escalation_rate": 0.0361,
+          "ttfa_answer": {
+            "n": 248,
+            "mean": 1.551,
+            "p50": 0.982,
+            "p95": 2.628,
+            "p99": 14.878,
+            "min": 0.386,
+            "max": 20.135
+          },
+          "ttfa_first_any": {
+            "n": 249,
+            "mean": 1.177,
+            "p50": 0.941,
+            "p95": 1.928,
+            "p99": 2.74,
+            "min": 0.386,
+            "max": 2.909
+          },
+          "feed_lag_max_ms": {
+            "n": 250,
+            "mean": 80.88,
+            "p50": 0.0,
+            "p95": 131.2,
+            "p99": 2737.6,
+            "min": 0.0,
+            "max": 3328.0
+          },
+          "ttfa_local_path": {
+            "n": 240,
+            "mean": 1.179,
+            "p50": 0.941,
+            "p95": 1.917,
+            "p99": 2.747,
+            "min": 0.386,
+            "max": 2.909
+          },
+          "ttfa_escalated_path": {
+            "n": 8,
+            "mean": 12.732,
+            "p50": 11.22,
+            "p95": 19.398,
+            "p99": 19.988,
+            "min": 4.238,
+            "max": 20.135
+          }
+        },
+        "balanced": {
+          "n_sessions": 250,
+          "status_counts": {
+            "completed": 250
+          },
+          "n_valid_ttfa": 250,
+          "n_missing_or_failed": 0,
+          "n_early_response": 0,
+          "escalation_rate": 0.184,
+          "ttfa_answer": {
+            "n": 250,
+            "mean": 2.454,
+            "p50": 1.463,
+            "p95": 8.461,
+            "p99": 23.74,
+            "min": 0.356,
+            "max": 41.138
+          },
+          "ttfa_first_any": {
+            "n": 250,
+            "mean": 1.055,
+            "p50": 0.728,
+            "p95": 1.815,
+            "p99": 2.556,
+            "min": 0.356,
+            "max": 5.542
+          },
+          "feed_lag_max_ms": {
+            "n": 250,
+            "mean": 27.828,
+            "p50": 0.0,
+            "p95": 91.4,
+            "p99": 650.96,
+            "min": 0.0,
+            "max": 2409.0
+          },
+          "ttfa_local_path": {
+            "n": 204,
+            "mean": 1.069,
+            "p50": 0.728,
+            "p95": 1.821,
+            "p99": 2.557,
+            "min": 0.356,
+            "max": 5.542
+          },
+          "ttfa_escalated_path": {
+            "n": 46,
+            "mean": 8.596,
+            "p50": 6.2,
+            "p95": 23.886,
+            "p99": 35.126,
+            "min": 3.083,
+            "max": 41.138
+          }
+        },
+        "aggressive": {
+          "n_sessions": 250,
+          "status_counts": {
+            "completed": 250
+          },
+          "n_valid_ttfa": 250,
+          "n_missing_or_failed": 0,
+          "n_early_response": 0,
+          "escalation_rate": 0.564,
+          "ttfa_answer": {
+            "n": 250,
+            "mean": 3.616,
+            "p50": 3.545,
+            "p95": 7.919,
+            "p99": 16.072,
+            "min": 0.328,
+            "max": 40.917
+          },
+          "ttfa_first_any": {
+            "n": 250,
+            "mean": 0.951,
+            "p50": 0.614,
+            "p95": 1.622,
+            "p99": 2.218,
+            "min": 0.328,
+            "max": 2.859
+          },
+          "feed_lag_max_ms": {
+            "n": 250,
+            "mean": 30.852,
+            "p50": 0.0,
+            "p95": 95.85,
+            "p99": 250.9,
+            "min": 0.0,
+            "max": 2149.0
+          },
+          "ttfa_local_path": {
+            "n": 109,
+            "mean": 1.044,
+            "p50": 1.349,
+            "p95": 1.621,
+            "p99": 2.474,
+            "min": 0.328,
+            "max": 2.543
+          },
+          "ttfa_escalated_path": {
+            "n": 141,
+            "mean": 5.604,
+            "p50": 4.638,
+            "p95": 9.855,
+            "p99": 20.117,
+            "min": 2.709,
+            "max": 40.917
+          }
+        },
+        "always": {
+          "n_sessions": 250,
+          "status_counts": {
+            "completed": 250
+          },
+          "n_valid_ttfa": 250,
+          "n_missing_or_failed": 0,
+          "n_early_response": 0,
+          "escalation_rate": 1.0,
+          "ttfa_answer": {
+            "n": 250,
+            "mean": 5.708,
+            "p50": 4.891,
+            "p95": 10.297,
+            "p99": 21.759,
+            "min": 2.842,
+            "max": 38.164
+          },
+          "ttfa_first_any": {
+            "n": 250,
+            "mean": 1.136,
+            "p50": 0.928,
+            "p95": 2.121,
+            "p99": 2.22,
+            "min": 0.351,
+            "max": 2.339
+          },
+          "feed_lag_max_ms": {
+            "n": 250,
+            "mean": 241.784,
+            "p50": 0.0,
+            "p95": 1085.95,
+            "p99": 3019.83,
+            "min": 0.0,
+            "max": 4978.0
+          }
+        }
+      },
+      "paired": {
+        "n_common_valid_ids": 248,
+        "local": {
+          "n": 248,
+          "mean": 1.141,
+          "p50": 0.897,
+          "p95": 1.923,
+          "p99": 2.712,
+          "min": -3.848,
+          "max": 2.882
+        },
+        "conservative": {
+          "n": 248,
+          "mean": 1.551,
+          "p50": 0.982,
+          "p95": 2.628,
+          "p99": 14.878,
+          "min": 0.386,
+          "max": 20.135
+        },
+        "balanced": {
+          "n": 248,
+          "mean": 2.372,
+          "p50": 1.463,
+          "p95": 8.32,
+          "p99": 20.042,
+          "min": 0.356,
+          "max": 41.138
+        },
+        "aggressive": {
+          "n": 248,
+          "mean": 3.563,
+          "p50": 3.439,
+          "p95": 7.885,
+          "p99": 14.263,
+          "min": 0.328,
+          "max": 40.917
+        },
+        "always": {
+          "n": 248,
+          "mean": 5.583,
+          "p50": 4.891,
+          "p95": 10.246,
+          "p99": 17.124,
+          "min": 2.842,
+          "max": 24.965
+        }
+      }
+    },
+    "swebq": {
+      "arms": {
+        "local": {
+          "n_sessions": 250,
+          "status_counts": {
+            "completed": 246,
+            "non_commit": 4
+          },
+          "n_valid_ttfa": 246,
+          "n_missing_or_failed": 4,
+          "n_early_response": 0,
+          "escalation_rate": 0.0,
+          "ttfa_answer": {
+            "n": 246,
+            "mean": 3.689,
+            "p50": 1.708,
+            "p95": 3.595,
+            "p99": 4.246,
+            "min": 0.475,
+            "max": 305.515
+          },
+          "ttfa_first_any": {
+            "n": 246,
+            "mean": 3.689,
+            "p50": 1.708,
+            "p95": 3.595,
+            "p99": 4.246,
+            "min": 0.475,
+            "max": 305.515
+          },
+          "feed_lag_max_ms": {
+            "n": 250,
+            "mean": 9.368,
+            "p50": 0.0,
+            "p95": 74.1,
+            "p99": 119.67,
+            "min": 0.0,
+            "max": 234.0
+          }
+        },
+        "conservative": {
+          "n_sessions": 250,
+          "status_counts": {
+            "completed": 246,
+            "non_commit": 4
+          },
+          "n_valid_ttfa": 246,
+          "n_missing_or_failed": 4,
+          "n_early_response": 0,
+          "escalation_rate": 0.0569,
+          "ttfa_answer": {
+            "n": 246,
+            "mean": 5.14,
+            "p50": 1.809,
+            "p95": 7.708,
+            "p99": 80.258,
+            "min": 0.463,
+            "max": 275.81
+          },
+          "ttfa_first_any": {
+            "n": 246,
+            "mean": 4.722,
+            "p50": 1.786,
+            "p95": 3.712,
+            "p99": 80.258,
+            "min": 0.463,
+            "max": 275.81
+          },
+          "feed_lag_max_ms": {
+            "n": 250,
+            "mean": 29.864,
+            "p50": 0.0,
+            "p95": 91.65,
+            "p99": 259.23,
+            "min": 0.0,
+            "max": 3787.0
+          },
+          "ttfa_local_path": {
+            "n": 232,
+            "mean": 4.896,
+            "p50": 1.782,
+            "p95": 3.717,
+            "p99": 94.156,
+            "min": 0.463,
+            "max": 275.81
+          },
+          "ttfa_escalated_path": {
+            "n": 14,
+            "mean": 9.18,
+            "p50": 8.341,
+            "p95": 14.303,
+            "p99": 14.488,
+            "min": 4.837,
+            "max": 14.534
+          }
+        },
+        "balanced": {
+          "n_sessions": 250,
+          "status_counts": {
+            "completed": 244,
+            "non_commit": 6
+          },
+          "n_valid_ttfa": 244,
+          "n_missing_or_failed": 6,
+          "n_early_response": 0,
+          "escalation_rate": 0.2172,
+          "ttfa_answer": {
+            "n": 244,
+            "mean": 3.62,
+            "p50": 2.179,
+            "p95": 9.884,
+            "p99": 20.613,
+            "min": 0.441,
+            "max": 59.582
+          },
+          "ttfa_first_any": {
+            "n": 244,
+            "mean": 2.218,
+            "p50": 1.597,
+            "p95": 3.527,
+            "p99": 4.576,
+            "min": 0.382,
+            "max": 59.582
+          },
+          "feed_lag_max_ms": {
+            "n": 250,
+            "mean": 26.204,
+            "p50": 0.0,
+            "p95": 111.0,
+            "p99": 419.21,
+            "min": 0.0,
+            "max": 2169.0
+          },
+          "ttfa_local_path": {
+            "n": 191,
+            "mean": 2.337,
+            "p50": 1.604,
+            "p95": 3.526,
+            "p99": 6.717,
+            "min": 0.441,
+            "max": 59.582
+          },
+          "ttfa_escalated_path": {
+            "n": 53,
+            "mean": 8.246,
+            "p50": 7.992,
+            "p95": 13.891,
+            "p99": 20.063,
+            "min": 4.273,
+            "max": 23.239
+          }
+        },
+        "aggressive": {
+          "n_sessions": 250,
+          "status_counts": {
+            "completed": 247,
+            "non_commit": 3
+          },
+          "n_valid_ttfa": 247,
+          "n_missing_or_failed": 3,
+          "n_early_response": 0,
+          "escalation_rate": 0.6032,
+          "ttfa_answer": {
+            "n": 247,
+            "mean": 7.396,
+            "p50": 5.07,
+            "p95": 13.254,
+            "p99": 24.503,
+            "min": 0.539,
+            "max": 261.886
+          },
+          "ttfa_first_any": {
+            "n": 247,
+            "mean": 3.769,
+            "p50": 1.665,
+            "p95": 3.191,
+            "p99": 5.142,
+            "min": 0.391,
+            "max": 257.517
+          },
+          "feed_lag_max_ms": {
+            "n": 250,
+            "mean": 298.372,
+            "p50": 0.0,
+            "p95": 1722.85,
+            "p99": 5997.1,
+            "min": 0.0,
+            "max": 8371.0
+          },
+          "ttfa_local_path": {
+            "n": 98,
+            "mean": 1.936,
+            "p50": 1.639,
+            "p95": 3.285,
+            "p99": 3.582,
+            "min": 0.539,
+            "max": 4.571
+          },
+          "ttfa_escalated_path": {
+            "n": 149,
+            "mean": 10.986,
+            "p50": 6.999,
+            "p95": 18.901,
+            "p99": 117.075,
+            "min": 2.72,
+            "max": 261.886
+          }
+        },
+        "always": {
+          "n_sessions": 250,
+          "status_counts": {
+            "completed": 248,
+            "non_commit": 2
+          },
+          "n_valid_ttfa": 248,
+          "n_missing_or_failed": 2,
+          "n_early_response": 0,
+          "escalation_rate": 1.0,
+          "ttfa_answer": {
+            "n": 248,
+            "mean": 7.492,
+            "p50": 6.127,
+            "p95": 16.711,
+            "p99": 23.129,
+            "min": 2.877,
+            "max": 46.428
+          },
+          "ttfa_first_any": {
+            "n": 248,
+            "mean": 1.865,
+            "p50": 1.714,
+            "p95": 2.787,
+            "p99": 3.087,
+            "min": 0.492,
+            "max": 3.742
+          },
+          "feed_lag_max_ms": {
+            "n": 250,
+            "mean": 119.18,
+            "p50": 0.0,
+            "p95": 516.3,
+            "p99": 1357.9,
+            "min": 0.0,
+            "max": 2366.0
+          }
+        }
+      },
+      "paired": {
+        "n_common_valid_ids": 237,
+        "local": {
+          "n": 237,
+          "mean": 3.714,
+          "p50": 1.702,
+          "p95": 3.595,
+          "p99": 4.32,
+          "min": 0.475,
+          "max": 305.515
+        },
+        "conservative": {
+          "n": 237,
+          "mean": 3.519,
+          "p50": 1.792,
+          "p95": 5.96,
+          "p99": 14.406,
+          "min": 0.463,
+          "max": 239.77
+        },
+        "balanced": {
+          "n": 237,
+          "mean": 3.567,
+          "p50": 1.727,
+          "p95": 9.794,
+          "p99": 21.04,
+          "min": 0.441,
+          "max": 59.582
+        },
+        "aggressive": {
+          "n": 237,
+          "mean": 7.427,
+          "p50": 5.07,
+          "p95": 13.18,
+          "p99": 24.678,
+          "min": 0.539,
+          "max": 261.886
+        },
+        "always": {
+          "n": 237,
+          "mean": 7.527,
+          "p50": 6.125,
+          "p95": 16.88,
+          "p99": 23.16,
+          "min": 2.877,
+          "max": 46.428
+        }
+      }
+    },
+    "sllama": {
+      "arms": {
+        "local": {
+          "n_sessions": 250,
+          "status_counts": {
+            "completed": 249,
+            "non_commit": 1
+          },
+          "n_valid_ttfa": 249,
+          "n_missing_or_failed": 1,
+          "n_early_response": 0,
+          "escalation_rate": 0.0,
+          "ttfa_answer": {
+            "n": 249,
+            "mean": 1.606,
+            "p50": 1.524,
+            "p95": 2.551,
+            "p99": 3.66,
+            "min": 0.268,
+            "max": 51.635
+          },
+          "ttfa_first_any": {
+            "n": 249,
+            "mean": 1.606,
+            "p50": 1.524,
+            "p95": 2.551,
+            "p99": 3.66,
+            "min": 0.268,
+            "max": 51.635
+          },
+          "feed_lag_max_ms": {
+            "n": 250,
+            "mean": 20.924,
+            "p50": 0.0,
+            "p95": 87.75,
+            "p99": 453.38,
+            "min": 0.0,
+            "max": 649.0
+          }
+        },
+        "conservative": {
+          "n_sessions": 250,
+          "status_counts": {
+            "completed": 249,
+            "non_commit": 1
+          },
+          "n_valid_ttfa": 249,
+          "n_missing_or_failed": 1,
+          "n_early_response": 0,
+          "escalation_rate": 0.0,
+          "ttfa_answer": {
+            "n": 249,
+            "mean": 1.634,
+            "p50": 1.537,
+            "p95": 2.551,
+            "p99": 3.714,
+            "min": 0.264,
+            "max": 51.583
+          },
+          "ttfa_first_any": {
+            "n": 249,
+            "mean": 1.634,
+            "p50": 1.537,
+            "p95": 2.551,
+            "p99": 3.714,
+            "min": 0.264,
+            "max": 51.583
+          },
+          "feed_lag_max_ms": {
+            "n": 250,
+            "mean": 23.452,
+            "p50": 0.0,
+            "p95": 129.65,
+            "p99": 440.04,
+            "min": 0.0,
+            "max": 636.0
+          },
+          "ttfa_local_path": {
+            "n": 249,
+            "mean": 1.634,
+            "p50": 1.537,
+            "p95": 2.551,
+            "p99": 3.714,
+            "min": 0.264,
+            "max": 51.583
+          },
+          "ttfa_escalated_path": null
+        },
+        "balanced": {
+          "n_sessions": 250,
+          "status_counts": {
+            "completed": 247,
+            "non_commit": 3
+          },
+          "n_valid_ttfa": 247,
+          "n_missing_or_failed": 3,
+          "n_early_response": 0,
+          "escalation_rate": 0.0405,
+          "ttfa_answer": {
+            "n": 247,
+            "mean": 2.095,
+            "p50": 1.532,
+            "p95": 3.82,
+            "p99": 22.782,
+            "min": 0.296,
+            "max": 51.69
+          },
+          "ttfa_first_any": {
+            "n": 247,
+            "mean": 1.648,
+            "p50": 1.522,
+            "p95": 2.59,
+            "p99": 3.796,
+            "min": 0.296,
+            "max": 51.69
+          },
+          "feed_lag_max_ms": {
+            "n": 250,
+            "mean": 89.816,
+            "p50": 0.0,
+            "p95": 353.1,
+            "p99": 2247.24,
+            "min": 0.0,
+            "max": 6649.0
+          },
+          "ttfa_local_path": {
+            "n": 237,
+            "mean": 1.688,
+            "p50": 1.525,
+            "p95": 2.609,
+            "p99": 3.814,
+            "min": 0.296,
+            "max": 51.69
+          },
+          "ttfa_escalated_path": {
+            "n": 10,
+            "mean": 11.723,
+            "p50": 10.092,
+            "p95": 22.842,
+            "p99": 25.012,
+            "min": 3.873,
+            "max": 25.554
+          }
+        },
+        "aggressive": {
+          "n_sessions": 250,
+          "status_counts": {
+            "completed": 246,
+            "non_commit": 4
+          },
+          "n_valid_ttfa": 246,
+          "n_missing_or_failed": 4,
+          "n_early_response": 0,
+          "escalation_rate": 0.1951,
+          "ttfa_answer": {
+            "n": 246,
+            "mean": 2.609,
+            "p50": 1.678,
+            "p95": 8.489,
+            "p99": 13.207,
+            "min": 0.416,
+            "max": 14.238
+          },
+          "ttfa_first_any": {
+            "n": 246,
+            "mean": 1.413,
+            "p50": 1.606,
+            "p95": 2.659,
+            "p99": 2.918,
+            "min": 0.416,
+            "max": 4.969
+          },
+          "feed_lag_max_ms": {
+            "n": 250,
+            "mean": 133.148,
+            "p50": 0.0,
+            "p95": 609.2,
+            "p99": 2925.69,
+            "min": 0.0,
+            "max": 4048.0
+          },
+          "ttfa_local_path": {
+            "n": 198,
+            "mean": 1.474,
+            "p50": 1.618,
+            "p95": 2.685,
+            "p99": 2.901,
+            "min": 0.416,
+            "max": 4.969
+          },
+          "ttfa_escalated_path": {
+            "n": 48,
+            "mean": 7.289,
+            "p50": 6.713,
+            "p95": 13.357,
+            "p99": 14.134,
+            "min": 2.859,
+            "max": 14.238
+          }
+        },
+        "always": {
+          "n_sessions": 250,
+          "status_counts": {
+            "completed": 249,
+            "non_commit": 1
+          },
+          "n_valid_ttfa": 249,
+          "n_missing_or_failed": 1,
+          "n_early_response": 0,
+          "escalation_rate": 1.0,
+          "ttfa_answer": {
+            "n": 249,
+            "mean": 5.126,
+            "p50": 4.315,
+            "p95": 9.453,
+            "p99": 15.69,
+            "min": 2.418,
+            "max": 28.076
+          },
+          "ttfa_first_any": {
+            "n": 249,
+            "mean": 1.267,
+            "p50": 1.538,
+            "p95": 1.918,
+            "p99": 2.709,
+            "min": 0.143,
+            "max": 3.917
+          },
+          "feed_lag_max_ms": {
+            "n": 250,
+            "mean": 201.408,
+            "p50": 0.0,
+            "p95": 730.55,
+            "p99": 2959.61,
+            "min": 0.0,
+            "max": 3385.0
+          }
+        }
+      },
+      "paired": {
+        "n_common_valid_ids": 242,
+        "local": {
+          "n": 242,
+          "mean": 1.385,
+          "p50": 1.522,
+          "p95": 2.497,
+          "p99": 2.633,
+          "min": 0.268,
+          "max": 32.468
+        },
+        "conservative": {
+          "n": 242,
+          "mean": 1.413,
+          "p50": 1.534,
+          "p95": 2.487,
+          "p99": 2.965,
+          "min": 0.264,
+          "max": 32.456
+        },
+        "balanced": {
+          "n": 242,
+          "mean": 1.887,
+          "p50": 1.531,
+          "p95": 3.655,
+          "p99": 17.355,
+          "min": 0.296,
+          "max": 32.438
+        },
+        "aggressive": {
+          "n": 242,
+          "mean": 2.617,
+          "p50": 1.678,
+          "p95": 8.51,
+          "p99": 13.267,
+          "min": 0.416,
+          "max": 14.238
+        },
+        "always": {
+          "n": 242,
+          "mean": 5.139,
+          "p50": 4.322,
+          "p95": 9.527,
+          "p99": 15.881,
+          "min": 2.418,
+          "max": 28.076
+        }
+      }
+    },
+    "sdqa": {
+      "arms": {
+        "local": {
+          "n_sessions": 200,
+          "status_counts": {
+            "completed": 200
+          },
+          "n_valid_ttfa": 200,
+          "n_missing_or_failed": 0,
+          "n_early_response": 1,
+          "escalation_rate": 0.0,
+          "ttfa_answer": {
+            "n": 200,
+            "mean": 0.934,
+            "p50": 0.622,
+            "p95": 1.666,
+            "p99": 2.242,
+            "min": -0.245,
+            "max": 3.099
+          },
+          "ttfa_first_any": {
+            "n": 200,
+            "mean": 0.934,
+            "p50": 0.622,
+            "p95": 1.666,
+            "p99": 2.242,
+            "min": -0.245,
+            "max": 3.099
+          },
+          "feed_lag_max_ms": {
+            "n": 200,
+            "mean": 263.645,
+            "p50": 0.0,
+            "p95": 2090.35,
+            "p99": 4169.03,
+            "min": 0.0,
+            "max": 4452.0
+          }
+        },
+        "conservative": {
+          "n_sessions": 200,
+          "status_counts": {
+            "completed": 199,
+            "non_commit": 1
+          },
+          "n_valid_ttfa": 199,
+          "n_missing_or_failed": 1,
+          "n_early_response": 2,
+          "escalation_rate": 0.0653,
+          "ttfa_answer": {
+            "n": 199,
+            "mean": 1.499,
+            "p50": 0.754,
+            "p95": 7.181,
+            "p99": 11.935,
+            "min": -0.277,
+            "max": 14.687
+          },
+          "ttfa_first_any": {
+            "n": 199,
+            "mean": 0.944,
+            "p50": 0.712,
+            "p95": 1.826,
+            "p99": 2.486,
+            "min": -0.277,
+            "max": 3.016
+          },
+          "feed_lag_max_ms": {
+            "n": 200,
+            "mean": 52.765,
+            "p50": 0.0,
+            "p95": 378.55,
+            "p99": 775.26,
+            "min": 0.0,
+            "max": 2558.0
+          },
+          "ttfa_local_path": {
+            "n": 186,
+            "mean": 0.935,
+            "p50": 0.709,
+            "p95": 1.812,
+            "p99": 2.114,
+            "min": -0.277,
+            "max": 2.537
+          },
+          "ttfa_escalated_path": {
+            "n": 13,
+            "mean": 9.565,
+            "p50": 9.212,
+            "p95": 14.681,
+            "p99": 14.686,
+            "min": 5.801,
+            "max": 14.687
+          }
+        },
+        "balanced": {
+          "n_sessions": 200,
+          "status_counts": {
+            "completed": 200
+          },
+          "n_valid_ttfa": 200,
+          "n_missing_or_failed": 0,
+          "n_early_response": 0,
+          "escalation_rate": 0.245,
+          "ttfa_answer": {
+            "n": 200,
+            "mean": 2.599,
+            "p50": 0.867,
+            "p95": 10.814,
+            "p99": 15.516,
+            "min": 0.1,
+            "max": 18.377
+          },
+          "ttfa_first_any": {
+            "n": 200,
+            "mean": 0.93,
+            "p50": 0.71,
+            "p95": 1.812,
+            "p99": 1.986,
+            "min": -0.034,
+            "max": 2.035
+          },
+          "feed_lag_max_ms": {
+            "n": 200,
+            "mean": 120.83,
+            "p50": 0.0,
+            "p95": 652.05,
+            "p99": 3201.4,
+            "min": 0.0,
+            "max": 4453.0
+          },
+          "ttfa_local_path": {
+            "n": 151,
+            "mean": 0.93,
+            "p50": 0.715,
+            "p95": 1.821,
+            "p99": 1.997,
+            "min": 0.1,
+            "max": 2.035
+          },
+          "ttfa_escalated_path": {
+            "n": 49,
+            "mean": 7.742,
+            "p50": 6.495,
+            "p95": 15.472,
+            "p99": 17.277,
+            "min": 3.031,
+            "max": 18.377
+          }
+        },
+        "aggressive": {
+          "n_sessions": 200,
+          "status_counts": {
+            "completed": 200
+          },
+          "n_valid_ttfa": 200,
+          "n_missing_or_failed": 0,
+          "n_early_response": 0,
+          "escalation_rate": 0.65,
+          "ttfa_answer": {
+            "n": 200,
+            "mean": 4.659,
+            "p50": 4.197,
+            "p95": 10.169,
+            "p99": 14.522,
+            "min": 0.398,
+            "max": 36.07
+          },
+          "ttfa_first_any": {
+            "n": 200,
+            "mean": 0.886,
+            "p50": 0.71,
+            "p95": 1.712,
+            "p99": 1.837,
+            "min": -0.051,
+            "max": 1.886
+          },
+          "feed_lag_max_ms": {
+            "n": 200,
+            "mean": 184.43,
+            "p50": 0.0,
+            "p95": 683.95,
+            "p99": 3261.44,
+            "min": 0.0,
+            "max": 3464.0
+          },
+          "ttfa_local_path": {
+            "n": 70,
+            "mean": 0.948,
+            "p50": 0.734,
+            "p95": 1.719,
+            "p99": 1.852,
+            "min": 0.398,
+            "max": 1.886
+          },
+          "ttfa_escalated_path": {
+            "n": 130,
+            "mean": 6.657,
+            "p50": 6.128,
+            "p95": 11.078,
+            "p99": 15.542,
+            "min": 2.9,
+            "max": 36.07
+          }
+        },
+        "always": {
+          "n_sessions": 200,
+          "status_counts": {
+            "completed": 200
+          },
+          "n_valid_ttfa": 200,
+          "n_missing_or_failed": 0,
+          "n_early_response": 0,
+          "escalation_rate": 1.0,
+          "ttfa_answer": {
+            "n": 200,
+            "mean": 5.847,
+            "p50": 5.095,
+            "p95": 10.636,
+            "p99": 13.997,
+            "min": 2.645,
+            "max": 37.673
+          },
+          "ttfa_first_any": {
+            "n": 200,
+            "mean": 0.897,
+            "p50": 0.712,
+            "p95": 1.785,
+            "p99": 1.912,
+            "min": -0.18,
+            "max": 2.118
+          },
+          "feed_lag_max_ms": {
+            "n": 200,
+            "mean": 222.025,
+            "p50": 22.0,
+            "p95": 1013.3,
+            "p99": 2391.73,
+            "min": 0.0,
+            "max": 3029.0
+          }
+        }
+      },
+      "paired": {
+        "n_common_valid_ids": 199,
+        "local": {
+          "n": 199,
+          "mean": 0.931,
+          "p50": 0.62,
+          "p95": 1.666,
+          "p99": 2.244,
+          "min": -0.245,
+          "max": 3.099
+        },
+        "conservative": {
+          "n": 199,
+          "mean": 1.499,
+          "p50": 0.754,
+          "p95": 7.181,
+          "p99": 11.935,
+          "min": -0.277,
+          "max": 14.687
+        },
+        "balanced": {
+          "n": 199,
+          "mean": 2.582,
+          "p50": 0.863,
+          "p95": 10.877,
+          "p99": 15.522,
+          "min": 0.1,
+          "max": 18.377
+        },
+        "aggressive": {
+          "n": 199,
+          "mean": 4.649,
+          "p50": 4.186,
+          "p95": 10.181,
+          "p99": 14.536,
+          "min": 0.398,
+          "max": 36.07
+        },
+        "always": {
+          "n": 199,
+          "mean": 5.847,
+          "p50": 5.094,
+          "p95": 10.652,
+          "p99": 14.003,
+          "min": 2.645,
+          "max": 37.673
+        }
+      }
+    }
+  },
+  "order_violations": [],
+  "pacing": {}
+}

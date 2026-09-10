@@ -1,0 +1,110 @@
+{
+  "run_id": "ttfa1",
+  "protocol": "ttfa-v3",
+  "created_utc": "2026-09-09T19:21:47Z",
+  "gate_art_path": "/data/gate_native.json",
+  "gate_art_sha256": "0e6494c2eeac9bcd86c10b5def3cbd32e98bb0765fa2fd8afc8c1b47915ea372",
+  "gate_act_path": "/data/gate_act.json",
+  "gate_act_sha256": "f2e4e642635e807c6b8e48ec1167cb3491de07e0fd2b2b65d206a97a4cc6e5e1",
+  "eot_thresholds_lang": {
+    "en": {
+      "conservative": 0.9057239890098572,
+      "balanced": 0.7972545623779297,
+      "aggressive": 0.5533501505851746
+    },
+    "zh": {
+      "conservative": 0.485044926404953,
+      "balanced": 0.38618695735931396,
+      "aggressive": 0.2787056267261505
+    }
+  },
+  "eot_thresholds": {
+    "conservative": 0.8968043923377991,
+    "balanced": 0.775121808052063,
+    "aggressive": 0.5140886306762695
+  },
+  "gate_layer": 22,
+  "gate_modes": [
+    "eot_last",
+    "eot_mean",
+    "user_mean"
+  ],
+  "gate_label_source": "native",
+  "read_point": {
+    "layer": 22,
+    "k3": 8,
+    "at": "listen->speak commit"
+  },
+  "serving": {
+    "sys_prompt": "You are a friendly assistant.",
+    "gen_top_k": 20,
+    "force_listen_count": 3,
+    "generate_audio": true,
+    "duplex_defaults": "as_duplex() stock",
+    "relay": "tts teacher-forced talker",
+    "relay_fmt": "clean_expert_v2",
+    "expert": "ask_expert_web(effort=low) -> ask_expert fallback",
+    "expert_asr": "gpt-transcribe"
+  },
+  "timing": {
+    "chunk_s": 1.0,
+    "max_wait_s": 150,
+    "max_ans": 60,
+    "max_chunks": 400,
+    "clock": "time.monotonic per worker",
+    "ttfa_def": "first_answer_pcm - input_end, signed",
+    "input_end": "feed_start + audio_s (scheduled arrival of last real sample)"
+  },
+  "pools": {
+    "frozen": {
+      "queries_file": "/data/queries.jsonl",
+      "queries_sha256": "61618dca1a9532dceb0b9a774ca28c3d8837ade098876d694de2ad1b1b93f0f3",
+      "n_queries": 240,
+      "lang": "en",
+      "audio_dir": "/data/audio_pool",
+      "note": "split==test only"
+    },
+    "striviaqa": {
+      "queries_file": "/data/queries_striviaqa.jsonl",
+      "queries_sha256": "0786d8c74f486155ad774349cc115c013967aff680eb66414d226f2afb09bd65",
+      "n_queries": 250,
+      "lang": "en",
+      "audio_dir": "/data/bench_audio",
+      "note": "all"
+    },
+    "swebq": {
+      "queries_file": "/data/queries_swebq.jsonl",
+      "queries_sha256": "ec6eae92fe12aeab33b722770d7816325f4c694c73885124ce9d126eb65c6210",
+      "n_queries": 250,
+      "lang": "en",
+      "audio_dir": "/data/bench_audio",
+      "note": "all"
+    },
+    "sllama": {
+      "queries_file": "/data/queries_sllama.jsonl",
+      "queries_sha256": "3cee65035ea055165387a8af0bb622755216d58c76946c387b68410674f338b1",
+      "n_queries": 250,
+      "lang": "en",
+      "audio_dir": "/data/bench_audio",
+      "note": "all"
+    },
+    "sdqa": {
+      "queries_file": "/data/queries_sdqa.jsonl",
+      "queries_sha256": "6b2c4fa920ed2318ab77f65c9d69c94bb2c6379b51b7687d0a19f45638a61156",
+      "n_queries": 200,
+      "lang": "en",
+      "audio_dir": "/data/sdqa_audio",
+      "note": "all"
+    }
+  },
+  "model": {
+    "dir": "/workspace/models/MiniCPM-o-4_5",
+    "file_hashes": {
+      "config.json": "b0c03cf9f0cfc1178ade50e4ba62727ca7a77aa6a6a71eda6668d8f289e96c1d",
+      "model.safetensors.index.json": "e578de05a95804bb15237a6fd7c236414e0160cd76751da82c9f7f0d134596e7",
+      "generation_config.json": "cf29e6aecb72503bd220cccb6d86bde84a9f57e77c741dedb8670036106e2119",
+      "_name_or_path": null
+    },
+    "n_files": 110
+  }
+}
