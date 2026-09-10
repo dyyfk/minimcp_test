@@ -18,6 +18,7 @@ Run from this directory:
 """
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 
@@ -32,11 +33,20 @@ from probe_lab import CALIB_TAGS, GP
 HERE = Path(__file__).resolve().parent
 JUDGED = HERE / "internal_pass3_judged.json"
 OUTPUT = HERE / "internal_pass3_remix.json"
+SCORES = HERE / "internal_pass3_scores.jsonl"
 LAYERS = (26, 30, 34)
 BLOCKS = ("commit", "onset_last", "onset_mean8", "run_mean")
 RATES = (0.15, 0.30, 0.50)
 NPERM = 10_000
 SEED = 8
+
+
+def sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
 def fit_and_score() -> tuple[dict[str, float], np.ndarray, np.ndarray]:
@@ -112,6 +122,7 @@ def main() -> None:
     ]
     rng = np.random.default_rng(SEED)
 
+    route_masks = {}
     rows = {
         "always-local": {
             "accuracy": float(local.mean()),
@@ -122,6 +133,7 @@ def main() -> None:
         k = round(nominal_rate * int(scoreable.sum()))
         escalated = np.zeros(len(data), dtype=bool)
         escalated[scoreable_order[:k]] = True
+        route_masks[nominal_rate] = escalated.copy()
         realized_rate = float(escalated.mean())
         gated = np.where(escalated, expert_outcome, local)
         random_mean = float(
@@ -163,6 +175,16 @@ def main() -> None:
         .to_numpy()
     )
     captured_scores = np.array([score_by_id[query_id] for query_id in captured_ids])
+    input_paths = [
+        GP / "queries.jsonl",
+        JUDGED,
+        GP.parent / "eval_expert.parquet",
+        *[
+            GP / "onset3" / f"nvda_h3_{tag}.L22-38.npz"
+            for tag in CALIB_TAGS
+        ],
+        *[GP / "onset_fit" / f"nvda_{tag}.parquet" for tag in CALIB_TAGS],
+    ]
     report = {
         "protocol": {
             "probe": (
@@ -177,6 +199,11 @@ def main() -> None:
             "n_total": len(data),
             "n_scoreable": int(scoreable.sum()),
             "n_no_onset": int((~scoreable).sum()),
+            "per_query_archive": SCORES.name,
+            "input_sha256": {
+                str(path.relative_to(GP.parent)): sha256_file(path)
+                for path in input_paths
+            },
         },
         "scoreable_auc_fresh_labels": float(
             roc_auc_score(scoreable_fresh_labels, captured_scores)
@@ -195,8 +222,44 @@ def main() -> None:
             for pool, group in data.groupby("pool", sort=True)
         },
     }
+
+    ranks = np.zeros(len(data), dtype=int)
+    ranks[scoreable_order] = np.arange(1, int(scoreable.sum()) + 1)
+    per_query = []
+    for index, row in data.iterrows():
+        record = {
+            "id": str(row["id"]),
+            "split": "test",
+            "pool": str(row["pool"]),
+            "onset_valid": bool(scoreable.iloc[index]),
+            "onset_frame": int(row["onset_frame"]),
+            "probe_logit": (
+                float(row["score"]) if scoreable.iloc[index] else None
+            ),
+            "probe_score": (
+                float(1 / (1 + np.exp(-row["score"])))
+                if scoreable.iloc[index]
+                else None
+            ),
+            "score_rank": int(ranks[index]) if scoreable.iloc[index] else None,
+            "local_ok": bool(row["adequate"]),
+            "expert_ok": bool(row["expert"]),
+        }
+        for nominal_rate, mask in route_masks.items():
+            suffix = str(round(100 * nominal_rate))
+            routed = bool(mask[index])
+            record[f"route_at_{suffix}pct"] = routed
+            record[f"outcome_at_{suffix}pct"] = bool(
+                row["expert"] if routed else row["adequate"]
+            )
+        per_query.append(record)
+
+    SCORES.write_text(
+        "".join(json.dumps(record, sort_keys=True) + "\n" for record in per_query)
+    )
     OUTPUT.write_text(json.dumps(report, indent=2) + "\n")
     print(json.dumps(report, indent=2))
+    print(f"wrote {SCORES}")
     print(f"wrote {OUTPUT}")
 
 
