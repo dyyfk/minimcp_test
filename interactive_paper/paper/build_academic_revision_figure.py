@@ -103,7 +103,7 @@ def make_figure(native_path, output_dir, weights_path=HERE / 'revision_data/join
                         textcoords='offset points', fontsize=7.5, color=INK)
         ax.set(xlim=(-3, 105), ylim=(30, 104),
                xticks=[0, 25, 50, 75, 100], yticks=[40, 60, 80, 100])
-        ax.set_ylabel('Weighted accuracy (%)' if row == 0 else 'Accuracy (%)', labelpad=6)
+        ax.set_ylabel('Accuracy (%)' if row == 0 else 'Accuracy (%)', labelpad=6)
         ax.set_title(f'{title}  ($n={p["never"]["n"]}$)', loc='left', pad=5,
                      fontweight='normal')
         timing_lines = []
