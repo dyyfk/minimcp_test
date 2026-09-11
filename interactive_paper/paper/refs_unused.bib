@@ -1,0 +1,496 @@
+% =========================================================================
+% refs_unused.bib — entries NOT cited anywhere in the compiled paper
+% (main.tex -> sections/*.tex incl. appendix_curated). Moved out of refs.bib
+% on 2026-09-11 so refs.bib mirrors the reference list exactly. Not loaded by
+% \bibliography{refs}; move an entry back to refs.bib to cite it.
+% Seven of these are cited only by sections/appendix.tex, which main.tex does
+% not \input: cheang2025recall, david2025temporal, hu2024routerbench,
+% lin2025fdb, pleiss2020aum, swayamdipta2020cartography, vu2023freshllms.
+% =========================================================================
+
+% ---------------- routing / cascades / deferral --------------------------
+
+@article{hu2024routerbench,
+  title   = {{RouterBench}: A Benchmark for Multi-{LLM} Routing System},
+  author  = {Hu, Qitian Jason and Bieker, Jacob and Li, Xiuyu and Jiang, Nan and Keigwin, Benjamin and Ranganath, Gaurav and Keutzer, Kurt and Upadhyay, Shriyash Kaustubh},
+  journal = {arXiv preprint arXiv:2403.12031},
+  year    = {2024}
+}
+
+@article{llmrouterbench2026,
+  title   = {{LLMRouterBench}: A Massive Benchmark and Unified Framework for {LLM} Routing},
+  author  = {Li, Hao and Zhang, Yiqun and Guo, Zhaoyan and Wang, Chenxu and Tang, Shengji and Zhang, Qiaosheng and Chen, Yang and Qi, Biqing and Ye, Peng and Bai, Lei and Wang, Zhen and Hu, Shuyue},
+  journal = {arXiv preprint arXiv:2601.07206},
+  year    = {2026}
+}
+
+@inproceedings{madras2018predict,
+  title     = {Predict Responsibly: Improving Fairness and Accuracy by Learning to Defer},
+  author    = {Madras, David and Pitassi, Toniann and Zemel, Richard},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  year      = {2018}
+}
+
+@inproceedings{leviathan2023fast,
+  title     = {Fast Inference from Transformers via Speculative Decoding},
+  author    = {Leviathan, Yaniv and Kalman, Matan and Matias, Yossi},
+  booktitle = {International Conference on Machine Learning (ICML)},
+  year      = {2023},
+  note      = {arXiv:2211.17192}
+}
+
+@inproceedings{schuster2022confident,
+  title     = {Confident Adaptive Language Modeling},
+  author    = {Schuster, Tal and Fisch, Adam and Gupta, Jai and Dehghani, Mostafa and Bahri, Dara and Tran, Vinh Q. and Tay, Yi and Metzler, Donald},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  year      = {2022},
+  note      = {arXiv:2207.07061}
+}
+
+@article{guo2025deepseekr1,
+  title   = {{DeepSeek-R1}: Incentivizing Reasoning Capability in {LLMs} via Reinforcement Learning},
+  author  = {{DeepSeek-AI} and Guo, Daya and others},
+  journal = {arXiv preprint arXiv:2501.12948},
+  year    = {2025}
+}
+
+
+% ---------------- duplex / omni speech models ----------------------------
+
+@article{zeng2024glm4voice,
+  title   = {{GLM-4-Voice}: Towards Intelligent and Human-Like End-to-End Spoken Chatbot},
+  author  = {Zeng, Aohan and Du, Zhengxiao and Liu, Mingdao and Wang, Kedong and Jiang, Shengmin and Zhao, Lei and Dong, Yuxiao and Tang, Jie},
+  journal = {arXiv preprint arXiv:2412.02612},
+  year    = {2024}
+}
+
+@article{xu2025qwen25omni,
+  title   = {{Qwen2.5-Omni} Technical Report},
+  author  = {Xu, Jin and Guo, Zhifang and He, Jinzheng and Hu, Hangrui and He, Ting and Bai, Shuai and Chen, Keqin and others},
+  journal = {arXiv preprint arXiv:2503.20215},
+  year    = {2025}
+}
+
+@article{liao2025flexduo,
+  title   = {{FlexDuo}: A Pluggable System for Enabling Full-Duplex Capabilities in Speech Dialogue Systems},
+  author  = {Liao, Borui and Xu, Yulong and Ou, Jiao and Yang, Kaiyuan and Jian, Weihua and Wan, Pengfei and Zhang, Di},
+  journal = {arXiv preprint arXiv:2502.13472},
+  year    = {2025}
+}
+
+@article{chen2025minmo,
+  title   = {{MinMo}: A Multimodal Large Language Model for Seamless Voice Interaction},
+  author  = {Chen, Qian and Chen, Yafeng and Chen, Yanni and others},
+  journal = {arXiv preprint arXiv:2501.06282},
+  year    = {2025}
+}
+
+
+% -- full-duplex control-as-special-token family (cross-check against the
+% -- Feishu duplex list before camera-ready; BayLing/DuplexPO-style works) --
+
+@article{ma2024lslm,
+  title   = {Language Model Can Listen While Speaking},
+  author  = {Ma, Ziyang and Song, Yakun and Du, Chenpeng and Cong, Jian and Chen, Zhuo and Wang, Yuping and Wang, Yuxuan and Chen, Xie},
+  journal = {arXiv preprint arXiv:2408.02622},
+  year    = {2024}
+}
+
+@article{fu2024vita,
+  title   = {{VITA}: Towards Open-Source Interactive Omni Multimodal {LLM}},
+  author  = {Fu, Chaoyou and Lin, Haojia and Long, Zuwei and Shen, Yunhang and Dai, Yuhang and Zhao, Meng and others},
+  journal = {arXiv preprint arXiv:2408.05211},
+  year    = {2024}
+}
+
+@article{yu2024salmonnomni,
+  title   = {{SALMONN-omni}: A Codec-free {LLM} for Full-duplex Speech Understanding and Generation},
+  author  = {Yu, Wenyi and Wang, Siyin and Yang, Xiaoyu and Chen, Xianzhao and Tian, Xiaohai and Zhang, Jun and Sun, Guangzhi and Lu, Lu and Wang, Yuxuan and Zhang, Chao},
+  journal = {arXiv preprint arXiv:2411.18138},
+  year    = {2024}
+}
+
+@article{zhang2026duplexsla,
+  title   = {{DuplexSLA}: A Full-Duplex Spoken Language Model with Synchronized Speech, Language, and Action},
+  author  = {Zhang, Haoyang and Chen, Jun and Wu, Donghang and Li, Yuxin and Zhang, Yuxin and Zhang, Xiangyu Tony and Liu, Che and Lin, Qingjian and Peng, Yizhou and Liu, Hexin and Chng, Eng Siong and Yan, Chao and Wu, Boyong and Huang, Yechang and Yang, Xuerui and Tian, Fei},
+  journal = {arXiv preprint arXiv:2605.20755},
+  year    = {2026}
+}
+
+@article{lin2025fdb,
+  title   = {{Full-Duplex-Bench}: A Benchmark to Evaluate Full-duplex Spoken Dialogue Models on Turn-taking Capabilities},
+  author  = {Lin, Guan-Ting and Lian, Jiachen and Li, Tingle and Wang, Qirui and Anumanchipalli, Gopala and Liu, Alexander H. and Lee, Hung-yi},
+  journal = {arXiv preprint arXiv:2503.04721},
+  year    = {2025}
+}
+
+@article{lin2026fdbv3,
+  title   = {{Full-Duplex-Bench-v3}: Benchmarking Tool Use for Full-Duplex Voice Agents Under Real-World Disfluency},
+  author  = {Lin, Guan-Ting and Chen, Chen and Chen, Zhehuai and Lee, Hung-yi},
+  journal = {arXiv preprint arXiv:2604.04847},
+  year    = {2026}
+}
+
+@article{ohashi2026interactivity,
+  title   = {Multi-Faceted Interactivity Alignment in Full-Duplex Speech Models},
+  author  = {Ohashi, Atsumoto and Zeghidour, Neil and D{\'e}fossez, Alexandre and Kharitonov, Eugene},
+  journal = {arXiv preprint arXiv:2606.11167},
+  year    = {2026}
+}
+
+@article{chu2024qwen2audio,
+  title   = {{Qwen2-Audio} Technical Report},
+  author  = {Chu, Yunfei and Xu, Jin and Yang, Qian and Wei, Haojie and Wei, Xipin and Guo, Zhifang and others},
+  journal = {arXiv preprint arXiv:2407.10759},
+  year    = {2024}
+}
+
+@article{nguyen2023generative,
+  title   = {Generative Spoken Dialogue Language Modeling},
+  author  = {Nguyen, Tu Anh and Kharitonov, Eugene and Copet, Jade and Adi, Yossi and Hsu, Wei-Ning and Elkahky, Ali and Tomasello, Paden and Algayres, Robin and Sagot, Beno{\^i}t and Mohamed, Abdelrahman and Dupoux, Emmanuel},
+  journal = {Transactions of the Association for Computational Linguistics},
+  year    = {2023},
+  note    = {arXiv:2203.16502}
+}
+
+@article{yao2024minicpmv,
+  title   = {{MiniCPM-V}: A {GPT-4V} Level {MLLM} on Your Phone},
+  author  = {Yao, Yuan and Yu, Tianyu and Zhang, Ao and Wang, Chongyi and Cui, Junbo and Zhu, Hongji and others},
+  journal = {arXiv preprint arXiv:2408.01800},
+  year    = {2024}
+}
+
+@article{yang2025qwen3,
+  title   = {{Qwen3} Technical Report},
+  author  = {Yang, An and others},
+  journal = {arXiv preprint arXiv:2505.09388},
+  year    = {2025}
+}
+
+@article{yang2024qwen25,
+  title   = {{Qwen2.5} Technical Report},
+  author  = {Yang, An and others},
+  journal = {arXiv preprint arXiv:2412.15115},
+  year    = {2024}
+}
+
+@article{jiang2023mistral,
+  title   = {Mistral 7{B}},
+  author  = {Jiang, Albert Q. and Sablayrolles, Alexandre and Mensch, Arthur and Bamford, Chris and Chaplot, Devendra Singh and de las Casas, Diego and others},
+  journal = {arXiv preprint arXiv:2310.06825},
+  year    = {2023}
+}
+
+@article{glm2024chatglm,
+  title   = {{ChatGLM}: A Family of Large Language Models from {GLM-130B} to {GLM-4} All Tools},
+  author  = {{Team GLM} and Zeng, Aohan and others},
+  journal = {arXiv preprint arXiv:2406.12793},
+  year    = {2024}
+}
+
+
+% ---------------- benchmarks / evaluation --------------------------------
+
+@article{wei2024simpleqa,
+  title   = {Measuring short-form factuality in large language models},
+  author  = {Wei, Jason and Karina, Nguyen and Chung, Hyung Won and Jiao, Yunxin Joy and Papay, Spencer and Glaese, Amelia and Schulman, John and Fedus, William},
+  journal = {arXiv preprint arXiv:2411.04368},
+  year    = {2024},
+  note    = {SimpleQA}
+}
+
+@inproceedings{wang2024mmlupro,
+  title     = {{MMLU-Pro}: A More Robust and Challenging Multi-Task Language Understanding Benchmark},
+  author    = {Wang, Yubo and Ma, Xueguang and Zhang, Ge and Ni, Yuansheng and others},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS), Datasets and Benchmarks},
+  year      = {2024},
+  note      = {arXiv:2406.01574}
+}
+
+@inproceedings{joshi2017triviaqa,
+  title     = {{TriviaQA}: A Large Scale Distantly Supervised Challenge Dataset for Reading Comprehension},
+  author    = {Joshi, Mandar and Choi, Eunsol and Weld, Daniel S. and Zettlemoyer, Luke},
+  booktitle = {Proceedings of the 55th Annual Meeting of the Association for Computational Linguistics (ACL)},
+  year      = {2017}
+}
+
+@article{cobbe2021gsm8k,
+  title   = {Training Verifiers to Solve Math Word Problems},
+  author  = {Cobbe, Karl and Kosaraju, Vineet and Bavarian, Mohammad and Chen, Mark and Jun, Heewoo and Kaiser, Lukasz and others},
+  journal = {arXiv preprint arXiv:2110.14168},
+  year    = {2021},
+  note    = {GSM8K}
+}
+
+@inproceedings{hendrycks2021math,
+  title     = {Measuring Mathematical Problem Solving With the {MATH} Dataset},
+  author    = {Hendrycks, Dan and Burns, Collin and Kadavath, Saurav and Arora, Akul and Basart, Steven and Tang, Eric and Song, Dawn and Steinhardt, Jacob},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS), Datasets and Benchmarks},
+  year      = {2021},
+  note      = {arXiv:2103.03874}
+}
+
+@inproceedings{lightman2024lets,
+  title     = {Let's Verify Step by Step},
+  author    = {Lightman, Hunter and Kosaraju, Vineet and Burda, Yura and Edwards, Harri and Baker, Bowen and Lee, Teddy and Leike, Jan and Schulman, John and Sutskever, Ilya and Cobbe, Karl},
+  booktitle = {International Conference on Learning Representations (ICLR)},
+  year      = {2024},
+  note      = {arXiv:2305.20050; source of the MATH-500 subset}
+}
+
+@misc{conover2023dolly,
+  title        = {Free Dolly: Introducing the World's First Truly Open Instruction-Tuned {LLM}},
+  author       = {Conover, Mike and Hayes, Matt and Mathur, Ankit and Xie, Jianwei and Wan, Jun and Shah, Sam and Ghodsi, Ali and Wendell, Patrick and Zaharia, Matei and Xin, Reynold},
+  year         = {2023},
+  howpublished = {Databricks blog},
+  note         = {databricks-dolly-15k}
+}
+
+@misc{taori2023alpaca,
+  title        = {Stanford Alpaca: An Instruction-following {LLaMA} Model},
+  author       = {Taori, Rohan and Gulrajani, Ishaan and Zhang, Tianyi and Dubois, Yann and Li, Xuechen and Guestrin, Carlos and Liang, Percy and Hashimoto, Tatsunori B.},
+  year         = {2023},
+  howpublished = {GitHub repository},
+  note         = {zh split: shibing624/alpaca-zh}
+}
+
+@inproceedings{mallen2023popqa,
+  title     = {When Not to Trust Language Models: Investigating Effectiveness of Parametric and Non-Parametric Memories},
+  author    = {Mallen, Alex and Asai, Akari and Zhong, Victor and Das, Rajarshi and Khashabi, Daniel and Hajishirzi, Hannaneh},
+  booktitle = {Proceedings of the 61st Annual Meeting of the Association for Computational Linguistics (ACL)},
+  year      = {2023},
+  note      = {PopQA; arXiv:2212.10511}
+}
+
+@inproceedings{zheng2023judging,
+  title     = {Judging {LLM}-as-a-Judge with {MT-Bench} and Chatbot Arena},
+  author    = {Zheng, Lianmin and Chiang, Wei-Lin and Sheng, Ying and Zhuang, Siyuan and Wu, Zhanghao and Zhuang, Yonghao and Lin, Zi and Li, Zhuohan and Li, Dacheng and Xing, Eric P. and Zhang, Hao and Gonzalez, Joseph E. and Stoica, Ion},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS), Datasets and Benchmarks},
+  year      = {2023},
+  note      = {arXiv:2306.05685}
+}
+
+@inproceedings{li2018spokensquad,
+  title     = {Spoken {SQuAD}: A Study of Mitigating the Impact of Speech Recognition Errors on Listening Comprehension},
+  author    = {Li, Chia-Hsuan and Wu, Szu-Lin and Liu, Chi-Liang and Lee, Hung-yi},
+  booktitle = {Interspeech},
+  year      = {2018},
+  note      = {arXiv:1804.00320}
+}
+
+@inproceedings{hu2023falseqa,
+  title     = {Won't Get Fooled Again: Answering Questions with False Premises},
+  author    = {Hu, Shengding and Luo, Yifan and Wang, Huadong and Cheng, Xingyi and Liu, Zhiyuan and Sun, Maosong},
+  booktitle = {Proceedings of the 61st Annual Meeting of the Association for Computational Linguistics (ACL)},
+  year      = {2023},
+  note      = {arXiv:2307.02394}
+}
+
+@inproceedings{ma2019stacl,
+  title     = {{STACL}: Simultaneous Translation with Implicit Anticipation and Controllable Latency using Prefix-to-Prefix Framework},
+  author    = {Ma, Mingbo and Huang, Liang and Xiong, Hao and Zheng, Renjie and Liu, Kaibo and Zheng, Baigong and Zhang, Chuanqiang and He, Zhongjun and Liu, Hairong and Li, Xing and Wu, Hua and Wang, Haifeng},
+  booktitle = {Proceedings of the 57th Annual Meeting of the Association for Computational Linguistics (ACL)},
+  year      = {2019}
+}
+
+
+% ---------------- misc ----------------------------------------------------
+
+@book{kahneman2011thinking,
+  title     = {Thinking, Fast and Slow},
+  author    = {Kahneman, Daniel},
+  publisher = {Farrar, Straus and Giroux},
+  year      = {2011}
+}
+
+@article{stivers2009universals,
+  title   = {Universals and cultural variation in turn-taking in conversation},
+  author  = {Stivers, Tanya and Enfield, N.~J. and Brown, Penelope and Englert, Christina and Hayashi, Makoto and Heinemann, Trine and Hoymann, Gertie and Rossano, Federico and de Ruiter, Jan Peter and Yoon, Kyung-Eun and Levinson, Stephen C.},
+  journal = {Proceedings of the National Academy of Sciences},
+  volume  = {106},
+  number  = {26},
+  pages   = {10587--10592},
+  year    = {2009}
+}
+
+@article{vu2023freshllms,
+  title={FreshLLMs: Refreshing Large Language Models with Search Engine Augmentation},
+  author={Vu, Tu and Iyyer, Mohit and Wang, Xuezhi and Constant, Noah and Wei, Jerry and Wei, Jason and Tar, Chris and Sung, Yun-Hsuan and Zhou, Denny and Le, Quoc and Luong, Thang},
+  journal={arXiv preprint arXiv:2310.03214},
+  year={2023}
+}
+
+
+% --- RTCA related-work additions (2026-08-25) ---
+
+@article{umui2026,
+  title   = {Unified Multimodal Uncertain Inference},
+  author  = {Zhang, Dengjia and Martin, Alexander and Jurayj, William and Murray, Kenton and Van Durme, Benjamin and Kriz, Reno},
+  journal = {arXiv preprint arXiv:2604.08701},
+  year    = {2026}
+}
+
+@article{sync2026turntaking,
+  title   = {Synchronization and Turn-Taking in Full-Duplex Speech Dialogue Models},
+  author  = {Riera, Pablo and Brusco, Pablo and Kuo, Cristina and Sancinetti, Marcelo and Branavan, S.~R.~K.},
+  journal = {arXiv preprint arXiv:2605.20356},
+  year    = {2026}
+}
+
+@article{hybridserve2025,
+  title   = {{HybridServe}: Efficient Serving of Large {AI} Models with Confidence-Based Cascade Routing},
+  author  = {Xue, Leyang and Fu, Yao and Mai, Luo and Marina, Mahesh K.},
+  journal = {arXiv preprint arXiv:2505.12566},
+  year    = {2025}
+}
+
+@inproceedings{berant2013webquestions,
+  title     = {Semantic Parsing on {Freebase} from Question-Answer Pairs},
+  author    = {Berant, Jonathan and Chou, Andrew and Frostig, Roy and Liang, Percy},
+  booktitle = {Proceedings of the 2013 Conference on Empirical Methods in Natural Language Processing (EMNLP)},
+  year      = {2013},
+  note      = {WebQuestions}
+}
+
+@inproceedings{nachmani2024spoken,
+  title     = {Spoken Question Answering and Speech Continuation Using Spectrogram-Powered {LLM}},
+  author    = {Nachmani, Eliya and Levkovitch, Alon and Hirsch, Roy and Salazar, Julian and Asawaroengchai, Chulayuth and Mariooryad, Soroosh and Rivlin, Ehud and Skerry-Ryan, RJ and Tadmor Ramanovich, Michelle},
+  booktitle = {International Conference on Learning Representations (ICLR)},
+  year      = {2024},
+  note      = {arXiv:2305.15255; Spectron, source of the Llama Questions dataset}
+}
+
+@article{qwen3omni2025,
+  title   = {{Qwen3-Omni} Technical Report},
+  author  = {Xu, Jin and Guo, Zhifang and Hu, Hangrui and Chu, Yunfei and Wang, Xiong and others},
+  journal = {arXiv preprint arXiv:2509.17765},
+  year    = {2025}
+}
+
+@article{kimiaudio2025,
+  title   = {{Kimi-Audio} Technical Report},
+  author  = {{Kimi Team} and Ding, Ding and Ju, Zeqian and Leng, Yichong and others},
+  journal = {arXiv preprint arXiv:2504.18425},
+  year    = {2025}
+}
+
+@inproceedings{goyal2024pause,
+  title     = {Think before you speak: Training language models with
+               pause tokens},
+  author    = {Goyal, Sachin and Ji, Ziwei and Rawat, Ankit Singh and
+               Menon, Aditya Krishna and Kumar, Sanjiv and Nagarajan,
+               Vaishnavh},
+  booktitle = {ICLR},
+  year      = {2024}
+}
+
+@article{zelikman2024quietstar,
+  title   = {{Quiet-STaR}: Language models can teach themselves to
+             think before speaking},
+  author  = {Zelikman, Eric and Harik, Georges and Shao, Yijia and
+             Jayasiri, Varuna and Haber, Nick and Goodman, Noah D.},
+  journal = {arXiv preprint arXiv:2403.09629},
+  year    = {2024}
+}
+
+@inproceedings{schick2023toolformer,
+  title     = {Toolformer: Language Models Can Teach Themselves to Use
+               Tools},
+  author    = {Schick, Timo and Dwivedi-Yu, Jane and Dess{\`\i}, Roberto
+               and Raileanu, Roberta and Lomeli, Maria and Zettlemoyer,
+               Luke and Cancedda, Nicola and Scialom, Thomas},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  year      = {2023},
+  note      = {arXiv:2302.04761}
+}
+
+@inproceedings{asai2024selfrag,
+  title     = {{Self-RAG}: Learning to Retrieve, Generate, and Critique
+               through Self-Reflection},
+  author    = {Asai, Akari and Wu, Zeqiu and Wang, Yizhong and Sil,
+               Avirup and Hajishirzi, Hannaneh},
+  booktitle = {International Conference on Learning Representations (ICLR)},
+  year      = {2024},
+  note      = {arXiv:2310.11511}
+}
+
+@inproceedings{shen2024collaborative,
+  title     = {Learning to Decode Collaboratively with Multiple Language
+               Models},
+  author    = {Shen, Shannon Zejiang and Lang, Hunter and Wang, Bailin
+               and Kim, Yoon and Sontag, David},
+  booktitle = {Proceedings of the 62nd Annual Meeting of the Association
+               for Computational Linguistics (ACL)},
+  year      = {2024},
+  note      = {arXiv:2403.03870; Co-LLM}
+}
+
+@inproceedings{zheng2025citer,
+  title     = {{CITER}: Collaborative Inference for Efficient Large
+               Language Model Decoding with Token-Level Routing},
+  author    = {Zheng, Wenhao and Chen, Yixiao and Zhang, Weitong and
+               Kundu, Souvik and Li, Yun and Liu, Zhengzhong and Xing,
+               Eric P. and Wang, Hongyi and Yao, Huaxiu},
+  booktitle = {Conference on Language Modeling (COLM)},
+  year      = {2025},
+  note      = {arXiv:2502.01976}
+}
+
+@inproceedings{chuang2024lookback,
+  title     = {Lookback Lens: Detecting and Mitigating Contextual Hallucinations in Large Language Models Using Only Attention Maps},
+  author    = {Chuang, Yung-Sung and Qiu, Linlu and Hsieh, Cheng-Yu and Krishna, Ranjay and Kim, Yoon and Glass, James},
+  booktitle = {Proceedings of the 2024 Conference on Empirical Methods in Natural Language Processing},
+  year      = {2024}
+}
+
+@article{lugoloobi2025difficulty,
+  title   = {{LLM}s Encode How Difficult Problems Are},
+  author  = {Lugoloobi, William and Russell, Chris},
+  journal = {arXiv preprint arXiv:2510.18147},
+  year    = {2025}
+}
+
+
+% Entries present in the published PDF but missing from the tracked source.
+
+@article{xu2024minimal,
+  title   = {Enabling Real-Time Conversations with Minimal Training Costs},
+  author  = {Xu, Wang and Wang, Shuo and Zhao, Weilin and Han, Xu and
+             Yan, Yukun and Zhang, Yudi and Tao, Zhe and Liu, Zhiyuan and
+             Che, Wanxiang},
+  journal = {arXiv preprint arXiv:2409.11727},
+  year    = {2024}
+}
+
+@inproceedings{swayamdipta2020cartography,
+  title     = {Dataset Cartography: Mapping and Diagnosing Datasets with Training Dynamics},
+  author    = {Swayamdipta, Swabha and Schwartz, Roy and Lourie, Nicholas and
+               Wang, Yizhong and Hajishirzi, Hannaneh and Smith, Noah A. and
+               Choi, Yejin},
+  booktitle = {EMNLP},
+  year      = {2020}
+}
+
+@inproceedings{pleiss2020aum,
+  title     = {Identifying Mislabeled Data Using the Area Under the Margin Ranking},
+  author    = {Pleiss, Geoff and Zhang, Tianyi and Elenberg, Ethan and
+               Weinberger, Kilian Q.},
+  booktitle = {NeurIPS},
+  year      = {2020}
+}
+
+@article{cheang2025recall,
+  title   = {Do {LLM}s Really Know What They Don't Know? Internal States
+             Mainly Reflect Knowledge Recall Rather Than Truthfulness},
+  author  = {Cheang, Chi Seng and Chan, Hou Pong and Zhang, Wenxuan and
+             Deng, Yang},
+  journal = {arXiv preprint arXiv:2510.09033},
+  year    = {2025}
+}
+
+@article{david2025temporal,
+  title   = {Temporal Predictors of Outcome in Reasoning Language Models},
+  author  = {David, Joey},
+  journal = {arXiv preprint arXiv:2511.14773},
+  year    = {2025}
+}

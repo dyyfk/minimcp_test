@@ -16,7 +16,7 @@ Pranjal Aggarwal, Aman Madaan, Ankit Anand, Srividya~Pranavi Potharaju, Swaroop
   (NeurIPS)}, 2024.
 \newblock arXiv:2310.12963.
 
-\bibitem[Alain and Bengio(2016)]{alain2017understanding}
+\bibitem[Alain and Bengio(2016)]{alain2016understanding}
 Guillaume Alain and Yoshua Bengio.
 \newblock Understanding intermediate layers using linear classifier probes.
 \newblock \emph{arXiv preprint arXiv:1610.01644}, 2016.
@@ -137,7 +137,7 @@ Lorenz Kuhn, Yarin Gal, and Sebastian Farquhar.
 \newblock arXiv:2302.09664.
 
 \bibitem[Li et~al.(2025)Li, Liu, Zhang, Fang, Pan, Wang,
-  et~al.]{openaudiobench2025}
+  et~al.]{li2025baichuanaudio}
 Tianpeng Li, Jun Liu, Tao Zhang, Yuanbo Fang, Da~Pan, Mingrui Wang, et~al.
 \newblock {Baichuan-Audio}: A unified framework for end-to-end speech
   interaction.
@@ -157,14 +157,16 @@ William Lugoloobi, Thomas Foster, William Bankes, and Chris Russell.
   activations.
 \newblock \emph{arXiv preprint arXiv:2602.09924}, 2026.
 
-\bibitem[Mahaut et~al.(2024)Mahaut, Aina, Czarnowska, Hardalov, Müller, and
-  Màrquez]{mahaut2024factual}
+\bibitem[Mahaut et~al.(2024)Mahaut, Aina, Czarnowska, Hardalov, M{\"u}ller, and
+  M{\`a}rquez]{mahaut2024factual}
 Mat{\'e}o Mahaut, Laura Aina, Paula Czarnowska, Momchil Hardalov, Thomas
-  Müller, and Lluís Màrquez.
+  M{\"u}ller, and Llu{\'\i}s M{\`a}rquez.
 \newblock Factual confidence of {LLM}s: on reliability and robustness of
   current estimators.
 \newblock In \emph{Proceedings of the 62nd Annual Meeting of the Association
-  for Computational Linguistics}, 2024.
+  for Computational Linguistics (Volume 1: Long Papers)}, pages 4554--4570,
+  Bangkok, Thailand, 2024. Association for Computational Linguistics.
+\newblock \doi{10.18653/v1/2024.acl-long.250}.
 
 \bibitem[Marks and Tegmark(2024)]{marks2024geometry}
 Samuel Marks and Max Tegmark.
@@ -181,7 +183,7 @@ Isaac Ong, Amjad Almahairi, Vincent Wu, Wei-Lin Chiang, Tianhao Wu, Joseph~E.
 \newblock \emph{arXiv preprint arXiv:2406.18665}, 2024.
 
 \bibitem[Orgad et~al.(2025)Orgad, Toker, Gekhman, Reichart, Szpektor, Kotek,
-  and Belinkov]{orgad2024llms}
+  and Belinkov]{orgad2025llms}
 Hadas Orgad, Michael Toker, Zorik Gekhman, Roi Reichart, Idan Szpektor, Hadas
   Kotek, and Yonatan Belinkov.
 \newblock {LLMs} know more than they show: On the intrinsic representation of
@@ -220,7 +222,7 @@ Xiong Wang, Yangze Li, Chaoyou Fu, Yunhang Shen, Lei Xie, Ke~Li, Xing Sun, and
   Long Ma.
 \newblock {Freeze-Omni}: A smart and low latency speech-to-speech dialogue
   model with frozen {LLM}.
-\newblock \emph{arXiv preprint arXiv:2411.00774v5}, 2024{\natexlab{b}}.
+\newblock \emph{arXiv preprint arXiv:2411.00774}, 2024{\natexlab{b}}.
 
 \bibitem[Wu et~al.(2026)Wu, Zhang, Chen, Zhang, Tian, Yang, Yu, Liu, Hou, Hu,
   and Chng]{chrono2026thinking}
