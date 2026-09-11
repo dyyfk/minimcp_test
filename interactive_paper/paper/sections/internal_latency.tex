@@ -1,6 +1,6 @@
 \begin{table}[!ht]
 \centering\small
-\caption{Internal server TTFA (seconds), complete \texttt{ttfa-v3} run on all 240 test IDs: 240 attempts per arm, with 239/238/236/236/237 completed and 1/2/4/4/3 failed in row order. TTFA is the nonnegative wait from scheduled input end to first answer PCM. All completed sessions count; the 17/12/11/13/7 early responses have zero wait. Failed attempts have no TTFA value. Timing ends at the first local PCM-bearing chunk return or relay PCM yield, excluding candidate/stall audio and client playback.}
+\caption{Internal server TTFA (seconds), complete \texttt{ttfa-v3} run on all 240 test IDs: 240 attempts per arm, with 239/238/236/236/237 completed and 1/2/4/4/3 failed in row order. TTFA is the nonnegative wait from scheduled input end to first answer PCM. All completed sessions count; the 17/12/11/13/7 early responses have zero wait. Failed attempts have no TTFA value. Timing ends at the first local PCM-bearing chunk return or relay PCM yield, excluding candidate/stall audio and client playback, which depends on the deployment environment.}
 \label{tab:latency}
 \begin{tabular}{lrrrr}
 \toprule

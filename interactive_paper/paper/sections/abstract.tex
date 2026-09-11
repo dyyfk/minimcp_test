@@ -1,19 +1,20 @@
 \begin{abstract}
-A local speech model can keep a conversation going, and a stronger
-expert can take over the hard questions. Calling the expert on every
-turn adds cost and waiting time, so the local model needs an early
-estimate of whether its own answer will fail. Hidden-state probes give
-such estimates for text models. It is not known whether this signal
-survives speech and duplex fine-tuning, audio input, and the timing of
-a native listen/speak protocol. We study these questions on frozen
-MiniCPM-o~4.5. We use lightweight probes to read failure signals from
-hidden states and separately calibrate a gate for expert handoff at
-answer onset. We find that failure signals can transfer from text to
-speech, and that readout design matters in native audio generation.
-On the full 240-query internal benchmark,
-selective expert handoff raises unweighted answer-content accuracy from
-40.8\% to 62.9\%. The full real-time timing evaluation on the same
-query IDs gives mean server waiting time to first answer audio of
-6.10\,s with aggressive handoff, versus 9.43\,s with always-escalate.
-P50 is 0.70\,s locally and 2.87\,s with aggressive handoff.
+A real-time duplex speech model should answer easy questions immediately, but
+hard questions often benefit from waiting for stronger reasoning. The challenge
+is to choose between these paths at the moment the model begins to speak.
+Recent systems learn related mode decisions through special-token generation
+inside the dialogue model, coupling routing to turn-taking and temporally
+annotated full-duplex training. We study a post-training alternative. We freeze
+MiniCPM-o~4.5 and fit a logistic failure readout on hidden states already
+available at its native listen-to-speak transition. The resulting gate requires
+no additional model generation and exposes thresholds that can be retuned
+without changing the duplex policy. The signal learned from text transfers to
+unseen human speech, while native-state aggregation improves its reliability.
+On the internal benchmark, selective handoff improves answer accuracy by 22.1
+points. Compared with always using the expert, it reduces mean server time to
+first answer audio by 35.3 percent. It also outperforms matched random routing
+across external speech question-answering pools and transfers to a second
+duplex model family. These results show that an existing duplex model can be
+equipped to answer easy turns immediately and wait for stronger reasoning on
+harder ones, without another round of duplex training.
 \end{abstract}

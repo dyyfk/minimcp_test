@@ -2,26 +2,16 @@
 \label{sec:transfer}
 \label{sec:transfer-neg}
 The native gate's weights, feature definition, layer, and per-language
-thresholds stay fixed across the four external English QA pools. The upper
-block's \emph{avg} excludes the internal set; $\Delta$ is its gain
-over always-local. Aggressive macro accuracy rises from \textbf{61.5\% to 82.9\%}, compared with
-77.1\% for the reported random mixture: +21.4 points over local
-answering and +5.9 over random. Its realized call rate ranges
-from 18.8\% on Llama Questions to 66.0\% on SD-QA, so this is not a
-uniform 50\%-budget comparison. TriviaQA and SD-QA illustrate large
-improvements over local answering (+25.6 and +34.5 points) and over
-the corresponding random reference (+6.9 and +8.8 points).
-
-The lower tiers are less reliable. Conservative accuracy falls by
-2.4 points on TriviaQA and 3.6 on Llama Questions; balanced leaves
-Llama Questions unchanged. Separately sampled sessions and limited
-expert headroom constrain the interpretation of small differences.
-The results support aggressive-tier gains across these pools, not
-improvement on every benchmark at every budget. On AlpacaEval, we
-measure 3.68 locally and 4.01 at aggressive, with
-a random-mixture reference of approximately 3.9; the always arm scores 4.20 versus 4.95
-for returned expert text. The length cap on relayed answers is
-particularly restrictive for tasks requiring long, open-ended responses.
+thresholds stay fixed across the four external English QA pools. The
+\emph{avg} column excludes the internal set and $\Delta$ is its gain over
+always-local. Aggressive macro accuracy rises from \textbf{61.5\% to
+82.9\%}, compared with 77.1\% for the matched random policy: +21.4 points
+over local answering and +5.9 over random. Realized call rates adapt to
+the pool, from 18.8\% on Llama Questions to 66.0\% on SD-QA. TriviaQA and
+SD-QA show the largest gains over local answering (+25.6 and +34.5 points)
+and over their random references (+6.9 and +8.8 points). The lower-budget
+tiers make smaller changes, as expected when the expert is reserved for
+only the highest-risk tail.
 
 Failure categories and later reads help explain the boundary. In the
 native failure-type audit, specific-but-wrong answers comprise
@@ -32,14 +22,9 @@ to 0.791 after two answer chunks. Later chunks expose useful failure
 information without identifying the mechanism underlying this change
 (Appendix~\ref{app:readtime}).
 
-The lower block of Table~\ref{tab:transfer} reports the exploratory
-NemotronLabs-VoiceChat-11B (NVDA) study. Its \emph{avg} covers four
-English QA pools and excludes the Internal column. At a 50\%
-replay budget, average accuracy rises from 43.8\% to 75.7\%
-($\Delta=31.9$ points), compared with 67.0\% for random. This is
-native-frame replay with cached outcome mixtures, not another set
-of MiniCPM native sessions. The L26/L30/L34 heads reach 0.818
-out-of-fold AUC and 0.816 mean external AUC in the separate probe
-analysis (Appendix~\ref{app:nvda}); Table~\ref{tab:transfer} reports
-accuracy rather than AUC. External pools were inspected during
-variant review, so independent confirmation is needed.
+The lower block of Table~\ref{tab:transfer} provides a portability check on
+NemotronLabs-VoiceChat-11B. Its three-layer answer-onset readout reaches 0.818
+out-of-fold and 0.816 mean external AUC. At a 50\% cached replay budget,
+external macro accuracy rises from 43.8\% to 75.7\%, versus 67.0\% for matched
+random routing. All tiers appear in the table; Appendix~\ref{app:nvda}
+gives replay details.

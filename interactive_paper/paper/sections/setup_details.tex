@@ -2,11 +2,10 @@
 \label{app:setup-details}
 
 \paragraph{Models and decoding.}
-The target is MiniCPM-o~4.5 (9B, based on Qwen3-8B). Matched controls
-include raw backbones, a second MiniCPM generation, Qwen2.5-Omni,
-Qwen2-Audio, and Freeze-Omni (Table~\ref{tab:models}). Representation
-analyses use bf16, greedy decoding, and seed 42. Native decoding uses
-temperature $T=0.7$ and top-$k=20$. The expert is
+The target is MiniCPM-o~4.5 (9B, based on Qwen3-8B). Controls include
+Qwen3-8B, MiniCPM-o~2.6, Qwen2.5-7B, Qwen2.5-Omni, Qwen2-Audio, and
+Freeze-Omni. Representation analyses use bf16, greedy decoding, and seed 42.
+Native decoding uses temperature $T=0.7$ and top-$k=20$. The expert is
 \texttt{gpt-5.5} with low reasoning effort.
 
 \paragraph{Probe fitting and thresholds.}

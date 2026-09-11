@@ -12,7 +12,8 @@
   accuracy for shorter waits. TriviaQA conservative is dominated by
   local. Accuracy retains the judged benchmark values; TTFA uses the
   full timing run (\S\ref{sec:evalproto}). Internal retains all 240 IDs
-  with unit weights. L is local; C/B/A are conservative/balanced/aggressive.}
+  with unit weights. L/C/B/A/W denote local, conservative, balanced,
+  aggressive, and always-expert policies.}
   \label{fig:dualview}
 \end{figure}
 
@@ -29,15 +30,10 @@ Aggressive exceeds the matched random reference of 56.1\% by
 6.8 percentage points, computed before rounding. Per-tier results
 and accuracy intervals are in Table~\ref{tab:live}.
 Aggressive recovers 74.6\% of the measured local-to-always accuracy
-gap at a call rate of 51.7\%.
-This measures selection value relative to the recorded endpoints.
-
-Gains vary across the fixed internal strata: factual QA improves by
-52.5 points, while math accuracy is unchanged. Of 60 knowledge
-questions, 43 exceed the expert's input window. These descriptive
-results show task differences and an input constraint; they do not
-isolate a truncation effect on accuracy. All queries remain in the
-five-category analysis (Appendix~\ref{app:internal-strata}).
+gap at a call rate of 51.7\%. The gain is concentrated on factual QA
+and questions with misleading premises, where the gate can identify
+that immediate local speech is risky; all queries and per-category
+results are retained in Appendix~\ref{app:internal-strata}.
 
 The complete \texttt{ttfa-v3} run measures server waiting time to
 first answer audio after input end on the same 240 query IDs
@@ -50,5 +46,6 @@ responses do not establish better interaction or correctness. Table~\ref{tab:lat
 counts failures and reports timing among completed sessions.
 Under the reporting convention in \S\ref{sec:evalproto}, aggressive
 has 62.9\% accuracy and 6.10\,s mean TTFA, compared with 70.4\%
-and 9.43\,s for always-escalate: 7.5 percentage points of accuracy
-are exchanged for a 35.3\% reduction in mean waiting time.
+and 9.43\,s for always-escalate. Thus the post-training gate retains
+89.3\% of always-expert accuracy while reducing mean waiting time by
+35.3\%, without retraining or modifying the duplex generation policy.

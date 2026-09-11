@@ -1,16 +1,21 @@
-\section{Discussion and Limitations}
+\section{Discussion}
 \label{sec:discussion}
-Three boundaries define the scope of the results. First, coverage is
-limited to the tested checkpoints and predominantly single-turn speech QA.
-Broader conversational tasks, including multi-turn dialogue and expert
-continuity, remain to be evaluated. Second, native serving requires
-in-regime audio features and answer labels to fit the readout and set
-thresholds; representation transfer alone does not provide a zero-shot gate.
-Third, the reported latency ends at server PCM readiness. Early
-responses need not improve turn-taking.
-Human-rated speech quality and timestamps of audio playback on the client
-remain unmeasured in these experiments.
-The internal results retain all 240 queries with equal weight, but the
-fixed mixture is not a population estimate of conversational traffic.
-Task-stratified results and per-tier uncertainty appear in
-Tables~\ref{tab:internal-strata} and~\ref{tab:live}.
+The central design choice is separation, not a new way to train a duplex
+model. A learned Listen/Speak or \texttt{[THINK]} token is useful when the
+desired policy and training distribution are fixed. A post-training readout is
+useful when the interaction checkpoint should remain unchanged and the cost of
+waiting or calling an expert may vary after deployment. Because the readout
+uses answer-onset states already produced by the model, the marginal local
+computation is small; because the threshold is external, the operating point
+can change without modifying generation.
+
+The results also distinguish floor readiness from answer readiness. The native
+model's decision to speak supplies a well-timed intervention point, but a
+separate competence signal is needed to decide whether taking that turn is
+wise. Mid-layer transfer and native aggregation are two complementary ways of
+preserving that signal under distribution and modality shift.
+
+Our evidence covers two duplex model families and primarily single-turn speech
+QA. The gate uses in-regime labeled calibration, and TTFA ends at server PCM
+readiness. Multi-turn continuity and human-rated interaction quality remain
+important next evaluations.

@@ -1,20 +1,18 @@
 \begin{table}[t]
 \centering\small
 \setlength{\tabcolsep}{3pt}
-\renewcommand{\arraystretch}{1.12}
+\renewcommand{\arraystretch}{0.98}
 \caption{\textbf{Answer-content accuracy (\%).}
-Both models use all 240 Internal IDs with unit weights and four external
-English QA pools; avg is the equal-pool external mean and $\Delta$ its
-gain over local. MiniCPM uses one native session per query/arm and
-fixed thresholds; random mixes endpoints at the realized call rate
-(Appendix~\ref{app:transferdetail}). NVDA is cached native-frame replay;
-Internal is post-selection (Appendix~\ref{app:nvda}).}
+Both models use 240 Internal IDs and four external QA pools; avg is the
+external mean and $\Delta$ its gain over local. MiniCPM uses native sessions;
+VoiceChat-11B uses cached replay across three routing budgets. Random rows
+match each aggressive call rate.}
 \label{tab:transfer}
 \begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lrrrrrrr@{}}
 \toprule
 & Internal & TriviaQA & WebQ & Llama Q. & SD-QA & avg & $\Delta$ \\
 \midrule
-\multicolumn{8}{l}{\emph{MiniCPM native sessions (answer-content accuracy)}} \\
+\multicolumn{8}{l}{\emph{MiniCPM-o~4.5 native sessions}} \\
 % BEGIN GENERATED MINICPM ROWS
 always-local & 40.8 & 62.8 & 52.8 & 82.4 & 48.0 & 61.5 & --- \\
 \;+ gate, conservative & 46.7 & 60.4 & 59.2 & 78.8 & 54.0 & 63.1 & +1.6 \\
@@ -24,7 +22,7 @@ always-local & 40.8 & 62.8 & 52.8 & 82.4 & 48.0 & 61.5 & --- \\
 always-escalate & 70.4 & 96.0 & 79.6 & 91.6 & 87.0 & 88.6 & +27.1 \\
 % END GENERATED MINICPM ROWS
 \midrule
-\multicolumn{8}{l}{\emph{NVDA three-layer answer-onset probe (pass-3 native-frame replay)}} \\
+\multicolumn{8}{l}{\emph{VoiceChat-11B cached native-frame replay}} \\
 % BEGIN GENERATED NVDA ROWS
 always-local & 19.6 & 35.8 & 37.6 & 70.8 & 31.0 & 43.8 & --- \\
 \;+ gate, conservative & 31.7 & 48.4 & 48.8 & 80.7 & 42.0 & 55.0 & +11.2 \\

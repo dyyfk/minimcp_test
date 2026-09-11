@@ -3,24 +3,27 @@
   \includegraphics[width=\linewidth]{layer_sweep}
   \caption{\textbf{Text-input transfer depends on layer and position.}
   The arrow and shading highlight MiniCPM-o~4.5's late-layer decline
-  in text-input LOPO math AUC. \textbf{This decline may reflect
-  specialization for duplex interaction control.} The model predicts a binary Listen/Speak
-  control token before generating content \citep[\S3.3]{openbmb2026minicpmo}.
-  L22 is the native readout; see \S\ref{sec:duplex} and Appendix~\ref{app:mech}
-  for audio-input results and mechanism controls.}
+  in text-input LOPO math AUC. MiniCPM-o predicts a binary Listen/Speak
+  control token before content \citep[\S3.3]{openbmb2026minicpmo}, but
+  direct controls do not identify turn control as the cause of the decline.
+  L22 is the native readout; \S\ref{sec:duplex} and
+  Appendix~\ref{app:mech} report the corresponding audio-input results and
+  mechanism checks.}
   \label{fig:layersweep}
 \end{figure}
 
 \subsection{Where should the probe read?}
 \label{sec:readlocation}
 Adapting the probe to duplex speech requires choosing its layer,
-position, and read time. The final layer feeds the output head, but
-its failure signal can degrade under a change in query distribution
-or input modality. Figure~\ref{fig:layersweep} motivates L22 through
+position, and read time. The final layer is optimized for the output
+head, whereas an earlier layer can retain more transferable task
+information. Figure~\ref{fig:layersweep} motivates L22 through
 text-input leave-one-pool-out (LOPO) evaluation: on held-out math,
 its last-token probe reaches 0.931 AUC, versus 0.366 at the final
-layer. This failure does not persist when both calibration and
-inference use audio input (\S\ref{sec:duplex}).
+layer. The contrast is regime-specific rather than a universal
+middle-layer advantage: it disappears when both calibration and
+inference use audio input in the matched native setting
+(\S\ref{sec:duplex}).
 
 The native feature vector concatenates the latest L22 tail state,
 the mean of the tail states, and the mean input state, allowing the

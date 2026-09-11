@@ -1,82 +1,84 @@
 \section{Introduction}
 \label{sec:intro}
-As a spoken question arrives, a conversational agent must decide both
-when to respond and whether it can answer reliably. A local speech
-model can manage the exchange, while a stronger expert can help with
-questions beyond its competence. Routine expert calls also make
-locally answerable questions incur the cost and wait of a handoff.
-The useful intervention is selective: retain local
-answers when they are likely to succeed and request help when they
-are likely to fail. This requires a signal available at the moment
-the speech model begins to respond.
+Real-time conversation rewards two behaviors that pull in opposite directions.
+For a greeting or an easy factual question, a speech agent should answer as
+soon as it understands the turn. For a difficult knowledge or reasoning
+question, speaking immediately can lock the interaction into a fluent but
+incorrect answer; taking time to reason or ask a stronger model is preferable.
+The choice is therefore whether to answer now or wait for stronger reasoning.
 
-Native duplex models already decide when to listen and when to speak
-\citep{defossez2024moshi,openbmb2026minicpmo}. That ability creates a
-natural place to intervene, but the decision to take the floor need
-not reveal whether the model knows the answer. A model can be ready
-to speak while lacking the knowledge or reasoning needed for a correct
-response. Waiting until it has finished an answer would allow a later
-check, but would also postpone expert help.
+Native duplex models already learn a fine-grained listen/speak policy
+\citep{defossez2024moshi,openbmb2026minicpmo}. Recent systems extend this idea
+with tokenized control. BayLing-Duplex uses four dialogue-state tokens for
+turn-taking and interruption \citep{bayling2026duplex}; DuplexOmni uses a
+\texttt{[THINK]} token to request an asynchronous reasoning layer
+\citep{huang2026duplexomni}; and Listen-Write-Speak encodes concurrent
+listening, writing, and speaking with a token schema
+\citep{zhang2026liberating}. These systems show that special-token control is
+expressive. They also make the routing rule part of autoregressive behavior:
+the model must learn rare control events together with speech content,
+timing, and interruption. BayLing-Duplex, for example, reweights rare state
+tokens, adds timing-focused preference optimization, and retains an auxiliary
+language-modeling loss. DuplexOmni and Listen-Write-Speak construct large
+temporally annotated training corpora. Updating the rule consequently means
+updating or retraining the interaction model.
 
-Text models offer a starting point. Hidden-state probes and verbal
-self-evaluation can predict answer correctness
-\citep{kadavath2022language,azaria2023internal,kossen2024semantic}, and
-intermediate layers can expose information absent from the output
-\citep{orgad2025llms}. Text routers allocate queries across models of
-different cost \citep{chen2023frugalgpt,ong2024routellm,varshney2026llmrouter}.
-In native speech, the model receives an evolving audio context, and
-the state used for routing must be produced by its
-listen/speak protocol. A useful text-input signal may change after
-speech and duplex fine-tuning, or become inaccessible at the point
-where a serving system needs it.
+Turn-taking supervision also does not directly answer the competence question.
+A model may be ready to take the floor while lacking the knowledge needed for
+a correct response. Conversely, routinely invoking a strong expert wastes cost
+and makes easy turns wait. What is needed is a failure-risk estimate that is
+available at the native speak boundary, does not disturb the learned duplex
+policy, and can be recalibrated as the desired accuracy--latency operating point
+changes.
 
-We ask whether failure information remains readable across these
-changes and can support an actionable handoff. Generalization matters:
-a probe may distinguish familiar query pools without recognizing
-failure on a new kind of question. Modality matters because a probe
-fit on text must be tested on speech-input states, including unseen
-human recordings. Readout design matters because the layer, position,
-and aggregation determine what information the gate receives. These
-questions connect representation analysis to deployment: a predictive
-score is useful only if it remains informative in the intended input
-regime and arrives in time to guide the response.
+We investigate whether this decision can be recovered from a frozen duplex
+model's own representations. Hidden-state probes can predict correctness in
+text models \citep{azaria2023internal,kossen2024semantic,lugoloobi2026failures},
+but a real-time speech setting introduces three shifts. The input is audio
+rather than text; duplex fine-tuning reshapes representations for interaction;
+and the read must be available at the listen-to-speak transition, before a
+complete answer can be inspected. A successful gate must survive all three and
+produce a useful serving policy, not merely an offline AUC measured after the
+answer has already been generated.
 
 \begin{figure}[t]
   \centering
   \includegraphics[width=\linewidth]{teaser_v2}
-  \caption{\textbf{The deployed system.} \textbf{(1)} Speech streams in
-  1\,s chunks into a full-duplex local model that decides for itself
-  when to speak. \textbf{(2)} At that speak commit, a mid-network (L22)
-  linear read scores the turn in $\sim$30\,ms at answer onset; the
-  triggering call may already return the first text unit.
-  \textbf{(3)} Lower-risk turns stay local; higher-risk turns
-  are sent to a cloud expert while the talker stalls. \textbf{(4)} The
-  returned answer is spoken verbatim in the talker's own voice.
-  Unweighted answer-content accuracy on the full 240-query internal test set
-  rises from 40.8\% to 62.9\% at 51.7\% escalation
-  (\S\ref{sec:evalproto}).}
+  \caption{\textbf{Post-training routing at the native speak boundary.}
+  \textbf{(1)} Speech streams in 1\,s chunks to a frozen full-duplex local
+  model. \textbf{(2)} When the model commits to speak, an L22 linear readout
+  scores local failure risk in tens of milliseconds; the triggering call may
+  already contain the first text unit. \textbf{(3)} Low-risk turns continue
+  immediately, while high-risk turns are sent to a stronger expert and the
+  talker holds the floor. \textbf{(4)} The expert answer is voiced by the local
+  talker. On all 240 internal queries, the aggressive policy raises accuracy
+  from 40.8\% to 62.9\% at 51.7\% escalation.}
   \label{fig:hero}
 \end{figure}
 
-We study frozen MiniCPM-o \citep{openbmb2026minicpmo}, with
-raw-backbone and other speech-model controls. Our layer and position
-audit traces how failure readout depends on the input and calibration
-regime (Figure~\ref{fig:layersweep}); a matched native ablation
-separates aggregation from layer choice
-(Figure~\ref{fig:native-ablation}). Text-trained probes also transfer
-to speech-input states on unseen human recordings
-(Figure~\ref{fig:xmodal-transfer}). To turn this evidence into a
-serving decision, we separately fit an aggregated answer-onset gate
-on native audio features. It reuses the local model's hidden states
-without updating the model or waiting for a completed answer. Lower-risk
-turns continue locally; higher-risk turns request an expert answer
-that the local talker then voices.
+Our system freezes MiniCPM-o~4.5 \citep{openbmb2026minicpmo} and trains only a
+regularized logistic readout on cached answer-onset states. This separates
+\emph{interaction control}---when the model takes the floor---from
+\emph{competence control}---whether its answer should be trusted. The readout
+adds no language-model forward pass, leaves local responses unchanged, and
+turns the expert-call budget into a threshold that can be adjusted after
+training. On the expert path, the question is sent to a stronger model and the
+returned answer is spoken by the local talker.
 
-The resulting handoff improves answer-content accuracy and, at the
-aggressive tier, exceeds the matched random-mixture reference. This
-connects readable failure information to selective expert use, while
-leaving an essential conversational question open: whether the improved
-answer is worth the interruption and wait. We report the judged
-answer-content benchmark alongside the full real-time timing evaluation
-to compare accuracy and server waiting time across routing policies.
-User-perceived delay and interruption quality remain to be evaluated.
+Our approach treats competence as a post-training serving decision. We
+implement think-or-talk routing at the native speak boundary with a linear gate,
+without adding control tokens, updating the backbone, or repeating duplex
+training. We trace the readable signal through duplex and modality shifts:
+text-trained probes transfer to unseen human speech, while the matched native
+ablation identifies answer-onset aggregation as important for robust readout.
+We evaluate the gate as a complete serving policy rather than only an offline
+classifier. On the 240-query internal set, selective handoff improves accuracy
+by 22.1 points while reducing mean server waiting time by 35.3\% relative to
+always escalating. Across four external speech-QA pools, the aggressive policy
+improves macro accuracy by 21.4 points over local answering and by 5.9 points
+over a matched random router at the same expert-call rate in every external
+evaluation pool.
+
+The result is a practical division of labor: the duplex model preserves the
+fast interaction for which it was trained, while a separately calibrated gate
+decides when additional reasoning is worth the delay.

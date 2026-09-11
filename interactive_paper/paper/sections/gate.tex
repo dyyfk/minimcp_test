@@ -1,20 +1,18 @@
-\section{Probe-Guided Expert Handoff}
+\section{Post-Training Think-or-Talk Routing}
 \label{sec:signal}
 
 \subsection{The local--expert loop}
 \label{sec:system}
 Selective model routing balances response quality against the cost
-of a stronger model \citep{ong2024routellm}. This suits our goal:
-improve answer accuracy under a limited expert-call budget. We adapt
-the routing decision to a local full-duplex speech model's transition
-from listening to speaking (Figure~\ref{fig:hero}). The local model
-processes incoming speech and decides when to respond; the gate then
-chooses whether to continue locally or request expert help. On the
-expert path, an audio uplink transcribes the question, the expert
-returns a text answer, and the local talker voices the prepared relay
-text. The request and relay add cost and waiting time. We use
-local-answer failure risk as a proxy for escalation value; gains
-depend on expert correction and faithful relay of the answer.
+of a stronger model \citep{ong2024routellm}. We place that decision at
+a local full-duplex speech model's transition from listening to
+speaking (Figure~\ref{fig:hero}). The local model retains its native
+decision about when to respond; the gate decides whether the response
+should begin immediately or wait for expert help. On the expert path,
+an audio uplink transcribes the question, the expert returns a text
+answer, and the local talker voices the prepared relay. We use predicted
+local-answer failure as the routing score and vary a threshold to expose
+the accuracy--latency frontier across different expert-call budgets.
 
 \subsection{A probe for the handoff decision}
 \label{sec:probe}
@@ -24,10 +22,8 @@ classifiers have estimated statement truthfulness
 \citep{azaria2023internal} and pre-generation task success
 \citep{lugoloobi2026failures}. We use this approach to ask whether a
 speech model's existing states contain a directly readable failure
-signal. Reusing these states avoids generating a separate
-self-evaluation and leaves the speech model unchanged. The linear
-restriction tests directly accessible information without ruling
-out information requiring a nonlinear readout.
+signal. Reusing these states avoids a separate self-evaluation
+generation and leaves the speech model unchanged.
 
 Offline, we collect local answers to calibration questions and use
 a judge to assign correctness labels. Each label is paired with
@@ -47,3 +43,13 @@ and stay fixed during evaluation (\S\ref{sec:models}). Realized call
 rates can change when the query distribution shifts. An auxiliary dialogue-act head
 restricts escalation to information requests, filtering turns such
 as acknowledgments and stop commands (Appendix~\ref{app:actgate}).
+
+\paragraph{Why separate routing from generation?}
+Only $w$ and $b$ are fitted; the regularized logistic objective is convex and
+uses cached features and answer labels. It therefore cannot alter the local
+model's answer distribution, listen/speak behavior, or speech quality. The
+operating threshold is a serving parameter rather than a generated token, so it
+can be recalibrated for a new expert budget without another duplex fine-tune.
+This is the precise training-stability advantage of our design: it removes
+competence arbitration from the joint autoregressive objective rather than
+claiming that special-token control cannot be trained successfully.
